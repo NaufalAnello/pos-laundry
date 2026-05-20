@@ -1,8 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
-const SQLiteStore = require('connect-sqlite3')(session);
+const KnexSessionStore = require('connect-session-knex')(session);
 const path = require('path');
+const db = require('./database/connection');
 
 const { requireAuth } = require('./middleware/auth');
 const { blockOperatorDelete } = require('./middleware/role');
@@ -35,9 +36,10 @@ app.use('/assets', express.static(path.join(__dirname, '../public/assets')));
 
 // ── Session ────────────────────────────────────────────────────────────────────
 app.use(session({
-  store: new SQLiteStore({
-    db:  'sessions.db',
-    dir: path.join(__dirname, '../data')
+  store: new KnexSessionStore({
+    knex:        db,
+    tablename:   'sessions',
+    createtable: true
   }),
   secret:            process.env.SESSION_SECRET || 'dev-secret-ganti-di-production',
   resave:            false,
