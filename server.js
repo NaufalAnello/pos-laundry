@@ -10,6 +10,6 @@ if (!fs.existsSync(dataDir)) {
 const app = require('./src/app');
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`✓ POS Laundry berjalan di port ${PORT}`);
 });

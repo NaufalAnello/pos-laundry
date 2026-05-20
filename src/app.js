@@ -53,6 +53,9 @@ app.use(session({
 
 // ── API Routes ─────────────────────────────────────────────────────────────────
 
+// Health check — tanpa auth, dipakai Docker HEALTHCHECK
+app.get('/api/v1/health', (req, res) => res.json({ status: 'ok' }));
+
 // Auth — TIDAK memerlukan sesi aktif
 app.use('/api/v1/auth', authRoutes);
 

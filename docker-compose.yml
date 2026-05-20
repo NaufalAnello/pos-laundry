@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  pos-laundry:
+    build: .
+    container_name: pos-laundry
+    ports:
+      - "3000:3000"
+    volumes:
+      - pos-data:/app/data
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - SESSION_SECRET=${SESSION_SECRET}
+      - DB_PATH=/app/data/laundry.db
+      - PRINTER_PORT=/dev/usb/lp0
+      - PRINTER_TYPE=EPSON
+      - PRINTER_WIDTH=58
+      - PRINTER_HAS_CUTTER=false
+volumes:
+  pos-data:
+    driver: local
