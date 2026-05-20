@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — POS Laundry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 18px;
+      color: #1e40af;
+    }
+    .brand-icon { font-size: 24px; }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: #dbeafe;
+      color: #1e40af;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .user-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+    }
+    .user-role {
+      font-size: 12px;
+      color: #6b7280;
+    }
+    .badge-role {
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+    .badge-admin    { background: #fef3c7; color: #92400e; }
+    .badge-kasir    { background: #d1fae5; color: #065f46; }
+    .badge-operator { background: #e0e7ff; color: #3730a3; }
+
+    .btn-logout {
+      padding: 7px 16px;
+      background: #fee2e2;
+      color: #b91c1c;
+      border: none;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-logout:hover { background: #fecaca; }
+
+    /* ── Main ── */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    .welcome {
+      margin-bottom: 32px;
+    }
+    .welcome h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    .welcome p {
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      border: 1px solid #f1f5f9;
+    }
+    .stat-icon {
+      font-size: 32px;
+      width: 56px; height: 56px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .stat-icon.blue   { background: #eff6ff; }
+    .stat-icon.green  { background: #f0fdf4; }
+    .stat-icon.yellow { background: #fffbeb; }
+    .stat-icon.purple { background: #faf5ff; }
+    .stat-label { font-size: 13px; color: #64748b; margin-bottom: 4px; }
+    .stat-value { font-size: 22px; font-weight: 700; color: #1e293b; }
+
+    .info-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      border: 1px solid #e2e8f0;
+      text-align: center;
+      color: #64748b;
+    }
+    .info-box p { margin-top: 8px; font-size: 14px; }
+
+    /* Loading overlay */
+    #loadingOverlay {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99;
+      transition: opacity .3s;
+    }
+    #loadingOverlay.hidden { opacity: 0; pointer-events: none; }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid #e2e8f0;
+      border-top-color: #2563eb;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <div id="loadingOverlay"><div class="spinner"></div></div>
+
+  <header>
+    <div class="brand">
+      <span class="brand-icon">🧺</span>
+      <span>POS Laundry</span>
+    </div>
+    <div class="user-info">
+      <div>
+        <div class="user-name" id="headerName">—</div>
+        <div class="user-role" id="headerRole">—</div>
+      </div>
+      <div class="user-avatar" id="headerAvatar">?</div>
+      <button class="btn-logout" id="logoutBtn">Keluar</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="welcome">
+      <h2 id="welcomeText">Selamat datang!</h2>
+      <p id="welcomeSub">Sistem POS Laundry siap digunakan.</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue">📋</div>
+        <div>
+          <div class="stat-label">Transaksi Hari Ini</div>
+          <div class="stat-value" id="statTransaksi">—</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">💰</div>
+        <div>
+          <div class="stat-label">Pendapatan Hari Ini</div>
+          <div class="stat-value" id="statPendapatan">—</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon yellow">⏳</div>
+        <div>
+          <div class="stat-label">Pesanan Proses</div>
+          <div class="stat-value" id="statProses">—</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">👥</div>
+        <div>
+          <div class="stat-label">Total Pelanggan</div>
+          <div class="stat-value" id="statPelanggan">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <div style="font-size:40px">🚧</div>
+      <p>Dashboard sedang dalam pengembangan.<br />Fitur lengkap akan segera tersedia.</p>
+    </div>
+  </main>
+
+  <script>
+    const loading = document.getElementById('loadingOverlay');
+
+    // ── Cek autentikasi saat load ────────────────────────────────────────────
+    fetch('/api/v1/auth/me', { credentials: 'include' })
+      .then(async (r) => {
+        if (!r.ok) {
+          window.location.replace('/login');
+          return;
+        }
+        const { user } = await r.json();
+        renderUser(user);
+        loading.classList.add('hidden');
+      })
+      .catch(() => window.location.replace('/login'));
+
+    function renderUser(user) {
+      document.getElementById('headerName').textContent = user.nama;
+      document.getElementById('headerRole').innerHTML =
+        `<span class="badge-role badge-${user.role}">${user.role}</span>`;
+      document.getElementById('headerAvatar').textContent =
+        user.nama.charAt(0).toUpperCase();
+
+      document.getElementById('welcomeText').textContent =
+        `Selamat datang, ${user.nama}!`;
+      document.getElementById('welcomeSub').textContent =
+        `Anda login sebagai ${user.role}. Hari ini: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
+
+      // Placeholder stats (akan diisi API nanti)
+      document.getElementById('statTransaksi').textContent = '0';
+      document.getElementById('statPendapatan').textContent = 'Rp 0';
+      document.getElementById('statProses').textContent = '0';
+      document.getElementById('statPelanggan').textContent = '0';
+    }
+
+    // ── Logout ───────────────────────────────────────────────────────────────
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      if (!confirm('Yakin ingin keluar?')) return;
+      try {
+        await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' });
+      } finally {
+        window.location.replace('/login');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="/css/layout.css"/>
+  <title>Pusat WhatsApp — POS Laundry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:#2563eb; --blue-lt:#eff6ff;
+      --green:#16a34a; --green-lt:#f0fdf4;
+      --yellow:#d97706; --yellow-lt:#fffbeb;
+      --red:#dc2626; --red-lt:#fef2f2;
+      --purple:#7c3aed; --purple-lt:#f5f3ff;
+      --wa:#25D366; --wa-lt:#f0fdf4;
+      --gray-1:#f8fafc; --gray-2:#f1f5f9; --gray-3:#e2e8f0;
+      --gray-5:#64748b; --gray-7:#374151; --gray-9:#111827;
+      --radius:10px; --shadow:0 1px 4px rgba(0,0,0,.08);
+    }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+           background:var(--gray-2); color:var(--gray-9); font-size:14px; min-height:100vh; }
+
+    header { background:#fff; border-bottom:1px solid var(--gray-3); padding:0 20px; height:56px;
+             display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:20; box-shadow:var(--shadow); }
+    .logo  { font-size:16px; font-weight:800; color:var(--blue); white-space:nowrap; }
+    nav    { display:flex; gap:4px; flex:1; overflow-x:auto; }
+    nav a  { padding:6px 12px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;
+             color:var(--gray-7); transition:background .15s; white-space:nowrap; }
+    nav a:hover  { background:var(--gray-2); }
+    nav a.active { background:var(--blue-lt); color:var(--blue); }
+    .header-user { font-size:13px; color:var(--gray-5); display:flex; align-items:center; gap:8px; white-space:nowrap; }
+    .logout-btn  { padding:5px 12px; border:1px solid var(--gray-3); border-radius:7px; background:none; font-size:13px; cursor:pointer; color:var(--gray-7); }
+    .logout-btn:hover { background:var(--gray-2); }
+
+    .page { max-width:1100px; margin:0 auto; padding:20px 16px; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; flex-wrap:wrap; }
+    .page-title  { font-size:20px; font-weight:800; }
+
+    /* ── Tabs ── */
+    .tabs { display:flex; gap:4px; border-bottom:2px solid var(--gray-3); margin-bottom:20px; }
+    .tab  { padding:10px 18px; border-radius:8px 8px 0 0; font-size:13px; font-weight:700;
+            cursor:pointer; color:var(--gray-5); border:none; background:none; transition:all .15s;
+            position:relative; bottom:-2px; border-bottom:2px solid transparent; }
+    .tab:hover  { color:var(--gray-9); background:var(--gray-1); }
+    .tab.active { color:var(--wa); border-bottom-color:var(--wa); background:#fff; }
+
+    /* ── Cards ── */
+    .card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3); box-shadow:var(--shadow); }
+    .card-head { padding:14px 18px; border-bottom:1px solid var(--gray-3); font-weight:700; font-size:14px;
+                 display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .card-body { padding:16px 18px; }
+
+    .btn { padding:8px 16px; border-radius:8px; border:1px solid transparent; font-size:13px;
+           font-weight:600; cursor:pointer; transition:opacity .15s; display:inline-flex; align-items:center; gap:6px; }
+    .btn:hover    { opacity:.85; }
+    .btn:disabled { opacity:.4; cursor:default; }
+    .btn-sm  { padding:5px 10px; font-size:12px; }
+    .btn-wa   { background:var(--wa);   color:#fff; }
+    .btn-blue { background:var(--blue); color:#fff; }
+    .btn-outline { background:#fff; border-color:var(--gray-3); color:var(--gray-7); }
+    .btn-ghost   { background:none; border:none; color:var(--gray-5); padding:4px 8px; cursor:pointer; font-size:12px; }
+    .btn-ghost:hover { background:var(--gray-2); border-radius:6px; }
+
+    /* ── Table ── */
+    table { width:100%; border-collapse:collapse; }
+    thead { background:var(--gray-1); }
+    th { padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:var(--gray-5);
+         text-transform:uppercase; letter-spacing:.4px; border-bottom:1px solid var(--gray-3); }
+    td { padding:10px 12px; border-bottom:1px solid var(--gray-3); font-size:13px; vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    .empty-row td { text-align:center; padding:32px; color:var(--gray-5); }
+
+    .badge { display:inline-flex; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; }
+    .badge-pending  { background:#fef9c3; color:#92400e; }
+    .badge-proses   { background:#dbeafe; color:#1d4ed8; }
+    .badge-selesai  { background:#dcfce7; color:#166534; }
+    .badge-diambil  { background:#f0fdf4; color:#15803d; }
+
+    /* pagination */
+    .pagination { display:flex; align-items:center; justify-content:space-between; padding:10px 16px;
+                  border-top:1px solid var(--gray-3); font-size:12px; color:var(--gray-5); }
+    .pag-btns { display:flex; gap:4px; }
+    .pag-btn  { padding:3px 9px; border:1px solid var(--gray-3); border-radius:6px; background:#fff;
+                cursor:pointer; font-size:12px; }
+    .pag-btn:hover:not(:disabled) { background:var(--gray-2); }
+    .pag-btn:disabled { opacity:.4; cursor:default; }
+    .pag-btn.active   { background:var(--blue); color:#fff; border-color:var(--blue); }
+
+    /* ── Broadcast ── */
+    .bc-layout { display:grid; grid-template-columns:300px 1fr; gap:16px; }
+    @media(max-width:700px){ .bc-layout { grid-template-columns:1fr; } }
+
+    .filter-group { display:flex; flex-direction:column; gap:10px; }
+    .filter-group label { font-size:12px; font-weight:600; color:var(--gray-7); }
+    .filter-group select, .filter-group input { padding:8px 10px; border:1px solid var(--gray-3);
+                                                border-radius:8px; font-size:13px; width:100%; }
+    .filter-group select:focus, .filter-group input:focus { outline:none; border-color:var(--blue); }
+
+    .bc-textarea { width:100%; padding:10px 12px; border:1px solid var(--gray-3); border-radius:8px;
+                   font-size:13px; resize:vertical; min-height:150px; font-family:inherit; }
+    .bc-textarea:focus { outline:none; border-color:var(--blue); }
+
+    .var-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .var-chip  { padding:3px 10px; background:var(--blue-lt); color:var(--blue); border-radius:6px;
+                 font-size:11px; font-weight:600; cursor:pointer; border:none; }
+    .var-chip:hover { background:var(--blue); color:#fff; }
+
+    .preview-count { font-size:12px; color:var(--gray-5); margin-top:8px; }
+
+    /* ── Broadcast Stepper ── */
+    .stepper-modal { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:60;
+                     display:none; align-items:center; justify-content:center; padding:16px; }
+    .stepper-modal.open { display:flex; }
+    .stepper-box { background:#fff; border-radius:14px; width:100%; max-width:480px;
+                   box-shadow:0 8px 32px rgba(0,0,0,.2); overflow:hidden; }
+    .stepper-head { background:var(--wa); color:#fff; padding:16px 20px; }
+    .stepper-head h3 { font-size:16px; font-weight:700; }
+    .stepper-progress { height:5px; background:rgba(255,255,255,.3); margin-top:10px; border-radius:4px; }
+    .stepper-progress-bar { height:100%; background:#fff; border-radius:4px; transition:width .3s; }
+    .stepper-body { padding:20px; }
+    .stepper-name { font-size:18px; font-weight:700; margin-bottom:4px; }
+    .stepper-phone { font-size:13px; color:var(--gray-5); margin-bottom:14px; }
+    .stepper-msg  { background:var(--gray-1); border-radius:8px; padding:12px; font-size:12px;
+                    white-space:pre-wrap; word-break:break-word; max-height:160px; overflow-y:auto; }
+    .stepper-foot { display:flex; align-items:center; justify-content:space-between;
+                    padding:14px 20px; border-top:1px solid var(--gray-3); gap:8px; }
+    .stepper-counter { font-size:13px; color:var(--gray-5); }
+
+    /* ── Log WA ── */
+    .log-msg { font-size:12px; max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--gray-7); }
+
+    /* ── WA Mode Toggle ── */
+    .wa-mode-wrap { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .wa-mode-lbl  { font-size:12px; font-weight:600; color:var(--gray-5); white-space:nowrap; }
+    .wa-mode-btn  {
+      padding:5px 12px; border-radius:8px; font-size:12px; font-weight:600;
+      cursor:pointer; border:1.5px solid var(--gray-3); background:var(--gray-1); color:var(--gray-5);
+      transition:all .15s;
+    }
+    .wa-mode-btn.active { background:#e6f4f1; border-color:#128c7e; color:#128c7e; }
+
+    /* ── Tab sections ── */
+    .tab-section { display:none; }
+    .tab-section.active { display:block; }
+
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+             background:#1e293b; color:#fff; padding:10px 20px; border-radius:8px;
+             font-size:13px; font-weight:600; z-index:99; transition:transform .3s; white-space:nowrap; }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+    .toast.err  { background:var(--red); }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">📱 Pusat WhatsApp</div>
+  </div>
+
+  <!-- WA Mode Toggle -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <div class="wa-mode-wrap">
+      <span class="wa-mode-lbl">Kirim via:</span>
+      <button class="wa-mode-btn active" id="waModeRegular" onclick="setWAMode('regular')">💬 WA Biasa</button>
+      <button class="wa-mode-btn" id="waModeBusiness" onclick="setWAMode('business')">💼 WA Business</button>
+    </div>
+    <span style="font-size:11px;color:var(--gray-5)">WA Business terbuka jika terinstall di perangkat</span>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('tagihan',this)">💸 Tagihan Belum Lunas</button>
+    <button class="tab" onclick="switchTab('broadcast',this)">📣 Broadcast</button>
+    <button class="tab" onclick="switchTab('riwayat',this)">📋 Riwayat WA</button>
+  </div>
+
+  <!-- ── TAB: Tagihan ── -->
+  <div id="sec-tagihan" class="tab-section active">
+    <div class="card">
+      <div class="card-head">
+        💸 Order Belum Lunas
+        <button class="btn btn-outline btn-sm" onclick="loadTagihan()">↻ Refresh</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>No. Order</th>
+            <th>Pelanggan</th>
+            <th>Nomor WA</th>
+            <th>Status</th>
+            <th>Total</th>
+            <th>Sisa Tagihan</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tagihanBody">
+          <tr class="empty-row"><td colspan="7">Memuat…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── TAB: Broadcast ── -->
+  <div id="sec-broadcast" class="tab-section">
+    <div class="card">
+      <div class="card-head">📣 Broadcast Pesan WA</div>
+      <div class="card-body">
+        <div class="bc-layout">
+          <!-- Sidebar: filter -->
+          <div>
+            <div class="filter-group">
+              <div>
+                <label>Target Pelanggan</label>
+                <select id="bcFilter" onchange="updateBcCount()">
+                  <option value="all">Semua pelanggan ber-WA</option>
+                  <option value="platinum">Level Platinum</option>
+                  <option value="gold">Level Gold</option>
+                  <option value="silver">Level Silver</option>
+                  <option value="bronze">Level Bronze</option>
+                </select>
+              </div>
+              <div id="bcCountWrap" style="font-size:13px;color:var(--gray-5)">
+                Menghitung…
+              </div>
+              <div style="border-top:1px solid var(--gray-3);padding-top:10px;font-size:12px;color:var(--gray-5)">
+                <strong>Cara kerja:</strong><br/>
+                Klik "Mulai Broadcast" → setiap WA dibuka satu per satu di tab baru → klik "Berikutnya" setelah mengirim pesan.
+              </div>
+            </div>
+          </div>
+          <!-- Compose -->
+          <div>
+            <label style="font-size:12px;font-weight:600;color:var(--gray-7);display:block;margin-bottom:6px">Pesan Broadcast</label>
+            <textarea class="bc-textarea" id="bcMsg" placeholder="Ketik pesan broadcast…
+
+Variabel yang tersedia: {nama}, {poin}, {level}"></textarea>
+            <div class="var-chips">
+              <span style="font-size:11px;color:var(--gray-5);align-self:center">Sisipkan:</span>
+              <button class="var-chip" onclick="insertVar('{nama}')">📛 {nama}</button>
+              <button class="var-chip" onclick="insertVar('{poin}')">⭐ {poin}</button>
+              <button class="var-chip" onclick="insertVar('{level}')">🏅 {level}</button>
+            </div>
+            <div id="bcPreviewCount" class="preview-count"></div>
+            <div style="margin-top:14px;display:flex;gap:8px">
+              <button class="btn btn-wa" onclick="startBroadcast()">📱 Mulai Broadcast</button>
+              <button class="btn btn-outline" onclick="loadBcCount()">↻ Hitung Target</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: Riwayat ── -->
+  <div id="sec-riwayat" class="tab-section">
+    <div class="card">
+      <div class="card-head">
+        📋 Riwayat Pesan WA
+        <button class="btn btn-outline btn-sm" onclick="loadLog(1)">↻ Refresh</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Waktu</th>
+            <th>Pelanggan</th>
+            <th>Nomor WA</th>
+            <th>Pesan</th>
+            <th>Order</th>
+          </tr>
+        </thead>
+        <tbody id="logBody">
+          <tr class="empty-row"><td colspan="5">Pilih tab Riwayat WA untuk memuat data.</td></tr>
+        </tbody>
+      </table>
+      <div class="pagination" id="logPagBar" style="display:none">
+        <span id="logPagInfo"></span>
+        <div class="pag-btns" id="logPagBtns"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Broadcast Stepper Modal ── -->
+<div class="stepper-modal" id="stepperModal">
+  <div class="stepper-box">
+    <div class="stepper-head">
+      <h3>📣 Broadcast Pesan</h3>
+      <div class="stepper-progress">
+        <div class="stepper-progress-bar" id="stepperBar" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="stepper-body">
+      <div class="stepper-name" id="stepName">–</div>
+      <div class="stepper-phone" id="stepPhone">–</div>
+      <div class="stepper-msg" id="stepMsg"></div>
+    </div>
+    <div class="stepper-foot">
+      <div class="stepper-counter" id="stepCounter"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm" onclick="stepperSkip()">Lewati</button>
+        <button class="btn btn-wa" id="stepSendBtn" onclick="stepperSend()">📱 Kirim WA</button>
+        <button class="btn btn-ghost" onclick="stepperClose()">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+let logPage = 1, logTotal = 1;
+let bcData = [];         // broadcast targets
+let stepIdx = 0;         // broadcast stepper index
+let bcMsg   = '';        // broadcast message (resolved per person)
+let waMode  = 'regular'; // per-sesi, default dari pengaturan
+
+// ── WA Mode ───────────────────────────────────────────────────────────────────
+function setWAMode(mode) {
+  waMode = mode;
+  document.getElementById('waModeRegular').classList.toggle('active', mode === 'regular');
+  document.getElementById('waModeBusiness').classList.toggle('active', mode === 'business');
+}
+
+function buildWAUrl(telepon, teks, mode) {
+  const clean = String(telepon).replace(/\D/g, '');
+  const phone = clean.startsWith('62') ? clean : clean.startsWith('0') ? '62' + clean.slice(1) : '62' + clean;
+  const enc   = encodeURIComponent(teks);
+  return mode === 'business'
+    ? `https://api.whatsapp.com/send?phone=${phone}&text=${enc}`
+    : `https://wa.me/${phone}?text=${enc}`;
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async () => {
+  try {
+    const d = await api('/api/v1/auth/me');
+    document.getElementById('userName').textContent = d.user?.nama || '–';
+  } catch {}
+  // Load default WA mode
+  try {
+    const m = await api('/api/v1/pengaturan/wa-mode');
+    if (m.wa_mode) setWAMode(m.wa_mode);
+  } catch {}
+  loadTagihan();
+  loadBcCount();
+})();
+
+async function api(url, opts = {}) {
+  const r = await fetch(url, { credentials:'include', headers:{'Content-Type':'application/json'}, ...opts });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || 'Error');
+  return j;
+}
+
+async function logout() {
+  await fetch('/api/v1/auth/logout', { method:'POST', credentials:'include' });
+  location.href = '/login';
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'riwayat') loadLog(1);
+}
+
+// ── Tagihan ───────────────────────────────────────────────────────────────────
+async function loadTagihan() {
+  try {
+    const { data } = await api('/api/v1/wa/tagihan');
+    const tb = document.getElementById('tagihanBody');
+    if (!data.length) {
+      tb.innerHTML = '<tr class="empty-row"><td colspan="7">🎉 Semua tagihan sudah lunas!</td></tr>';
+      return;
+    }
+    tb.innerHTML = data.map(r => `
+      <tr>
+        <td><a href="/api/v1/transaksi/${r.id}/struk" target="_blank" style="color:var(--blue);font-weight:600">${esc(r.nomor_transaksi)}</a></td>
+        <td style="font-weight:600">${esc(r.pelanggan_nama)}</td>
+        <td><a href="https://wa.me/${esc(r.pelanggan_telepon)}" target="_blank" style="color:var(--wa)">📱 ${esc(r.pelanggan_telepon)}</a></td>
+        <td><span class="badge badge-${r.status}">${r.status}</span></td>
+        <td>${rupiah(r.total_bayar)}</td>
+        <td style="color:var(--red);font-weight:700">${rupiah(r.sisa_tagihan)}</td>
+        <td>
+          <button class="btn btn-wa btn-sm" onclick="kirimTagihanWA(${r.id})">📱 Tagih</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (e) { toast(e.message, true); }
+}
+
+async function kirimTagihanWA(id) {
+  try {
+    const d = await api(`/api/v1/transaksi/${id}/wa/tagihan?mode=${waMode}`);
+    if (!d.url) { toast('Tidak ada nomor WA', true); return; }
+    window.open(d.url, '_blank');
+    // Log
+    await fetch('/api/v1/wa/log', {
+      method:'POST', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ telepon: d.telepon, pesan: d.teks, transaksi_id: id, status:'terkirim', wa_mode: waMode })
+    });
+    toast(`WA tagihan dibuka untuk ${d.pelanggan}`);
+  } catch (e) { toast(e.message, true); }
+}
+
+// ── Broadcast ─────────────────────────────────────────────────────────────────
+async function loadBcCount() {
+  const level_filter = document.getElementById('bcFilter').value;
+  try {
+    const { total } = await api('/api/v1/wa/broadcast', {
+      method: 'POST',
+      body: JSON.stringify({ pesan: 'x', level_filter })
+    });
+    document.getElementById('bcCountWrap').textContent = `✅ ${total} pelanggan memenuhi filter`;
+    document.getElementById('bcPreviewCount').textContent = `Target: ${total} penerima`;
+  } catch {}
+}
+
+function updateBcCount() { loadBcCount(); }
+
+function insertVar(v) {
+  const ta = document.getElementById('bcMsg');
+  const s  = ta.selectionStart, e = ta.selectionEnd;
+  ta.value = ta.value.slice(0, s) + v + ta.value.slice(e);
+  ta.selectionStart = ta.selectionEnd = s + v.length;
+  ta.focus();
+}
+
+async function startBroadcast() {
+  const pesan        = document.getElementById('bcMsg').value.trim();
+  const level_filter = document.getElementById('bcFilter').value;
+
+  if (!pesan) { toast('Isi pesan terlebih dahulu', true); return; }
+
+  try {
+    const res = await api('/api/v1/wa/broadcast', {
+      method: 'POST',
+      body: JSON.stringify({ pesan, level_filter, mode: waMode })
+    });
+
+    if (!res.data?.length) { toast('Tidak ada target broadcast (mungkin tidak ada nomor WA)', true); return; }
+
+    bcData  = res.data;
+    bcMsg   = pesan;
+    stepIdx = 0;
+    showStepper();
+  } catch (e) { toast(e.message, true); }
+}
+
+function showStepper() {
+  const modal = document.getElementById('stepperModal');
+  modal.classList.add('open');
+  updateStepper();
+}
+
+function updateStepper() {
+  if (stepIdx >= bcData.length) {
+    // Done
+    document.getElementById('stepperModal').classList.remove('open');
+    toast(`Broadcast selesai! ${bcData.length} pesan dikirim`);
+    return;
+  }
+
+  const target = bcData[stepIdx];
+  const p      = target.pelanggan;
+
+  // Replace vars in message
+  const resolved = bcMsg
+    .replace(/\{nama\}/g, p.nama || '')
+    .replace(/\{poin\}/g, p.total_poin || 0)
+    .replace(/\{level\}/g, getLevel(p.total_poin || 0));
+
+  document.getElementById('stepName').textContent    = p.nama;
+  document.getElementById('stepPhone').textContent   = '📱 ' + p.telepon;
+  document.getElementById('stepMsg').textContent     = resolved;
+  document.getElementById('stepCounter').textContent = `${stepIdx + 1} / ${bcData.length}`;
+  document.getElementById('stepperBar').style.width  = ((stepIdx / bcData.length) * 100) + '%';
+
+  // Store resolved message for this step
+  bcData[stepIdx]._resolved = resolved;
+}
+
+function stepperSend() {
+  const target   = bcData[stepIdx];
+  const resolved = target._resolved || bcMsg;
+  const url      = buildWAUrl(target.pelanggan.telepon, resolved, waMode);
+  window.open(url, '_blank');
+
+  // Log WA
+  fetch('/api/v1/wa/log', {
+    method:'POST', credentials:'include',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ telepon: target.pelanggan.telepon, pesan: resolved, status:'terkirim', wa_mode: waMode })
+  }).catch(() => {});
+
+  stepIdx++;
+  updateStepper();
+}
+
+function stepperSkip() { stepIdx++; updateStepper(); }
+
+function stepperClose() {
+  document.getElementById('stepperModal').classList.remove('open');
+  bcData  = [];
+  stepIdx = 0;
+}
+
+// ── Riwayat log ───────────────────────────────────────────────────────────────
+async function loadLog(p) {
+  logPage = p;
+  try {
+    const d = await api(`/api/v1/wa/log-list?page=${p}&limit=30`);
+    const tb = document.getElementById('logBody');
+    if (!d.data.length) {
+      tb.innerHTML = '<tr class="empty-row"><td colspan="5">Belum ada riwayat WA</td></tr>';
+      document.getElementById('logPagBar').style.display = 'none';
+      return;
+    }
+
+    tb.innerHTML = d.data.map(r => `
+      <tr>
+        <td style="white-space:nowrap;color:var(--gray-5)">${fmtDt(r.created_at)}</td>
+        <td>${r.pelanggan_nama ? esc(r.pelanggan_nama) : '<span style="color:var(--gray-5)">–</span>'}</td>
+        <td>${r.telepon ? `<a href="https://wa.me/${esc(r.telepon)}" target="_blank" style="color:var(--wa)">${esc(r.telepon)}</a>` : '–'}</td>
+        <td><div class="log-msg" title="${esc(r.pesan)}">${esc(r.pesan)}</div></td>
+        <td>${r.nomor_transaksi ? `<a href="/api/v1/transaksi/${r.transaksi_id}/struk" target="_blank" style="color:var(--blue);font-size:12px">${esc(r.nomor_transaksi)}</a>` : '–'}</td>
+      </tr>
+    `).join('');
+
+    const bar = document.getElementById('logPagBar');
+    bar.style.display = 'flex';
+    logTotal = Math.ceil(d.meta.total / d.meta.limit) || 1;
+    document.getElementById('logPagInfo').textContent = `${(p-1)*d.meta.limit+1}–${Math.min(p*d.meta.limit, d.meta.total)} dari ${d.meta.total}`;
+
+    let pbtns = `<button class="pag-btn" onclick="loadLog(${p-1})" ${p<=1?'disabled':''}>‹</button>`;
+    for (let i = Math.max(1,p-2); i <= Math.min(logTotal,p+2); i++) {
+      pbtns += `<button class="pag-btn${i===p?' active':''}" onclick="loadLog(${i})">${i}</button>`;
+    }
+    pbtns += `<button class="pag-btn" onclick="loadLog(${p+1})" ${p>=logTotal?'disabled':''}>›</button>`;
+    document.getElementById('logPagBtns').innerHTML = pbtns;
+  } catch (e) { toast(e.message, true); }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function getLevel(poin) {
+  if (poin >= 5000) return 'Platinum';
+  if (poin >= 2000) return 'Gold';
+  if (poin >= 500)  return 'Silver';
+  return 'Bronze';
+}
+
+function rupiah(n) { return 'Rp ' + Number(n||0).toLocaleString('id-ID'); }
+
+function fmtDt(s) {
+  if (!s) return '–';
+  return new Date(s).toLocaleString('id-ID', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(msg, err = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = 'toast show' + (err ? ' err' : '');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+</script>
+<script src="/js/nav.js"></script>
+</body>
+</html>

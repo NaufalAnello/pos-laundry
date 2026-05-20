@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="/css/layout.css"/>
+  <title>Laporan — POS Laundry</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:#2563eb; --blue-lt:#eff6ff;
+      --green:#16a34a; --green-lt:#f0fdf4;
+      --yellow:#d97706; --yellow-lt:#fffbeb;
+      --red:#dc2626; --red-lt:#fef2f2;
+      --purple:#7c3aed; --purple-lt:#f5f3ff;
+      --gray-1:#f8fafc; --gray-2:#f1f5f9; --gray-3:#e2e8f0;
+      --gray-5:#64748b; --gray-7:#374151; --gray-9:#111827;
+      --radius:10px; --shadow:0 1px 4px rgba(0,0,0,.08);
+    }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+           background:var(--gray-2); color:var(--gray-9); font-size:14px; min-height:100vh; }
+
+    header { background:#fff; border-bottom:1px solid var(--gray-3); padding:0 20px; height:56px;
+             display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:20; box-shadow:var(--shadow); }
+    .logo  { font-size:16px; font-weight:800; color:var(--blue); white-space:nowrap; }
+    nav    { display:flex; gap:4px; flex:1; overflow-x:auto; }
+    nav a  { padding:6px 12px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;
+             color:var(--gray-7); transition:background .15s; white-space:nowrap; }
+    nav a:hover  { background:var(--gray-2); }
+    nav a.active { background:var(--blue-lt); color:var(--blue); }
+    .header-user { font-size:13px; color:var(--gray-5); display:flex; align-items:center; gap:8px; white-space:nowrap; }
+    .logout-btn  { padding:5px 12px; border:1px solid var(--gray-3); border-radius:7px; background:none;
+                   font-size:13px; cursor:pointer; color:var(--gray-7); }
+    .logout-btn:hover { background:var(--gray-2); }
+
+    .page { max-width:1100px; margin:0 auto; padding:20px 16px; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; flex-wrap:wrap; }
+    .page-title  { font-size:20px; font-weight:800; }
+
+    .btn { padding:8px 16px; border-radius:8px; border:1px solid transparent; font-size:13px;
+           font-weight:600; cursor:pointer; transition:opacity .15s; display:inline-flex; align-items:center; gap:6px; }
+    .btn:hover    { opacity:.85; }
+    .btn:disabled { opacity:.4; cursor:default; }
+    .btn-sm  { padding:5px 10px; font-size:12px; }
+    .btn-blue    { background:var(--blue);  color:#fff; }
+    .btn-green   { background:var(--green); color:#fff; }
+    .btn-outline { background:#fff; border-color:var(--gray-3); color:var(--gray-7); }
+
+    /* ── Filter bar ── */
+    .filter-bar { background:#fff; border:1px solid var(--gray-3); border-radius:var(--radius);
+                  padding:14px 16px; display:flex; align-items:center; gap:10px; margin-bottom:20px; flex-wrap:wrap;
+                  box-shadow:var(--shadow); }
+    .filter-bar label { font-size:12px; font-weight:600; color:var(--gray-5); }
+    .filter-bar input[type=date] { padding:7px 10px; border:1px solid var(--gray-3); border-radius:8px;
+                                   font-size:13px; cursor:pointer; }
+    .filter-bar input[type=date]:focus { outline:none; border-color:var(--blue); }
+    .preset-btns { display:flex; gap:6px; flex-wrap:wrap; }
+    .preset-btn  { padding:5px 12px; border:1px solid var(--gray-3); border-radius:20px; background:#fff;
+                   font-size:12px; font-weight:600; cursor:pointer; color:var(--gray-7); transition:all .15s; }
+    .preset-btn:hover, .preset-btn.active { background:var(--blue-lt); border-color:var(--blue); color:var(--blue); }
+    .sep { color:var(--gray-3); }
+
+    /* ── Stat cards ── */
+    .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+    @media(max-width:700px) { .stats-grid { grid-template-columns:1fr 1fr; } }
+    .stat-card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3);
+                 box-shadow:var(--shadow); padding:18px 20px; }
+    .stat-label { font-size:11px; font-weight:700; color:var(--gray-5); text-transform:uppercase; letter-spacing:.4px; margin-bottom:6px; }
+    .stat-val   { font-size:24px; font-weight:800; }
+    .stat-sub   { font-size:12px; color:var(--gray-5); margin-top:4px; }
+
+    /* ── Chart & content ── */
+    .card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3); box-shadow:var(--shadow); }
+    .card-head { padding:14px 18px; border-bottom:1px solid var(--gray-3); font-weight:700; font-size:14px; display:flex; justify-content:space-between; align-items:center; }
+    .card-body { padding:18px; }
+
+    .chart-wrap { position:relative; height:240px; }
+
+    /* grid 2-col */
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+    @media(max-width:700px) { .grid-2 { grid-template-columns:1fr; } }
+
+    /* table */
+    table { width:100%; border-collapse:collapse; }
+    thead { background:var(--gray-1); }
+    th { padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:var(--gray-5);
+         text-transform:uppercase; letter-spacing:.4px; border-bottom:1px solid var(--gray-3); }
+    td { padding:10px 12px; border-bottom:1px solid var(--gray-3); font-size:13px; }
+    tr:last-child td { border-bottom:none; }
+    .num-cell { text-align:right; font-weight:600; }
+
+    /* laba rugi */
+    .lr-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--gray-3); font-size:14px; }
+    .lr-row:last-child { border-bottom:none; }
+    .lr-total { font-weight:800; font-size:15px; }
+    .laba    { color:var(--green); }
+    .rugi    { color:var(--red);   }
+
+    /* badges/info row */
+    .info-chips { display:flex; gap:10px; flex-wrap:wrap; }
+    .chip { background:var(--gray-1); border:1px solid var(--gray-3); border-radius:8px; padding:10px 14px; flex:1; min-width:130px; }
+    .chip .cv  { font-size:18px; font-weight:800; margin-bottom:2px; }
+    .chip .cl  { font-size:11px; color:var(--gray-5); }
+
+    /* status badges */
+    .badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:999px;
+             font-size:11px; font-weight:700; text-transform:capitalize; }
+    .badge-pending  { background:#fef9c3; color:#92400e; }
+    .badge-proses   { background:#dbeafe; color:#1d4ed8; }
+    .badge-selesai  { background:#dcfce7; color:#166534; }
+    .badge-diambil  { background:#f0fdf4; color:#15803d; }
+    .badge-batal    { background:#fee2e2; color:#991b1b; }
+
+    /* loading */
+    .loading { display:flex; align-items:center; justify-content:center; height:120px; color:var(--gray-5); font-size:14px; }
+
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+             background:#1e293b; color:#fff; padding:10px 20px; border-radius:8px;
+             font-size:13px; font-weight:600; z-index:99; transition:transform .3s; white-space:nowrap; }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+    .toast.err  { background:var(--red); }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Laporan Bisnis</div>
+    <button class="btn btn-green" onclick="exportCsv()">⬇ Export CSV</button>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-bar">
+    <label>Periode:</label>
+    <input type="date" id="dateStart" onchange="load()"/>
+    <span class="sep">–</span>
+    <input type="date" id="dateEnd" onchange="load()"/>
+    <div class="preset-btns">
+      <button class="preset-btn" onclick="setPreset('today')">Hari Ini</button>
+      <button class="preset-btn" onclick="setPreset('week')">7 Hari</button>
+      <button class="preset-btn active" onclick="setPreset('month')">Bulan Ini</button>
+      <button class="preset-btn" onclick="setPreset('last3')">3 Bulan</button>
+      <button class="preset-btn" onclick="setPreset('year')">Tahun Ini</button>
+    </div>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Omset</div>
+      <div class="stat-val" id="sOmset">–</div>
+      <div class="stat-sub" id="sOmsetSub">–</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Jumlah Transaksi</div>
+      <div class="stat-val" id="sTrx">–</div>
+      <div class="stat-sub" id="sTrxSub">–</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Rata-rata per Transaksi</div>
+      <div class="stat-val" id="sAvg">–</div>
+      <div class="stat-sub" id="sAvgSub">–</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Pelanggan Baru</div>
+      <div class="stat-val" id="sPelanggan">–</div>
+      <div class="stat-sub">dalam periode ini</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Poin Diberikan</div>
+      <div class="stat-val" id="sPoin">–</div>
+      <div class="stat-sub" id="sPoinSub">–</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Promo Digunakan</div>
+      <div class="stat-val" id="sPromo">–</div>
+      <div class="stat-sub" id="sPromoSub">–</div>
+    </div>
+  </div>
+
+  <!-- Bar chart -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-head">
+      <span>📈 Omset Harian</span>
+      <span id="chartPeriode" style="font-size:12px;font-weight:400;color:var(--gray-5)"></span>
+    </div>
+    <div class="card-body">
+      <div class="chart-wrap">
+        <canvas id="omsetChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Distribusi & Laba Rugi -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head">🏆 Top Layanan</div>
+      <div id="distribusiBody">
+        <div class="loading">Memuat…</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">💰 Laba Rugi (Kas)</div>
+      <div class="card-body" id="labaRugiBody">
+        <div class="loading">Memuat…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status + Poin/Promo -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head">📊 Status Transaksi</div>
+      <div class="card-body" id="statusBody">
+        <div class="loading">Memuat…</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">🎁 Ringkasan Poin & Promo</div>
+      <div class="card-body" id="poinPromoBody">
+        <div class="loading">Memuat…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let chart = null;
+const today = () => new Date().toISOString().slice(0, 10);
+const fmt   = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '–';
+const rupiah = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async () => {
+  try {
+    const d = await apiFetch('/api/v1/auth/me');
+    document.getElementById('userName').textContent = d.user?.nama || '–';
+  } catch {}
+  setPreset('month');
+})();
+
+async function apiFetch(url, opts = {}) {
+  const r = await fetch(url, { credentials:'include', headers:{'Content-Type':'application/json'}, ...opts });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || 'Error');
+  return j;
+}
+
+async function logout() {
+  await fetch('/api/v1/auth/logout', { method:'POST', credentials:'include' });
+  location.href = '/login';
+}
+
+// ── Preset dates ──────────────────────────────────────────────────────────────
+function setPreset(key) {
+  const t = new Date();
+  let start, end = today();
+
+  if (key === 'today')  { start = end; }
+  else if (key === 'week')  { const d = new Date(t); d.setDate(d.getDate()-6); start = d.toISOString().slice(0,10); }
+  else if (key === 'month') { start = end.slice(0,7) + '-01'; }
+  else if (key === 'last3') { const d = new Date(t); d.setMonth(d.getMonth()-3); start = d.toISOString().slice(0,10); }
+  else if (key === 'year')  { start = end.slice(0,4) + '-01-01'; }
+
+  document.getElementById('dateStart').value = start;
+  document.getElementById('dateEnd').value   = end;
+
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  load();
+}
+
+// ── Load data ─────────────────────────────────────────────────────────────────
+async function load() {
+  const start = document.getElementById('dateStart').value;
+  const end   = document.getElementById('dateEnd').value;
+  if (!start || !end) return;
+
+  // set loading state
+  ['sOmset','sTrx','sAvg','sPelanggan','sPoin','sPromo'].forEach(id => {
+    document.getElementById(id).textContent = '…';
+  });
+  document.getElementById('distribusiBody').innerHTML = '<div class="loading">Memuat…</div>';
+  document.getElementById('labaRugiBody').innerHTML   = '<div class="loading">Memuat…</div>';
+  document.getElementById('statusBody').innerHTML     = '<div class="loading">Memuat…</div>';
+  document.getElementById('poinPromoBody').innerHTML  = '<div class="loading">Memuat…</div>';
+
+  try {
+    const data = await apiFetch(`/api/v1/laporan?start=${start}&end=${end}`);
+    renderAll(data);
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderAll(d) {
+  const { omset, pelanggan_baru, poin, promo, harian, distribusi_layanan, laba_rugi, status_transaksi, periode } = d;
+
+  // Stat cards
+  document.getElementById('sOmset').textContent    = rupiah(omset.total);
+  document.getElementById('sOmsetSub').textContent = `Diskon: ${rupiah(omset.total_diskon)}`;
+  document.getElementById('sTrx').textContent      = omset.jumlah;
+  document.getElementById('sTrxSub').textContent   = `Periode: ${fmt(periode.start)} – ${fmt(periode.end)}`;
+  document.getElementById('sAvg').textContent      = rupiah(omset.rata_rata);
+  document.getElementById('sAvgSub').textContent   = 'per transaksi (selesai)';
+  document.getElementById('sPelanggan').textContent = pelanggan_baru;
+  document.getElementById('sPoin').textContent     = poin.diberikan + ' poin';
+  document.getElementById('sPoinSub').textContent  = `Ditukarkan: ${poin.ditukarkan} poin`;
+  document.getElementById('sPromo').textContent    = promo.jumlah_pakai + 'x';
+  document.getElementById('sPromoSub').textContent = `Total diskon: ${rupiah(promo.total_diskon)}`;
+
+  // Chart
+  const labels = (harian || []).map(r => {
+    const d = new Date(r.tanggal);
+    return d.toLocaleDateString('id-ID', { day:'2-digit', month:'short' });
+  });
+  const values = (harian || []).map(r => Number(r.omset));
+
+  document.getElementById('chartPeriode').textContent = `${fmt(periode.start)} – ${fmt(periode.end)}`;
+
+  if (chart) chart.destroy();
+  const ctx = document.getElementById('omsetChart').getContext('2d');
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Omset',
+        data: values,
+        backgroundColor: 'rgba(37,99,235,.7)',
+        borderRadius: 5,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => rupiah(ctx.parsed.y),
+            title: (items) => {
+              const idx = items[0].dataIndex;
+              const h   = harian[idx];
+              return `${items[0].label} · ${h?.jumlah || 0} transaksi`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display:false }, ticks:{ font:{size:11} } },
+        y: {
+          grid: { color:'#f1f5f9' },
+          ticks: {
+            font:{size:11},
+            callback: v => v >= 1000000 ? (v/1000000).toFixed(1)+'jt' : v >= 1000 ? (v/1000).toFixed(0)+'rb' : v
+          }
+        }
+      }
+    }
+  });
+
+  // Distribusi layanan
+  const distRows = (distribusi_layanan || []).map((r, i) => `
+    <tr>
+      <td style="color:var(--gray-5)">${i+1}</td>
+      <td style="font-weight:600">${esc(r.nama_layanan)}</td>
+      <td class="num-cell">${Number(r.total_jumlah)}</td>
+      <td class="num-cell">${rupiah(r.total_omset)}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--gray-5);padding:20px">Tidak ada data</td></tr>';
+
+  document.getElementById('distribusiBody').innerHTML = `
+    <table>
+      <thead><tr><th>#</th><th>Layanan</th><th style="text-align:right">Qty</th><th style="text-align:right">Omset</th></tr></thead>
+      <tbody>${distRows}</tbody>
+    </table>
+  `;
+
+  // Laba Rugi
+  const lr = laba_rugi;
+  const labaClass = lr.laba >= 0 ? 'laba' : 'rugi';
+  document.getElementById('labaRugiBody').innerHTML = `
+    <div class="lr-row"><span>📥 Total Kas Masuk</span><span style="color:var(--green);font-weight:600">${rupiah(lr.pendapatan)}</span></div>
+    <div class="lr-row"><span>📤 Total Kas Keluar</span><span style="color:var(--red);font-weight:600">${rupiah(lr.pengeluaran)}</span></div>
+    <div class="lr-row lr-total">
+      <span>${lr.laba >= 0 ? '✅ Laba Bersih' : '❌ Rugi Bersih'}</span>
+      <span class="${labaClass}">${rupiah(Math.abs(lr.laba))}</span>
+    </div>
+    <div style="margin-top:12px;font-size:11px;color:var(--gray-5)">* Berdasarkan entri buku kas pada periode ini</div>
+  `;
+
+  // Status transaksi
+  const statusLabels = { pending:'Pending', proses:'Diproses', selesai:'Selesai', diambil:'Diambil', dibatalkan:'Dibatalkan' };
+  const statusChips = Object.entries(statusLabels).map(([k, label]) => `
+    <div class="chip">
+      <div class="cv">${status_transaksi[k] || 0}</div>
+      <div class="cl">${label}</div>
+    </div>
+  `).join('');
+  document.getElementById('statusBody').innerHTML = `<div class="info-chips">${statusChips}</div>`;
+
+  // Poin & Promo
+  document.getElementById('poinPromoBody').innerHTML = `
+    <div class="info-chips" style="margin-bottom:14px">
+      <div class="chip"><div class="cv" style="color:var(--purple)">${poin.diberikan}</div><div class="cl">Poin Diberikan</div></div>
+      <div class="chip"><div class="cv" style="color:var(--yellow)">${poin.ditukarkan}</div><div class="cl">Poin Ditukarkan</div></div>
+    </div>
+    <div class="info-chips">
+      <div class="chip"><div class="cv" style="color:var(--blue)">${promo.jumlah_pakai}x</div><div class="cl">Transaksi Pakai Promo</div></div>
+      <div class="chip"><div class="cv" style="font-size:14px;color:var(--red)">${rupiah(promo.total_diskon)}</div><div class="cl">Total Nilai Diskon Promo</div></div>
+    </div>
+  `;
+}
+
+// ── Export CSV ────────────────────────────────────────────────────────────────
+function exportCsv() {
+  const start = document.getElementById('dateStart').value;
+  const end   = document.getElementById('dateEnd').value;
+  if (!start || !end) { toast('Pilih rentang tanggal terlebih dahulu', true); return; }
+  window.location.href = `/api/v1/laporan/export?start=${start}&end=${end}`;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(msg, err = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = 'toast show' + (err ? ' err' : '');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+</script>
+<script src="/js/nav.js"></script>
+</body>
+</html>

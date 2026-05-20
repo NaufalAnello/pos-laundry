@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — POS Laundry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+      padding: 16px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
+      animation: slideUp .35s ease;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .brand-icon {
+      font-size: 52px;
+      display: block;
+      margin-bottom: 12px;
+    }
+    .brand h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e3a8a;
+      letter-spacing: -.3px;
+    }
+    .brand p {
+      font-size: 14px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .field {
+      margin-bottom: 20px;
+    }
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+    .input-wrap input {
+      width: 100%;
+      padding: 11px 44px 11px 14px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 15px;
+      color: #111827;
+      background: #f9fafb;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      outline: none;
+    }
+    .input-wrap input:focus {
+      border-color: #3b82f6;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, .15);
+    }
+    .input-wrap input.error {
+      border-color: #ef4444;
+    }
+    .input-wrap input.error:focus {
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, .15);
+    }
+
+    .toggle-pwd {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: #9ca3af;
+      padding: 4px;
+      line-height: 1;
+      transition: color .15s;
+    }
+    .toggle-pwd:hover { color: #6b7280; }
+
+    .error-msg {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13.5px;
+      margin-bottom: 20px;
+      animation: shake .35s ease;
+    }
+    .error-msg.hidden { display: none; }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%       { transform: translateX(-6px); }
+      40%       { transform: translateX(6px); }
+      60%       { transform: translateX(-4px); }
+      80%       { transform: translateX(4px); }
+    }
+
+    .btn {
+      width: 100%;
+      padding: 13px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, transform .1s, box-shadow .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn:hover:not(:disabled) {
+      background: #1d4ed8;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, .35);
+    }
+    .btn:active:not(:disabled) { transform: scale(.98); }
+    .btn:disabled {
+      background: #93c5fd;
+      cursor: not-allowed;
+    }
+
+    .btn-text { transition: opacity .2s; }
+    .btn-spinner {
+      display: none;
+      position: absolute;
+      inset: 0;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn.loading .btn-text   { opacity: 0; }
+    .btn.loading .btn-spinner { display: flex; }
+
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2.5px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .footer-text {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    /* Checking auth overlay */
+    #authCheck {
+      position: fixed;
+      inset: 0;
+      background: #1e40af;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99;
+      transition: opacity .3s;
+    }
+    #authCheck.hidden { opacity: 0; pointer-events: none; }
+    #authCheck .dot-wrap {
+      display: flex; gap: 10px;
+    }
+    #authCheck .dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.7);
+      animation: bounce .9s infinite ease-in-out;
+    }
+    #authCheck .dot:nth-child(2) { animation-delay: .15s; }
+    #authCheck .dot:nth-child(3) { animation-delay: .3s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(.6); opacity: .4; }
+      40%            { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Auth check overlay saat halaman dimuat -->
+  <div id="authCheck" aria-hidden="true">
+    <div class="dot-wrap">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+
+  <div class="card" role="main">
+    <div class="brand">
+      <span class="brand-icon">🧺</span>
+      <h1>POS Laundry</h1>
+      <p>Masuk untuk melanjutkan</p>
+    </div>
+
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="username">Username</label>
+        <div class="input-wrap">
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Masukkan username"
+            autocomplete="username"
+            autofocus
+            required
+          />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Masukkan password"
+            autocomplete="current-password"
+            required
+          />
+          <button type="button" id="togglePwd" class="toggle-pwd" aria-label="Tampilkan password">
+            <span id="eyeIcon">🙈</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="errorMsg" class="error-msg hidden" role="alert">
+        <span>⚠️</span>
+        <span id="errorText"></span>
+      </div>
+
+      <button type="submit" id="submitBtn" class="btn">
+        <span class="btn-text">Masuk</span>
+        <span class="btn-spinner" aria-hidden="true">
+          <span class="spinner"></span>
+        </span>
+      </button>
+    </form>
+
+    <p class="footer-text">POS Laundry &copy; 2025</p>
+  </div>
+
+  <script>
+    const authCheck = document.getElementById('authCheck');
+    const form      = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMsg  = document.getElementById('errorMsg');
+    const errorText = document.getElementById('errorText');
+    const usernameEl = document.getElementById('username');
+    const passwordEl = document.getElementById('password');
+
+    // ── Cek sesi aktif → langsung redirect ke dashboard ─────────────────────
+    fetch('/api/v1/auth/me', { credentials: 'include' })
+      .then(r => {
+        if (r.ok) {
+          window.location.replace('/');
+        } else {
+          authCheck.classList.add('hidden');
+        }
+      })
+      .catch(() => authCheck.classList.add('hidden'));
+
+    // ── Toggle visibility password ──────────────────────────────────────────
+    document.getElementById('togglePwd').addEventListener('click', () => {
+      const isPassword = passwordEl.type === 'password';
+      passwordEl.type = isPassword ? 'text' : 'password';
+      document.getElementById('eyeIcon').textContent = isPassword ? '👁️' : '🙈';
+    });
+
+    // ── Tampilkan error ──────────────────────────────────────────────────────
+    function showError(msg) {
+      errorText.textContent = msg;
+      errorMsg.classList.remove('hidden');
+      // re-trigger animasi shake
+      errorMsg.style.animation = 'none';
+      requestAnimationFrame(() => { errorMsg.style.animation = ''; });
+      usernameEl.classList.add('error');
+      passwordEl.classList.add('error');
+    }
+
+    function clearError() {
+      errorMsg.classList.add('hidden');
+      usernameEl.classList.remove('error');
+      passwordEl.classList.remove('error');
+    }
+
+    [usernameEl, passwordEl].forEach(el =>
+      el.addEventListener('input', clearError)
+    );
+
+    // ── Submit login ─────────────────────────────────────────────────────────
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearError();
+
+      const username = usernameEl.value.trim();
+      const password = passwordEl.value;
+
+      if (!username || !password) {
+        showError('Username dan password wajib diisi');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.classList.add('loading');
+
+      try {
+        const res = await fetch('/api/v1/auth/login', {
+          method:      'POST',
+          headers:     { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body:        JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.error || 'Login gagal');
+          return;
+        }
+
+        // Sukses → tampilkan overlay loading lalu redirect
+        authCheck.classList.remove('hidden');
+        window.location.replace('/');
+
+      } catch {
+        showError('Tidak dapat terhubung ke server. Coba lagi.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+      }
+    });
+  </script>
+</body>
+</html>

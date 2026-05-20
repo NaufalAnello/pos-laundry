@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="/css/layout.css"/>
+  <title>Pelanggan — POS Laundry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:#2563eb; --blue-lt:#eff6ff;
+      --green:#16a34a; --green-lt:#f0fdf4;
+      --yellow:#d97706; --yellow-lt:#fffbeb;
+      --red:#dc2626; --red-lt:#fef2f2;
+      --purple:#7c3aed; --purple-lt:#f5f3ff;
+      --gray-1:#f8fafc; --gray-2:#f1f5f9; --gray-3:#e2e8f0;
+      --gray-5:#64748b; --gray-7:#374151; --gray-9:#111827;
+      --radius:10px; --shadow:0 1px 4px rgba(0,0,0,.08);
+    }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+           background:var(--gray-2); color:var(--gray-9); font-size:14px; min-height:100vh; }
+
+    header { background:#fff; border-bottom:1px solid var(--gray-3); padding:0 20px; height:56px;
+             display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:20; box-shadow:var(--shadow); }
+    .logo  { font-size:16px; font-weight:800; color:var(--blue); white-space:nowrap; }
+    nav    { display:flex; gap:4px; flex:1; overflow-x:auto; }
+    nav a  { padding:6px 12px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;
+             color:var(--gray-7); transition:background .15s; white-space:nowrap; }
+    nav a:hover  { background:var(--gray-2); }
+    nav a.active { background:var(--blue-lt); color:var(--blue); }
+    .header-user { font-size:13px; color:var(--gray-5); display:flex; align-items:center; gap:8px; white-space:nowrap; }
+    .logout-btn  { padding:5px 12px; border:1px solid var(--gray-3); border-radius:7px; background:none;
+                   font-size:13px; cursor:pointer; color:var(--gray-7); }
+    .logout-btn:hover { background:var(--gray-2); }
+
+    .page { max-width:1100px; margin:0 auto; padding:20px 16px; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; flex-wrap:wrap; }
+    .page-title  { font-size:20px; font-weight:800; }
+
+    .btn { padding:8px 16px; border-radius:8px; border:1px solid transparent; font-size:13px;
+           font-weight:600; cursor:pointer; transition:opacity .15s; display:inline-flex; align-items:center; gap:6px; }
+    .btn:hover    { opacity:.85; }
+    .btn:disabled { opacity:.4; cursor:default; }
+    .btn-sm  { padding:5px 10px; font-size:12px; }
+    .btn-blue    { background:var(--blue);  color:#fff; }
+    .btn-green   { background:var(--green); color:#fff; }
+    .btn-red     { background:var(--red);   color:#fff; }
+    .btn-outline { background:#fff; border-color:var(--gray-3); color:var(--gray-7); }
+    .btn-ghost   { background:none; border:none; color:var(--gray-5); padding:4px 8px; cursor:pointer; }
+    .btn-ghost:hover { color:var(--gray-9); background:var(--gray-2); border-radius:6px; }
+
+    /* toolbar */
+    .toolbar { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+    .search-wrap { position:relative; flex:1; min-width:200px; }
+    .search-wrap input { width:100%; padding:8px 12px 8px 36px; border:1px solid var(--gray-3);
+                         border-radius:8px; font-size:13px; background:#fff; }
+    .search-wrap::before { content:'🔍'; position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:13px; }
+    .search-wrap input:focus { outline:none; border-color:var(--blue); }
+
+    /* table */
+    .card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3); box-shadow:var(--shadow); overflow:hidden; }
+    table { width:100%; border-collapse:collapse; }
+    thead { background:var(--gray-1); }
+    th { padding:10px 14px; text-align:left; font-size:12px; font-weight:700; color:var(--gray-5);
+         text-transform:uppercase; letter-spacing:.4px; border-bottom:1px solid var(--gray-3); }
+    td { padding:11px 14px; border-bottom:1px solid var(--gray-3); font-size:13px; vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tbody tr:hover { background:var(--gray-1); cursor:pointer; }
+    .empty-row td { text-align:center; color:var(--gray-5); padding:40px; }
+
+    .badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:999px;
+             font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.3px; }
+
+    /* pagination */
+    .pagination { display:flex; align-items:center; justify-content:space-between; padding:12px 16px;
+                  border-top:1px solid var(--gray-3); font-size:13px; color:var(--gray-5); gap:8px; flex-wrap:wrap; }
+    .pag-btns { display:flex; gap:4px; }
+    .pag-btn  { padding:4px 10px; border:1px solid var(--gray-3); border-radius:6px; background:#fff; cursor:pointer; font-size:12px; }
+    .pag-btn:hover:not(:disabled) { background:var(--gray-2); }
+    .pag-btn:disabled { opacity:.4; cursor:default; }
+    .pag-btn.active   { background:var(--blue); color:#fff; border-color:var(--blue); }
+
+    /* ── Detail panel ── */
+    .overlay { position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:40; display:none; }
+    .overlay.open { display:block; }
+    .panel { position:fixed; right:0; top:0; bottom:0; width:480px; max-width:100vw; background:#fff;
+             box-shadow:-4px 0 24px rgba(0,0,0,.12); z-index:41; display:flex; flex-direction:column;
+             transform:translateX(100%); transition:transform .25s cubic-bezier(.4,0,.2,1); }
+    .panel.open { transform:none; }
+    .panel-head { display:flex; align-items:center; justify-content:space-between;
+                  padding:16px 20px; border-bottom:1px solid var(--gray-3); flex-shrink:0; }
+    .panel-head h2 { font-size:16px; font-weight:700; }
+    .panel-body { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:16px; }
+    .panel-foot { padding:14px 20px; border-top:1px solid var(--gray-3); display:flex; gap:8px; flex-shrink:0; }
+
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .info-item label { font-size:11px; font-weight:600; color:var(--gray-5); text-transform:uppercase; }
+    .info-item p { font-size:14px; font-weight:600; margin-top:2px; }
+
+    .stat-row { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .stat-box { background:var(--gray-1); border-radius:8px; padding:12px; text-align:center; }
+    .stat-box .val { font-size:18px; font-weight:800; }
+    .stat-box .lbl { font-size:11px; color:var(--gray-5); margin-top:2px; }
+
+    .section-title { font-size:13px; font-weight:700; color:var(--gray-7); border-bottom:1px solid var(--gray-3); padding-bottom:8px; }
+
+    .wa-list { display:flex; flex-direction:column; gap:8px; }
+    .wa-item { background:var(--gray-1); border-radius:8px; padding:10px 12px; }
+    .wa-item .wa-meta { font-size:11px; color:var(--gray-5); margin-bottom:4px; }
+    .wa-item .wa-msg  { font-size:12px; white-space:pre-wrap; word-break:break-word; max-height:80px; overflow:hidden; }
+
+    .trx-list { display:flex; flex-direction:column; gap:6px; }
+    .trx-item { display:flex; justify-content:space-between; align-items:center;
+                padding:8px 10px; background:var(--gray-1); border-radius:8px; font-size:12px; }
+    .trx-item .nomor { font-weight:600; color:var(--blue); }
+    .trx-item .bayar { font-weight:700; }
+
+    /* ── WA custom ── */
+    .wa-composer { display:flex; flex-direction:column; gap:8px; }
+    .wa-composer textarea { width:100%; padding:8px 10px; border:1px solid var(--gray-3);
+                            border-radius:8px; font-size:13px; resize:vertical; min-height:80px; }
+    .wa-composer textarea:focus { outline:none; border-color:var(--blue); }
+
+    /* ── Modal form ── */
+    .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:50; display:none;
+                align-items:center; justify-content:center; padding:16px; }
+    .modal-bg.open { display:flex; }
+    .modal { background:#fff; border-radius:12px; width:100%; max-width:460px; box-shadow:0 8px 32px rgba(0,0,0,.18); }
+    .modal-head { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--gray-3); }
+    .modal-head h3 { font-size:16px; font-weight:700; }
+    .modal-body { padding:20px; display:flex; flex-direction:column; gap:14px; }
+    .modal-foot { display:flex; gap:8px; justify-content:flex-end; padding:14px 20px; border-top:1px solid var(--gray-3); }
+
+    .field label { font-size:12px; font-weight:600; color:var(--gray-7); display:block; margin-bottom:5px; }
+    .field input, .field textarea { width:100%; padding:8px 12px; border:1px solid var(--gray-3);
+                                    border-radius:8px; font-size:13px; font-family:inherit; }
+    .field input:focus, .field textarea:focus { outline:none; border-color:var(--blue); }
+    .field small { font-size:11px; color:var(--gray-5); margin-top:3px; display:block; }
+    .err-msg { color:var(--red); font-size:12px; margin-top:4px; }
+
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+             background:#1e293b; color:#fff; padding:10px 20px; border-radius:8px;
+             font-size:13px; font-weight:600; z-index:99; transition:transform .3s; white-space:nowrap; }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+    .toast.err  { background:var(--red); }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Pelanggan</div>
+    <button class="btn btn-blue" onclick="openAdd()">+ Tambah Pelanggan</button>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="Cari nama atau nomor WA…" oninput="onSearch()"/>
+    </div>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Pelanggan</th>
+          <th>Nomor WA</th>
+          <th>Level</th>
+          <th>Transaksi</th>
+          <th>Total Belanja</th>
+          <th>Bergabung</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr class="empty-row"><td colspan="7">Memuat data…</td></tr>
+      </tbody>
+    </table>
+    <div class="pagination" id="paginationBar" style="display:none;">
+      <span id="pagInfo"></span>
+      <div class="pag-btns" id="pagBtns"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+<aside class="panel" id="panel">
+  <div class="panel-head">
+    <h2 id="panelTitle">Detail Pelanggan</h2>
+    <button class="btn-ghost" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-body" id="panelBody">
+    <div style="text-align:center;color:var(--gray-5);padding:40px">Memuat…</div>
+  </div>
+  <div class="panel-foot" id="panelFoot">
+    <button class="btn btn-outline btn-sm" onclick="editCurrent()">Edit</button>
+    <button class="btn btn-red btn-sm" onclick="deleteCurrent()">Hapus</button>
+    <div style="flex:1"></div>
+    <button class="btn btn-ghost btn-sm" onclick="closePanel()">Tutup</button>
+  </div>
+</aside>
+
+<!-- Form Modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle">Tambah Pelanggan</h3>
+      <button class="btn-ghost" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId"/>
+      <div class="field">
+        <label>Nama Pelanggan *</label>
+        <input type="text" id="fNama" placeholder="Nama lengkap"/>
+      </div>
+      <div class="field">
+        <label>Nomor WhatsApp</label>
+        <input type="text" id="fTelepon" placeholder="628123456789" oninput="formatPhone(this)"/>
+        <small>Format: 628xxx… (tanpa spasi atau +)</small>
+        <button type="button" class="btn btn-outline btn-sm" style="margin-top:6px" onclick="testWA()">
+          📱 Test WA
+        </button>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="fEmail" placeholder="email@contoh.com"/>
+      </div>
+      <div class="field">
+        <label>Alamat</label>
+        <textarea id="fAlamat" rows="2" placeholder="Alamat pelanggan (opsional)"></textarea>
+      </div>
+      <div class="err-msg" id="formErr"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal()">Batal</button>
+      <button class="btn btn-blue" id="saveBtn" onclick="savePelanggan()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+let page = 1, totalPages = 1, currentId = null, searchTimeout = null;
+
+const LEVEL_COLOR = { Platinum:'#7c3aed', Gold:'#d97706', Silver:'#6b7280', Bronze:'#92400e' };
+const LEVEL_BG    = { Platinum:'#f5f3ff',  Gold:'#fffbeb', Silver:'#f1f5f9', Bronze:'#fef3c7' };
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async () => {
+  try {
+    const d = await api('/api/v1/auth/me');
+    document.getElementById('userName').textContent = d.user?.nama || '–';
+  } catch {}
+  load();
+})();
+
+// ── API helper ────────────────────────────────────────────────────────────────
+async function api(url, opts = {}) {
+  const r = await fetch(url, { credentials:'include', headers:{'Content-Type':'application/json'}, ...opts });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || 'Error');
+  return j;
+}
+
+async function logout() {
+  await fetch('/api/v1/auth/logout', { method:'POST', credentials:'include' });
+  location.href = '/login';
+}
+
+// ── Load table ────────────────────────────────────────────────────────────────
+async function load() {
+  const q = document.getElementById('searchInput').value.trim();
+  try {
+    const d = await api(`/api/v1/pelanggan?page=${page}&limit=25${q ? '&q='+encodeURIComponent(q) : ''}`);
+    renderTable(d.data, d.meta);
+  } catch (e) { toast(e.message, true); }
+}
+
+function onSearch() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => { page = 1; load(); }, 350);
+}
+
+function renderTable(rows, meta) {
+  const tb = document.getElementById('tableBody');
+  if (!rows.length) {
+    tb.innerHTML = '<tr class="empty-row"><td colspan="7">Belum ada pelanggan</td></tr>';
+    document.getElementById('paginationBar').style.display = 'none';
+    return;
+  }
+
+  tb.innerHTML = rows.map(p => `
+    <tr onclick="openPanel(${p.id})">
+      <td>
+        <div style="font-weight:700">${esc(p.nama)}</div>
+        ${p.email ? `<div style="font-size:11px;color:var(--gray-5)">${esc(p.email)}</div>` : ''}
+      </td>
+      <td>${p.telepon ? `<a href="https://wa.me/${esc(p.telepon)}" target="_blank" onclick="event.stopPropagation()" style="color:var(--green);text-decoration:none">📱 ${esc(p.telepon)}</a>` : '<span style="color:var(--gray-5)">–</span>'}</td>
+      <td><span class="badge" style="background:${LEVEL_BG[p.level?.label]||'#f1f5f9'};color:${LEVEL_COLOR[p.level?.label]||'#374151'}">${p.level?.label||'–'}</span></td>
+      <td style="text-align:center">${p.jumlah_transaksi}</td>
+      <td style="font-weight:600">${rupiah(p.total_belanja)}</td>
+      <td style="color:var(--gray-5)">${fmtDate(p.created_at)}</td>
+      <td onclick="event.stopPropagation()">
+        <button class="btn btn-outline btn-sm" onclick="openPanel(${p.id})">Detail</button>
+      </td>
+    </tr>
+  `).join('');
+
+  totalPages = Math.ceil(meta.total / meta.limit) || 1;
+  const bar  = document.getElementById('paginationBar');
+  bar.style.display = 'flex';
+  document.getElementById('pagInfo').textContent = `${(page-1)*meta.limit+1}–${Math.min(page*meta.limit, meta.total)} dari ${meta.total} pelanggan`;
+  renderPagBtns();
+}
+
+function renderPagBtns() {
+  const c = document.getElementById('pagBtns');
+  let html = `<button class="pag-btn" onclick="goPage(${page-1})" ${page<=1?'disabled':''}>‹</button>`;
+  for (let i = Math.max(1,page-2); i <= Math.min(totalPages,page+2); i++) {
+    html += `<button class="pag-btn${i===page?' active':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  html += `<button class="pag-btn" onclick="goPage(${page+1})" ${page>=totalPages?'disabled':''}>›</button>`;
+  c.innerHTML = html;
+}
+
+function goPage(p) { if (p < 1 || p > totalPages) return; page = p; load(); }
+
+// ── Detail Panel ──────────────────────────────────────────────────────────────
+async function openPanel(id) {
+  currentId = id;
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('panel').classList.add('open');
+  document.getElementById('panelBody').innerHTML = '<div style="text-align:center;color:var(--gray-5);padding:40px">Memuat…</div>';
+
+  try {
+    const { data } = await api(`/api/v1/pelanggan/${id}`);
+    renderPanel(data);
+  } catch (e) {
+    document.getElementById('panelBody').innerHTML = `<div style="color:var(--red);padding:20px">${e.message}</div>`;
+  }
+}
+
+function renderPanel(d) {
+  document.getElementById('panelTitle').textContent = d.nama;
+  const lvl = d.level || {};
+
+  const waRows = (d.wa_log || []).slice(0, 8).map(w => `
+    <div class="wa-item">
+      <div class="wa-meta">${fmtDateTime(w.created_at)}${w.nomor_transaksi ? ` · ${esc(w.nomor_transaksi)}` : ''}</div>
+      <div class="wa-msg">${esc(w.pesan)}</div>
+    </div>
+  `).join('') || '<div style="color:var(--gray-5);font-size:13px">Belum ada riwayat WA</div>';
+
+  const trxRows = (d.transaksi_terbaru || []).map(t => `
+    <div class="trx-item">
+      <span class="nomor">${esc(t.nomor_transaksi)}</span>
+      <span style="color:var(--gray-5)">${fmtDate(t.tanggal_masuk)}</span>
+      <span class="bayar">${rupiah(t.total_bayar)}</span>
+    </div>
+  `).join('') || '<div style="color:var(--gray-5);font-size:13px">Belum ada transaksi</div>';
+
+  document.getElementById('panelBody').innerHTML = `
+    <div class="info-grid">
+      <div class="info-item"><label>Nama</label><p>${esc(d.nama)}</p></div>
+      <div class="info-item"><label>Level</label>
+        <p><span class="badge" style="background:${LEVEL_BG[lvl.label]||'#f1f5f9'};color:${LEVEL_COLOR[lvl.label]||'#374151'}">${lvl.label||'–'}</span></p>
+      </div>
+      <div class="info-item"><label>Nomor WA</label>
+        <p>${d.telepon ? `<a href="https://wa.me/${esc(d.telepon)}" target="_blank" style="color:var(--green)">${esc(d.telepon)}</a>` : '–'}</p>
+      </div>
+      <div class="info-item"><label>Email</label><p>${esc(d.email || '–')}</p></div>
+      ${d.alamat ? `<div class="info-item" style="grid-column:1/-1"><label>Alamat</label><p>${esc(d.alamat)}</p></div>` : ''}
+      <div class="info-item"><label>Bergabung</label><p>${fmtDate(d.created_at)}</p></div>
+      <div class="info-item"><label>Total Poin</label><p style="color:var(--purple)">${d.total_poin} poin</p></div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="val">${d.jumlah_transaksi}</div>
+        <div class="lbl">Transaksi</div>
+      </div>
+      <div class="stat-box">
+        <div class="val" style="font-size:14px">${rupiah(d.total_belanja)}</div>
+        <div class="lbl">Total Belanja</div>
+      </div>
+      <div class="stat-box">
+        <div class="val" style="font-size:13px">${d.transaksi_terakhir ? fmtDate(d.transaksi_terakhir) : '–'}</div>
+        <div class="lbl">Terakhir Order</div>
+      </div>
+    </div>
+
+    ${d.telepon ? `
+    <div>
+      <div class="section-title" style="margin-bottom:10px">📤 Kirim Pesan WA</div>
+      <div class="wa-composer">
+        <textarea id="waMsg" placeholder="Ketik pesan custom…">Halo ${d.nama}, terima kasih telah menjadi pelanggan setia kami!</textarea>
+        <button class="btn btn-green btn-sm" onclick="sendWA('${esc(d.telepon)}')">📱 Buka WhatsApp</button>
+      </div>
+    </div>
+    ` : ''}
+
+    <div>
+      <div class="section-title" style="margin-bottom:10px">🧾 Transaksi Terbaru</div>
+      <div class="trx-list">${trxRows}</div>
+    </div>
+
+    <div>
+      <div class="section-title" style="margin-bottom:10px">📨 Riwayat WA</div>
+      <div class="wa-list">${waRows}</div>
+    </div>
+  `;
+}
+
+function closePanel() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('panel').classList.remove('open');
+  currentId = null;
+}
+
+function sendWA(phone) {
+  const msg = document.getElementById('waMsg')?.value?.trim();
+  if (!msg) return;
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+
+  // Log ke server
+  fetch('/api/v1/wa/log', {
+    method: 'POST', credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ telepon: phone, pesan: msg, status: 'terkirim' })
+  }).catch(() => {});
+}
+
+// ── Form Modal ────────────────────────────────────────────────────────────────
+function openAdd() {
+  document.getElementById('editId').value = '';
+  document.getElementById('modalTitle').textContent = 'Tambah Pelanggan';
+  document.getElementById('fNama').value    = '';
+  document.getElementById('fTelepon').value = '';
+  document.getElementById('fEmail').value   = '';
+  document.getElementById('fAlamat').value  = '';
+  document.getElementById('formErr').textContent = '';
+  document.getElementById('modalBg').classList.add('open');
+  setTimeout(() => document.getElementById('fNama').focus(), 100);
+}
+
+async function editCurrent() {
+  if (!currentId) return;
+  try {
+    const { data } = await api(`/api/v1/pelanggan/${currentId}`);
+    document.getElementById('editId').value    = data.id;
+    document.getElementById('modalTitle').textContent = 'Edit Pelanggan';
+    document.getElementById('fNama').value    = data.nama || '';
+    document.getElementById('fTelepon').value = data.telepon || '';
+    document.getElementById('fEmail').value   = data.email || '';
+    document.getElementById('fAlamat').value  = data.alamat || '';
+    document.getElementById('formErr').textContent = '';
+    document.getElementById('modalBg').classList.add('open');
+  } catch (e) { toast(e.message, true); }
+}
+
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('open');
+}
+
+async function savePelanggan() {
+  const id   = document.getElementById('editId').value;
+  const body = {
+    nama:    document.getElementById('fNama').value.trim(),
+    telepon: document.getElementById('fTelepon').value.trim() || null,
+    email:   document.getElementById('fEmail').value.trim()   || null,
+    alamat:  document.getElementById('fAlamat').value.trim()  || null
+  };
+  document.getElementById('formErr').textContent = '';
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+
+  try {
+    if (id) {
+      await api(`/api/v1/pelanggan/${id}`, { method:'PUT', body: JSON.stringify(body) });
+      toast('Pelanggan berhasil diperbarui');
+    } else {
+      await api('/api/v1/pelanggan', { method:'POST', body: JSON.stringify(body) });
+      toast('Pelanggan berhasil ditambahkan');
+    }
+    closeModal();
+    load();
+    if (id && currentId == id) openPanel(id);
+  } catch (e) {
+    document.getElementById('formErr').textContent = e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function deleteCurrent() {
+  if (!currentId) return;
+  if (!confirm('Yakin hapus pelanggan ini? Pelanggan dengan riwayat transaksi tidak dapat dihapus.')) return;
+  try {
+    await api(`/api/v1/pelanggan/${currentId}`, { method:'DELETE' });
+    toast('Pelanggan berhasil dihapus');
+    closePanel();
+    load();
+  } catch (e) { toast(e.message, true); }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function formatPhone(input) {
+  let v = input.value.replace(/[^\d]/g, '');
+  if (v.startsWith('0')) v = '62' + v.slice(1);
+  input.value = v;
+}
+
+function testWA() {
+  const phone = document.getElementById('fTelepon').value.trim();
+  if (!phone) { alert('Masukkan nomor WA terlebih dahulu'); return; }
+  window.open(`https://wa.me/${phone}`, '_blank');
+}
+
+function rupiah(n) {
+  return 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+}
+
+function fmtDate(s) {
+  if (!s) return '–';
+  return new Date(s).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function fmtDateTime(s) {
+  if (!s) return '–';
+  return new Date(s).toLocaleString('id-ID', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(msg, err = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = 'toast show' + (err ? ' err' : '');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+</script>
+<script src="/js/nav.js"></script>
+</body>
+</html>

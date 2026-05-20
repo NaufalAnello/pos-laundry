@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/css/layout.css"/>
+  <title>Order Baru — POS Laundry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:   #2563eb; --blue-dk: #1d4ed8; --blue-lt: #eff6ff;
+      --green:  #16a34a; --red: #dc2626; --yellow: #d97706;
+      --gray-1: #f8fafc; --gray-2: #f1f5f9; --gray-3: #e2e8f0;
+      --gray-5: #64748b; --gray-7: #374151; --gray-9: #111827;
+      --radius: 10px; --shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+           background: var(--gray-2); color: var(--gray-9); font-size: 14px; }
+
+    /* ── Header ── */
+    header {
+      background: #fff; border-bottom: 1px solid var(--gray-3);
+      padding: 0 20px; height: 56px;
+      display: flex; align-items: center; gap: 16px;
+      position: sticky; top: 0; z-index: 20;
+      box-shadow: var(--shadow);
+    }
+    .back-btn { color: var(--blue); text-decoration: none; font-weight: 600;
+                display: flex; align-items: center; gap: 6px; }
+    header h1 { font-size: 16px; font-weight: 700; flex: 1; }
+    .header-badge { background: var(--blue-lt); color: var(--blue);
+                    font-size: 11px; font-weight: 700; padding: 3px 10px;
+                    border-radius: 99px; letter-spacing: .4px; }
+
+    /* ── Layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1280px;
+      margin: 0 auto;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #fff; border-radius: var(--radius);
+      box-shadow: var(--shadow); border: 1px solid var(--gray-3);
+      margin-bottom: 12px;
+    }
+    .card-header {
+      padding: 14px 18px; border-bottom: 1px solid var(--gray-3);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-header h2 { font-size: 14px; font-weight: 700; color: var(--gray-7); }
+    .card-body { padding: 16px 18px; }
+
+    /* ── Form controls ── */
+    label { display: block; font-size: 12px; font-weight: 600;
+            color: var(--gray-5); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .3px; }
+    input[type=text], input[type=number], select, textarea {
+      width: 100%; padding: 9px 12px; border: 1.5px solid var(--gray-3);
+      border-radius: 7px; font-size: 14px; background: var(--gray-1);
+      color: var(--gray-9); outline: none; transition: border-color .15s, box-shadow .15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--blue); background: #fff;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    }
+    textarea { resize: vertical; min-height: 60px; }
+    .field { margin-bottom: 14px; }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+    /* ── Autocomplete ── */
+    .ac-wrap { position: relative; }
+    .ac-dropdown {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: #fff; border: 1.5px solid var(--gray-3);
+      border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      z-index: 100; max-height: 280px; overflow-y: auto;
+    }
+    .ac-dropdown.hidden { display: none; }
+    .ac-item {
+      padding: 10px 14px; cursor: pointer;
+      display: flex; align-items: center; gap: 10px;
+      border-bottom: 1px solid var(--gray-3);
+      transition: background .1s;
+    }
+    .ac-item:last-child { border-bottom: none; }
+    .ac-item:hover { background: var(--blue-lt); }
+    .ac-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--blue-lt); color: var(--blue);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px; flex-shrink: 0;
+    }
+    .ac-name  { font-weight: 600; font-size: 13px; }
+    .ac-sub   { font-size: 11px; color: var(--gray-5); margin-top: 1px; }
+    .level-badge {
+      padding: 1px 7px; border-radius: 99px; font-size: 10px;
+      font-weight: 700; letter-spacing: .3px; text-transform: uppercase;
+    }
+    .level-Platinum { background: #ede9fe; color: #6d28d9; }
+    .level-Gold     { background: #fef3c7; color: #92400e; }
+    .level-Silver   { background: #f1f5f9; color: #475569; }
+    .level-Bronze   { background: #fef9ee; color: #92400e; }
+
+    /* ── Customer info panel ── */
+    #customerInfo {
+      background: var(--blue-lt); border-radius: 8px;
+      padding: 12px 14px; display: flex; align-items: center; gap: 12px;
+      margin-top: 10px;
+    }
+    #customerInfo.hidden { display: none; }
+    .ci-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--blue); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 16px; flex-shrink: 0;
+    }
+    .ci-detail { flex: 1; }
+    .ci-name  { font-weight: 700; font-size: 14px; color: var(--blue-dk); }
+    .ci-meta  { font-size: 12px; color: var(--gray-5); margin-top: 2px; }
+    .ci-poin  { font-size: 13px; font-weight: 600; color: var(--blue-dk); }
+    .ci-clear { background: none; border: none; cursor: pointer;
+                color: var(--gray-5); font-size: 18px; padding: 4px; }
+
+    /* ── Items table ── */
+    .item-row {
+      display: grid;
+      grid-template-columns: 1fr 80px 90px 100px 34px;
+      gap: 8px; align-items: center;
+      padding: 8px 0; border-bottom: 1px solid var(--gray-3);
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-header {
+      display: grid;
+      grid-template-columns: 1fr 80px 90px 100px 34px;
+      gap: 8px; padding: 0 0 6px 0;
+      border-bottom: 2px solid var(--gray-3);
+      font-size: 11px; font-weight: 700; color: var(--gray-5);
+      text-transform: uppercase; letter-spacing: .3px;
+    }
+    .item-subtotal { font-weight: 700; color: var(--blue-dk); }
+    .btn-remove {
+      width: 30px; height: 30px; border-radius: 7px;
+      background: #fee2e2; color: var(--red); border: none;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 16px; transition: background .15s;
+    }
+    .btn-remove:hover { background: #fecaca; }
+    .btn-add-item {
+      margin-top: 12px; padding: 8px 16px;
+      background: var(--blue-lt); color: var(--blue);
+      border: 1.5px dashed var(--blue); border-radius: 7px;
+      cursor: pointer; font-size: 13px; font-weight: 600;
+      width: 100%; transition: background .15s;
+    }
+    .btn-add-item:hover { background: #dbeafe; }
+
+    /* ── Toggle switch ── */
+    .toggle-wrap {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0;
+    }
+    .toggle-label { font-size: 13px; font-weight: 600; color: var(--gray-7); }
+    .toggle-sub   { font-size: 11px; color: var(--gray-5); margin-top: 2px; }
+    .toggle {
+      position: relative; width: 44px; height: 24px; flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0; background: var(--gray-3);
+      border-radius: 99px; cursor: pointer; transition: background .2s;
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; top: 3px; left: 3px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+      transition: transform .2s;
+    }
+    input:checked + .toggle-slider { background: var(--blue); }
+    input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+    /* ── Payment method ── */
+    .pay-methods { display: flex; gap: 8px; flex-wrap: wrap; }
+    .pay-method-btn {
+      flex: 1; min-width: 80px; padding: 9px 8px;
+      border: 1.5px solid var(--gray-3); border-radius: 8px;
+      background: var(--gray-1); cursor: pointer;
+      text-align: center; font-size: 13px; font-weight: 600;
+      color: var(--gray-5); transition: all .15s;
+    }
+    .pay-method-btn.active {
+      border-color: var(--blue); background: var(--blue-lt); color: var(--blue);
+    }
+    .pay-method-icon { font-size: 20px; display: block; margin-bottom: 3px; }
+
+    /* ── Summary rows ── */
+    .summary-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 7px 0; border-bottom: 1px solid var(--gray-3);
+      font-size: 13px;
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-row.total {
+      font-size: 16px; font-weight: 700; color: var(--blue-dk);
+      padding: 12px 0 8px;
+    }
+    .summary-row.discount { color: var(--green); }
+    .summary-val { font-weight: 600; }
+
+    /* ── Action buttons ── */
+    .actions { display: flex; flex-direction: column; gap: 8px; }
+    .btn {
+      width: 100%; padding: 13px; border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all .15s; position: relative;
+    }
+    .btn:disabled { opacity: .6; cursor: not-allowed; }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--blue-dk);
+      box-shadow: 0 4px 12px rgba(37,99,235,.35); }
+    .btn-secondary { background: var(--gray-2); color: var(--gray-7);
+                     border: 1.5px solid var(--gray-3); }
+    .btn-secondary:hover:not(:disabled) { background: var(--gray-3); }
+    .btn-success { background: var(--green); color: #fff; }
+    .btn-success:hover:not(:disabled) {
+      background: #15803d; box-shadow: 0 4px 12px rgba(22,163,74,.35); }
+
+    /* ── Poin input ── */
+    #poinSection { background: #f0fdf4; border: 1.5px solid #bbf7d0;
+                   border-radius: 8px; padding: 12px 14px; margin-top: 8px; }
+    #poinSection.hidden { display: none; }
+    .poin-avail { font-size: 12px; color: var(--green); margin-bottom: 8px; font-weight: 600; }
+
+    /* ── Toast notification ── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: #1e293b; color: #fff; padding: 12px 20px;
+      border-radius: 10px; font-size: 14px; font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,.2); z-index: 999;
+      transform: translateY(80px); opacity: 0;
+      transition: transform .3s, opacity .3s;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.success { background: var(--green); }
+    #toast.error   { background: var(--red); }
+
+    /* Loading overlay */
+    #loadingOverlay {
+      position: fixed; inset: 0; background: rgba(255,255,255,.85);
+      display: none; align-items: center; justify-content: center; z-index: 50;
+    }
+    #loadingOverlay.show { display: flex; }
+    .spinner {
+      width: 40px; height: 40px; border: 3px solid var(--gray-3);
+      border-top-color: var(--blue); border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-items {
+      text-align: center; padding: 24px; color: var(--gray-5); font-size: 13px;
+    }
+    .kembalian-ok { color: var(--green); }
+    .kembalian-kurang { color: var(--red); }
+  </style>
+</head>
+<body>
+
+<div id="loadingOverlay"><div class="spinner"></div></div>
+<div id="toast"></div>
+
+<header>
+  <a href="/" class="back-btn">← Dashboard</a>
+  <h1>Order Baru</h1>
+  <span class="header-badge" id="nomorPreview">LDR-...</span>
+</header>
+
+<div class="layout">
+
+  <!-- ══ PANEL KIRI ══ -->
+  <div class="panel-left">
+
+    <!-- Customer -->
+    <div class="card">
+      <div class="card-header"><h2>👤 Pelanggan</h2>
+        <span style="font-size:11px;color:var(--gray-5)">Opsional — bisa walk-in</span>
+      </div>
+      <div class="card-body">
+        <div class="ac-wrap">
+          <input type="text" id="customerSearch" placeholder="Cari nama atau nomor WA pelanggan..." autocomplete="off" />
+          <div id="customerDropdown" class="ac-dropdown hidden"></div>
+        </div>
+        <div id="customerInfo" class="hidden">
+          <div class="ci-avatar" id="ciAvatar">?</div>
+          <div class="ci-detail">
+            <div class="ci-name" id="ciName">—</div>
+            <div class="ci-meta" id="ciMeta">—</div>
+            <div class="ci-poin" id="ciPoin">—</div>
+          </div>
+          <button class="ci-clear" id="clearCustomer" title="Hapus pilihan">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Items -->
+    <div class="card">
+      <div class="card-header">
+        <h2>🧺 Item Laundry</h2>
+        <span id="itemCount" style="font-size:12px;color:var(--gray-5)">0 item</span>
+      </div>
+      <div class="card-body">
+        <div class="item-header">
+          <span>Layanan</span><span>Jumlah</span><span>Satuan</span><span>Subtotal</span><span></span>
+        </div>
+        <div id="itemsContainer">
+          <div class="empty-items">Belum ada item. Klik "+ Tambah Item" untuk mulai.</div>
+        </div>
+        <button class="btn-add-item" id="addItemBtn">+ Tambah Item</button>
+      </div>
+    </div>
+
+    <!-- Catatan & Jemput -->
+    <div class="card">
+      <div class="card-header"><h2>📝 Catatan & Pengiriman</h2></div>
+      <div class="card-body">
+        <div class="field">
+          <label>Catatan</label>
+          <textarea id="catatan" placeholder="Catatan khusus untuk order ini..."></textarea>
+        </div>
+        <div class="toggle-wrap">
+          <div>
+            <div class="toggle-label">🛵 Antar Jemput</div>
+            <div class="toggle-sub">Aktifkan jika perlu pickup/delivery</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="antarJemput" /><span class="toggle-slider"></span></label>
+        </div>
+        <div id="alamatSection" class="field" style="display:none;margin-top:8px">
+          <label>Alamat Jemput / Antar</label>
+          <textarea id="alamatJemput" placeholder="Masukkan alamat lengkap..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PANEL KANAN ══ -->
+  <div class="panel-right">
+
+    <!-- Promo & Poin -->
+    <div class="card">
+      <div class="card-header"><h2>🎁 Promo & Poin</h2></div>
+      <div class="card-body">
+        <div class="field">
+          <label>Paket Promo</label>
+          <select id="promoSelect">
+            <option value="">— Tidak ada promo —</option>
+          </select>
+          <div id="promoInfo" style="font-size:11px;color:var(--green);margin-top:4px"></div>
+        </div>
+        <div class="toggle-wrap">
+          <div>
+            <div class="toggle-label">⭐ Tukar Poin</div>
+            <div class="toggle-sub" id="poinToggleSub">Pilih pelanggan terlebih dahulu</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="usePoin" disabled /><span class="toggle-slider"></span></label>
+        </div>
+        <div id="poinSection" class="hidden">
+          <div class="poin-avail" id="poinAvail"></div>
+          <div class="field">
+            <label>Jumlah Poin Digunakan</label>
+            <input type="number" id="poinInput" min="0" step="1" value="0" />
+          </div>
+          <div id="poinDiskonInfo" style="font-size:12px;color:var(--green);margin-top:4px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ringkasan Harga -->
+    <div class="card">
+      <div class="card-header"><h2>💰 Ringkasan</h2></div>
+      <div class="card-body">
+        <div class="summary-row">
+          <span>Subtotal</span><span class="summary-val" id="sumSubtotal">Rp 0</span>
+        </div>
+        <div class="summary-row discount" id="sumDiskonRow" style="display:none">
+          <span>Diskon Promo</span><span class="summary-val" id="sumDiskon">- Rp 0</span>
+        </div>
+        <div class="summary-row discount" id="sumPoinRow" style="display:none">
+          <span>Diskon Poin</span><span class="summary-val" id="sumPoinDiskon">- Rp 0</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total Bayar</span><span id="sumTotal">Rp 0</span>
+        </div>
+
+        <!-- Metode bayar -->
+        <div class="field" style="margin-top:8px">
+          <label>Metode Bayar</label>
+          <div class="pay-methods">
+            <button class="pay-method-btn active" data-method="tunai">
+              <span class="pay-method-icon">💵</span>Tunai
+            </button>
+            <button class="pay-method-btn" data-method="transfer">
+              <span class="pay-method-icon">🏦</span>Transfer
+            </button>
+            <button class="pay-method-btn" data-method="qris">
+              <span class="pay-method-icon">📱</span>QRIS
+            </button>
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label>Bayar (Rp)</label>
+            <input type="number" id="bayarInput" min="0" step="1000" value="0" />
+          </div>
+          <div class="field">
+            <label>Kembalian</label>
+            <input type="text" id="kembalianDisplay" readonly style="background:var(--gray-1);font-weight:700" />
+          </div>
+        </div>
+
+        <!-- Estimasi selesai -->
+        <div class="field">
+          <label>Estimasi Selesai</label>
+          <input type="date" id="tanggalSelesai" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifikasi WA -->
+    <div class="card">
+      <div class="card-header"><h2>📲 Notifikasi</h2></div>
+      <div class="card-body">
+        <div class="toggle-wrap">
+          <div>
+            <div class="toggle-label">Kirim Nota via WhatsApp</div>
+            <div class="toggle-sub" id="waToggleSub">Pilih pelanggan dengan nomor WA</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="kirimWa" disabled /><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="actions">
+      <button class="btn btn-success" id="saveWaBtn">
+        <span>📲</span> Simpan & Kirim WA
+      </button>
+      <button class="btn btn-primary" id="savePrintBtn">
+        <span>🖨️</span> Simpan & Cetak
+      </button>
+      <button class="btn btn-secondary" id="saveBtn">
+        <span>💾</span> Simpan Saja
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+const state = {
+  pelanggan:    null,
+  items:        [],     // { id, layanan_id, nama, harga, satuan, jumlah, subtotal }
+  promo:        null,
+  poinDigunakan: 0,
+  usePoin:      false,
+  metodeBayar:  'tunai',
+  bayar:        0,
+  settings:     { perNominal: 10000, nilaiPerPoin: 100, minRedeem: 100 }
+};
+
+let layananList = [];
+let promoList   = [];
+let acTimer     = null;
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+(async () => {
+  // Auth check
+  const me = await apiFetch('/api/v1/auth/me');
+  if (!me) { window.location.replace('/login'); return; }
+
+  // Load settings
+  const cfg = await apiFetch('/api/v1/pengaturan');
+  if (cfg?.data) {
+    state.settings.perNominal   = parseInt(cfg.data.poin_per_nominal)  || 10000;
+    state.settings.nilaiPerPoin = parseInt(cfg.data.nilai_tukar_poin)  || 100;
+    state.settings.minRedeem    = parseInt(cfg.data.min_poin_redeem)   || 100;
+  }
+
+  // Load layanan
+  const lRes = await apiFetch('/api/v1/layanan');
+  if (lRes?.data) layananList = lRes.data;
+
+  // Load promo
+  const pRes = await apiFetch('/api/v1/paket-promo');
+  if (pRes?.data) {
+    promoList = pRes.data;
+    const sel = document.getElementById('promoSelect');
+    promoList.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      const disc = p.diskon_persen > 0 ? `${p.diskon_persen}%` : `Rp ${fmtRp(p.diskon_nominal)}`;
+      opt.textContent = `${p.nama} (diskon ${disc})`;
+      sel.appendChild(opt);
+    });
+  }
+
+  // Default estimasi selesai = besok
+  const tomorrow = new Date(Date.now() + 86400000);
+  document.getElementById('tanggalSelesai').value = tomorrow.toISOString().slice(0, 10);
+
+  addItemRow(); // baris item pertama langsung
+})();
+
+// ════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════
+function fmtRp(n) { return Number(n || 0).toLocaleString('id-ID'); }
+
+async function apiFetch(url, opts = {}) {
+  try {
+    const r = await fetch(url, { credentials: 'include', ...opts });
+    if (r.status === 401) { window.location.replace('/login'); return null; }
+    return await r.json();
+  } catch { return null; }
+}
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  setTimeout(() => { t.className = ''; }, 3500);
+}
+
+function setLoading(on) {
+  document.getElementById('loadingOverlay').classList.toggle('show', on);
+}
+
+// ════════════════════════════════════════════════════════
+// CUSTOMER AUTOCOMPLETE
+// ════════════════════════════════════════════════════════
+const searchEl    = document.getElementById('customerSearch');
+const dropdownEl  = document.getElementById('customerDropdown');
+const customerInfo = document.getElementById('customerInfo');
+
+searchEl.addEventListener('input', () => {
+  clearTimeout(acTimer);
+  const q = searchEl.value.trim();
+  if (q.length < 1) { dropdownEl.classList.add('hidden'); return; }
+  acTimer = setTimeout(() => doSearch(q), 280);
+});
+
+searchEl.addEventListener('blur', () => {
+  setTimeout(() => dropdownEl.classList.add('hidden'), 200);
+});
+searchEl.addEventListener('focus', () => {
+  if (searchEl.value.trim().length >= 1) dropdownEl.classList.remove('hidden');
+});
+
+async function doSearch(q) {
+  const res = await apiFetch(`/api/v1/pelanggan?q=${encodeURIComponent(q)}&limit=8`);
+  if (!res?.data) return;
+  if (res.data.length === 0) {
+    dropdownEl.innerHTML = '<div class="ac-item" style="color:var(--gray-5)">Tidak ditemukan</div>';
+    dropdownEl.classList.remove('hidden');
+    return;
+  }
+  dropdownEl.innerHTML = res.data.map(p => `
+    <div class="ac-item" data-id="${p.id}">
+      <div class="ac-avatar">${p.nama.charAt(0).toUpperCase()}</div>
+      <div>
+        <div class="ac-name">
+          ${p.nama}
+          <span class="level-badge level-${p.level?.label || 'Bronze'}">${p.level?.label || 'Bronze'}</span>
+        </div>
+        <div class="ac-sub">📱 ${p.telepon || '—'} &nbsp;·&nbsp; ⭐ ${p.total_poin} poin</div>
+      </div>
+    </div>
+  `).join('');
+  dropdownEl.classList.remove('hidden');
+
+  dropdownEl.querySelectorAll('.ac-item[data-id]').forEach(el => {
+    el.addEventListener('click', () => {
+      const found = res.data.find(p => p.id == el.dataset.id);
+      if (found) selectCustomer(found);
+    });
+  });
+}
+
+function selectCustomer(p) {
+  state.pelanggan = p;
+  searchEl.value  = '';
+  dropdownEl.classList.add('hidden');
+
+  document.getElementById('ciAvatar').textContent = p.nama.charAt(0).toUpperCase();
+  document.getElementById('ciName').textContent   = p.nama;
+  document.getElementById('ciMeta').textContent   = `📱 ${p.telepon || '—'}`;
+  const lvl = p.level || { label: 'Bronze' };
+  document.getElementById('ciPoin').innerHTML =
+    `⭐ ${p.total_poin} poin &nbsp;<span class="level-badge level-${lvl.label}">${lvl.label}</span>`;
+  customerInfo.classList.remove('hidden');
+
+  // Aktifkan toggle poin jika ada poin
+  const poinToggle = document.getElementById('usePoin');
+  const waToggle   = document.getElementById('kirimWa');
+  if (p.total_poin >= state.settings.minRedeem) {
+    poinToggle.disabled = false;
+    document.getElementById('poinToggleSub').textContent =
+      `Tersedia ${p.total_poin} poin (min. ${state.settings.minRedeem})`;
+  } else {
+    poinToggle.disabled = true;
+    document.getElementById('poinToggleSub').textContent =
+      `Poin tidak cukup (${p.total_poin}/${state.settings.minRedeem})`;
+  }
+  if (p.telepon) {
+    waToggle.disabled = false;
+    document.getElementById('waToggleSub').textContent = `Kirim ke ${p.telepon}`;
+  }
+  document.getElementById('poinAvail').textContent =
+    `Poin tersedia: ${p.total_poin} (nilai: Rp ${fmtRp(p.total_poin * state.settings.nilaiPerPoin)})`;
+  calcTotal();
+}
+
+document.getElementById('clearCustomer').addEventListener('click', () => {
+  state.pelanggan = null;
+  state.poinDigunakan = 0;
+  state.usePoin = false;
+  customerInfo.classList.add('hidden');
+  document.getElementById('usePoin').checked  = false;
+  document.getElementById('usePoin').disabled = true;
+  document.getElementById('kirimWa').checked  = false;
+  document.getElementById('kirimWa').disabled = true;
+  document.getElementById('poinSection').classList.add('hidden');
+  document.getElementById('poinToggleSub').textContent = 'Pilih pelanggan terlebih dahulu';
+  document.getElementById('waToggleSub').textContent   = 'Pilih pelanggan dengan nomor WA';
+  calcTotal();
+});
+
+// ════════════════════════════════════════════════════════
+// ITEMS MANAGEMENT
+// ════════════════════════════════════════════════════════
+let itemIdSeq = 0;
+
+function addItemRow(defaults = {}) {
+  const id = ++itemIdSeq;
+  const container = document.getElementById('itemsContainer');
+
+  // Hapus empty state
+  const empty = container.querySelector('.empty-items');
+  if (empty) empty.remove();
+
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.dataset.itemId = id;
+
+  // Build layanan options grouped by kategori
+  const grouped = {};
+  layananList.forEach(l => {
+    const cat = l.kategori_nama || 'Lainnya';
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(l);
+  });
+  let optionsHtml = '<option value="">— Pilih layanan —</option>';
+  Object.entries(grouped).forEach(([cat, items]) => {
+    optionsHtml += `<optgroup label="${cat}">`;
+    items.forEach(l => {
+      optionsHtml += `<option value="${l.id}" data-harga="${l.harga}" data-satuan="${l.satuan}"
+        ${defaults.layanan_id == l.id ? 'selected' : ''}>${l.nama} (Rp ${fmtRp(l.harga)}/${l.satuan})</option>`;
+    });
+    optionsHtml += '</optgroup>';
+  });
+
+  row.innerHTML = `
+    <select class="item-layanan">${optionsHtml}</select>
+    <input type="number" class="item-jumlah" min="0.1" step="0.1" value="${defaults.jumlah || 1}" />
+    <input type="text" class="item-satuan" readonly value="${defaults.satuan || ''}" style="background:var(--gray-1);color:var(--gray-5)" />
+    <span class="item-subtotal">${defaults.subtotal ? 'Rp ' + fmtRp(defaults.subtotal) : 'Rp 0'}</span>
+    <button class="btn-remove" title="Hapus">✕</button>
+  `;
+
+  const selLayanan = row.querySelector('.item-layanan');
+  const inpJumlah  = row.querySelector('.item-jumlah');
+  const inpSatuan  = row.querySelector('.item-satuan');
+  const spanSub    = row.querySelector('.item-subtotal');
+
+  const updateRow = () => {
+    const opt   = selLayanan.options[selLayanan.selectedIndex];
+    const harga  = parseFloat(opt?.dataset.harga || 0);
+    const satuan = opt?.dataset.satuan || '';
+    const jumlah = parseFloat(inpJumlah.value) || 0;
+    const sub    = harga * jumlah;
+    inpSatuan.value = satuan;
+    spanSub.textContent = 'Rp ' + fmtRp(sub);
+
+    // Update state
+    const existing = state.items.find(i => i.id === id);
+    const data = { id, layanan_id: parseInt(selLayanan.value) || 0, nama: opt?.text || '',
+                   harga, satuan, jumlah, subtotal: sub };
+    if (existing) Object.assign(existing, data);
+    else state.items.push(data);
+
+    updateItemCount();
+    calcTotal();
+  };
+
+  selLayanan.addEventListener('change', updateRow);
+  inpJumlah.addEventListener('input', updateRow);
+
+  row.querySelector('.btn-remove').addEventListener('click', () => {
+    state.items = state.items.filter(i => i.id !== id);
+    row.remove();
+    if (!document.querySelector('.item-row')) {
+      document.getElementById('itemsContainer').innerHTML =
+        '<div class="empty-items">Belum ada item. Klik "+ Tambah Item" untuk mulai.</div>';
+    }
+    updateItemCount();
+    calcTotal();
+  });
+
+  container.appendChild(row);
+  if (defaults.layanan_id) updateRow();
+}
+
+document.getElementById('addItemBtn').addEventListener('click', () => addItemRow());
+
+function updateItemCount() {
+  const n = document.querySelectorAll('.item-row').length;
+  document.getElementById('itemCount').textContent = n + ' item';
+}
+
+// ════════════════════════════════════════════════════════
+// PROMO
+// ════════════════════════════════════════════════════════
+document.getElementById('promoSelect').addEventListener('change', (e) => {
+  state.promo = promoList.find(p => p.id == e.target.value) || null;
+  const info = document.getElementById('promoInfo');
+  if (state.promo) {
+    const disc = state.promo.diskon_persen > 0
+      ? `${state.promo.diskon_persen}% off`
+      : `Rp ${fmtRp(state.promo.diskon_nominal)} off`;
+    const minB = state.promo.min_pembelian > 0
+      ? ` | Min. beli Rp ${fmtRp(state.promo.min_pembelian)}`
+      : '';
+    info.textContent = `✓ Diskon ${disc}${minB}`;
+  } else {
+    info.textContent = '';
+  }
+  calcTotal();
+});
+
+// ════════════════════════════════════════════════════════
+// POIN
+// ════════════════════════════════════════════════════════
+document.getElementById('usePoin').addEventListener('change', (e) => {
+  state.usePoin = e.target.checked;
+  document.getElementById('poinSection').classList.toggle('hidden', !state.usePoin);
+  if (!state.usePoin) {
+    state.poinDigunakan = 0;
+    document.getElementById('poinInput').value = 0;
+  }
+  calcTotal();
+});
+
+document.getElementById('poinInput').addEventListener('input', (e) => {
+  const max  = state.pelanggan?.total_poin || 0;
+  const val  = Math.min(parseInt(e.target.value) || 0, max);
+  e.target.value = val;
+  state.poinDigunakan = val;
+  const diskon = val * state.settings.nilaiPerPoin;
+  document.getElementById('poinDiskonInfo').textContent =
+    val > 0 ? `✓ Diskon poin: Rp ${fmtRp(diskon)}` : '';
+  calcTotal();
+});
+
+// ════════════════════════════════════════════════════════
+// PAYMENT
+// ════════════════════════════════════════════════════════
+document.querySelectorAll('.pay-method-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pay-method-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.metodeBayar = btn.dataset.method;
+  });
+});
+
+document.getElementById('bayarInput').addEventListener('input', (e) => {
+  state.bayar = parseFloat(e.target.value) || 0;
+  updateKembalian();
+});
+
+document.getElementById('antarJemput').addEventListener('change', (e) => {
+  document.getElementById('alamatSection').style.display = e.target.checked ? 'block' : 'none';
+});
+
+// ════════════════════════════════════════════════════════
+// CALCULATE TOTAL
+// ════════════════════════════════════════════════════════
+function calcTotal() {
+  const totalHarga = state.items.reduce((s, i) => s + i.subtotal, 0);
+  let diskon = 0;
+  if (state.promo) {
+    if (state.promo.diskon_persen > 0) {
+      diskon = Math.round(totalHarga * state.promo.diskon_persen / 100);
+    } else {
+      diskon = state.promo.diskon_nominal || 0;
+    }
+    if (state.promo.min_pembelian > 0 && totalHarga < state.promo.min_pembelian) diskon = 0;
+  }
+  const diskonPoin = state.poinDigunakan * state.settings.nilaiPerPoin;
+  const total      = Math.max(0, totalHarga - diskon - diskonPoin);
+
+  document.getElementById('sumSubtotal').textContent = 'Rp ' + fmtRp(totalHarga);
+
+  const diskonRow = document.getElementById('sumDiskonRow');
+  if (diskon > 0) {
+    diskonRow.style.display = '';
+    document.getElementById('sumDiskon').textContent = '- Rp ' + fmtRp(diskon);
+  } else { diskonRow.style.display = 'none'; }
+
+  const poinRow = document.getElementById('sumPoinRow');
+  if (diskonPoin > 0) {
+    poinRow.style.display = '';
+    document.getElementById('sumPoinDiskon').textContent = '- Rp ' + fmtRp(diskonPoin);
+  } else { poinRow.style.display = 'none'; }
+
+  document.getElementById('sumTotal').textContent = 'Rp ' + fmtRp(total);
+  state._totalBayar = total;
+  updateKembalian();
+
+  // Hitung estimasi poin yang akan didapat
+  if (state.pelanggan) {
+    const poinEarned = Math.floor(total / state.settings.perNominal);
+    const ciPoinEl = document.getElementById('ciPoin');
+    const lvl = state.pelanggan.level || { label: 'Bronze' };
+    const poinNet = state.pelanggan.total_poin - state.poinDigunakan + poinEarned;
+    ciPoinEl.innerHTML =
+      `⭐ ${state.pelanggan.total_poin} poin &nbsp;<span class="level-badge level-${lvl.label}">${lvl.label}</span>` +
+      (poinEarned > 0 ? ` &nbsp;<span style="color:var(--green);font-size:11px">+${poinEarned} dari order ini</span>` : '');
+  }
+}
+
+function updateKembalian() {
+  const total    = state._totalBayar || 0;
+  const kembalian = Math.max(0, state.bayar - total);
+  const el       = document.getElementById('kembalianDisplay');
+  el.value       = 'Rp ' + fmtRp(kembalian);
+  el.className   = state.bayar >= total && total > 0 ? 'kembalian-ok' : 'kembalian-kurang';
+}
+
+// ════════════════════════════════════════════════════════
+// SUBMIT
+// ════════════════════════════════════════════════════════
+async function submitOrder(kirimWa, cetakSetelah) {
+  const validItems = state.items.filter(i => i.layanan_id && i.jumlah > 0);
+  if (validItems.length === 0) { showToast('Tambahkan minimal 1 item', 'error'); return; }
+
+  const body = {
+    pelanggan_id:    state.pelanggan?.id   || null,
+    paket_promo_id:  state.promo?.id       || null,
+    poin_digunakan:  state.usePoin ? state.poinDigunakan : 0,
+    items:           validItems.map(i => ({ layanan_id: i.layanan_id, jumlah: i.jumlah })),
+    metode_bayar:    state.metodeBayar,
+    bayar:           state.bayar,
+    catatan:         document.getElementById('catatan').value.trim() || null,
+    tanggal_selesai: document.getElementById('tanggalSelesai').value || null,
+    antar_jemput:    document.getElementById('antarJemput').checked,
+    alamat_jemput:   document.getElementById('alamatJemput').value.trim() || null,
+    kirim_wa:        kirimWa && document.getElementById('kirimWa').checked
+  };
+
+  setLoading(true);
+  const res = await fetch('/api/v1/transaksi', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body:    JSON.stringify(body)
+  });
+  setLoading(false);
+
+  const data = await res.json();
+  if (!res.ok) { showToast(data.error || 'Gagal menyimpan', 'error'); return; }
+
+  showToast(`✓ Order ${data.data.nomor_transaksi} berhasil disimpan`, 'success');
+
+  if (cetakSetelah) {
+    setTimeout(() => window.print(), 500);
+  }
+
+  // Reset form setelah 1.5 detik
+  setTimeout(() => window.location.reload(), 1500);
+}
+
+document.getElementById('saveBtn').addEventListener('click',      () => submitOrder(false, false));
+document.getElementById('savePrintBtn').addEventListener('click', () => submitOrder(false, true));
+document.getElementById('saveWaBtn').addEventListener('click',    () => submitOrder(true,  false));
+</script>
+<script src="/js/nav.js"></script>
+</body>
+</html>

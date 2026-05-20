@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="/css/layout.css"/>
+  <title>Poin Pelanggan — POS Laundry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:#2563eb; --blue-lt:#eff6ff;
+      --green:#16a34a; --green-lt:#f0fdf4;
+      --yellow:#d97706; --yellow-lt:#fffbeb;
+      --red:#dc2626; --red-lt:#fef2f2;
+      --purple:#7c3aed; --purple-lt:#f5f3ff;
+      --bronze:#92400e; --bronze-lt:#fef3c7;
+      --gray-1:#f8fafc; --gray-2:#f1f5f9; --gray-3:#e2e8f0;
+      --gray-5:#64748b; --gray-7:#374151; --gray-9:#111827;
+      --radius:10px; --shadow:0 1px 4px rgba(0,0,0,.08);
+    }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+           background:var(--gray-2); color:var(--gray-9); font-size:14px; min-height:100vh; }
+
+    header { background:#fff; border-bottom:1px solid var(--gray-3); padding:0 20px; height:56px;
+             display:flex; align-items:center; gap:20px; position:sticky; top:0; z-index:20; box-shadow:var(--shadow); }
+    .logo  { font-size:16px; font-weight:800; color:var(--blue); white-space:nowrap; }
+    nav    { display:flex; gap:4px; flex:1; overflow-x:auto; }
+    nav a  { padding:6px 14px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;
+             color:var(--gray-7); white-space:nowrap; transition:background .15s; }
+    nav a:hover  { background:var(--gray-2); }
+    nav a.active { background:var(--blue-lt); color:var(--blue); }
+    .header-user { font-size:13px; color:var(--gray-5); display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    .logout-btn  { padding:5px 12px; border:1px solid var(--gray-3); border-radius:7px; background:none; font-size:13px; cursor:pointer; color:var(--gray-7); }
+    .logout-btn:hover { background:var(--gray-2); }
+
+    .page { max-width:1200px; margin:0 auto; padding:20px 16px; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; flex-wrap:wrap; }
+    .page-title  { font-size:20px; font-weight:800; }
+
+    /* ── Page tabs ── */
+    .page-tabs  { display:flex; gap:0; border-bottom:2px solid var(--gray-3); margin-bottom:20px; }
+    .page-tab   { padding:10px 20px; border:none; background:none; font-size:14px; font-weight:700;
+                  color:var(--gray-5); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:color .1s; }
+    .page-tab:hover  { color:var(--gray-9); }
+    .page-tab.active { color:var(--blue); border-bottom-color:var(--blue); }
+
+    /* ── Buttons ── */
+    .btn { padding:8px 16px; border-radius:8px; border:1px solid transparent; font-size:13px;
+           font-weight:600; cursor:pointer; transition:opacity .15s; display:inline-flex; align-items:center; gap:6px; }
+    .btn:hover    { opacity:.85; }
+    .btn:disabled { opacity:.4; cursor:default; }
+    .btn-sm  { padding:5px 10px; font-size:12px; }
+    .btn-blue    { background:var(--blue);  color:#fff; }
+    .btn-green   { background:var(--green); color:#fff; }
+    .btn-red     { background:var(--red);   color:#fff; }
+    .btn-outline { background:#fff; border-color:var(--gray-3); color:var(--gray-7); }
+
+    /* ── Level cards ── */
+    .level-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+    @media(max-width:800px) { .level-grid { grid-template-columns:repeat(2,1fr); } }
+    .level-card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3);
+                  box-shadow:var(--shadow); padding:16px 18px; position:relative; overflow:hidden; }
+    .level-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; }
+    .level-card.bronze::before   { background:var(--bronze); }
+    .level-card.silver::before   { background:#9ca3af; }
+    .level-card.gold::before     { background:var(--yellow); }
+    .level-card.platinum::before { background:var(--purple); }
+    .level-label  { font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+    .level-card.bronze   .level-label { color:var(--bronze); }
+    .level-card.silver   .level-label { color:#6b7280; }
+    .level-card.gold     .level-label { color:var(--yellow); }
+    .level-card.platinum .level-label { color:var(--purple); }
+    .level-count { font-size:28px; font-weight:900; color:var(--gray-9); }
+    .level-sub   { font-size:11px; color:var(--gray-5); margin-top:2px; }
+    .level-icon  { position:absolute; right:14px; top:14px; font-size:24px; opacity:.15; }
+
+    /* ── Filter bar ── */
+    .filter-bar { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+    .search-input { flex:1; min-width:200px; padding:9px 12px; border:1px solid var(--gray-3);
+                    border-radius:8px; font-size:14px; outline:none; background:#fff; transition:border-color .15s; }
+    .search-input:focus { border-color:var(--blue); }
+
+    /* ── Table ── */
+    .table-card { background:#fff; border:1px solid var(--gray-3); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+    .table-wrap  { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; min-width:600px; }
+    thead th { padding:10px 16px; text-align:left; font-size:11px; font-weight:700;
+               text-transform:uppercase; letter-spacing:.4px; color:var(--gray-5);
+               background:var(--gray-1); border-bottom:1px solid var(--gray-3); white-space:nowrap; }
+    tbody tr { border-bottom:1px solid var(--gray-3); cursor:pointer; transition:background .1s; }
+    tbody tr:last-child { border-bottom:none; }
+    tbody tr:hover { background:var(--gray-1); }
+    tbody td { padding:12px 16px; vertical-align:middle; font-size:13px; }
+
+    /* Level badge */
+    .lvl-badge { display:inline-block; padding:3px 10px; border-radius:99px; font-size:11px; font-weight:800;
+                 text-transform:uppercase; letter-spacing:.4px; }
+    .lvl-Bronze   { background:var(--bronze-lt); color:var(--bronze); }
+    .lvl-Silver   { background:var(--gray-2);   color:#6b7280; }
+    .lvl-Gold     { background:var(--yellow-lt); color:var(--yellow); }
+    .lvl-Platinum { background:var(--purple-lt); color:var(--purple); }
+
+    /* Progress bar */
+    .progress-wrap { height:8px; background:var(--gray-3); border-radius:99px; overflow:hidden; margin:4px 0; }
+    .progress-bar  { height:100%; border-radius:99px; transition:width .4s; }
+
+    /* ── Modal ── */
+    .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:100;
+                align-items:flex-start; justify-content:flex-end; }
+    .modal-bg.open { display:flex; }
+    .detail-panel { background:#fff; width:100%; max-width:440px; height:100vh; overflow-y:auto;
+                    box-shadow:-8px 0 40px rgba(0,0,0,.15); display:flex; flex-direction:column; }
+    .panel-header { padding:18px 22px; border-bottom:1px solid var(--gray-3);
+                    display:flex; align-items:center; gap:12px; position:sticky; top:0; background:#fff; z-index:1; }
+    .panel-close  { background:none; border:none; font-size:22px; cursor:pointer; color:var(--gray-5); margin-left:auto; }
+    .panel-body   { padding:20px 22px; flex:1; }
+    .panel-section { margin-bottom:20px; }
+    .panel-section h3 { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.5px;
+                         color:var(--gray-5); margin-bottom:10px; }
+
+    /* Avatar */
+    .avatar { width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+               font-size:22px; font-weight:800; color:#fff; flex-shrink:0; }
+
+    /* Stats row */
+    .stats-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+    .stat-mini { background:var(--gray-1); border-radius:8px; padding:10px 12px; text-align:center; }
+    .stat-mini .val { font-size:16px; font-weight:800; }
+    .stat-mini .lbl { font-size:10px; color:var(--gray-5); margin-top:2px; text-transform:uppercase; }
+
+    /* Riwayat */
+    .riwayat-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--gray-3); }
+    .riwayat-item:last-child { border-bottom:none; }
+    .rw-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .rw-dot.tambah { background:var(--green); }
+    .rw-dot.kurang { background:var(--red); }
+    .rw-ket  { flex:1; font-size:12px; }
+    .rw-trx  { font-size:11px; color:var(--blue); }
+    .rw-jml  { font-size:13px; font-weight:800; white-space:nowrap; }
+    .rw-jml.tambah { color:var(--green); }
+    .rw-jml.kurang { color:var(--red); }
+    .rw-date { font-size:10px; color:var(--gray-5); }
+
+    /* Sesuaikan form */
+    .adj-form { background:var(--gray-1); border-radius:8px; padding:14px; }
+    .adj-row  { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .form-input { width:100%; padding:8px 10px; border:1px solid var(--gray-3); border-radius:7px;
+                  font-size:13px; outline:none; background:#fff; transition:border-color .15s; }
+    .form-input:focus { border-color:var(--blue); }
+    .form-label { font-size:11px; font-weight:700; color:var(--gray-7); display:block; margin-bottom:4px; text-transform:uppercase; }
+
+    /* ── Settings panel ── */
+    .settings-card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3);
+                     box-shadow:var(--shadow); padding:28px; max-width:600px; }
+    .settings-section { margin-bottom:28px; }
+    .settings-section h3 { font-size:14px; font-weight:800; color:var(--gray-9); margin-bottom:16px;
+                            padding-bottom:8px; border-bottom:2px solid var(--gray-3); }
+    .settings-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+    .settings-field {}
+    .s-label { font-size:12px; font-weight:700; color:var(--gray-7); display:block; margin-bottom:5px;
+               text-transform:uppercase; letter-spacing:.4px; }
+    .s-input { width:100%; padding:9px 12px; border:1px solid var(--gray-3); border-radius:8px;
+               font-size:14px; outline:none; background:#fff; transition:border-color .15s; }
+    .s-input:focus { border-color:var(--blue); }
+    .s-hint  { font-size:11px; color:var(--gray-5); margin-top:4px; }
+
+    /* Level preview */
+    .level-preview { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px; }
+    .lv-item { border-radius:8px; padding:10px; text-align:center; font-size:12px; font-weight:700; }
+    .lv-item.bronze   { background:var(--bronze-lt); color:var(--bronze); }
+    .lv-item.silver   { background:var(--gray-2);   color:#6b7280; }
+    .lv-item.gold     { background:var(--yellow-lt); color:var(--yellow); }
+    .lv-item.platinum { background:var(--purple-lt); color:var(--purple); }
+
+    /* Toast */
+    #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+             background:#111; color:#fff; padding:10px 20px; border-radius:99px;
+             font-size:13px; font-weight:600; z-index:9999; opacity:0; pointer-events:none; transition:opacity .25s; }
+    #toast.show { opacity:1; }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Poin Pelanggan</div>
+  </div>
+
+  <!-- Page tabs -->
+  <div class="page-tabs">
+    <button class="page-tab active" onclick="switchTab('pelanggan', this)">Pelanggan & Poin</button>
+    <button class="page-tab"        onclick="switchTab('pengaturan', this)">Pengaturan Poin</button>
+  </div>
+
+  <!-- ── Tab: Pelanggan ── -->
+  <div id="tab-pelanggan">
+    <!-- Level cards -->
+    <div class="level-grid">
+      <div class="level-card bronze">
+        <div class="level-icon">🥉</div>
+        <div class="level-label">Bronze</div>
+        <div class="level-count" id="lvlBronze">—</div>
+        <div class="level-sub">pelanggan</div>
+      </div>
+      <div class="level-card silver">
+        <div class="level-icon">🥈</div>
+        <div class="level-label">Silver</div>
+        <div class="level-count" id="lvlSilver">—</div>
+        <div class="level-sub">pelanggan</div>
+      </div>
+      <div class="level-card gold">
+        <div class="level-icon">🥇</div>
+        <div class="level-label">Gold</div>
+        <div class="level-count" id="lvlGold">—</div>
+        <div class="level-sub">pelanggan</div>
+      </div>
+      <div class="level-card platinum">
+        <div class="level-icon">💎</div>
+        <div class="level-label">Platinum</div>
+        <div class="level-count" id="lvlPlatinum">—</div>
+        <div class="level-sub">pelanggan</div>
+      </div>
+    </div>
+
+    <!-- Filter + stats -->
+    <div class="filter-bar">
+      <input type="text" class="search-input" id="searchInput"
+             placeholder="Cari nama atau nomor telepon..." oninput="debounceSearch()"/>
+      <div style="font-size:13px;color:var(--gray-5);align-self:center" id="totalInfo"></div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Pelanggan</th>
+              <th>Poin</th>
+              <th>Level</th>
+              <th>Progress Level</th>
+              <th>Transaksi</th>
+              <th>Total Belanja</th>
+            </tr>
+          </thead>
+          <tbody id="pelangganBody">
+            <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--gray-5)">Memuat...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="loadMoreWrap" style="text-align:center;padding:12px;display:none">
+      <button class="btn btn-outline btn-sm" onclick="loadMore()">Muat lebih banyak</button>
+    </div>
+  </div>
+
+  <!-- ── Tab: Pengaturan ── -->
+  <div id="tab-pengaturan" style="display:none">
+    <div class="settings-card">
+      <div class="settings-section">
+        <h3>Aturan Poin</h3>
+        <div class="settings-row">
+          <div class="settings-field">
+            <label class="s-label">Poin per Nominal</label>
+            <input type="number" id="s-perNominal" class="s-input" min="1"/>
+            <div class="s-hint">Setiap kelipatan Rp <span id="hint-perNominal">10.000</span> = 1 poin</div>
+          </div>
+          <div class="settings-field">
+            <label class="s-label">Nilai Tukar Poin</label>
+            <input type="number" id="s-nilaiPoin" class="s-input" min="1"/>
+            <div class="s-hint">1 poin = Rp <span id="hint-nilaiPoin">100</span> diskon</div>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-field">
+            <label class="s-label">Min. Poin Redeem</label>
+            <input type="number" id="s-minRedeem" class="s-input" min="1"/>
+            <div class="s-hint">Minimum poin untuk bisa ditukar</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Batas Level Poin</h3>
+        <div class="settings-row">
+          <div class="settings-field">
+            <label class="s-label" style="color:#6b7280">🥈 Silver mulai dari</label>
+            <input type="number" id="s-silverMin" class="s-input" min="1"/>
+            <div class="s-hint">poin untuk naik ke Silver</div>
+          </div>
+          <div class="settings-field">
+            <label class="s-label" style="color:var(--yellow)">🥇 Gold mulai dari</label>
+            <input type="number" id="s-goldMin" class="s-input" min="1"/>
+            <div class="s-hint">poin untuk naik ke Gold</div>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-field">
+            <label class="s-label" style="color:var(--purple)">💎 Platinum mulai dari</label>
+            <input type="number" id="s-platinumMin" class="s-input" min="1"/>
+            <div class="s-hint">poin untuk naik ke Platinum</div>
+          </div>
+        </div>
+
+        <!-- Level preview -->
+        <div style="margin-top:6px;font-size:12px;color:var(--gray-5);margin-bottom:6px">Preview level berdasarkan nilai di atas:</div>
+        <div class="level-preview">
+          <div class="lv-item bronze">🥉 Bronze<br/><span id="prev-bronze">0 – ?</span></div>
+          <div class="lv-item silver">🥈 Silver<br/><span id="prev-silver">500 – ?</span></div>
+          <div class="lv-item gold">🥇 Gold<br/><span id="prev-gold">2000 – ?</span></div>
+          <div class="lv-item platinum">💎 Platinum<br/><span id="prev-platinum">5000+</span></div>
+        </div>
+      </div>
+
+      <button class="btn btn-blue" id="savePengaturanBtn" onclick="savePengaturan()">Simpan Pengaturan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel (slide-in) -->
+<div class="modal-bg" id="detailModal">
+  <div class="detail-panel">
+    <div class="panel-header">
+      <div class="avatar" id="panelAvatar" style="background:#6366f1">A</div>
+      <div>
+        <div style="font-size:16px;font-weight:800" id="panelNama">—</div>
+        <div style="font-size:12px;color:var(--gray-5)" id="panelTelepon">—</div>
+      </div>
+      <button class="panel-close" onclick="closeDetail()">×</button>
+    </div>
+    <div class="panel-body">
+
+      <!-- Level & poin -->
+      <div class="panel-section">
+        <h3>Poin & Level</h3>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+          <div style="font-size:32px;font-weight:900;color:var(--blue)" id="panelPoin">—</div>
+          <div>
+            <div id="panelLevelBadge"></div>
+            <div style="font-size:11px;color:var(--gray-5);margin-top:3px" id="panelNextLevel"></div>
+          </div>
+        </div>
+        <div id="panelProgressWrap">
+          <div class="progress-wrap">
+            <div class="progress-bar" id="panelProgressBar" style="width:0;background:var(--blue)"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--gray-5);margin-top:3px">
+            <span id="panelProgMin">0</span>
+            <span id="panelProgMax">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="panel-section">
+        <h3>Statistik</h3>
+        <div class="stats-row">
+          <div class="stat-mini">
+            <div class="val" id="panelTrxCount">—</div>
+            <div class="lbl">Transaksi</div>
+          </div>
+          <div class="stat-mini">
+            <div class="val" id="panelBelanja">—</div>
+            <div class="lbl">Total Belanja</div>
+          </div>
+          <div class="stat-mini">
+            <div class="val" id="panelLastTrx">—</div>
+            <div class="lbl">Terakhir</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manual adjustment (admin) -->
+      <div class="panel-section" id="adjSection">
+        <h3>Sesuaikan Poin</h3>
+        <div class="adj-form">
+          <div class="adj-row" style="margin-bottom:8px">
+            <div>
+              <label class="form-label">Delta Poin</label>
+              <input type="number" id="adjDelta" class="form-input" placeholder="+100 atau -50"/>
+            </div>
+            <div>
+              <label class="form-label">Keterangan</label>
+              <input type="text" id="adjKet" class="form-input" placeholder="Opsional"/>
+            </div>
+          </div>
+          <button class="btn btn-sm btn-blue" onclick="sesuaikanPoin()">Simpan Penyesuaian</button>
+        </div>
+      </div>
+
+      <!-- Riwayat -->
+      <div class="panel-section">
+        <h3>Riwayat Poin</h3>
+        <div id="panelRiwayat">
+          <div style="text-align:center;padding:20px;color:var(--gray-5)">Memuat...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const fmtRp  = n => 'Rp ' + Number(n||0).toLocaleString('id-ID');
+const fmtRpShort = n => {
+  n = Number(n||0);
+  if (n >= 1000000) return 'Rp '+(n/1000000).toFixed(1).replace('.0','')+'jt';
+  if (n >= 1000)    return 'Rp '+(n/1000).toFixed(0)+'rb';
+  return 'Rp '+n.toLocaleString('id-ID');
+};
+const fmtDate = s => s ? new Date(s).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+
+let debTimer    = null;
+let currentPage = 1;
+let allLoaded   = false;
+let settings    = {};
+let currentPelangganId = null;
+
+function showToast(msg, dur=2500) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+async function logout() { await fetch('/api/v1/auth/logout',{method:'POST'}); location.href='/login'; }
+
+// ── Tab switch ────────────────────────────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.page-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-pelanggan').style.display  = tab === 'pelanggan'  ? '' : 'none';
+  document.getElementById('tab-pengaturan').style.display = tab === 'pengaturan' ? '' : 'none';
+  if (tab === 'pengaturan') loadPengaturan();
+}
+
+// ── Level helpers ─────────────────────────────────────────────────────────────
+function getLevelInfo(poin) {
+  const s = settings;
+  if (poin >= (s.level_platinum_min||5000)) return { label:'Platinum', color:'#7c3aed', bg:'var(--purple-lt)', next:null,      nextMin:null };
+  if (poin >= (s.level_gold_min    ||2000)) return { label:'Gold',     color:'#d97706', bg:'var(--yellow-lt)', next:'Platinum', nextMin:s.level_platinum_min||5000 };
+  if (poin >= (s.level_silver_min  || 500)) return { label:'Silver',   color:'#6b7280', bg:'var(--gray-2)',    next:'Gold',     nextMin:s.level_gold_min||2000 };
+  return                                           { label:'Bronze',   color:'#92400e', bg:'var(--bronze-lt)', next:'Silver',   nextMin:s.level_silver_min||500 };
+}
+
+function prevMin(label) {
+  if (label === 'Platinum') return settings.level_gold_min    || 2000;
+  if (label === 'Gold')     return settings.level_silver_min  || 500;
+  if (label === 'Silver')   return 0;
+  return 0;
+}
+
+// ── Load pelanggan ────────────────────────────────────────────────────────────
+function debounceSearch() {
+  clearTimeout(debTimer);
+  debTimer = setTimeout(() => { currentPage = 1; allLoaded = false; loadPelanggan(1); }, 350);
+}
+
+function loadMore() { if (!allLoaded) loadPelanggan(currentPage + 1); }
+
+async function loadPelanggan(page = 1) {
+  currentPage = page;
+  const q = document.getElementById('searchInput').value.trim();
+  const params = new URLSearchParams({ page, limit: 30 });
+  if (q) params.set('q', q);
+
+  if (page === 1) {
+    document.getElementById('pelangganBody').innerHTML =
+      '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--gray-5)">Memuat...</td></tr>';
+  }
+
+  try {
+    const r = await fetch('/api/v1/poin/pelanggan?' + params);
+    if (r.status === 401) { location.href='/login'; return; }
+    const d = await r.json();
+
+    if (d.stats) {
+      settings = d.stats.settings;
+      document.getElementById('lvlBronze').textContent   = d.stats.level_stats.Bronze   || 0;
+      document.getElementById('lvlSilver').textContent   = d.stats.level_stats.Silver   || 0;
+      document.getElementById('lvlGold').textContent     = d.stats.level_stats.Gold     || 0;
+      document.getElementById('lvlPlatinum').textContent = d.stats.level_stats.Platinum || 0;
+      document.getElementById('totalInfo').textContent   =
+        `${d.stats.total_pelanggan} pelanggan · ${Number(d.stats.total_poin_beredar).toLocaleString('id-ID')} poin beredar`;
+    }
+
+    const tbody = document.getElementById('pelangganBody');
+    const rows  = d.data || [];
+
+    if (page === 1 && !rows.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--gray-5)">Belum ada data pelanggan</td></tr>';
+      return;
+    }
+
+    const html = rows.map(p => {
+      const lvl  = getLevelInfo(p.total_poin);
+      const nMin = prevMin(lvl.label);
+      const pct  = lvl.next
+        ? Math.min(100, Math.round((p.total_poin - nMin) / ((lvl.nextMin || 1) - nMin) * 100))
+        : 100;
+      return `<tr onclick="openDetail(${p.id})">
+        <td><div style="font-weight:700">${p.nama}</div>
+            <div style="font-size:11px;color:var(--gray-5)">${p.telepon || '—'}</div></td>
+        <td style="font-size:16px;font-weight:800;color:var(--blue)">${Number(p.total_poin).toLocaleString('id-ID')}</td>
+        <td><span class="lvl-badge lvl-${lvl.label}">${lvl.label}</span></td>
+        <td style="min-width:120px">
+          <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%;background:${lvl.color}"></div></div>
+          <div style="font-size:10px;color:var(--gray-5);margin-top:2px">${pct}% ke ${lvl.next || 'Maks'}</div>
+        </td>
+        <td>${Number(p.jumlah_transaksi).toLocaleString('id-ID')}</td>
+        <td>${fmtRpShort(p.total_belanja)}</td>
+      </tr>`;
+    }).join('');
+
+    if (page === 1) tbody.innerHTML = html;
+    else tbody.innerHTML += html;
+
+    const total  = d.meta?.total || 0;
+    const loaded = page * 30;
+    allLoaded    = loaded >= total;
+    document.getElementById('loadMoreWrap').style.display = allLoaded ? 'none' : 'block';
+  } catch(e) {
+    console.error(e);
+    document.getElementById('pelangganBody').innerHTML =
+      '<tr><td colspan="6" style="text-align:center;color:var(--red);padding:30px">Gagal memuat data</td></tr>';
+  }
+}
+
+// ── Detail panel ──────────────────────────────────────────────────────────────
+async function openDetail(id) {
+  currentPelangganId = id;
+  document.getElementById('detailModal').classList.add('open');
+  document.getElementById('panelRiwayat').innerHTML = '<div style="text-align:center;padding:20px;color:var(--gray-5)">Memuat...</div>';
+
+  try {
+    const r = await fetch(`/api/v1/poin/pelanggan/${id}`);
+    const d = await r.json();
+    const p = d.data;
+    const lvl = getLevelInfo(p.total_poin);
+
+    const initials = p.nama.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+    const avatar = document.getElementById('panelAvatar');
+    avatar.textContent = initials;
+    avatar.style.background = lvl.color;
+
+    document.getElementById('panelNama').textContent    = p.nama;
+    document.getElementById('panelTelepon').textContent = p.telepon || '—';
+    document.getElementById('panelPoin').textContent    = Number(p.total_poin).toLocaleString('id-ID') + ' poin';
+
+    const badge = document.getElementById('panelLevelBadge');
+    badge.innerHTML = `<span class="lvl-badge lvl-${lvl.label}">${lvl.label}</span>`;
+
+    if (lvl.next) {
+      const nMin = prevMin(lvl.label);
+      const pct  = Math.min(100, Math.round((p.total_poin - nMin) / ((lvl.nextMin||1) - nMin) * 100));
+      document.getElementById('panelProgressWrap').style.display = '';
+      document.getElementById('panelProgressBar').style.width    = pct + '%';
+      document.getElementById('panelProgressBar').style.background = lvl.color;
+      document.getElementById('panelProgMin').textContent = nMin + ' poin';
+      document.getElementById('panelProgMax').textContent = (lvl.nextMin||0) + ' poin';
+      document.getElementById('panelNextLevel').textContent = `${pct}% menuju ${lvl.next} (butuh ${((lvl.nextMin||0) - p.total_poin).toLocaleString('id-ID')} poin lagi)`;
+    } else {
+      document.getElementById('panelProgressWrap').style.display = 'none';
+      document.getElementById('panelNextLevel').textContent = 'Level tertinggi 🏆';
+    }
+
+    document.getElementById('panelTrxCount').textContent = Number(p.jumlah_transaksi).toLocaleString('id-ID');
+    document.getElementById('panelBelanja').textContent  = fmtRpShort(p.total_belanja);
+    document.getElementById('panelLastTrx').textContent  = p.transaksi_terakhir ? fmtDate(p.transaksi_terakhir) : '—';
+
+    // Riwayat
+    const riwayat = p.riwayat || [];
+    if (!riwayat.length) {
+      document.getElementById('panelRiwayat').innerHTML = '<div style="text-align:center;padding:20px;color:var(--gray-5)">Belum ada riwayat</div>';
+    } else {
+      document.getElementById('panelRiwayat').innerHTML = riwayat.map(r => `
+        <div class="riwayat-item">
+          <div class="rw-dot ${r.jenis}"></div>
+          <div class="rw-ket">
+            <div>${r.keterangan || '—'}</div>
+            ${r.nomor_transaksi ? `<div class="rw-trx">${r.nomor_transaksi}</div>` : ''}
+            <div class="rw-date">${fmtDate(r.created_at)}</div>
+          </div>
+          <div class="rw-jml ${r.jenis}">${r.jenis === 'tambah' ? '+' : '-'}${Number(r.jumlah_poin).toLocaleString('id-ID')}</div>
+        </div>`).join('');
+    }
+
+    // Reset adj form
+    document.getElementById('adjDelta').value = '';
+    document.getElementById('adjKet').value   = '';
+  } catch(e) {
+    console.error(e);
+    document.getElementById('panelRiwayat').innerHTML = '<div style="text-align:center;color:var(--red);padding:20px">Gagal memuat</div>';
+  }
+}
+
+function closeDetail() {
+  document.getElementById('detailModal').classList.remove('open');
+  currentPelangganId = null;
+}
+
+document.getElementById('detailModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeDetail();
+});
+
+// ── Sesuaikan poin ────────────────────────────────────────────────────────────
+async function sesuaikanPoin() {
+  const delta = parseInt(document.getElementById('adjDelta').value);
+  const ket   = document.getElementById('adjKet').value.trim();
+  if (!delta || delta === 0) { showToast('Masukkan delta poin (positif/negatif)'); return; }
+  if (!currentPelangganId)   { showToast('Pilih pelanggan terlebih dahulu'); return; }
+
+  try {
+    const r = await fetch(`/api/v1/poin/pelanggan/${currentPelangganId}/sesuaikan`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ delta, keterangan: ket || undefined })
+    });
+    const d = await r.json();
+    if (!r.ok) { showToast('Gagal: ' + d.error); return; }
+    showToast(d.message);
+    openDetail(currentPelangganId);
+    loadPelanggan(1);
+  } catch { showToast('Koneksi gagal'); }
+}
+
+// ── Pengaturan ────────────────────────────────────────────────────────────────
+async function loadPengaturan() {
+  try {
+    const r = await fetch('/api/v1/poin/pengaturan');
+    const d = await r.json();
+    const s = d.data;
+    settings = s;
+    document.getElementById('s-perNominal').value   = s.poin_per_nominal   || 10000;
+    document.getElementById('s-nilaiPoin').value    = s.nilai_tukar_poin   || 100;
+    document.getElementById('s-minRedeem').value    = s.min_poin_redeem    || 100;
+    document.getElementById('s-silverMin').value    = s.level_silver_min   || 500;
+    document.getElementById('s-goldMin').value      = s.level_gold_min     || 2000;
+    document.getElementById('s-platinumMin').value  = s.level_platinum_min || 5000;
+    updateSettingHints();
+  } catch(e) { console.error(e); }
+}
+
+function updateSettingHints() {
+  const pN = parseInt(document.getElementById('s-perNominal').value) || 10000;
+  const nP = parseInt(document.getElementById('s-nilaiPoin').value)  || 100;
+  const sM = parseInt(document.getElementById('s-silverMin').value)  || 500;
+  const gM = parseInt(document.getElementById('s-goldMin').value)    || 2000;
+  const pM = parseInt(document.getElementById('s-platinumMin').value)|| 5000;
+  document.getElementById('hint-perNominal').textContent = pN.toLocaleString('id-ID');
+  document.getElementById('hint-nilaiPoin').textContent  = nP.toLocaleString('id-ID');
+  document.getElementById('prev-bronze').textContent     = `0 – ${(sM-1).toLocaleString('id-ID')}`;
+  document.getElementById('prev-silver').textContent     = `${sM.toLocaleString('id-ID')} – ${(gM-1).toLocaleString('id-ID')}`;
+  document.getElementById('prev-gold').textContent       = `${gM.toLocaleString('id-ID')} – ${(pM-1).toLocaleString('id-ID')}`;
+  document.getElementById('prev-platinum').textContent   = `${pM.toLocaleString('id-ID')}+`;
+}
+
+['s-perNominal','s-nilaiPoin','s-silverMin','s-goldMin','s-platinumMin'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', updateSettingHints);
+});
+
+async function savePengaturan() {
+  const body = {
+    poin_per_nominal:   parseInt(document.getElementById('s-perNominal').value)  || 0,
+    nilai_tukar_poin:   parseInt(document.getElementById('s-nilaiPoin').value)   || 0,
+    min_poin_redeem:    parseInt(document.getElementById('s-minRedeem').value)   || 0,
+    level_silver_min:   parseInt(document.getElementById('s-silverMin').value)   || 0,
+    level_gold_min:     parseInt(document.getElementById('s-goldMin').value)     || 0,
+    level_platinum_min: parseInt(document.getElementById('s-platinumMin').value) || 0
+  };
+
+  const btn = document.getElementById('savePengaturanBtn');
+  btn.disabled = true;
+  try {
+    const r = await fetch('/api/v1/poin/pengaturan', {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+    });
+    const d = await r.json();
+    if (!r.ok) { showToast('Gagal: ' + d.error); return; }
+    settings = d.data;
+    showToast('Pengaturan poin berhasil disimpan');
+  } catch { showToast('Koneksi gagal'); }
+  finally   { btn.disabled = false; }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+fetch('/api/v1/auth/me').then(r => r.json()).then(d => {
+  if (d.user) document.getElementById('userName').textContent = d.user.nama;
+}).catch(() => {});
+
+loadPelanggan(1);
+</script>
+<script src="/js/nav.js"></script>
+</body>
+</html>

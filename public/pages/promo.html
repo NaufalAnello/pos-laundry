@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="/css/layout.css"/>
+  <title>Promo — POS Laundry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:#2563eb; --blue-lt:#eff6ff;
+      --green:#16a34a; --green-lt:#f0fdf4;
+      --yellow:#d97706; --yellow-lt:#fffbeb;
+      --red:#dc2626; --red-lt:#fef2f2;
+      --purple:#7c3aed; --purple-lt:#f5f3ff;
+      --orange:#ea580c; --orange-lt:#fff7ed;
+      --gray-1:#f8fafc; --gray-2:#f1f5f9; --gray-3:#e2e8f0;
+      --gray-5:#64748b; --gray-7:#374151; --gray-9:#111827;
+      --radius:10px; --shadow:0 1px 4px rgba(0,0,0,.08);
+    }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+           background:var(--gray-2); color:var(--gray-9); font-size:14px; min-height:100vh; }
+
+    header { background:#fff; border-bottom:1px solid var(--gray-3); padding:0 20px; height:56px;
+             display:flex; align-items:center; gap:20px; position:sticky; top:0; z-index:20; box-shadow:var(--shadow); }
+    .logo  { font-size:16px; font-weight:800; color:var(--blue); white-space:nowrap; }
+    nav    { display:flex; gap:4px; flex:1; overflow-x:auto; }
+    nav a  { padding:6px 14px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;
+             color:var(--gray-7); white-space:nowrap; transition:background .15s; }
+    nav a:hover  { background:var(--gray-2); }
+    nav a.active { background:var(--blue-lt); color:var(--blue); }
+    .header-user { font-size:13px; color:var(--gray-5); display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    .logout-btn  { padding:5px 12px; border:1px solid var(--gray-3); border-radius:7px; background:none; font-size:13px; cursor:pointer; color:var(--gray-7); }
+    .logout-btn:hover { background:var(--gray-2); }
+
+    .page { max-width:1200px; margin:0 auto; padding:20px 16px; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; flex-wrap:wrap; }
+    .page-title  { font-size:20px; font-weight:800; }
+
+    .btn { padding:8px 16px; border-radius:8px; border:1px solid transparent; font-size:13px;
+           font-weight:600; cursor:pointer; transition:opacity .15s; display:inline-flex; align-items:center; gap:6px; }
+    .btn:hover    { opacity:.85; }
+    .btn:disabled { opacity:.4; cursor:default; }
+    .btn-sm  { padding:5px 10px; font-size:12px; }
+    .btn-xs  { padding:3px 8px; font-size:11px; }
+    .btn-blue    { background:var(--blue);  color:#fff; }
+    .btn-green   { background:var(--green); color:#fff; }
+    .btn-outline { background:#fff; border-color:var(--gray-3); color:var(--gray-7); }
+    .btn-red     { background:var(--red);   color:#fff; }
+    .btn-ghost   { background:none; border:none; color:var(--gray-5); padding:4px 8px; }
+    .btn-ghost:hover { color:var(--gray-9); background:var(--gray-2); border-radius:6px; }
+
+    /* Tabs */
+    .tabs { display:flex; gap:4px; margin-bottom:16px; background:#fff; padding:6px;
+            border-radius:var(--radius); border:1px solid var(--gray-3); box-shadow:var(--shadow); flex-wrap:wrap; }
+    .tab-btn { padding:7px 16px; border:none; background:none; font-size:13px; font-weight:600;
+               color:var(--gray-5); cursor:pointer; border-radius:8px; transition:all .15s; }
+    .tab-btn:hover  { background:var(--gray-2); color:var(--gray-9); }
+    .tab-btn.active { background:var(--blue); color:#fff; }
+    .tab-count { background:rgba(255,255,255,.3); border-radius:99px; padding:1px 7px; font-size:11px; margin-left:4px; }
+    .tab-btn:not(.active) .tab-count { background:var(--gray-3); color:var(--gray-5); }
+
+    /* Grid */
+    .promo-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:14px; }
+
+    /* Promo card */
+    .promo-card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3);
+                  box-shadow:var(--shadow); overflow:hidden; display:flex; flex-direction:column; }
+    .promo-card.inactive { opacity:.65; }
+    .promo-top { padding:16px 18px 12px; flex:1; }
+    .promo-header { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:10px; }
+    .promo-nama   { font-size:15px; font-weight:800; line-height:1.3; }
+    .promo-jenis  { display:inline-block; padding:3px 10px; border-radius:99px; font-size:11px; font-weight:700;
+                    text-transform:uppercase; letter-spacing:.4px; flex-shrink:0; }
+    .jenis-persen  { background:var(--blue-lt);   color:var(--blue); }
+    .jenis-nominal { background:var(--green-lt);  color:var(--green); }
+    .jenis-paket   { background:var(--purple-lt); color:var(--purple); }
+    .promo-diskon  { font-size:24px; font-weight:900; color:var(--orange); margin-bottom:6px; }
+    .promo-meta    { font-size:12px; color:var(--gray-5); display:flex; flex-direction:column; gap:3px; }
+    .promo-hari    { display:flex; gap:4px; flex-wrap:wrap; margin-top:6px; }
+    .hari-chip     { padding:2px 8px; border-radius:99px; font-size:11px; font-weight:600;
+                     background:var(--blue-lt); color:var(--blue); }
+    .hari-chip.inactive { background:var(--gray-2); color:var(--gray-5); }
+    .promo-desc    { font-size:12px; color:var(--gray-5); margin-top:6px; font-style:italic; }
+    .promo-bottom  { padding:10px 18px; border-top:1px solid var(--gray-3); background:var(--gray-1);
+                     display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .promo-actions { display:flex; gap:6px; }
+
+    /* Toggle */
+    .toggle { position:relative; display:inline-block; width:40px; height:22px; }
+    .toggle input { opacity:0; width:0; height:0; }
+    .slider { position:absolute; inset:0; background:var(--gray-3); border-radius:99px; cursor:pointer; transition:.2s; }
+    .slider::before { content:''; position:absolute; width:16px; height:16px; left:3px; bottom:3px;
+                       background:#fff; border-radius:50%; transition:.2s; }
+    input:checked + .slider { background:var(--green); }
+    input:checked + .slider::before { transform:translateX(18px); }
+
+    /* Badge */
+    .badge { display:inline-block; padding:2px 9px; border-radius:99px; font-size:11px; font-weight:700; }
+    .badge-aktif    { background:var(--green-lt); color:var(--green); }
+    .badge-nonaktif { background:var(--gray-2);   color:var(--gray-5); }
+    .badge-expired  { background:var(--red-lt);   color:var(--red); }
+
+    /* Empty */
+    .empty-state { text-align:center; padding:60px 20px; color:var(--gray-5); }
+    .empty-state .icon { font-size:40px; margin-bottom:10px; }
+
+    /* Modal */
+    .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:100;
+                align-items:center; justify-content:center; padding:16px; }
+    .modal-bg.open { display:flex; }
+    .modal { background:#fff; border-radius:var(--radius); box-shadow:0 8px 40px rgba(0,0,0,.2);
+             width:100%; max-width:560px; max-height:92vh; overflow-y:auto; }
+    .modal-header { padding:18px 22px 0; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:#fff; z-index:1; padding-bottom:12px; border-bottom:1px solid var(--gray-3); }
+    .modal-title  { font-size:16px; font-weight:800; }
+    .modal-close  { background:none; border:none; font-size:22px; cursor:pointer; color:var(--gray-5); padding:0 4px; line-height:1; }
+    .modal-body   { padding:20px 22px; }
+    .modal-footer { padding:14px 22px; border-top:1px solid var(--gray-3); display:flex; justify-content:flex-end; gap:8px;
+                    position:sticky; bottom:0; background:#fff; }
+
+    /* Form */
+    .form-group   { margin-bottom:16px; }
+    .form-label   { display:block; font-size:12px; font-weight:700; color:var(--gray-7); margin-bottom:5px; text-transform:uppercase; letter-spacing:.4px; }
+    .form-input, .form-select, .form-textarea {
+      width:100%; padding:9px 12px; border:1px solid var(--gray-3); border-radius:8px;
+      font-size:14px; color:var(--gray-9); outline:none; transition:border-color .15s; background:#fff; }
+    .form-input:focus, .form-select:focus { border-color:var(--blue); }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .form-hint { font-size:11px; color:var(--gray-5); margin-top:4px; }
+
+    /* Jenis radio */
+    .jenis-group { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+    .jenis-radio { position:relative; }
+    .jenis-radio input { position:absolute; opacity:0; }
+    .jenis-radio label { display:block; padding:10px 8px; border:2px solid var(--gray-3); border-radius:8px;
+                          text-align:center; cursor:pointer; font-size:13px; font-weight:600;
+                          transition:all .15s; color:var(--gray-5); }
+    .jenis-radio input:checked + label { border-color:var(--blue); color:var(--blue); background:var(--blue-lt); }
+    .jenis-radio label:hover { border-color:var(--gray-5); }
+
+    /* Hari checkboxes */
+    .hari-group { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+    .hari-cb { position:relative; }
+    .hari-cb input { position:absolute; opacity:0; width:100%; height:100%; cursor:pointer; margin:0; }
+    .hari-cb label { display:block; padding:6px 4px; border:2px solid var(--gray-3); border-radius:6px;
+                      text-align:center; cursor:pointer; font-size:11px; font-weight:700;
+                      transition:all .15s; color:var(--gray-5); }
+    .hari-cb input:checked + label { border-color:var(--blue); color:#fff; background:var(--blue); }
+
+    /* Toast */
+    #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+             background:#111; color:#fff; padding:10px 20px; border-radius:99px;
+             font-size:13px; font-weight:600; z-index:9999; opacity:0; pointer-events:none; transition:opacity .25s; }
+    #toast.show { opacity:1; }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Manajemen Promo</div>
+    <button class="btn btn-blue" onclick="openModal()">+ Tambah Promo</button>
+  </div>
+
+  <div class="tabs" id="tabBar">
+    <button class="tab-btn active" data-tab="semua" onclick="setTab('semua',this)">Semua <span class="tab-count" id="cnt-semua">0</span></button>
+    <button class="tab-btn" data-tab="aktif"     onclick="setTab('aktif',this)">Aktif <span class="tab-count" id="cnt-aktif">0</span></button>
+    <button class="tab-btn" data-tab="nonaktif"  onclick="setTab('nonaktif',this)">Non-aktif <span class="tab-count" id="cnt-nonaktif">0</span></button>
+    <button class="tab-btn" data-tab="terjadwal" onclick="setTab('terjadwal',this)">Terjadwal <span class="tab-count" id="cnt-terjadwal">0</span></button>
+    <button class="tab-btn" data-tab="expired"   onclick="setTab('expired',this)">Expired <span class="tab-count" id="cnt-expired">0</span></button>
+  </div>
+
+  <div id="promoGrid" class="promo-grid">
+    <div class="empty-state" style="grid-column:1/-1"><div class="icon">⏳</div>Memuat...</div>
+  </div>
+</div>
+
+<!-- Modal Form -->
+<div class="modal-bg" id="promoModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Tambah Promo</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="promoId"/>
+
+      <div class="form-group">
+        <label class="form-label">Nama Promo *</label>
+        <input type="text" id="fNama" class="form-input" placeholder="contoh: Promo Akhir Pekan"/>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Deskripsi</label>
+        <input type="text" id="fDeskripsi" class="form-input" placeholder="Opsional"/>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Jenis Promo *</label>
+        <div class="jenis-group">
+          <div class="jenis-radio">
+            <input type="radio" name="jenis" id="jPersen"  value="persen"  checked onchange="onJenisChange()"/>
+            <label for="jPersen">% Persen</label>
+          </div>
+          <div class="jenis-radio">
+            <input type="radio" name="jenis" id="jNominal" value="nominal" onchange="onJenisChange()"/>
+            <label for="jNominal">Rp Nominal</label>
+          </div>
+          <div class="jenis-radio">
+            <input type="radio" name="jenis" id="jPaket"   value="paket"   onchange="onJenisChange()"/>
+            <label for="jPaket">📦 Paket</label>
+          </div>
+        </div>
+      </div>
+
+      <div id="diskonWrap" class="form-row">
+        <div class="form-group" id="diskonPersenGroup">
+          <label class="form-label">Diskon Persen (%)</label>
+          <input type="number" id="fDiskonPersen" class="form-input" min="0" max="100" value="0" placeholder="10"/>
+        </div>
+        <div class="form-group" id="diskonNominalGroup" style="display:none">
+          <label class="form-label">Diskon Nominal (Rp)</label>
+          <input type="number" id="fDiskonNominal" class="form-input" min="0" value="0" placeholder="5000"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Min. Pembelian (Rp)</label>
+          <input type="number" id="fMinBeli" class="form-input" min="0" value="0" placeholder="0 = semua"/>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Berlaku Mulai</label>
+          <input type="date" id="fMulai" class="form-input"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Berlaku Sampai</label>
+          <input type="date" id="fSampai" class="form-input"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Hari Berlaku <span style="font-weight:400;text-transform:none">(kosongi = semua hari)</span></label>
+        <div class="hari-group">
+          <div class="hari-cb"><input type="checkbox" id="h0" value="0"/><label for="h0">Min</label></div>
+          <div class="hari-cb"><input type="checkbox" id="h1" value="1"/><label for="h1">Sen</label></div>
+          <div class="hari-cb"><input type="checkbox" id="h2" value="2"/><label for="h2">Sel</label></div>
+          <div class="hari-cb"><input type="checkbox" id="h3" value="3"/><label for="h3">Rab</label></div>
+          <div class="hari-cb"><input type="checkbox" id="h4" value="4"/><label for="h4">Kam</label></div>
+          <div class="hari-cb"><input type="checkbox" id="h5" value="5"/><label for="h5">Jum</label></div>
+          <div class="hari-cb"><input type="checkbox" id="h6" value="6"/><label for="h6">Sab</label></div>
+        </div>
+        <div class="form-hint">Centang hari saat promo ini berlaku</div>
+      </div>
+
+      <div class="form-group" style="display:flex;align-items:center;gap:10px;">
+        <label class="toggle">
+          <input type="checkbox" id="fAktif" checked/>
+          <span class="slider"></span>
+        </label>
+        <span style="font-size:13px;font-weight:600;">Aktif</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Batal</button>
+      <button class="btn btn-blue" id="saveBtn" onclick="savePromo()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const HARI_LABEL = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const fmtRp  = n => Number(n||0).toLocaleString('id-ID');
+const fmtDate = s => s ? new Date(s+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '';
+
+let currentTab = 'semua';
+let allPromo   = [];
+
+function showToast(msg, dur=2500) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+async function logout() { await fetch('/api/v1/auth/logout',{method:'POST'}); location.href='/login'; }
+
+function setTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid(filterData(allPromo, tab));
+}
+
+function filterData(data, tab) {
+  const today = new Date().toISOString().slice(0,10);
+  if (tab === 'aktif')     return data.filter(p => p.aktif && (!p.berlaku_sampai || p.berlaku_sampai >= today));
+  if (tab === 'nonaktif')  return data.filter(p => !p.aktif);
+  if (tab === 'terjadwal') return data.filter(p => p.berlaku_mulai && p.berlaku_mulai > today);
+  if (tab === 'expired')   return data.filter(p => p.berlaku_sampai && p.berlaku_sampai < today);
+  return data;
+}
+
+function updateCounts(data) {
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('cnt-semua').textContent     = data.length;
+  document.getElementById('cnt-aktif').textContent     = data.filter(p => p.aktif && (!p.berlaku_sampai || p.berlaku_sampai >= today)).length;
+  document.getElementById('cnt-nonaktif').textContent  = data.filter(p => !p.aktif).length;
+  document.getElementById('cnt-terjadwal').textContent = data.filter(p => p.berlaku_mulai && p.berlaku_mulai > today).length;
+  document.getElementById('cnt-expired').textContent   = data.filter(p => p.berlaku_sampai && p.berlaku_sampai < today).length;
+}
+
+function renderGrid(data) {
+  const el = document.getElementById('promoGrid');
+  if (!data.length) {
+    el.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">🏷️</div>Tidak ada promo</div>`;
+    return;
+  }
+
+  el.innerHTML = data.map(p => {
+    const today = new Date().toISOString().slice(0,10);
+    const isExpired = p.berlaku_sampai && p.berlaku_sampai < today;
+
+    let diskonStr = '';
+    if (p.jenis === 'persen'  || p.diskon_persen > 0)  diskonStr = `${p.diskon_persen}% OFF`;
+    if (p.jenis === 'nominal' || (!p.diskon_persen && p.diskon_nominal > 0)) diskonStr = `Rp ${fmtRp(p.diskon_nominal)} OFF`;
+    if (p.jenis === 'paket')  diskonStr = 'Harga Paket Spesial';
+
+    let periodeStr = '';
+    if (p.berlaku_mulai || p.berlaku_sampai) {
+      periodeStr = `${fmtDate(p.berlaku_mulai) || '∞'} – ${fmtDate(p.berlaku_sampai) || '∞'}`;
+    } else { periodeStr = 'Tidak terbatas'; }
+
+    let hariStr = '';
+    if (p.hari_berlaku) {
+      try {
+        const hari = JSON.parse(p.hari_berlaku);
+        if (hari.length) hariStr = `<div class="promo-hari">${hari.map(h => `<span class="hari-chip">${HARI_LABEL[h]}</span>`).join('')}</div>`;
+      } catch {}
+    }
+
+    const badgeClass = isExpired ? 'badge-expired' : (p.aktif ? 'badge-aktif' : 'badge-nonaktif');
+    const badgeLabel = isExpired ? 'Expired' : (p.aktif ? 'Aktif' : 'Non-aktif');
+
+    return `<div class="promo-card ${p.aktif ? '' : 'inactive'}">
+      <div class="promo-top">
+        <div class="promo-header">
+          <div class="promo-nama">${p.nama}</div>
+          <span class="promo-jenis jenis-${p.jenis || 'persen'}">${p.jenis || 'persen'}</span>
+        </div>
+        <div class="promo-diskon">${diskonStr}</div>
+        <div class="promo-meta">
+          ${p.min_pembelian > 0 ? `<span>Min. beli: Rp ${fmtRp(p.min_pembelian)}</span>` : ''}
+          <span>📅 ${periodeStr}</span>
+          <span><span class="badge ${badgeClass}">${badgeLabel}</span></span>
+        </div>
+        ${hariStr}
+        ${p.deskripsi ? `<div class="promo-desc">${p.deskripsi}</div>` : ''}
+      </div>
+      <div class="promo-bottom">
+        <label class="toggle" title="${p.aktif ? 'Nonaktifkan' : 'Aktifkan'}">
+          <input type="checkbox" ${p.aktif ? 'checked' : ''} onchange="togglePromo(${p.id}, this)"/>
+          <span class="slider"></span>
+        </label>
+        <div class="promo-actions">
+          <button class="btn btn-sm btn-outline" onclick='editPromo(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Edit</button>
+          <button class="btn btn-sm btn-ghost" onclick="deletePromo(${p.id},'${p.nama.replace(/'/g,"\\'")}')">
+            <span style="color:var(--red)">Hapus</span>
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function loadPromo() {
+  try {
+    const r = await fetch('/api/v1/promo');
+    if (r.status === 401) { location.href='/login'; return; }
+    const d = await r.json();
+    allPromo = d.data || [];
+    updateCounts(allPromo);
+    renderGrid(filterData(allPromo, currentTab));
+  } catch(e) {
+    document.getElementById('promoGrid').innerHTML =
+      '<div class="empty-state" style="grid-column:1/-1;color:var(--red)">Gagal memuat data</div>';
+  }
+}
+
+// ── Toggle ────────────────────────────────────────────────────────────────────
+async function togglePromo(id, checkbox) {
+  const prev = !checkbox.checked;
+  try {
+    const r = await fetch(`/api/v1/promo/${id}/toggle`, { method:'PATCH' });
+    const d = await r.json();
+    if (!r.ok) { checkbox.checked = prev; showToast('Gagal: ' + d.error); return; }
+    showToast(d.message);
+    loadPromo();
+  } catch { checkbox.checked = prev; showToast('Koneksi gagal'); }
+}
+
+async function deletePromo(id, nama) {
+  if (!confirm(`Hapus promo "${nama}"?`)) return;
+  try {
+    const r = await fetch(`/api/v1/promo/${id}`, { method:'DELETE' });
+    const d = await r.json();
+    if (!r.ok) { showToast('Gagal: ' + d.error); return; }
+    showToast(d.message + (d.soft ? ' (dinonaktifkan)' : ''));
+    loadPromo();
+  } catch { showToast('Koneksi gagal'); }
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function onJenisChange() {
+  const jenis = document.querySelector('input[name="jenis"]:checked')?.value;
+  document.getElementById('diskonPersenGroup').style.display  = jenis === 'persen'  ? '' : 'none';
+  document.getElementById('diskonNominalGroup').style.display = jenis === 'nominal' || jenis === 'paket' ? '' : 'none';
+}
+
+function openModal(data = null) {
+  document.getElementById('promoId').value     = data?.id || '';
+  document.getElementById('fNama').value       = data?.nama || '';
+  document.getElementById('fDeskripsi').value  = data?.deskripsi || '';
+  document.getElementById('fDiskonPersen').value  = data?.diskon_persen  || 0;
+  document.getElementById('fDiskonNominal').value = data?.diskon_nominal || 0;
+  document.getElementById('fMinBeli').value    = data?.min_pembelian || 0;
+  document.getElementById('fMulai').value      = data?.berlaku_mulai  || '';
+  document.getElementById('fSampai').value     = data?.berlaku_sampai || '';
+  document.getElementById('fAktif').checked    = data ? !!data.aktif : true;
+
+  // Jenis radio
+  const jenis = data?.jenis || 'persen';
+  document.querySelector(`input[name="jenis"][value="${jenis}"]`).checked = true;
+
+  // Hari berlaku
+  const hariBerlaku = data?.hari_berlaku ? (() => { try { return JSON.parse(data.hari_berlaku); } catch { return []; } })() : [];
+  for (let i = 0; i <= 6; i++) {
+    document.getElementById(`h${i}`).checked = hariBerlaku.includes(i);
+  }
+
+  document.getElementById('modalTitle').textContent = data ? 'Edit Promo' : 'Tambah Promo';
+  onJenisChange();
+  document.getElementById('promoModal').classList.add('open');
+}
+
+function editPromo(data) { openModal(data); }
+function closeModal()    { document.getElementById('promoModal').classList.remove('open'); }
+
+async function savePromo() {
+  const id    = document.getElementById('promoId').value;
+  const jenis = document.querySelector('input[name="jenis"]:checked')?.value || 'persen';
+
+  const hariBerlaku = [];
+  for (let i = 0; i <= 6; i++) {
+    if (document.getElementById(`h${i}`).checked) hariBerlaku.push(i);
+  }
+
+  const body = {
+    nama:           document.getElementById('fNama').value.trim(),
+    deskripsi:      document.getElementById('fDeskripsi').value.trim() || null,
+    jenis,
+    diskon_persen:  parseFloat(document.getElementById('fDiskonPersen').value)  || 0,
+    diskon_nominal: parseFloat(document.getElementById('fDiskonNominal').value) || 0,
+    min_pembelian:  parseFloat(document.getElementById('fMinBeli').value)       || 0,
+    berlaku_mulai:  document.getElementById('fMulai').value  || null,
+    berlaku_sampai: document.getElementById('fSampai').value || null,
+    hari_berlaku:   hariBerlaku.length ? JSON.stringify(hariBerlaku) : null,
+    aktif:          document.getElementById('fAktif').checked
+  };
+
+  if (!body.nama)           { showToast('Nama promo wajib diisi'); return; }
+  if (body.jenis === 'persen'  && !body.diskon_persen)  { showToast('Masukkan persentase diskon'); return; }
+  if (body.jenis === 'nominal' && !body.diskon_nominal) { showToast('Masukkan nominal diskon'); return; }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  try {
+    const url    = id ? `/api/v1/promo/${id}` : '/api/v1/promo';
+    const method = id ? 'PUT' : 'POST';
+    const r = await fetch(url, { method, headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    const d = await r.json();
+    if (!r.ok) { showToast('Gagal: ' + d.error); return; }
+    showToast(d.message);
+    closeModal();
+    loadPromo();
+  } catch { showToast('Koneksi gagal'); }
+  finally   { btn.disabled = false; }
+}
+
+document.getElementById('promoModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+fetch('/api/v1/auth/me').then(r => r.json()).then(d => {
+  if (d.user) document.getElementById('userName').textContent = d.user.nama;
+}).catch(() => {});
+
+loadPromo();
+</script>
+<script src="/js/nav.js"></script>
+</body>
+</html>

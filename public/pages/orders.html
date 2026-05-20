@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="/css/layout.css"/>
+  <title>Kelola Order — POS Laundry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:   #2563eb; --blue-dk: #1d4ed8; --blue-lt: #eff6ff;
+      --green:  #16a34a; --green-lt: #f0fdf4;
+      --yellow: #d97706; --yellow-lt: #fffbeb;
+      --red:    #dc2626; --red-lt:   #fef2f2;
+      --gray-1: #f8fafc; --gray-2: #f1f5f9; --gray-3: #e2e8f0;
+      --gray-5: #64748b; --gray-7: #374151; --gray-9: #111827;
+      --radius: 10px; --shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+           background: var(--gray-2); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
+
+    /* ── Header ── */
+    header {
+      background: #fff; border-bottom: 1px solid var(--gray-3);
+      padding: 0 20px; height: 56px;
+      display: flex; align-items: center; gap: 20px;
+      position: sticky; top: 0; z-index: 20;
+      box-shadow: var(--shadow);
+    }
+    .logo { font-size: 16px; font-weight: 800; color: var(--blue); white-space: nowrap; }
+    header nav { display: flex; gap: 4px; flex: 1; }
+    header nav a {
+      padding: 6px 14px; border-radius: 8px; text-decoration: none;
+      font-size: 13px; font-weight: 600; color: var(--gray-7); transition: background .15s;
+    }
+    header nav a:hover { background: var(--gray-2); }
+    header nav a.active { background: var(--blue-lt); color: var(--blue); }
+    .header-user { font-size: 13px; color: var(--gray-5); display: flex; align-items: center; gap: 8px; }
+    .logout-btn { padding: 5px 12px; border: 1px solid var(--gray-3); border-radius: 7px;
+                  background: none; font-size: 13px; cursor: pointer; color: var(--gray-7); }
+    .logout-btn:hover { background: var(--gray-2); }
+
+    /* ── Page ── */
+    .page { max-width: 1400px; margin: 0 auto; padding: 20px 16px; }
+    .page-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+      background: #fff; border: 1px solid var(--gray-3); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 14px 16px; margin-bottom: 16px;
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 4px; }
+    .filter-label { font-size: 11px; font-weight: 700; color: var(--gray-5); text-transform: uppercase; letter-spacing: .4px; }
+    .filter-input, .filter-select {
+      padding: 7px 10px; border: 1px solid var(--gray-3); border-radius: 7px;
+      font-size: 13px; background: #fff; color: var(--gray-9);
+      outline: none; transition: border-color .15s;
+    }
+    .filter-input:focus, .filter-select:focus { border-color: var(--blue); }
+    .filter-search { min-width: 200px; }
+    .filter-actions { display: flex; gap: 8px; margin-left: auto; align-items: flex-end; }
+    .btn { padding: 7px 14px; border-radius: 7px; border: 1px solid transparent;
+           font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s;
+           display: inline-flex; align-items: center; gap: 5px; }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .5; cursor: default; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+    .btn-blue   { background: var(--blue); color: #fff; }
+    .btn-outline { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
+    .btn-green  { background: var(--green); color: #fff; }
+    .btn-wa     { background: #25d366; color: #fff; }
+    .btn-red    { background: var(--red); color: #fff; }
+    .btn-ghost  { background: none; border: none; padding: 4px 8px; color: var(--gray-5); }
+    .btn-ghost:hover { color: var(--gray-9); background: var(--gray-2); }
+
+    /* ── Badge ── */
+    .badge {
+      display: inline-block; padding: 2px 9px; border-radius: 99px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+    }
+    .badge-pending    { background: var(--yellow-lt); color: var(--yellow); }
+    .badge-proses     { background: var(--blue-lt);   color: var(--blue); }
+    .badge-selesai    { background: var(--green-lt);  color: var(--green); }
+    .badge-diambil    { background: var(--gray-2);    color: var(--gray-5); }
+    .badge-dibatalkan { background: var(--red-lt);    color: var(--red); }
+    .badge-lunas      { background: var(--green-lt);  color: var(--green); }
+    .badge-belum      { background: var(--red-lt);    color: var(--red); }
+
+    /* ── Table card ── */
+    .table-card {
+      background: #fff; border: 1px solid var(--gray-3); border-radius: var(--radius);
+      box-shadow: var(--shadow); overflow: hidden;
+    }
+    .table-toolbar {
+      padding: 12px 16px; border-bottom: 1px solid var(--gray-3);
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .table-info { font-size: 13px; color: var(--gray-5); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; }
+    thead th {
+      padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .4px; color: var(--gray-5);
+      background: var(--gray-1); border-bottom: 1px solid var(--gray-3);
+      white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid var(--gray-3); transition: background .1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--gray-1); }
+    tbody td { padding: 10px 14px; vertical-align: middle; font-size: 13px; }
+    .td-nomor { font-weight: 700; white-space: nowrap; }
+    .td-nomor a { color: var(--blue); text-decoration: none; }
+    .td-nomor a:hover { text-decoration: underline; }
+    .td-meta { font-size: 11px; color: var(--gray-5); margin-top: 2px; }
+    .td-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .status-select {
+      padding: 4px 8px; border: 1px solid var(--gray-3); border-radius: 6px;
+      font-size: 12px; background: #fff; cursor: pointer; font-weight: 600; max-width: 130px;
+    }
+
+    /* ── Pagination ── */
+    .pagination {
+      padding: 12px 16px; border-top: 1px solid var(--gray-3);
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .page-btns { display: flex; gap: 4px; }
+    .page-btn {
+      min-width: 32px; height: 32px; padding: 0 8px; border: 1px solid var(--gray-3);
+      border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px; font-weight: 600;
+      transition: background .1s;
+    }
+    .page-btn:hover { background: var(--gray-2); }
+    .page-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .page-btn:disabled { opacity: .4; cursor: default; }
+
+    /* ── Empty & loading ── */
+    .table-empty {
+      text-align: center; padding: 60px 20px; color: var(--gray-5);
+    }
+    .table-empty .icon { font-size: 40px; margin-bottom: 10px; }
+    .loading-row td { text-align: center; padding: 40px; color: var(--gray-5); }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #111; color: #fff; padding: 10px 20px; border-radius: 99px;
+      font-size: 13px; font-weight: 600; z-index: 9999;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    #toast.show { opacity: 1; }
+
+    /* ── WA Dropdown ── */
+    .wa-menu-wrap { position: relative; display: inline-block; }
+    .wa-menu {
+      display: none; position: absolute; right: 0; top: 100%; margin-top: 4px;
+      background: #fff; border: 1px solid var(--gray-3); border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.12); min-width: 160px; z-index: 100; overflow: hidden;
+    }
+    .wa-menu.open { display: block; }
+    .wa-menu a {
+      display: block; padding: 9px 14px; font-size: 13px; color: var(--gray-9);
+      text-decoration: none;
+    }
+    .wa-menu a:hover { background: var(--gray-2); }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div class="page-title">Kelola Order</div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <div class="filter-label">Cari</div>
+      <input type="text" id="filterSearch" class="filter-input filter-search"
+             placeholder="Nomor order / nama pelanggan..." oninput="debounceLoad()"/>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Status</div>
+      <select id="filterStatus" class="filter-select" onchange="loadOrders(1)">
+        <option value="">Semua Status</option>
+        <option value="pending">Pending</option>
+        <option value="proses">Proses</option>
+        <option value="selesai">Selesai</option>
+        <option value="diambil">Diambil</option>
+        <option value="dibatalkan">Dibatalkan</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Tanggal</div>
+      <input type="date" id="filterTanggal" class="filter-input" onchange="loadOrders(1)"/>
+    </div>
+    <div class="filter-actions">
+      <button class="btn btn-outline" onclick="clearFilters()">Reset Filter</button>
+      <button class="btn btn-green" onclick="exportCSV()">Export CSV</button>
+      <a href="/order/baru" class="btn btn-blue">+ Order Baru</a>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-toolbar">
+      <div class="table-info" id="tableInfo">Memuat...</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>No. Order</th>
+            <th>Pelanggan</th>
+            <th>Layanan</th>
+            <th>Total</th>
+            <th>Bayar</th>
+            <th>Status</th>
+            <th>Tgl Masuk</th>
+            <th>Est. Selesai</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr class="loading-row"><td colspan="9">Memuat data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pagination" style="display:none">
+      <div class="table-info" id="paginationInfo"></div>
+      <div class="page-btns" id="pageBtns"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const fmtRp  = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+const fmtDate = s => s ? new Date(s).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+
+let currentPage = 1;
+let totalPages  = 1;
+let debTimer    = null;
+let lastMeta    = {};
+
+function showToast(msg, dur = 2500) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+async function logout() {
+  await fetch('/api/v1/auth/logout', { method: 'POST' });
+  location.href = '/login';
+}
+
+function debounceLoad() {
+  clearTimeout(debTimer);
+  debTimer = setTimeout(() => loadOrders(1), 400);
+}
+
+function clearFilters() {
+  document.getElementById('filterSearch').value  = '';
+  document.getElementById('filterStatus').value  = '';
+  document.getElementById('filterTanggal').value = '';
+  loadOrders(1);
+}
+
+// Check URL params on load
+function readURLParams() {
+  const params = new URLSearchParams(location.search);
+  if (params.get('status') === 'belum_lunas') {
+    // handled client-side after fetch
+  }
+}
+
+async function loadOrders(page = 1) {
+  currentPage = page;
+  const q       = document.getElementById('filterSearch').value.trim();
+  const status  = document.getElementById('filterStatus').value;
+  const tanggal = document.getElementById('filterTanggal').value;
+
+  const params = new URLSearchParams({ page, limit: 20 });
+  if (q)       params.set('q', q);
+  if (status)  params.set('status', status);
+  if (tanggal) params.set('tanggal', tanggal);
+
+  document.getElementById('tableBody').innerHTML =
+    '<tr class="loading-row"><td colspan="9">Memuat data...</td></tr>';
+
+  try {
+    const r = await fetch('/api/v1/transaksi?' + params);
+    if (r.status === 401) { location.href = '/login'; return; }
+    const d = await r.json();
+
+    lastMeta = d.meta || {};
+    const total = lastMeta.total || 0;
+    totalPages  = Math.max(1, Math.ceil(total / 20));
+
+    document.getElementById('tableInfo').textContent =
+      `Menampilkan ${d.data.length} dari ${total} order`;
+
+    renderTable(d.data);
+    renderPagination(total);
+  } catch (err) {
+    console.error(err);
+    document.getElementById('tableBody').innerHTML =
+      '<tr class="loading-row"><td colspan="9">Gagal memuat data</td></tr>';
+  }
+}
+
+function renderTable(rows) {
+  const tbody = document.getElementById('tableBody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="9">
+      <div class="table-empty">
+        <div class="icon">📭</div>
+        <div>Tidak ada order yang cocok dengan filter</div>
+      </div>
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(t => {
+    const lunas = t.bayar >= t.total_bayar;
+    const statusOpts = ['pending','proses','selesai','diambil','dibatalkan'];
+    const selectHtml = `<select class="status-select" onchange="updateStatus(${t.id}, this.value, this)"
+      data-current="${t.status}" ${['diambil','dibatalkan'].includes(t.status) ? 'disabled' : ''}>
+      ${statusOpts.map(s => `<option value="${s}" ${s === t.status ? 'selected' : ''}>${s}</option>`).join('')}
+    </select>`;
+
+    const hasPhone = t.pelanggan_telepon;
+
+    return `<tr id="row-${t.id}">
+      <td>
+        <div class="td-nomor">
+          <a href="/api/v1/transaksi/${t.id}/struk" target="_blank">${t.nomor_transaksi}</a>
+        </div>
+        <div class="td-meta">${t.kasir_nama || '—'}</div>
+      </td>
+      <td>
+        <div>${t.pelanggan_nama || '<span style="color:var(--gray-5)">Non-member</span>'}</div>
+        ${t.pelanggan_telepon ? `<div class="td-meta">${t.pelanggan_telepon}</div>` : ''}
+      </td>
+      <td>
+        <div style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;"
+             title="${t.layanan_ringkas || ''}">
+          ${t.layanan_ringkas || '—'}
+        </div>
+      </td>
+      <td style="font-weight:700;white-space:nowrap;">${fmtRp(t.total_bayar)}</td>
+      <td>
+        <span class="badge ${lunas ? 'badge-lunas' : 'badge-belum'}">${lunas ? 'Lunas' : 'Belum'}</span>
+        ${!lunas ? `<div class="td-meta" style="margin-top:3px;">Sisa ${fmtRp(t.total_bayar - t.bayar)}</div>` : ''}
+      </td>
+      <td>${selectHtml}</td>
+      <td style="white-space:nowrap;font-size:12px;">${fmtDate(t.tanggal_masuk)}</td>
+      <td style="white-space:nowrap;font-size:12px;">${fmtDate(t.tanggal_selesai)}</td>
+      <td>
+        <div class="td-actions">
+          <a href="/api/v1/transaksi/${t.id}/struk" target="_blank"
+             class="btn btn-sm btn-outline" title="Cetak struk">Struk</a>
+          ${hasPhone ? `
+          <div class="wa-menu-wrap">
+            <button class="btn btn-sm btn-wa" onclick="toggleWaMenu(this)" title="Kirim WA">WA ▾</button>
+            <div class="wa-menu">
+              <a href="#" onclick="openWa(${t.id},'nota');return false;">Nota Order</a>
+              <a href="#" onclick="openWa(${t.id},'tagihan');return false;">Tagihan</a>
+              <a href="#" onclick="openWa(${t.id},'notif');return false;">Notif Selesai</a>
+            </div>
+          </div>` : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPagination(total) {
+  const el = document.getElementById('pagination');
+  if (totalPages <= 1) { el.style.display = 'none'; return; }
+  el.style.display = 'flex';
+
+  document.getElementById('paginationInfo').textContent =
+    `Halaman ${currentPage} dari ${totalPages}`;
+
+  const btns = document.getElementById('pageBtns');
+  let html = `<button class="page-btn" onclick="loadOrders(${currentPage - 1})"
+    ${currentPage <= 1 ? 'disabled' : ''}>‹</button>`;
+
+  const start = Math.max(1, currentPage - 2);
+  const end   = Math.min(totalPages, currentPage + 2);
+  if (start > 1) html += `<button class="page-btn" onclick="loadOrders(1)">1</button>`;
+  if (start > 2) html += `<span style="padding:0 4px;align-self:center;color:var(--gray-5)">…</span>`;
+
+  for (let p = start; p <= end; p++) {
+    html += `<button class="page-btn ${p === currentPage ? 'active' : ''}"
+      onclick="loadOrders(${p})">${p}</button>`;
+  }
+
+  if (end < totalPages - 1) html += `<span style="padding:0 4px;align-self:center;color:var(--gray-5)">…</span>`;
+  if (end < totalPages) html += `<button class="page-btn" onclick="loadOrders(${totalPages})">${totalPages}</button>`;
+
+  html += `<button class="page-btn" onclick="loadOrders(${currentPage + 1})"
+    ${currentPage >= totalPages ? 'disabled' : ''}>›</button>`;
+
+  btns.innerHTML = html;
+}
+
+async function updateStatus(id, status, selectEl) {
+  const prev = selectEl.dataset.current;
+  if (status === prev) return;
+  if (!confirm(`Ubah status ke "${status}"?`)) { selectEl.value = prev; return; }
+
+  selectEl.disabled = true;
+  try {
+    const r = await fetch(`/api/v1/transaksi/${id}/status`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    const d = await r.json();
+    if (!r.ok) {
+      showToast('Gagal: ' + d.error);
+      selectEl.value = prev;
+    } else {
+      showToast('Status diubah ke "' + status + '"');
+      selectEl.dataset.current = status;
+      if (['diambil','dibatalkan'].includes(status)) selectEl.disabled = true;
+      loadOrders(currentPage);
+    }
+  } catch {
+    showToast('Koneksi gagal');
+    selectEl.value = prev;
+  } finally {
+    if (!['diambil','dibatalkan'].includes(status)) selectEl.disabled = false;
+  }
+}
+
+async function openWa(id, type) {
+  try {
+    const r = await fetch(`/api/v1/transaksi/${id}/wa/${type}`);
+    const d = await r.json();
+    if (!r.ok) { showToast('Gagal: ' + d.error); return; }
+    window.open(d.url, '_blank');
+    await fetch('/api/v1/wa/log', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ telepon: d.telepon, pesan: d.teks, transaksi_id: id, status: 'terkirim' })
+    });
+    showToast('WA dibuka di tab baru');
+  } catch { showToast('Koneksi gagal'); }
+}
+
+function toggleWaMenu(btn) {
+  const menu = btn.nextElementSibling;
+  document.querySelectorAll('.wa-menu.open').forEach(m => { if (m !== menu) m.classList.remove('open'); });
+  menu.classList.toggle('open');
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.wa-menu-wrap'))
+    document.querySelectorAll('.wa-menu.open').forEach(m => m.classList.remove('open'));
+});
+
+async function exportCSV() {
+  const q       = document.getElementById('filterSearch').value.trim();
+  const status  = document.getElementById('filterStatus').value;
+  const tanggal = document.getElementById('filterTanggal').value;
+
+  showToast('Mengambil data untuk export...');
+  const params = new URLSearchParams({ page: 1, limit: 1000 });
+  if (q)       params.set('q', q);
+  if (status)  params.set('status', status);
+  if (tanggal) params.set('tanggal', tanggal);
+
+  try {
+    const r = await fetch('/api/v1/transaksi?' + params);
+    const d = await r.json();
+    const rows = d.data || [];
+
+    const headers = ['No','Nomor Order','Pelanggan','Telepon','Total Bayar','Sudah Bayar','Kembalian',
+                     'Metode Bayar','Status','Kasir','Tgl Masuk','Est Selesai','Tgl Diambil','Catatan'];
+    const csvRows = [
+      headers.join(','),
+      ...rows.map((t, i) => [
+        i + 1,
+        t.nomor_transaksi,
+        csvEsc(t.pelanggan_nama || 'Non-member'),
+        csvEsc(t.pelanggan_telepon || ''),
+        t.total_bayar,
+        t.bayar,
+        t.kembalian,
+        t.metode_bayar,
+        t.status,
+        csvEsc(t.kasir_nama || ''),
+        fmtDate(t.tanggal_masuk),
+        fmtDate(t.tanggal_selesai),
+        fmtDate(t.tanggal_ambil),
+        csvEsc(t.catatan || '')
+      ].join(','))
+    ];
+
+    const blob = new Blob(['﻿' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const now  = new Date().toISOString().slice(0, 10);
+    a.href     = url;
+    a.download = `orders-${now}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`Export ${rows.length} order selesai`);
+  } catch { showToast('Gagal export CSV'); }
+}
+
+function csvEsc(v) {
+  if (!v) return '';
+  v = String(v).replace(/"/g, '""');
+  return /[,"\n]/.test(v) ? `"${v}"` : v;
+}
+
+// Load user
+fetch('/api/v1/auth/me').then(r => r.json()).then(d => {
+  if (d.user) document.getElementById('userName').textContent = d.user.nama;
+}).catch(() => {});
+
+// Check URL param for pre-filter
+const urlParams = new URLSearchParams(location.search);
+if (urlParams.get('status') === 'belum_lunas') {
+  // Not a real status filter, handled as empty status + client filter
+}
+
+loadOrders(1);
+</script>
+<script src="/js/nav.js"></script>
+</body>
+</html>

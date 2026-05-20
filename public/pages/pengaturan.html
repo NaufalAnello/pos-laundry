@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="/css/layout.css"/>
+  <title>Pengaturan — POS Laundry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:#2563eb; --blue-lt:#eff6ff;
+      --green:#16a34a; --green-lt:#f0fdf4;
+      --yellow:#d97706; --yellow-lt:#fffbeb;
+      --red:#dc2626; --red-lt:#fef2f2;
+      --purple:#7c3aed; --purple-lt:#f5f3ff;
+      --wa:#25D366; --wa-lt:#f0fdf4;
+      --gray-1:#f8fafc; --gray-2:#f1f5f9; --gray-3:#e2e8f0;
+      --gray-5:#64748b; --gray-7:#374151; --gray-9:#111827;
+      --radius:10px; --shadow:0 1px 4px rgba(0,0,0,.08);
+    }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+           background:var(--gray-2); color:var(--gray-9); font-size:14px; min-height:100vh; }
+
+    header { background:#fff; border-bottom:1px solid var(--gray-3); padding:0 20px; height:56px;
+             display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:20; box-shadow:var(--shadow); }
+    .logo  { font-size:16px; font-weight:800; color:var(--blue); white-space:nowrap; }
+    nav    { display:flex; gap:4px; flex:1; overflow-x:auto; }
+    nav a  { padding:6px 12px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;
+             color:var(--gray-7); transition:background .15s; white-space:nowrap; }
+    nav a:hover  { background:var(--gray-2); }
+    nav a.active { background:var(--blue-lt); color:var(--blue); }
+    .header-user { font-size:13px; color:var(--gray-5); display:flex; align-items:center; gap:8px; white-space:nowrap; }
+    .logout-btn  { padding:5px 12px; border:1px solid var(--gray-3); border-radius:7px; background:none; font-size:13px; cursor:pointer; color:var(--gray-7); }
+    .logout-btn:hover { background:var(--gray-2); }
+
+    .page { max-width:880px; margin:0 auto; padding:20px 16px; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; flex-wrap:wrap; }
+    .page-title  { font-size:20px; font-weight:800; }
+
+    /* ── Tabs ── */
+    .tabs { display:flex; gap:4px; border-bottom:2px solid var(--gray-3); margin-bottom:20px; }
+    .tab  { padding:10px 18px; border-radius:8px 8px 0 0; font-size:13px; font-weight:700;
+            cursor:pointer; color:var(--gray-5); border:none; background:none; transition:all .15s;
+            position:relative; bottom:-2px; border-bottom:2px solid transparent; }
+    .tab:hover  { color:var(--gray-9); background:var(--gray-1); }
+    .tab.active { color:var(--blue); border-bottom-color:var(--blue); background:#fff; }
+    .tab-section { display:none; }
+    .tab-section.active { display:block; }
+
+    /* ── Card ── */
+    .card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3); box-shadow:var(--shadow); }
+    .card + .card { margin-top:16px; }
+    .card-head { padding:14px 18px; border-bottom:1px solid var(--gray-3); font-weight:700; font-size:14px; }
+    .card-body { padding:20px; display:flex; flex-direction:column; gap:16px; }
+
+    /* ── Form ── */
+    .field { display:flex; flex-direction:column; gap:5px; }
+    .field label { font-size:12px; font-weight:600; color:var(--gray-7); }
+    .field input, .field textarea, .field select {
+      padding:8px 12px; border:1px solid var(--gray-3); border-radius:8px; font-size:13px;
+      font-family:inherit; background:#fff; }
+    .field input:focus, .field textarea:focus, .field select:focus { outline:none; border-color:var(--blue); }
+    .field textarea { resize:vertical; min-height:120px; }
+    .field small { font-size:11px; color:var(--gray-5); }
+
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media(max-width:600px){ .form-row { grid-template-columns:1fr; } }
+
+    /* ── Buttons ── */
+    .btn { padding:9px 18px; border-radius:8px; border:1px solid transparent; font-size:13px;
+           font-weight:600; cursor:pointer; transition:opacity .15s; display:inline-flex; align-items:center; gap:6px; }
+    .btn:hover    { opacity:.85; }
+    .btn:disabled { opacity:.4; cursor:default; }
+    .btn-sm  { padding:5px 10px; font-size:12px; }
+    .btn-blue    { background:var(--blue);   color:#fff; }
+    .btn-green   { background:var(--green); color:#fff; }
+    .btn-green:disabled { background:var(--gray-3); color:var(--gray-5); }
+    .btn-red     { background:var(--red);   color:#fff; }
+    .btn-outline { background:#fff; border-color:var(--gray-3); color:var(--gray-7); }
+    .btn-ghost   { background:none; border:none; color:var(--gray-5); padding:4px 8px; cursor:pointer; font-size:12px; }
+    .btn-ghost:hover { background:var(--gray-2); border-radius:6px; }
+
+    /* ── Toggle ── */
+    .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--gray-3); }
+    .toggle-row:last-child { border-bottom:none; }
+    .toggle-info .tl { font-size:14px; font-weight:600; }
+    .toggle-info .td { font-size:12px; color:var(--gray-5); margin-top:2px; }
+    .toggle { position:relative; width:44px; height:24px; flex-shrink:0; }
+    .toggle input { opacity:0; width:0; height:0; }
+    .toggle-slider { position:absolute; inset:0; background:var(--gray-3); border-radius:24px;
+                     cursor:pointer; transition:background .2s; }
+    .toggle-slider::before { content:''; position:absolute; width:18px; height:18px; background:#fff;
+                              border-radius:50%; left:3px; top:3px; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+    .toggle input:checked + .toggle-slider { background:var(--blue); }
+    .toggle input:checked + .toggle-slider::before { transform:translateX(20px); }
+
+    /* ── User table ── */
+    table { width:100%; border-collapse:collapse; }
+    thead { background:var(--gray-1); }
+    th { padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:var(--gray-5);
+         text-transform:uppercase; letter-spacing:.4px; border-bottom:1px solid var(--gray-3); }
+    td { padding:10px 12px; border-bottom:1px solid var(--gray-3); font-size:13px; vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    .empty-row td { text-align:center; padding:32px; color:var(--gray-5); }
+
+    .role-badge { display:inline-flex; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; text-transform:uppercase; }
+    .role-admin { background:#fef3c7; color:#92400e; }
+    .role-kasir  { background:#dbeafe; color:#1d4ed8; }
+    .role-operator { background:#dcfce7; color:#166534; }
+
+    /* ── Modal ── */
+    .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:50; display:none;
+                align-items:center; justify-content:center; padding:16px; }
+    .modal-bg.open { display:flex; }
+    .modal { background:#fff; border-radius:12px; width:100%; max-width:440px; box-shadow:0 8px 32px rgba(0,0,0,.18); }
+    .modal-head { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--gray-3); }
+    .modal-head h3 { font-size:16px; font-weight:700; }
+    .modal-body { padding:20px; display:flex; flex-direction:column; gap:14px; }
+    .modal-foot { display:flex; gap:8px; justify-content:flex-end; padding:14px 20px; border-top:1px solid var(--gray-3); }
+    .err-msg { color:var(--red); font-size:12px; }
+
+    /* ── Backup ── */
+    .backup-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media(max-width:600px){ .backup-grid { grid-template-columns:1fr; } }
+    .backup-card { background:var(--gray-1); border:1px solid var(--gray-3); border-radius:10px; padding:20px; text-align:center; }
+    .backup-card .icon { font-size:36px; margin-bottom:10px; }
+    .backup-card h4 { font-size:14px; font-weight:700; margin-bottom:6px; }
+    .backup-card p { font-size:12px; color:var(--gray-5); margin-bottom:16px; line-height:1.5; }
+
+    /* ── Template vars ── */
+    .var-ref { background:var(--gray-1); border-radius:8px; padding:12px; font-size:12px; line-height:1.8; }
+    .var-ref code { background:var(--blue-lt); color:var(--blue); padding:1px 5px; border-radius:4px; font-family:monospace; }
+
+    .save-bar { display:flex; align-items:center; gap:12px; padding:14px 0; border-top:1px solid var(--gray-3); margin-top:4px; }
+    .save-ok  { font-size:13px; color:var(--green); }
+
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+             background:#1e293b; color:#fff; padding:10px 20px; border-radius:8px;
+             font-size:13px; font-weight:600; z-index:99; transition:transform .3s; white-space:nowrap; }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+    .toast.err  { background:var(--red); }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">⚙️ Pengaturan</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('umum',this)">🏪 Profil Usaha</button>
+    <button class="tab" onclick="switchTab('wa',this)">📱 WhatsApp</button>
+    <button class="tab" onclick="switchTab('printer',this)">🖨️ Printer</button>
+    <button class="tab" onclick="switchTab('user',this)">👤 Manajemen User</button>
+    <button class="tab" onclick="switchTab('backup',this)">💾 Backup & Restore</button>
+  </div>
+
+  <!-- ── TAB: Umum ── -->
+  <div id="sec-umum" class="tab-section active">
+    <div class="card">
+      <div class="card-head">🏪 Profil Usaha</div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="field"><label>Nama Toko *</label><input id="sNamaToko" type="text" placeholder="Nama Laundry"/></div>
+          <div class="field"><label>Telepon / WA Usaha</label><input id="sTelepon" type="text" placeholder="628xxx"/></div>
+        </div>
+        <div class="field"><label>Alamat</label><input id="sAlamat" type="text" placeholder="Jl. ..."/></div>
+        <div class="field"><label>Email</label><input id="sEmail" type="email" placeholder="email@contoh.com"/></div>
+        <div class="form-row">
+          <div class="field"><label>Jam Operasional</label><input id="sJam" type="text" placeholder="08.00 – 21.00 WIB"/></div>
+          <div class="field">
+            <label>Lebar Struk</label>
+            <select id="sStrukLebar">
+              <option value="58mm">58 mm (narrow)</option>
+              <option value="80mm">80 mm (standard)</option>
+              <option value="A5">A5</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>Footer Struk</label><input id="sFooter" type="text" placeholder="Terima kasih!"/></div>
+        <div class="save-bar">
+          <button class="btn btn-blue" onclick="saveUmum()">💾 Simpan Pengaturan</button>
+          <span class="save-ok" id="umumOk" style="display:none">✓ Tersimpan</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: WhatsApp ── -->
+  <div id="sec-wa" class="tab-section">
+
+    <!-- Mode Pengiriman Default -->
+    <div class="card">
+      <div class="card-head">📲 Mode Pengiriman Default</div>
+      <div class="card-body" style="gap:12px">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--gray-3);border-radius:8px"
+                 id="modeRegularLabel">
+            <input type="radio" name="waModeDefault" id="rModeRegular" value="regular"
+                   onchange="onWAModeChange()" style="margin-top:2px;flex-shrink:0"/>
+            <div>
+              <div style="font-size:13px;font-weight:600">💬 WhatsApp Biasa</div>
+              <div style="font-size:12px;color:var(--gray-5);margin-top:2px">Membuka via wa.me — kompatibel dengan semua perangkat</div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--gray-3);border-radius:8px"
+                 id="modeBusinessLabel">
+            <input type="radio" name="waModeDefault" id="rModeBusiness" value="business"
+                   onchange="onWAModeChange()" style="margin-top:2px;flex-shrink:0"/>
+            <div>
+              <div style="font-size:13px;font-weight:600">💼 WhatsApp Business</div>
+              <div style="font-size:12px;color:var(--gray-5);margin-top:2px">Membuka via api.whatsapp.com — terbuka jika WA Business terinstall di perangkat</div>
+            </div>
+          </label>
+        </div>
+        <div class="save-bar">
+          <button class="btn btn-blue" onclick="saveWAMode()">💾 Simpan Mode WA</button>
+          <span class="save-ok" id="waModeOk" style="display:none">✓ Tersimpan</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toggle otomasi -->
+    <div class="card">
+      <div class="card-head">🔔 Otomasi Notifikasi</div>
+      <div class="card-body" style="padding:0 20px">
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="tl">Auto Nota Baru</div>
+            <div class="td">Buka WA otomatis ketika order baru dibuat</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="tAutoNota"/><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="tl">Auto Notif Selesai</div>
+            <div class="td">Buka WA otomatis ketika status berubah ke Selesai</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="tAutoNotif"/><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row" style="border-bottom:none">
+          <div class="toggle-info">
+            <div class="tl">Pengingat Tagihan</div>
+            <div class="td">Tampilkan pengingat tagihan belum lunas di dashboard setelah N hari</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="number" id="tReminderHari" min="1" max="30" value="3"
+                   style="width:60px;padding:6px 8px;border:1px solid var(--gray-3);border-radius:8px;font-size:13px;text-align:center"/>
+            <span style="font-size:12px;color:var(--gray-5)">hari</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Templates -->
+    <div class="card">
+      <div class="card-head">
+        📝 Template Pesan
+        <div class="var-ref" style="font-size:11px;padding:6px 10px">
+          Variabel: <code>{nama}</code> <code>{nomor}</code> <code>{tanggal_masuk}</code> <code>{tanggal_selesai}</code>
+          <code>{items}</code> <code>{subtotal}</code> <code>{diskon}</code> <code>{total}</code>
+          <code>{bayar}</code> <code>{kembalian}</code> <code>{poin_dapat}</code> <code>{poin_total}</code>
+          <code>{nama_toko}</code> <code>{alamat_toko}</code> <code>{telepon_toko}</code>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>Template Nota (Order Baru)</label>
+          <textarea id="tplNota" rows="8"></textarea>
+        </div>
+        <div class="field">
+          <label>Template Tagihan (Pengingat Lunas)</label>
+          <textarea id="tplTagihan" rows="6"></textarea>
+        </div>
+        <div class="field">
+          <label>Template Notifikasi Selesai</label>
+          <textarea id="tplNotif" rows="6"></textarea>
+        </div>
+        <div class="save-bar">
+          <button class="btn btn-blue" onclick="saveWA()">💾 Simpan Pengaturan WA</button>
+          <span class="save-ok" id="waOk" style="display:none">✓ Tersimpan</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: Printer ── -->
+  <div id="sec-printer" class="tab-section">
+
+    <!-- Status printer -->
+    <div class="card">
+      <div class="card-head">
+        🖨️ Status Printer Thermal
+        <button class="btn btn-outline btn-sm" onclick="cekPrinter()">↻ Cek Ulang</button>
+      </div>
+      <div class="card-body" style="gap:12px">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--gray-1);border-radius:8px;border:1px solid var(--gray-3)">
+          <div id="printerStatusDot" style="width:14px;height:14px;border-radius:50%;background:var(--gray-3);flex-shrink:0"></div>
+          <div>
+            <div id="printerStatusTxt" style="font-size:14px;font-weight:700">Memeriksa...</div>
+            <div id="printerStatusPort" style="font-size:12px;color:var(--gray-5);margin-top:2px"></div>
+          </div>
+        </div>
+        <button class="btn btn-green" id="testPrintBtn" onclick="testPrint()" disabled>
+          🖨️ Test Print
+        </button>
+      </div>
+    </div>
+
+    <!-- Konfigurasi -->
+    <div class="card">
+      <div class="card-head">⚙️ Konfigurasi Printer</div>
+      <div class="card-body">
+        <div class="field">
+          <label>Port Printer (USB)</label>
+          <input id="pPrinterPort" type="text" placeholder="/dev/usb/lp0"/>
+          <small>Linux: /dev/usb/lp0 · macOS: /dev/usb/printer0 · Windows: \\.\COM3</small>
+        </div>
+        <div class="field">
+          <label>Tipe Printer</label>
+          <select id="pPrinterType">
+            <option value="EPSON">EPSON (Xantri BT-58D, Epson TM-T20)</option>
+            <option value="STAR">STAR (Star TSP100)</option>
+            <option value="TANCA">TANCA</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div style="background:var(--gray-1);border-radius:8px;padding:12px;border:1px solid var(--gray-3)">
+            <div style="font-size:11px;color:var(--gray-5);font-weight:600;text-transform:uppercase;margin-bottom:4px">Lebar Kertas</div>
+            <div style="font-size:14px;font-weight:700">58mm (fixed)</div>
+            <div style="font-size:11px;color:var(--gray-5)">32 karakter per baris</div>
+          </div>
+          <div style="background:var(--gray-1);border-radius:8px;padding:12px;border:1px solid var(--gray-3)">
+            <div style="font-size:11px;color:var(--gray-5);font-weight:600;text-transform:uppercase;margin-bottom:4px">Auto Cutter</div>
+            <div style="font-size:14px;font-weight:700;color:var(--red)">Tidak ada</div>
+            <div style="font-size:11px;color:var(--gray-5)">Sobek manual setelah cetak</div>
+          </div>
+        </div>
+        <div class="save-bar">
+          <button class="btn btn-blue" onclick="savePrinterSettings()">💾 Simpan Pengaturan Printer</button>
+          <span class="save-ok" id="printerOk" style="display:none">✓ Tersimpan</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panduan akses USB Linux -->
+    <div class="card">
+      <div class="card-head">📋 Panduan Akses USB di Linux</div>
+      <div class="card-body" style="gap:8px">
+        <div style="font-size:12px;line-height:1.7;color:var(--gray-7)">
+          <p>Jika muncul error <code style="background:var(--gray-2);padding:1px 5px;border-radius:4px">EACCES: permission denied</code> saat cetak:</p>
+          <ol style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:4px">
+            <li>Cek device: <code style="background:var(--gray-2);padding:1px 5px;border-radius:4px">ls -la /dev/usb/</code></li>
+            <li>Tambah user ke grup: <code style="background:var(--gray-2);padding:1px 5px;border-radius:4px">sudo usermod -a -G lp $USER</code></li>
+            <li>Logout dan login ulang, atau: <code style="background:var(--gray-2);padding:1px 5px;border-radius:4px">newgrp lp</code></li>
+            <li>Alternatif sementara: <code style="background:var(--gray-2);padding:1px 5px;border-radius:4px">sudo chmod 666 /dev/usb/lp0</code></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: User ── -->
+  <div id="sec-user" class="tab-section">
+    <div class="card">
+      <div class="card-head">
+        👤 Manajemen User
+        <button class="btn btn-blue btn-sm" onclick="openAddUser()">+ Tambah User</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="userBody">
+          <tr class="empty-row"><td colspan="5">Memuat…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--gray-5);padding:0 4px">
+      * Hanya admin yang dapat mengelola user. Menghapus user akan menonaktifkan (bukan hapus permanen).
+    </div>
+  </div>
+
+  <!-- ── TAB: Backup ── -->
+  <div id="sec-backup" class="tab-section">
+    <div class="card">
+      <div class="card-head">💾 Backup & Restore Database</div>
+      <div class="card-body">
+        <div class="backup-grid">
+          <div class="backup-card">
+            <div class="icon">⬇️</div>
+            <h4>Download Backup</h4>
+            <p>Download salinan database SQLite. Simpan di tempat aman sebagai cadangan data.</p>
+            <button class="btn btn-blue" onclick="downloadBackup()">⬇️ Download Backup</button>
+          </div>
+          <div class="backup-card">
+            <div class="icon">⬆️</div>
+            <h4>Restore dari Backup</h4>
+            <p>Upload file backup .db. File akan disimpan sementara. <strong>Server perlu direstart</strong> untuk menerapkan restore.</p>
+            <div style="margin-bottom:12px">
+              <input type="file" id="restoreFile" accept=".db" style="font-size:12px;width:100%"/>
+            </div>
+            <button class="btn btn-outline" onclick="uploadRestore()">⬆️ Upload & Restore</button>
+          </div>
+        </div>
+        <div style="background:var(--yellow-lt);border:1px solid #fde68a;border-radius:8px;padding:14px;margin-top:16px;font-size:13px">
+          <strong>⚠️ Perhatian Restore:</strong><br/>
+          1. Download backup terbaru sebelum restore.<br/>
+          2. Upload file .db backup yang valid.<br/>
+          3. Setelah upload berhasil, hentikan server dan rename file <code>laundry.db.restore</code> ke <code>laundry.db</code>.<br/>
+          4. Jalankan ulang server.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- User Modal -->
+<div class="modal-bg" id="userModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="userModalTitle">Tambah User</h3>
+      <button class="btn-ghost" onclick="closeUserModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="uEditId"/>
+      <div class="form-row">
+        <div class="field"><label>Nama *</label><input id="uNama" type="text" placeholder="Nama lengkap"/></div>
+        <div class="field"><label>Username *</label><input id="uUsername" type="text" placeholder="username (huruf+angka)"/></div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Password <span id="uPwHint" style="color:var(--gray-5)">(isi untuk ubah)</span></label>
+          <input id="uPassword" type="password" placeholder="Min. 6 karakter"/>
+        </div>
+        <div class="field">
+          <label>Role</label>
+          <select id="uRole">
+            <option value="kasir">Kasir</option>
+            <option value="operator">Operator</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" id="uAktifWrap" style="display:none">
+        <label style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="uAktif" checked/> Aktif
+        </label>
+      </div>
+      <div class="err-msg" id="uErr"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeUserModal()">Batal</button>
+      <button class="btn btn-blue" id="uSaveBtn" onclick="saveUser()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+let settings = {};
+let myRole   = '';
+let myId     = 0;
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async () => {
+  try {
+    const d = await api('/api/v1/auth/me');
+    document.getElementById('userName').textContent = d.user?.nama || '–';
+    myRole = d.user?.role || '';
+    myId   = d.user?.id   || 0;
+  } catch {}
+  await loadSettings();
+})();
+
+async function api(url, opts = {}) {
+  const r = await fetch(url, { credentials:'include', headers:{'Content-Type':'application/json'}, ...opts });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || 'Error');
+  return j;
+}
+
+async function logout() {
+  await fetch('/api/v1/auth/logout', { method:'POST', credentials:'include' });
+  location.href = '/login';
+}
+
+// ── Tab ───────────────────────────────────────────────────────────────────────
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'user')    loadUsers();
+  if (id === 'printer') cekPrinter();
+}
+
+// ── Load settings ─────────────────────────────────────────────────────────────
+async function loadSettings() {
+  try {
+    const { data } = await api('/api/v1/pengaturan');
+    settings = data;
+
+    // Umum
+    document.getElementById('sNamaToko').value    = data.nama_toko        || '';
+    document.getElementById('sTelepon').value     = data.telepon_toko     || '';
+    document.getElementById('sAlamat').value      = data.alamat_toko      || '';
+    document.getElementById('sEmail').value       = data.email_toko       || '';
+    document.getElementById('sJam').value         = data.jam_operasional  || '';
+    document.getElementById('sFooter').value      = data.footer_struk     || '';
+    const lebar = data.struk_lebar || '80mm';
+    document.getElementById('sStrukLebar').value  = lebar;
+
+    // WA toggles
+    document.getElementById('tAutoNota').checked  = data.wa_auto_nota    === 'true';
+    document.getElementById('tAutoNotif').checked = data.wa_auto_notif   === 'true';
+    document.getElementById('tReminderHari').value = data.wa_reminder_hari || '3';
+
+    // WA mode default
+    const waMode = data.wa_mode || 'regular';
+    document.getElementById(waMode === 'business' ? 'rModeBusiness' : 'rModeRegular').checked = true;
+    highlightWAMode(waMode);
+
+    // Printer settings
+    document.getElementById('pPrinterPort').value = data.printer_port || '/dev/usb/lp0';
+    const pt = data.printer_type || 'EPSON';
+    const ptSel = document.getElementById('pPrinterType');
+    if (ptSel) [...ptSel.options].forEach(o => { if (o.value === pt) o.selected = true; });
+
+    // WA templates
+    document.getElementById('tplNota').value    = data.wa_template_nota           || '';
+    document.getElementById('tplTagihan').value = data.wa_template_tagihan        || '';
+    document.getElementById('tplNotif').value   = data.wa_template_notif_selesai  || '';
+  } catch (e) { toast('Gagal memuat pengaturan: ' + e.message, true); }
+}
+
+// ── Save Umum ─────────────────────────────────────────────────────────────────
+async function saveUmum() {
+  try {
+    await api('/api/v1/pengaturan', {
+      method: 'PUT',
+      body: JSON.stringify({
+        nama_toko:       document.getElementById('sNamaToko').value.trim(),
+        telepon_toko:    document.getElementById('sTelepon').value.trim(),
+        alamat_toko:     document.getElementById('sAlamat').value.trim(),
+        email_toko:      document.getElementById('sEmail').value.trim(),
+        jam_operasional: document.getElementById('sJam').value.trim(),
+        footer_struk:    document.getElementById('sFooter').value.trim(),
+        struk_lebar:     document.getElementById('sStrukLebar').value
+      })
+    });
+    showOk('umumOk');
+    toast('Pengaturan umum disimpan');
+  } catch (e) { toast(e.message, true); }
+}
+
+// ── WA Mode ───────────────────────────────────────────────────────────────────
+function onWAModeChange() {
+  const mode = document.querySelector('input[name="waModeDefault"]:checked')?.value || 'regular';
+  highlightWAMode(mode);
+}
+
+function highlightWAMode(mode) {
+  document.getElementById('modeRegularLabel').style.borderColor  = mode === 'regular'  ? 'var(--wa)' : 'var(--gray-3)';
+  document.getElementById('modeBusinessLabel').style.borderColor = mode === 'business' ? 'var(--wa)' : 'var(--gray-3)';
+}
+
+async function saveWAMode() {
+  const mode = document.querySelector('input[name="waModeDefault"]:checked')?.value;
+  if (!mode) return;
+  try {
+    await api('/api/v1/pengaturan/wa-mode', { method: 'PUT', body: JSON.stringify({ mode }) });
+    showOk('waModeOk');
+    toast('Mode WA disimpan');
+  } catch (e) { toast(e.message, true); }
+}
+
+// ── Printer ───────────────────────────────────────────────────────────────────
+async function cekPrinter() {
+  const dot  = document.getElementById('printerStatusDot');
+  const txt  = document.getElementById('printerStatusTxt');
+  const port = document.getElementById('printerStatusPort');
+  const btn  = document.getElementById('testPrintBtn');
+  if (!dot) return; // tab belum dirender
+
+  dot.style.background = '#94a3b8';
+  txt.textContent = 'Memeriksa...';
+
+  try {
+    const d = await api('/api/v1/printer/status');
+    port.textContent = 'Port: ' + d.port;
+    if (d.connected) {
+      dot.style.cssText = 'width:14px;height:14px;border-radius:50%;flex-shrink:0;background:#16a34a;box-shadow:0 0 8px #16a34a';
+      txt.textContent = 'Printer terhubung — siap cetak';
+      btn.disabled = false;
+    } else {
+      dot.style.cssText = 'width:14px;height:14px;border-radius:50%;flex-shrink:0;background:#dc2626';
+      txt.textContent = 'Printer tidak terhubung' + (d.error ? ': ' + d.error : '');
+      btn.disabled = true;
+    }
+  } catch (e) {
+    dot.style.cssText = 'width:14px;height:14px;border-radius:50%;flex-shrink:0;background:#f59e0b';
+    txt.textContent = 'Gagal cek printer: ' + e.message;
+    if (btn) btn.disabled = true;
+  }
+}
+
+async function testPrint() {
+  const btn = document.getElementById('testPrintBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Mencetak...';
+  try {
+    await api('/api/v1/printer/test', { method: 'POST' });
+    toast('Test print berhasil dicetak!');
+  } catch (e) {
+    toast(e.message, true);
+  } finally {
+    btn.textContent = '🖨️ Test Print';
+    cekPrinter();
+  }
+}
+
+async function savePrinterSettings() {
+  try {
+    await api('/api/v1/pengaturan', {
+      method: 'PUT',
+      body: JSON.stringify({
+        printer_port: document.getElementById('pPrinterPort').value.trim(),
+        printer_type: document.getElementById('pPrinterType').value
+      })
+    });
+    showOk('printerOk');
+    toast('Pengaturan printer disimpan');
+  } catch (e) { toast(e.message, true); }
+}
+
+// ── Save WA ───────────────────────────────────────────────────────────────────
+async function saveWA() {
+  try {
+    await api('/api/v1/pengaturan', {
+      method: 'PUT',
+      body: JSON.stringify({
+        wa_auto_nota:               document.getElementById('tAutoNota').checked  ? 'true' : 'false',
+        wa_auto_notif:              document.getElementById('tAutoNotif').checked ? 'true' : 'false',
+        wa_reminder_hari:           document.getElementById('tReminderHari').value || '3',
+        wa_template_nota:           document.getElementById('tplNota').value,
+        wa_template_tagihan:        document.getElementById('tplTagihan').value,
+        wa_template_notif_selesai:  document.getElementById('tplNotif').value
+      })
+    });
+    showOk('waOk');
+    toast('Pengaturan WA disimpan');
+  } catch (e) { toast(e.message, true); }
+}
+
+function showOk(id) {
+  const el = document.getElementById(id);
+  el.style.display = 'inline';
+  setTimeout(() => el.style.display = 'none', 3000);
+}
+
+// ── Users ─────────────────────────────────────────────────────────────────────
+async function loadUsers() {
+  try {
+    const { data } = await api('/api/v1/users');
+    const tb = document.getElementById('userBody');
+    if (!data.length) {
+      tb.innerHTML = '<tr class="empty-row"><td colspan="5">Belum ada user</td></tr>';
+      return;
+    }
+    tb.innerHTML = data.map(u => `
+      <tr>
+        <td style="font-weight:600">${esc(u.nama)}</td>
+        <td style="font-family:monospace;color:var(--gray-5)">${esc(u.username)}</td>
+        <td><span class="role-badge role-${u.role}">${u.role}</span></td>
+        <td>${u.aktif ? '<span style="color:var(--green);font-weight:600">✓ Aktif</span>' : '<span style="color:var(--red)">✗ Nonaktif</span>'}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-outline btn-sm" onclick="openEditUser(${u.id})">Edit</button>
+          ${u.id !== myId ? `<button class="btn btn-ghost btn-sm" onclick="toggleUser(${u.id},${u.aktif})">${u.aktif ? 'Nonaktifkan' : 'Aktifkan'}</button>` : ''}
+        </td>
+      </tr>
+    `).join('');
+  } catch (e) { toast(e.message, true); }
+}
+
+function openAddUser() {
+  document.getElementById('uEditId').value = '';
+  document.getElementById('userModalTitle').textContent = 'Tambah User';
+  document.getElementById('uNama').value      = '';
+  document.getElementById('uUsername').value  = '';
+  document.getElementById('uPassword').value  = '';
+  document.getElementById('uRole').value      = 'kasir';
+  document.getElementById('uPwHint').textContent = '';
+  document.getElementById('uAktifWrap').style.display = 'none';
+  document.getElementById('uErr').textContent = '';
+  document.getElementById('userModal').classList.add('open');
+  setTimeout(() => document.getElementById('uNama').focus(), 100);
+}
+
+async function openEditUser(id) {
+  try {
+    const { data } = await api('/api/v1/users');
+    const u = data.find(x => x.id === id);
+    if (!u) return;
+
+    document.getElementById('uEditId').value   = u.id;
+    document.getElementById('userModalTitle').textContent = 'Edit User';
+    document.getElementById('uNama').value      = u.nama;
+    document.getElementById('uUsername').value  = u.username;
+    document.getElementById('uPassword').value  = '';
+    document.getElementById('uRole').value      = u.role;
+    document.getElementById('uPwHint').textContent = '(kosongkan jika tidak ubah)';
+    document.getElementById('uAktifWrap').style.display = 'block';
+    document.getElementById('uAktif').checked  = u.aktif;
+    document.getElementById('uErr').textContent = '';
+    document.getElementById('userModal').classList.add('open');
+  } catch (e) { toast(e.message, true); }
+}
+
+function closeUserModal() { document.getElementById('userModal').classList.remove('open'); }
+
+async function saveUser() {
+  const id   = document.getElementById('uEditId').value;
+  const body = {
+    nama:     document.getElementById('uNama').value.trim(),
+    username: document.getElementById('uUsername').value.trim(),
+    role:     document.getElementById('uRole').value
+  };
+  const pw = document.getElementById('uPassword').value;
+  if (pw) body.password = pw;
+  if (id) body.aktif = document.getElementById('uAktif').checked;
+
+  document.getElementById('uErr').textContent = '';
+  const btn = document.getElementById('uSaveBtn');
+  btn.disabled = true;
+
+  try {
+    if (id) {
+      await api(`/api/v1/users/${id}`, { method:'PUT', body: JSON.stringify(body) });
+      toast('User berhasil diperbarui');
+    } else {
+      if (!body.password) { document.getElementById('uErr').textContent = 'Password wajib diisi'; btn.disabled = false; return; }
+      await api('/api/v1/users', { method:'POST', body: JSON.stringify(body) });
+      toast('User berhasil dibuat');
+    }
+    closeUserModal();
+    loadUsers();
+  } catch (e) {
+    document.getElementById('uErr').textContent = e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function toggleUser(id, aktif) {
+  const action = aktif ? 'nonaktifkan' : 'aktifkan';
+  if (!confirm(`Yakin ${action} user ini?`)) return;
+  try {
+    await api(`/api/v1/users/${id}`, { method:'PUT', body: JSON.stringify({ aktif: !aktif }) });
+    toast(`User berhasil di${action}`);
+    loadUsers();
+  } catch (e) { toast(e.message, true); }
+}
+
+// ── Backup ────────────────────────────────────────────────────────────────────
+function downloadBackup() {
+  window.location.href = '/api/v1/pengaturan/backup';
+  toast('Download backup dimulai');
+}
+
+async function uploadRestore() {
+  const file = document.getElementById('restoreFile').files[0];
+  if (!file) { toast('Pilih file backup terlebih dahulu', true); return; }
+  if (!file.name.endsWith('.db') && !file.name.endsWith('.sqlite')) {
+    toast('File harus berekstensi .db', true); return;
+  }
+
+  if (!confirm('Upload file restore? Server perlu direstart setelah upload untuk menerapkan perubahan.')) return;
+
+  try {
+    const buf = await file.arrayBuffer();
+    const r = await fetch('/api/v1/pengaturan/restore', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/octet-stream' },
+      body: buf
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error);
+    alert('✅ ' + j.message + '\n\n' + (j.note || ''));
+    toast('File backup berhasil diupload');
+  } catch (e) { toast(e.message, true); }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(msg, err = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = 'toast show' + (err ? ' err' : '');
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+</script>
+<script src="/js/nav.js"></script>
+</body>
+</html>

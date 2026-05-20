@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Preview WA — POS Laundry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --wa-green:    #25d366;
+      --wa-dk:       #128c7e;
+      --wa-bg:       #e5ddd5;
+      --wa-bubble:   #dcf8c6;
+      --wa-header:   #075e54;
+      --blue:        #2563eb;
+      --gray-2:      #f1f5f9;
+      --gray-3:      #e2e8f0;
+      --gray-5:      #64748b;
+      --gray-7:      #374151;
+      --gray-9:      #111827;
+      --radius:      10px;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--gray-2); color: var(--gray-9);
+      min-height: 100vh;
+    }
+
+    /* ── App header ── */
+    header {
+      background: var(--wa-header); color: #fff;
+      padding: 0 20px; height: 56px;
+      display: flex; align-items: center; gap: 14px;
+      position: sticky; top: 0; z-index: 20;
+    }
+    .back-btn { color: rgba(255,255,255,.85); text-decoration: none;
+                font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+    header h1 { font-size: 15px; font-weight: 700; flex: 1; }
+
+    /* ── Layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1100px;
+      margin: 0 auto;
+      align-items: start;
+    }
+    @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+
+    /* ── Card ── */
+    .card {
+      background: #fff; border-radius: var(--radius);
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      border: 1px solid var(--gray-3); margin-bottom: 12px;
+    }
+    .card-header {
+      padding: 13px 18px; border-bottom: 1px solid var(--gray-3);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-header h2 { font-size: 14px; font-weight: 700; color: var(--gray-7); }
+    .card-body { padding: 16px 18px; }
+
+    /* ── Type tabs ── */
+    .type-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+    .type-tab {
+      padding: 7px 16px; border: 1.5px solid var(--gray-3);
+      border-radius: 99px; background: var(--gray-2); cursor: pointer;
+      font-size: 13px; font-weight: 600; color: var(--gray-5);
+      transition: all .15s;
+    }
+    .type-tab.active {
+      border-color: var(--wa-dk); background: #e6f4f1; color: var(--wa-dk);
+    }
+
+    /* ── Info penerima ── */
+    .recipient-card {
+      display: flex; align-items: center; gap: 12px;
+      background: #f0fdf4; border: 1.5px solid #bbf7d0;
+      border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;
+    }
+    .recipient-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--wa-green); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 16px; flex-shrink: 0;
+    }
+    .recipient-name  { font-weight: 700; font-size: 14px; color: #065f46; }
+    .recipient-phone { font-size: 12px; color: var(--gray-5); margin-top: 2px; }
+
+    /* ── Edit area ── */
+    .msg-editor {
+      width: 100%; border: 1.5px solid var(--gray-3); border-radius: 8px;
+      padding: 10px 12px; font-size: 13px; line-height: 1.6;
+      font-family: inherit; resize: vertical; min-height: 200px;
+      color: var(--gray-9); background: var(--gray-2); outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .msg-editor:focus {
+      border-color: var(--wa-dk); background: #fff;
+      box-shadow: 0 0 0 3px rgba(18,140,126,.12);
+    }
+    .char-count { font-size: 11px; color: var(--gray-5); text-align: right; margin-top: 4px; }
+
+    /* ── Action buttons ── */
+    .actions { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+    .btn {
+      width: 100%; padding: 12px; border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all .15s;
+    }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-wa {
+      background: var(--wa-green); color: #fff;
+    }
+    .btn-wa:hover:not(:disabled) {
+      background: #1ebe5c; box-shadow: 0 4px 12px rgba(37,211,102,.35);
+    }
+    .btn-log {
+      background: var(--gray-2); color: var(--gray-7);
+      border: 1.5px solid var(--gray-3);
+    }
+    .btn-log:hover:not(:disabled) { background: var(--gray-3); }
+    .btn-copy {
+      background: var(--blue); color: #fff;
+    }
+    .btn-copy:hover:not(:disabled) { background: #1d4ed8; }
+
+    /* ── WA Phone Mockup ── */
+    .phone-mockup {
+      background: var(--wa-bg); border-radius: 12px;
+      overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.15);
+      border: 8px solid #1a1a1a;
+    }
+    .phone-header {
+      background: var(--wa-header); padding: 10px 14px;
+      display: flex; align-items: center; gap: 10px; color: #fff;
+    }
+    .phone-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,.3);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; flex-shrink: 0;
+    }
+    .phone-name  { font-size: 14px; font-weight: 600; }
+    .phone-sub   { font-size: 11px; opacity: .8; margin-top: 1px; }
+    .phone-icons { margin-left: auto; display: flex; gap: 14px;
+                   font-size: 16px; opacity: .8; }
+
+    .phone-body {
+      padding: 12px 10px; min-height: 320px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+
+    .wa-bubble-wrap { display: flex; justify-content: flex-end; }
+    .wa-bubble {
+      background: var(--wa-bubble);
+      border-radius: 12px 2px 12px 12px;
+      padding: 8px 12px 22px; /* bottom for timestamp */
+      max-width: 85%;
+      position: relative;
+      box-shadow: 0 1px 3px rgba(0,0,0,.1);
+      font-size: 13px; line-height: 1.5;
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .wa-bubble::after {
+      content: ''; position: absolute; top: 0; right: -8px;
+      border-width: 0 0 10px 10px; border-style: solid;
+      border-color: transparent transparent transparent var(--wa-bubble);
+    }
+    .wa-time {
+      position: absolute; bottom: 4px; right: 10px;
+      font-size: 10px; color: var(--gray-5);
+      display: flex; align-items: center; gap: 3px;
+    }
+    .wa-check { color: #53bdeb; font-size: 12px; }
+
+    /* ── WA Bold: *text* ── */
+    .wa-bold { font-weight: 700; }
+    .wa-italic { font-style: italic; }
+
+    /* ── Loading ── */
+    .loading-shimmer {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+      border-radius: 6px; height: 14px; margin: 4px 0;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    /* ── Log list ── */
+    .log-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 0; border-bottom: 1px solid var(--gray-3);
+      font-size: 13px;
+    }
+    .log-item:last-child { border-bottom: none; }
+    .log-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .log-status.terkirim { background: var(--wa-green); }
+    .log-status.pending  { background: #f59e0b; }
+    .log-status.gagal    { background: #ef4444; }
+    .log-meta  { font-size: 11px; color: var(--gray-5); margin-top: 2px; }
+
+    /* ── WA Mode Toggle ── */
+    .wa-mode-card { background:#fff; border-radius:var(--radius); box-shadow:0 1px 4px rgba(0,0,0,.08);
+                    border:1px solid var(--gray-3); margin-bottom:12px; }
+    .wa-mode-body { padding:14px 18px; }
+    .wa-mode-label { font-size:12px; font-weight:600; color:var(--gray-5); margin-bottom:10px; }
+    .wa-mode-btns { display:flex; gap:6px; }
+    .wa-mode-btn {
+      flex:1; padding:8px 12px; border-radius:8px; font-size:13px; font-weight:600;
+      cursor:pointer; transition:all .15s; text-align:center;
+      background:var(--gray-2); border:1.5px solid var(--gray-3); color:var(--gray-5);
+    }
+    .wa-mode-btn.active {
+      background:#e6f4f1; border-color:var(--wa-dk); color:var(--wa-dk);
+    }
+    .wa-mode-note { font-size:11px; color:var(--gray-5); margin-top:8px; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 20px; right: 20px;
+      background: #1e293b; color: #fff; padding: 10px 18px;
+      border-radius: 8px; font-size: 13px; z-index: 999;
+      transform: translateY(60px); opacity: 0;
+      transition: transform .3s, opacity .3s;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.success { background: var(--wa-dk); }
+    #toast.error   { background: #dc2626; }
+
+    .empty-log { text-align: center; color: var(--gray-5); font-size: 13px; padding: 20px 0; }
+  </style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<header>
+  <a class="back-btn" id="backBtn" href="/">← Kembali</a>
+  <h1>Preview Pesan WhatsApp</h1>
+</header>
+
+<div class="layout">
+
+  <!-- ══ PANEL KIRI: Editor ══ -->
+  <div>
+
+    <!-- Tipe pesan -->
+    <div class="card">
+      <div class="card-header"><h2>📨 Jenis Pesan</h2></div>
+      <div class="card-body">
+        <div class="type-tabs">
+          <button class="type-tab active" data-type="nota">📋 Nota Order</button>
+          <button class="type-tab" data-type="tagihan">💰 Tagihan</button>
+          <button class="type-tab" data-type="notif">✅ Selesai</button>
+        </div>
+
+        <!-- Info penerima -->
+        <div class="recipient-card" id="recipientCard">
+          <div class="recipient-avatar" id="recipientAvatar">?</div>
+          <div>
+            <div class="recipient-name" id="recipientName">Memuat...</div>
+            <div class="recipient-phone" id="recipientPhone"></div>
+          </div>
+        </div>
+
+        <!-- Editor teks -->
+        <textarea class="msg-editor" id="msgEditor" rows="12"
+          placeholder="Memuat pesan..."></textarea>
+        <div class="char-count"><span id="charCount">0</span> karakter</div>
+
+        <div class="actions">
+          <button class="btn btn-wa" id="sendBtn" disabled>
+            <span>📲</span> Buka WhatsApp & Kirim
+          </button>
+          <button class="btn btn-copy" id="copyBtn">
+            <span>📋</span> Salin Teks
+          </button>
+          <button class="btn btn-log" id="logBtn" disabled>
+            <span>📝</span> Tandai Terkirim (Log)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Log WA untuk transaksi ini -->
+    <div class="card">
+      <div class="card-header">
+        <h2>📜 Riwayat WA</h2>
+        <button onclick="loadLog()" style="font-size:12px;color:var(--blue);background:none;border:none;cursor:pointer">Refresh</button>
+      </div>
+      <div class="card-body" id="logContainer">
+        <div class="empty-log">Memuat riwayat...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PANEL KANAN: Phone Mockup ══ -->
+  <div>
+    <div class="card">
+      <div class="card-header"><h2>📱 Preview Tampilan WA</h2></div>
+      <div class="card-body" style="padding:12px">
+        <div class="phone-mockup">
+          <!-- Phone status bar -->
+          <div style="background:#111;color:#fff;font-size:10px;padding:4px 14px;display:flex;justify-content:space-between">
+            <span id="phoneClock">12:00</span>
+            <span>📶 🔋</span>
+          </div>
+          <!-- WA header -->
+          <div class="phone-header">
+            <div class="phone-avatar" id="mockAvatar">?</div>
+            <div>
+              <div class="phone-name" id="mockName">Pelanggan</div>
+              <div class="phone-sub" id="mockPhone">+62...</div>
+            </div>
+            <div class="phone-icons">📞 ⋮</div>
+          </div>
+          <!-- Chat body -->
+          <div class="phone-body" id="phoneChatBody">
+            <div class="loading-shimmer" style="width:80%;align-self:flex-end"></div>
+            <div class="loading-shimmer" style="width:60%;align-self:flex-end"></div>
+            <div class="loading-shimmer" style="width:70%;align-self:flex-end"></div>
+          </div>
+          <!-- Input bar -->
+          <div style="background:#f0f0f0;padding:8px 12px;display:flex;gap:8px;align-items:center">
+            <div style="flex:1;background:#fff;border-radius:20px;padding:8px 12px;font-size:12px;color:#999">
+              Ketik pesan...
+            </div>
+            <div style="width:36px;height:36px;background:var(--wa-green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px">🎤</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WA Mode Toggle -->
+    <div class="wa-mode-card">
+      <div class="wa-mode-body">
+        <div class="wa-mode-label">Kirim via:</div>
+        <div class="wa-mode-btns">
+          <button class="wa-mode-btn active" id="modeRegularBtn" onclick="setWAMode('regular')">
+            💬 WhatsApp Biasa
+          </button>
+          <button class="wa-mode-btn" id="modeBusinessBtn" onclick="setWAMode('business')">
+            💼 WhatsApp Business
+          </button>
+        </div>
+        <div class="wa-mode-note">WA Business terbuka jika terinstall di perangkat</div>
+      </div>
+    </div>
+
+    <!-- Info transaksi singkat -->
+    <div class="card">
+      <div class="card-header"><h2>🧾 Info Transaksi</h2></div>
+      <div class="card-body" id="txInfo">
+        <div class="loading-shimmer"></div>
+        <div class="loading-shimmer" style="width:70%;margin-top:8px"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════
+const params       = new URLSearchParams(window.location.search);
+const transaksiId  = params.get('id');
+const initType     = params.get('type') || 'nota';
+
+let currentType    = initType;
+let currentUrl     = null;
+let currentPhone   = null;
+let transaksiData  = null;
+let cache          = {};   // type → { url, teks, telepon, pelanggan }
+let waMode         = 'regular';
+
+// ════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════
+async function apiFetch(url, opts = {}) {
+  const r = await fetch(url, { credentials: 'include', ...opts });
+  if (r.status === 401) { window.location.replace('/login'); return null; }
+  return r.json();
+}
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  setTimeout(() => t.className = '', 3000);
+}
+
+// Render *bold* dan _italic_ seperti WA
+function renderWAText(text) {
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*([^*\n]+)\*/g, '<strong>$1</strong>')
+    .replace(/_([^_\n]+)_/g, '<em>$1</em>')
+    .replace(/\n/g, '<br/>');
+}
+
+// Jam sekarang
+function nowTime() {
+  return new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ════════════════════════════════════════
+// WA MODE
+// ════════════════════════════════════════
+function setWAMode(mode) {
+  waMode = mode;
+  document.getElementById('modeRegularBtn').classList.toggle('active', mode === 'regular');
+  document.getElementById('modeBusinessBtn').classList.toggle('active', mode === 'business');
+  // Invalidate cache karena URL berubah per mode
+  cache = {};
+}
+
+function buildWAUrl(phone, teks, mode) {
+  const clean = phone.replace(/\D/g, '');
+  const formatted = clean.startsWith('62') ? clean : clean.startsWith('0') ? '62' + clean.slice(1) : '62' + clean;
+  const encoded = encodeURIComponent(teks);
+  return mode === 'business'
+    ? `https://api.whatsapp.com/send?phone=${formatted}&text=${encoded}`
+    : `https://wa.me/${formatted}?text=${encoded}`;
+}
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
+(async () => {
+  if (!transaksiId) {
+    document.querySelector('.layout').innerHTML =
+      '<div style="padding:40px;text-align:center;color:#666">Parameter <code>?id=</code> tidak ditemukan.</div>';
+    return;
+  }
+
+  // Auth check
+  const me = await apiFetch('/api/v1/auth/me');
+  if (!me) return;
+
+  // Load default WA mode dari pengaturan
+  const modeRes = await apiFetch('/api/v1/pengaturan/wa-mode').catch(() => null);
+  if (modeRes?.wa_mode) setWAMode(modeRes.wa_mode);
+
+  // Load transaksi info
+  const txRes = await apiFetch(`/api/v1/transaksi/${transaksiId}`);
+  if (txRes?.data) {
+    transaksiData = txRes.data;
+    renderTxInfo(txRes.data);
+    // Back button ke transaksi
+    document.getElementById('backBtn').href = `/transaksi/${transaksiId}`;
+  }
+
+  // Set tab aktif sesuai initType
+  document.querySelectorAll('.type-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.type === currentType);
+  });
+
+  // Update jam
+  document.getElementById('phoneClock').textContent = nowTime();
+  setInterval(() => document.getElementById('phoneClock').textContent = nowTime(), 30000);
+
+  // Load pesan
+  await loadWAContent(currentType);
+  await loadLog();
+})();
+
+// ════════════════════════════════════════
+// LOAD WA CONTENT
+// ════════════════════════════════════════
+async function loadWAContent(type) {
+  currentType = type;
+  const editor = document.getElementById('msgEditor');
+  editor.value = 'Memuat pesan...';
+  document.getElementById('sendBtn').disabled = true;
+  document.getElementById('logBtn').disabled  = true;
+  document.getElementById('phoneChatBody').innerHTML =
+    '<div class="loading-shimmer" style="width:80%;align-self:flex-end"></div>' +
+    '<div class="loading-shimmer" style="width:60%;align-self:flex-end;margin-top:8px"></div>';
+
+  if (cache[type]) {
+    applyWAContent(cache[type]);
+    return;
+  }
+
+  const res = await apiFetch(`/api/v1/transaksi/${transaksiId}/wa/${type}`);
+  if (!res) return;
+  if (res.error) {
+    editor.value = '⚠️ ' + res.error;
+    document.getElementById('phoneChatBody').innerHTML =
+      `<div style="text-align:center;color:#999;font-size:12px;padding:20px">${res.error}</div>`;
+    return;
+  }
+
+  cache[type] = res;
+  applyWAContent(res);
+}
+
+function applyWAContent({ url, teks, telepon, pelanggan }) {
+  currentUrl   = url;
+  currentPhone = telepon;
+
+  // Editor
+  const editor = document.getElementById('msgEditor');
+  editor.value = teks;
+  updateCharCount(teks);
+
+  // Recipient info
+  document.getElementById('recipientAvatar').textContent = (pelanggan || '?').charAt(0).toUpperCase();
+  document.getElementById('recipientName').textContent   = pelanggan || '—';
+  document.getElementById('recipientPhone').textContent  = telepon ? `📱 ${telepon}` : '—';
+
+  // Phone mockup header
+  document.getElementById('mockAvatar').textContent = (pelanggan || '?').charAt(0).toUpperCase();
+  document.getElementById('mockName').textContent   = pelanggan || '—';
+  document.getElementById('mockPhone').textContent  = telepon   || '—';
+
+  // Render bubble
+  renderBubble(teks);
+
+  document.getElementById('sendBtn').disabled = !url;
+  document.getElementById('logBtn').disabled  = false;
+}
+
+// ════════════════════════════════════════
+// BUBBLE RENDER
+// ════════════════════════════════════════
+function renderBubble(teks) {
+  const body = document.getElementById('phoneChatBody');
+  body.innerHTML = `
+    <div class="wa-bubble-wrap">
+      <div class="wa-bubble">
+        ${renderWAText(teks)}
+        <div class="wa-time">${nowTime()} <span class="wa-check">✓✓</span></div>
+      </div>
+    </div>`;
+}
+
+// Editor → live update bubble
+document.getElementById('msgEditor').addEventListener('input', (e) => {
+  updateCharCount(e.target.value);
+  renderBubble(e.target.value);
+  // Invalidate cache untuk type ini
+  if (cache[currentType]) cache[currentType].teks = e.target.value;
+});
+
+function updateCharCount(text) {
+  document.getElementById('charCount').textContent = text.length;
+}
+
+// ════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════
+document.querySelectorAll('.type-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    loadWAContent(tab.dataset.type);
+  });
+});
+
+// ════════════════════════════════════════
+// ACTIONS
+// ════════════════════════════════════════
+
+// Kirim WA
+document.getElementById('sendBtn').addEventListener('click', () => {
+  const teks = document.getElementById('msgEditor').value.trim();
+  if (!teks || !currentPhone) return;
+  const url = buildWAUrl(currentPhone, teks, waMode);
+  window.open(url, '_blank', 'noopener');
+  showToast('WhatsApp dibuka di tab baru!', 'success');
+});
+
+// Salin teks
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  const teks = document.getElementById('msgEditor').value;
+  try {
+    await navigator.clipboard.writeText(teks);
+    showToast('Teks disalin ke clipboard!', 'success');
+  } catch {
+    showToast('Salin gagal — coba manual', 'error');
+  }
+});
+
+// Log terkirim
+document.getElementById('logBtn').addEventListener('click', async () => {
+  const teks  = document.getElementById('msgEditor').value.trim();
+  const phone = currentPhone;
+  if (!teks || !phone) return;
+
+  const res = await apiFetch('/api/v1/wa/log', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({
+      telepon:      phone,
+      pesan:        teks,
+      transaksi_id: parseInt(transaksiId),
+      status:       'terkirim',
+      wa_mode:      waMode
+    })
+  });
+  if (res?.id) {
+    showToast('✓ WA dicatat sebagai terkirim', 'success');
+    loadLog();
+  } else {
+    showToast('Gagal mencatat log', 'error');
+  }
+});
+
+// ════════════════════════════════════════
+// RIWAYAT LOG
+// ════════════════════════════════════════
+async function loadLog() {
+  const container = document.getElementById('logContainer');
+  const db = await apiFetch(`/api/v1/transaksi/${transaksiId}`);
+  if (!db) return;
+
+  // Ambil log dari server (endpoint khusus belum ada, skip atau gunakan data log yang ada)
+  // Untuk sekarang tampilkan pesan sederhana
+  const res = await fetch(`/api/v1/wa/log-list?transaksi_id=${transaksiId}`, { credentials: 'include' });
+  if (!res.ok) {
+    container.innerHTML = '<div class="empty-log">Belum ada riwayat pengiriman WA.</div>';
+    return;
+  }
+  const { data } = await res.json();
+  if (!data?.length) {
+    container.innerHTML = '<div class="empty-log">Belum ada riwayat pengiriman WA.</div>';
+    return;
+  }
+  container.innerHTML = data.map(log => `
+    <div class="log-item">
+      <div class="log-status ${log.status}"></div>
+      <div style="flex:1">
+        <div>${log.telepon} — ${log.status}</div>
+        <div class="log-meta">${new Date(log.created_at).toLocaleString('id-ID')}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════
+// TX INFO CARD
+// ════════════════════════════════════════
+function renderTxInfo(t) {
+  const fmtRp = n => Number(n || 0).toLocaleString('id-ID');
+  document.getElementById('txInfo').innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <tr><td style="color:#64748b;padding:3px 0">No. Order</td>
+          <td style="font-weight:700;padding:3px 0">${t.nomor_transaksi}</td></tr>
+      <tr><td style="color:#64748b;padding:3px 0">Status</td>
+          <td style="padding:3px 0">
+            <span style="padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;
+              background:${statusBg(t.status)};color:${statusColor(t.status)}">
+              ${t.status}
+            </span>
+          </td></tr>
+      <tr><td style="color:#64748b;padding:3px 0">Total</td>
+          <td style="font-weight:700;color:#2563eb;padding:3px 0">Rp ${fmtRp(t.total_bayar)}</td></tr>
+      <tr><td style="color:#64748b;padding:3px 0">Item</td>
+          <td style="padding:3px 0">${(t.items||[]).length} layanan</td></tr>
+    </table>`;
+}
+
+function statusBg(s) {
+  return { pending:'#fef3c7', proses:'#dbeafe', selesai:'#d1fae5', diambil:'#f1f5f9', dibatalkan:'#fee2e2' }[s] || '#f1f5f9';
+}
+function statusColor(s) {
+  return { pending:'#92400e', proses:'#1e40af', selesai:'#065f46', diambil:'#475569', dibatalkan:'#991b1b' }[s] || '#374151';
+}
+
+function formatPhone(telepon) {
+  if (!telepon) return '';
+  const clean = telepon.replace(/\D/g, '');
+  if (clean.startsWith('62')) return clean;
+  if (clean.startsWith('0'))  return '62' + clean.slice(1);
+  return '62' + clean;
+}
+</script>
+</body>
+</html>

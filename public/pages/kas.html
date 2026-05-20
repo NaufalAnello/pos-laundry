@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="/css/layout.css"/>
+  <title>Buku Kas — POS Laundry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:#2563eb; --blue-lt:#eff6ff;
+      --green:#16a34a; --green-lt:#f0fdf4;
+      --yellow:#d97706; --yellow-lt:#fffbeb;
+      --red:#dc2626; --red-lt:#fef2f2;
+      --purple:#7c3aed; --purple-lt:#f5f3ff;
+      --gray-1:#f8fafc; --gray-2:#f1f5f9; --gray-3:#e2e8f0;
+      --gray-5:#64748b; --gray-7:#374151; --gray-9:#111827;
+      --radius:10px; --shadow:0 1px 4px rgba(0,0,0,.08);
+    }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+           background:var(--gray-2); color:var(--gray-9); font-size:14px; min-height:100vh; }
+
+    /* ── Header ── */
+    header { background:#fff; border-bottom:1px solid var(--gray-3); padding:0 20px; height:56px;
+             display:flex; align-items:center; gap:20px; position:sticky; top:0; z-index:20; box-shadow:var(--shadow); }
+    .logo  { font-size:16px; font-weight:800; color:var(--blue); white-space:nowrap; }
+    nav    { display:flex; gap:4px; flex:1; }
+    nav a  { padding:6px 14px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600; color:var(--gray-7); transition:background .15s; }
+    nav a:hover  { background:var(--gray-2); }
+    nav a.active { background:var(--blue-lt); color:var(--blue); }
+    .header-user { font-size:13px; color:var(--gray-5); display:flex; align-items:center; gap:8px; }
+    .logout-btn  { padding:5px 12px; border:1px solid var(--gray-3); border-radius:7px; background:none; font-size:13px; cursor:pointer; color:var(--gray-7); }
+    .logout-btn:hover { background:var(--gray-2); }
+
+    /* ── Page ── */
+    .page { max-width:1100px; margin:0 auto; padding:20px 16px; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; flex-wrap:wrap; }
+    .page-title  { font-size:20px; font-weight:800; }
+
+    /* ── Buttons ── */
+    .btn { padding:8px 16px; border-radius:8px; border:1px solid transparent; font-size:13px;
+           font-weight:600; cursor:pointer; transition:opacity .15s; display:inline-flex; align-items:center; gap:6px; }
+    .btn:hover    { opacity:.85; }
+    .btn:disabled { opacity:.4; cursor:default; }
+    .btn-sm  { padding:5px 10px; font-size:12px; }
+    .btn-blue    { background:var(--blue);  color:#fff; }
+    .btn-green   { background:var(--green); color:#fff; }
+    .btn-red     { background:var(--red);   color:#fff; }
+    .btn-outline { background:#fff; border-color:var(--gray-3); color:var(--gray-7); }
+    .btn-ghost   { background:none; border:none; color:var(--gray-5); padding:4px 8px; }
+    .btn-ghost:hover { color:var(--gray-9); background:var(--gray-2); border-radius:6px; }
+
+    /* ── Stat cards ── */
+    .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+    @media(max-width:700px) { .stats-grid { grid-template-columns:1fr; } }
+    .stat-card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3);
+                 box-shadow:var(--shadow); padding:18px 20px; display:flex; align-items:flex-start; gap:14px; }
+    .stat-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center;
+                 justify-content:center; font-size:22px; flex-shrink:0; }
+    .stat-card.purple .stat-icon { background:var(--purple-lt); }
+    .stat-card.green  .stat-icon { background:var(--green-lt);  }
+    .stat-card.red    .stat-icon { background:var(--red-lt);    }
+    .stat-label { font-size:12px; color:var(--gray-5); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+    .stat-value { font-size:22px; font-weight:800; margin-top:2px; }
+    .stat-card.purple .stat-value { color:var(--purple); }
+    .stat-card.green  .stat-value { color:var(--green);  }
+    .stat-card.red    .stat-value { color:var(--red);    }
+    .stat-sub { font-size:12px; color:var(--gray-5); margin-top:4px; }
+
+    /* ── Main grid ── */
+    .main-grid { display:grid; grid-template-columns:1fr 320px; gap:16px; }
+    @media(max-width:1000px) { .main-grid { grid-template-columns:1fr; } }
+
+    /* ── Card ── */
+    .card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3); box-shadow:var(--shadow); margin-bottom:0; }
+    .card-header { padding:14px 18px; border-bottom:1px solid var(--gray-3);
+                   display:flex; align-items:center; justify-content:space-between; }
+    .card-header h2 { font-size:14px; font-weight:700; color:var(--gray-7); }
+    .card-body  { padding:16px 18px; }
+
+    /* ── Filter/Tabs ── */
+    .filter-bar { background:#fff; border:1px solid var(--gray-3); border-radius:var(--radius);
+                  box-shadow:var(--shadow); padding:12px 16px; margin-bottom:16px;
+                  display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; }
+    .filter-group  { display:flex; flex-direction:column; gap:4px; }
+    .filter-label  { font-size:11px; font-weight:700; color:var(--gray-5); text-transform:uppercase; letter-spacing:.4px; }
+    .filter-input, .filter-select {
+      padding:7px 10px; border:1px solid var(--gray-3); border-radius:7px;
+      font-size:13px; background:#fff; outline:none; transition:border-color .15s; }
+    .filter-input:focus, .filter-select:focus { border-color:var(--blue); }
+
+    .tabs { display:flex; gap:4px; border-bottom:2px solid var(--gray-3); margin-bottom:16px; }
+    .tab-btn { padding:8px 16px; border:none; background:none; font-size:13px; font-weight:600;
+               color:var(--gray-5); cursor:pointer; border-bottom:2px solid transparent;
+               margin-bottom:-2px; transition:color .1s; }
+    .tab-btn:hover  { color:var(--gray-9); }
+    .tab-btn.active { color:var(--blue); border-bottom-color:var(--blue); }
+
+    /* ── Day group ── */
+    .day-group   { margin-bottom:12px; }
+    .day-header  { display:flex; align-items:center; justify-content:space-between; padding:8px 0; }
+    .day-label   { font-size:13px; font-weight:700; color:var(--gray-7); }
+    .day-summary { font-size:12px; color:var(--gray-5); display:flex; gap:12px; }
+    .day-masuk   { color:var(--green); font-weight:600; }
+    .day-keluar  { color:var(--red);   font-weight:600; }
+
+    .kas-item { display:flex; align-items:center; gap:12px; padding:10px 14px; background:#fff;
+                border:1px solid var(--gray-3); border-radius:8px; margin-bottom:6px; transition:background .1s; }
+    .kas-item:hover { background:var(--gray-1); }
+    .kas-dot  { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    .kas-dot.masuk  { background:var(--green); }
+    .kas-dot.keluar { background:var(--red);   }
+    .kas-info { flex:1; min-width:0; }
+    .kas-ket  { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .kas-meta { font-size:11px; color:var(--gray-5); margin-top:2px; }
+    .kas-jml  { font-size:14px; font-weight:800; white-space:nowrap; }
+    .kas-jml.masuk  { color:var(--green); }
+    .kas-jml.keluar { color:var(--red);   }
+    .kas-actions { display:flex; gap:4px; }
+
+    .empty-state { text-align:center; padding:40px; color:var(--gray-5); font-size:13px; }
+
+    /* ── Form ── */
+    .form-group { margin-bottom:14px; }
+    .form-label { display:block; font-size:12px; font-weight:700; color:var(--gray-7); margin-bottom:5px; text-transform:uppercase; letter-spacing:.4px; }
+    .form-input, .form-select {
+      width:100%; padding:9px 12px; border:1px solid var(--gray-3); border-radius:8px;
+      font-size:14px; outline:none; transition:border-color .15s; background:#fff; color:var(--gray-9); }
+    .form-input:focus, .form-select:focus { border-color:var(--blue); }
+
+    /* ── Jenis toggle ── */
+    .jenis-toggle { display:grid; grid-template-columns:1fr 1fr; border:1px solid var(--gray-3); border-radius:8px; overflow:hidden; }
+    .jenis-btn { padding:10px; text-align:center; font-size:13px; font-weight:700; cursor:pointer;
+                 background:#fff; border:none; transition:background .1s; }
+    .jenis-btn.masuk.active  { background:var(--green);  color:#fff; }
+    .jenis-btn.keluar.active { background:var(--red);    color:#fff; }
+    .jenis-btn:not(.active)  { color:var(--gray-5); }
+
+    /* ── Toast ── */
+    #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+             background:#111; color:#fff; padding:10px 20px; border-radius:99px;
+             font-size:13px; font-weight:600; z-index:9999; opacity:0; pointer-events:none; transition:opacity .25s; }
+    #toast.show { opacity:1; }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Buku Kas</div>
+    <button class="btn btn-green" onclick="exportCSV()">Export CSV</button>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stats-grid">
+    <div class="stat-card purple">
+      <div class="stat-icon">💳</div>
+      <div>
+        <div class="stat-label">Saldo Total</div>
+        <div class="stat-value" id="statSaldo">—</div>
+        <div class="stat-sub">Semua waktu</div>
+      </div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon">📈</div>
+      <div>
+        <div class="stat-label">Masuk Bulan Ini</div>
+        <div class="stat-value" id="statMasukBulan">—</div>
+        <div class="stat-sub" id="statMasukHari">Hari ini: —</div>
+      </div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-icon">📉</div>
+      <div>
+        <div class="stat-label">Keluar Bulan Ini</div>
+        <div class="stat-value" id="statKeluarBulan">—</div>
+        <div class="stat-sub" id="statKeluarHari">Hari ini: —</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <!-- Kiri: list kas -->
+    <div>
+      <!-- Filter -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <div class="filter-label">Dari</div>
+          <input type="date" id="filterDari" class="filter-input" onchange="loadKas()"/>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Sampai</div>
+          <input type="date" id="filterSampai" class="filter-input" onchange="loadKas()"/>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Jenis</div>
+          <select id="filterJenis" class="filter-select" onchange="loadKas()">
+            <option value="">Semua</option>
+            <option value="masuk">Masuk</option>
+            <option value="keluar">Keluar</option>
+          </select>
+        </div>
+        <button class="btn btn-outline btn-sm" style="align-self:flex-end" onclick="resetFilter()">Reset</button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="setTab('semua', this)">Semua</button>
+        <button class="tab-btn" onclick="setTab('masuk', this)">Masuk</button>
+        <button class="tab-btn" onclick="setTab('keluar', this)">Keluar</button>
+        <button class="tab-btn" onclick="setTab('hari', this)">Hari Ini</button>
+        <button class="tab-btn" onclick="setTab('bulan', this)">Bulan Ini</button>
+      </div>
+
+      <!-- List -->
+      <div id="kasList">
+        <div class="empty-state">Memuat...</div>
+      </div>
+
+      <!-- Pagination info -->
+      <div id="paginationInfo" style="text-align:center;padding:12px;font-size:13px;color:var(--gray-5);display:none"></div>
+      <div id="loadMoreWrap" style="text-align:center;padding:8px;display:none">
+        <button class="btn btn-outline btn-sm" onclick="loadMore()">Muat lebih banyak</button>
+      </div>
+    </div>
+
+    <!-- Kanan: form catat -->
+    <div>
+      <div class="card">
+        <div class="card-header"><h2>Catat Transaksi Kas</h2></div>
+        <div class="card-body">
+          <div class="form-group">
+            <div class="jenis-toggle">
+              <button class="jenis-btn masuk active" id="jenisMasuk" onclick="setJenis('masuk')">▲ Pemasukan</button>
+              <button class="jenis-btn keluar" id="jenisKeluar" onclick="setJenis('keluar')">▼ Pengeluaran</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tanggal *</label>
+            <input type="date" id="formTanggal" class="form-input"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jumlah (Rp) *</label>
+            <input type="number" id="formJumlah" class="form-input" placeholder="50000" min="1"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kategori</label>
+            <select id="formKategori" class="form-select">
+              <option value="lainnya">Lainnya</option>
+              <option value="operasional">Operasional</option>
+              <option value="bahan">Bahan/Supplies</option>
+              <option value="gaji">Gaji</option>
+              <option value="peralatan">Peralatan</option>
+              <option value="tagihan">Tagihan/Utilitas</option>
+              <option value="transaksi">Transaksi</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Keterangan</label>
+            <input type="text" id="formKeterangan" class="form-input" placeholder="Deskripsi singkat..."/>
+          </div>
+          <button class="btn btn-blue" style="width:100%" id="simpanBtn" onclick="simpanKas()">
+            Simpan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const fmtRp      = n => 'Rp ' + Number(n||0).toLocaleString('id-ID');
+const fmtRpShort = n => {
+  n = Number(n||0);
+  if (n >= 1000000) return 'Rp ' + (n/1000000).toFixed(1).replace('.0','') + 'jt';
+  if (n >= 1000)    return 'Rp ' + (n/1000).toFixed(0) + 'rb';
+  return 'Rp ' + n.toLocaleString('id-ID');
+};
+const fmtDate = s => s ? new Date(s + 'T00:00:00').toLocaleDateString('id-ID',
+  { weekday:'long', day:'numeric', month:'long', year:'numeric' }) : '—';
+const fmtDateShort = s => s ? new Date(s + 'T00:00:00').toLocaleDateString('id-ID',
+  { day:'2-digit', month:'short', year:'numeric' }) : '—';
+
+let currentJenis = 'masuk';
+let allRows = [];
+let currentPage = 1;
+const PAGE_SIZE = 50;
+
+function showToast(msg, dur=2500) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+async function logout() {
+  await fetch('/api/v1/auth/logout', { method:'POST' });
+  location.href = '/login';
+}
+
+function setJenis(j) {
+  currentJenis = j;
+  document.getElementById('jenisMasuk').classList.toggle('active', j === 'masuk');
+  document.getElementById('jenisKeluar').classList.toggle('active', j === 'keluar');
+}
+
+function setTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const today = new Date().toISOString().slice(0,10);
+  const bulanAwal = today.slice(0,7) + '-01';
+
+  const dari   = document.getElementById('filterDari');
+  const sampai = document.getElementById('filterSampai');
+  const jenis  = document.getElementById('filterJenis');
+
+  dari.value = ''; sampai.value = ''; jenis.value = '';
+
+  if (tab === 'hari')   { dari.value = today;     sampai.value = today; }
+  if (tab === 'bulan')  { dari.value = bulanAwal; sampai.value = today; }
+  if (tab === 'masuk')  { jenis.value = 'masuk';  }
+  if (tab === 'keluar') { jenis.value = 'keluar'; }
+
+  loadKas();
+}
+
+function resetFilter() {
+  document.getElementById('filterDari').value   = '';
+  document.getElementById('filterSampai').value = '';
+  document.getElementById('filterJenis').value  = '';
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.tab-btn').classList.add('active');
+  loadKas();
+}
+
+// ── Load ringkasan ────────────────────────────────────────────────────────────
+async function loadRingkasan() {
+  try {
+    const r = await fetch('/api/v1/kas/ringkasan');
+    const d = await r.json();
+    document.getElementById('statSaldo').textContent       = fmtRpShort(d.saldo_total);
+    document.getElementById('statMasukBulan').textContent  = fmtRpShort(d.masuk_bulan_ini);
+    document.getElementById('statKeluarBulan').textContent = fmtRpShort(d.keluar_bulan_ini);
+    document.getElementById('statMasukHari').textContent   = 'Hari ini: ' + fmtRpShort(d.masuk_hari_ini);
+    document.getElementById('statKeluarHari').textContent  = 'Hari ini: ' + fmtRpShort(d.keluar_hari_ini);
+  } catch { /* silent */ }
+}
+
+// ── Load kas list ─────────────────────────────────────────────────────────────
+async function loadKas(page = 1) {
+  currentPage = page;
+  const dari   = document.getElementById('filterDari').value;
+  const sampai = document.getElementById('filterSampai').value;
+  const jenis  = document.getElementById('filterJenis').value;
+
+  const params = new URLSearchParams({ page, limit: PAGE_SIZE });
+  if (dari)   params.set('tanggal_dari', dari);
+  if (sampai) params.set('tanggal_sampai', sampai);
+  if (jenis)  params.set('jenis', jenis);
+
+  if (page === 1) {
+    allRows = [];
+    document.getElementById('kasList').innerHTML = '<div class="empty-state">Memuat...</div>';
+  }
+
+  try {
+    const r = await fetch('/api/v1/kas?' + params);
+    if (r.status === 401) { location.href = '/login'; return; }
+    const d = await r.json();
+
+    allRows = page === 1 ? d.data : [...allRows, ...d.data];
+    renderList(allRows);
+
+    const total = d.meta?.total || 0;
+    const loaded = allRows.length;
+
+    const infoEl = document.getElementById('paginationInfo');
+    const moreEl = document.getElementById('loadMoreWrap');
+
+    if (total > 0) {
+      infoEl.style.display = 'block';
+      infoEl.textContent   = `Menampilkan ${loaded} dari ${total} entri`;
+    } else { infoEl.style.display = 'none'; }
+
+    moreEl.style.display = (loaded < total) ? 'block' : 'none';
+  } catch(e) {
+    console.error(e);
+    document.getElementById('kasList').innerHTML = '<div class="empty-state" style="color:var(--red)">Gagal memuat data</div>';
+  }
+}
+
+function loadMore() { loadKas(currentPage + 1); }
+
+// ── Render list grouped by day ────────────────────────────────────────────────
+function renderList(rows) {
+  const el = document.getElementById('kasList');
+  if (!rows.length) {
+    el.innerHTML = '<div class="empty-state">Tidak ada data kas untuk filter ini</div>';
+    return;
+  }
+
+  // Group by tanggal
+  const groups = {};
+  rows.forEach(r => {
+    const tgl = r.tanggal?.slice(0,10) || '?';
+    if (!groups[tgl]) groups[tgl] = [];
+    groups[tgl].push(r);
+  });
+
+  el.innerHTML = Object.entries(groups).map(([tgl, items]) => {
+    const masukTotal  = items.filter(i => i.jenis === 'masuk' ).reduce((s,i) => s + Number(i.jumlah), 0);
+    const keluarTotal = items.filter(i => i.jenis === 'keluar').reduce((s,i) => s + Number(i.jumlah), 0);
+
+    const itemsHtml = items.map(i => {
+      const isManual = !i.transaksi_id;
+      return `<div class="kas-item">
+        <div class="kas-dot ${i.jenis}"></div>
+        <div class="kas-info">
+          <div class="kas-ket">${i.keterangan || (i.nomor_transaksi ? 'Transaksi ' + i.nomor_transaksi : '(tanpa keterangan)')}</div>
+          <div class="kas-meta">
+            ${i.kategori || '—'}
+            ${i.nomor_transaksi ? ` · <a href="/api/v1/transaksi/${i.transaksi_id}/struk" target="_blank" style="color:var(--blue)">${i.nomor_transaksi}</a>` : ''}
+            ${i.user_nama ? ' · ' + i.user_nama : ''}
+          </div>
+        </div>
+        <div class="kas-jml ${i.jenis}">${i.jenis === 'masuk' ? '+' : '-'}${fmtRp(i.jumlah)}</div>
+        ${isManual ? `<div class="kas-actions">
+          <button class="btn-ghost" onclick="hapusKas(${i.id})" title="Hapus" style="font-size:16px;color:var(--red)">×</button>
+        </div>` : ''}
+      </div>`;
+    }).join('');
+
+    return `<div class="day-group">
+      <div class="day-header">
+        <div class="day-label">${fmtDate(tgl)}</div>
+        <div class="day-summary">
+          ${masukTotal  ? `<span class="day-masuk">+${fmtRpShort(masukTotal)}</span>`  : ''}
+          ${keluarTotal ? `<span class="day-keluar">-${fmtRpShort(keluarTotal)}</span>` : ''}
+        </div>
+      </div>
+      ${itemsHtml}
+    </div>`;
+  }).join('');
+}
+
+// ── Simpan kas manual ─────────────────────────────────────────────────────────
+async function simpanKas() {
+  const tanggal   = document.getElementById('formTanggal').value;
+  const jumlah    = parseFloat(document.getElementById('formJumlah').value);
+  const kategori  = document.getElementById('formKategori').value;
+  const keterangan = document.getElementById('formKeterangan').value.trim();
+
+  if (!tanggal)         { showToast('Tanggal wajib diisi'); return; }
+  if (!jumlah || jumlah < 1) { showToast('Jumlah harus lebih dari 0'); return; }
+
+  const btn = document.getElementById('simpanBtn');
+  btn.disabled = true;
+  try {
+    const r = await fetch('/api/v1/kas', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ tanggal, jenis: currentJenis, kategori, keterangan, jumlah })
+    });
+    const d = await r.json();
+    if (!r.ok) { showToast('Gagal: ' + d.error); return; }
+    showToast(d.message);
+    document.getElementById('formJumlah').value    = '';
+    document.getElementById('formKeterangan').value = '';
+    loadKas();
+    loadRingkasan();
+  } catch { showToast('Koneksi gagal'); }
+  finally   { btn.disabled = false; }
+}
+
+// ── Hapus entri ───────────────────────────────────────────────────────────────
+async function hapusKas(id) {
+  if (!confirm('Hapus entri kas ini?')) return;
+  try {
+    const r = await fetch(`/api/v1/kas/${id}`, { method:'DELETE' });
+    const d = await r.json();
+    if (!r.ok) { showToast('Gagal: ' + d.error, 4000); return; }
+    showToast(d.message);
+    loadKas();
+    loadRingkasan();
+  } catch { showToast('Koneksi gagal'); }
+}
+
+// ── Export CSV ────────────────────────────────────────────────────────────────
+async function exportCSV() {
+  const dari   = document.getElementById('filterDari').value;
+  const sampai = document.getElementById('filterSampai').value;
+  const jenis  = document.getElementById('filterJenis').value;
+
+  showToast('Mengambil data...');
+  const params = new URLSearchParams({ page:1, limit:5000 });
+  if (dari)   params.set('tanggal_dari', dari);
+  if (sampai) params.set('tanggal_sampai', sampai);
+  if (jenis)  params.set('jenis', jenis);
+
+  try {
+    const r = await fetch('/api/v1/kas?' + params);
+    const d = await r.json();
+    const rows = d.data || [];
+
+    const headers = ['No','Tanggal','Jenis','Kategori','Keterangan','Jumlah','No. Transaksi','Dicatat Oleh'];
+    const csv = [
+      headers.join(','),
+      ...rows.map((row, i) => [
+        i+1,
+        row.tanggal,
+        row.jenis,
+        row.kategori || '',
+        csvEsc(row.keterangan || ''),
+        row.jumlah,
+        row.nomor_transaksi || '',
+        csvEsc(row.user_nama || '')
+      ].join(','))
+    ];
+
+    const blob = new Blob(['﻿' + csv.join('\n')], { type:'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = `buku-kas-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+    showToast(`Export ${rows.length} entri selesai`);
+  } catch { showToast('Gagal export'); }
+}
+
+function csvEsc(v) {
+  v = String(v||'').replace(/"/g, '""');
+  return /[,"\n]/.test(v) ? `"${v}"` : v;
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+fetch('/api/v1/auth/me').then(r => r.json()).then(d => {
+  if (d.user) document.getElementById('userName').textContent = d.user.nama;
+}).catch(() => {});
+
+// Set default tanggal form
+document.getElementById('formTanggal').value = new Date().toISOString().slice(0,10);
+
+loadRingkasan();
+loadKas();
+</script>
+<script src="/js/nav.js"></script>
+</body>
+</html>

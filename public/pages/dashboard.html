@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="/css/layout.css"/>
+  <title>Dashboard — POS Laundry</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:   #2563eb; --blue-dk: #1d4ed8; --blue-lt: #eff6ff;
+      --green:  #16a34a; --green-lt: #f0fdf4;
+      --yellow: #d97706; --yellow-lt: #fffbeb;
+      --red:    #dc2626; --red-lt:   #fef2f2;
+      --purple: #7c3aed; --purple-lt: #f5f3ff;
+      --gray-1: #f8fafc; --gray-2: #f1f5f9; --gray-3: #e2e8f0;
+      --gray-5: #64748b; --gray-7: #374151; --gray-9: #111827;
+      --radius: 10px; --shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+           background: var(--gray-2); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
+
+    /* ── Header ── */
+    header {
+      background: #fff; border-bottom: 1px solid var(--gray-3);
+      padding: 0 20px; height: 56px;
+      display: flex; align-items: center; gap: 20px;
+      position: sticky; top: 0; z-index: 20;
+      box-shadow: var(--shadow);
+    }
+    .logo { font-size: 16px; font-weight: 800; color: var(--blue); white-space: nowrap; }
+    header nav { display: flex; gap: 4px; flex: 1; }
+    header nav a {
+      padding: 6px 14px; border-radius: 8px; text-decoration: none;
+      font-size: 13px; font-weight: 600; color: var(--gray-7); transition: background .15s;
+    }
+    header nav a:hover { background: var(--gray-2); }
+    header nav a.active { background: var(--blue-lt); color: var(--blue); }
+    .header-user { font-size: 13px; color: var(--gray-5); display: flex; align-items: center; gap: 8px; }
+    .logout-btn { padding: 5px 12px; border: 1px solid var(--gray-3); border-radius: 7px;
+                  background: none; font-size: 13px; cursor: pointer; color: var(--gray-7); }
+    .logout-btn:hover { background: var(--gray-2); }
+
+    /* ── Page ── */
+    .page { max-width: 1280px; margin: 0 auto; padding: 20px 16px; }
+    .page-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .page-sub { color: var(--gray-5); font-size: 13px; margin-bottom: 20px; }
+
+    /* ── Stat cards ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+    @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
+    .stat-card {
+      background: #fff; border-radius: var(--radius); border: 1px solid var(--gray-3);
+      box-shadow: var(--shadow); padding: 18px 20px;
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .stat-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .stat-card.blue   .stat-icon { background: var(--blue-lt); }
+    .stat-card.green  .stat-icon { background: var(--green-lt); }
+    .stat-card.yellow .stat-icon { background: var(--yellow-lt); }
+    .stat-card.red    .stat-icon { background: var(--red-lt); }
+    .stat-body {}
+    .stat-label { font-size: 12px; color: var(--gray-5); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+    .stat-value { font-size: 24px; font-weight: 800; margin-top: 2px; line-height: 1.2; }
+    .stat-card.blue   .stat-value { color: var(--blue); }
+    .stat-card.green  .stat-value { color: var(--green); }
+    .stat-card.yellow .stat-value { color: var(--yellow); }
+    .stat-card.red    .stat-value { color: var(--red); }
+
+    /* ── Main grid ── */
+    .main-grid { display: grid; grid-template-columns: 1fr 380px; gap: 16px; }
+    @media (max-width: 1100px) { .main-grid { grid-template-columns: 1fr; } }
+
+    /* ── Card ── */
+    .card {
+      background: #fff; border-radius: var(--radius);
+      border: 1px solid var(--gray-3); box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    .card-header {
+      padding: 14px 18px; border-bottom: 1px solid var(--gray-3);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-header h2 { font-size: 14px; font-weight: 700; color: var(--gray-7); }
+    .card-body { padding: 16px 18px; }
+
+    /* ── Chart ── */
+    .chart-wrap { position: relative; height: 220px; }
+
+    /* ── Antrian ── */
+    .antrian-empty { text-align: center; color: var(--gray-5); padding: 32px; font-size: 13px; }
+    .antrian-item {
+      border: 1px solid var(--gray-3); border-radius: 8px; padding: 12px 14px;
+      margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .antrian-item:last-child { margin-bottom: 0; }
+    .antrian-row1 { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .antrian-nomor { font-weight: 700; font-size: 13px; }
+    .antrian-pelanggan { font-size: 12px; color: var(--gray-5); }
+    .antrian-row2 { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .antrian-items-text { font-size: 12px; color: var(--gray-5); flex: 1; }
+    .antrian-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .btn { padding: 5px 12px; border-radius: 7px; border: 1px solid transparent;
+           font-size: 12px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+    .btn:hover { opacity: .85; }
+    .btn-sm { padding: 4px 10px; font-size: 11px; }
+    .btn-blue { background: var(--blue); color: #fff; }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-outline { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
+    .btn-wa { background: #25d366; color: #fff; }
+    .btn-red { background: var(--red); color: #fff; }
+
+    /* ── Status badge ── */
+    .badge {
+      display: inline-block; padding: 2px 9px; border-radius: 99px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+    }
+    .badge-pending  { background: var(--yellow-lt); color: var(--yellow); }
+    .badge-proses   { background: var(--blue-lt);   color: var(--blue); }
+    .badge-selesai  { background: var(--green-lt);  color: var(--green); }
+    .badge-diambil  { background: var(--gray-2);    color: var(--gray-5); }
+    .badge-dibatalkan { background: var(--red-lt);  color: var(--red); }
+
+    /* ── Status select ── */
+    .status-select {
+      padding: 4px 8px; border: 1px solid var(--gray-3); border-radius: 6px;
+      font-size: 12px; cursor: pointer; background: #fff; font-weight: 600;
+    }
+
+    /* ── Right sidebar items ── */
+    .tagihan-item {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 10px 0; border-bottom: 1px solid var(--gray-3); gap: 8px;
+    }
+    .tagihan-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .tagihan-nomor { font-weight: 700; font-size: 13px; }
+    .tagihan-meta  { font-size: 11px; color: var(--gray-5); margin-top: 2px; }
+    .tagihan-sisa  { font-weight: 700; color: var(--red); font-size: 13px; white-space: nowrap; }
+
+    .promo-item { padding: 8px 0; border-bottom: 1px solid var(--gray-3); }
+    .promo-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .promo-nama { font-weight: 600; font-size: 13px; }
+    .promo-disc { font-size: 12px; color: var(--green); font-weight: 600; }
+    .promo-exp  { font-size: 11px; color: var(--gray-5); }
+
+    .stok-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 7px 0; border-bottom: 1px solid var(--gray-3);
+    }
+    .stok-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .stok-nama  { font-size: 13px; font-weight: 600; }
+    .stok-sisa  { font-size: 12px; font-weight: 700; color: var(--red); }
+    .stok-min   { font-size: 11px; color: var(--gray-5); }
+
+    .empty-state { text-align: center; color: var(--gray-5); padding: 20px; font-size: 13px; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #111; color: #fff; padding: 10px 20px; border-radius: 99px;
+      font-size: 13px; font-weight: 600; z-index: 9999;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    #toast.show { opacity: 1; }
+
+    /* ── WA Dropdown ── */
+    .wa-menu-wrap { position: relative; display: inline-block; }
+    .wa-menu {
+      display: none; position: absolute; right: 0; top: 100%; margin-top: 4px;
+      background: #fff; border: 1px solid var(--gray-3); border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.12); min-width: 160px; z-index: 100;
+      overflow: hidden;
+    }
+    .wa-menu.open { display: block; }
+    .wa-menu a {
+      display: block; padding: 9px 14px; font-size: 13px; color: var(--gray-9);
+      text-decoration: none; transition: background .1s;
+    }
+    .wa-menu a:hover { background: var(--gray-2); }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div class="page-title">Dashboard</div>
+  <div class="page-sub" id="pageDate">Memuat...</div>
+
+  <!-- Stat cards -->
+  <div class="stats-grid">
+    <div class="stat-card blue">
+      <div class="stat-icon">📋</div>
+      <div class="stat-body">
+        <div class="stat-label">Order Hari Ini</div>
+        <div class="stat-value" id="statOrder">—</div>
+      </div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon">💰</div>
+      <div class="stat-body">
+        <div class="stat-label">Omset Hari Ini</div>
+        <div class="stat-value" id="statOmset">—</div>
+      </div>
+    </div>
+    <div class="stat-card yellow">
+      <div class="stat-icon">💬</div>
+      <div class="stat-body">
+        <div class="stat-label">WA Terkirim</div>
+        <div class="stat-value" id="statWa">—</div>
+      </div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-icon">⚠️</div>
+      <div class="stat-body">
+        <div class="stat-label">Tagihan Belum Lunas</div>
+        <div class="stat-value" id="statTagihan">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <!-- Left column -->
+    <div>
+      <!-- Bar chart -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Omset 7 Hari Terakhir</h2>
+        </div>
+        <div class="card-body">
+          <div class="chart-wrap">
+            <canvas id="omsetChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Antrian aktif -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Antrian Aktif</h2>
+          <span id="antrianCount" class="badge badge-pending">—</span>
+        </div>
+        <div class="card-body" id="antrianBody">
+          <div class="antrian-empty">Memuat...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column -->
+    <div>
+      <!-- Tagihan belum lunas -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Tagihan Belum Lunas</h2>
+          <a href="/order?status=belum_lunas" style="font-size:12px;color:var(--blue);text-decoration:none;">Lihat Semua</a>
+        </div>
+        <div class="card-body" id="tagihanBody">
+          <div class="empty-state">Memuat...</div>
+        </div>
+      </div>
+
+      <!-- Promo aktif -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Promo Aktif Hari Ini</h2>
+        </div>
+        <div class="card-body" id="promoBody">
+          <div class="empty-state">Memuat...</div>
+        </div>
+      </div>
+
+      <!-- Stok hampir habis -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Stok Hampir Habis</h2>
+        </div>
+        <div class="card-body" id="stokBody">
+          <div class="empty-state">Memuat...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+const fmtRpShort = n => {
+  n = Number(n || 0);
+  if (n >= 1000000) return 'Rp ' + (n / 1000000).toFixed(1).replace('.0','') + 'jt';
+  if (n >= 1000)    return 'Rp ' + (n / 1000).toFixed(0) + 'rb';
+  return 'Rp ' + n.toLocaleString('id-ID');
+};
+const fmtDate = s => s ? new Date(s).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+const fmtTime = s => s ? new Date(s).toLocaleString('id-ID', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '—';
+
+let chartInstance = null;
+
+function showToast(msg, dur = 2500) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+async function logout() {
+  await fetch('/api/v1/auth/logout', { method: 'POST' });
+  location.href = '/login';
+}
+
+async function updateStatus(id, status, btn) {
+  btn.disabled = true;
+  try {
+    const r = await fetch(`/api/v1/transaksi/${id}/status`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    const d = await r.json();
+    if (!r.ok) { showToast('Gagal: ' + d.error); return; }
+    showToast('Status diubah ke "' + status + '"');
+    loadDashboard();
+  } catch { showToast('Koneksi gagal'); }
+  finally { btn.disabled = false; }
+}
+
+async function openWa(id, type) {
+  try {
+    const r = await fetch(`/api/v1/transaksi/${id}/wa/${type}`);
+    const d = await r.json();
+    if (!r.ok) { showToast('Gagal: ' + d.error); return; }
+    window.open(d.url, '_blank');
+    await fetch('/api/v1/wa/log', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ telepon: d.telepon, pesan: d.teks, transaksi_id: id, status: 'terkirim' })
+    });
+  } catch { showToast('Koneksi gagal'); }
+}
+
+function toggleWaMenu(btn) {
+  const menu = btn.nextElementSibling;
+  document.querySelectorAll('.wa-menu.open').forEach(m => { if (m !== menu) m.classList.remove('open'); });
+  menu.classList.toggle('open');
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.wa-menu-wrap')) {
+    document.querySelectorAll('.wa-menu.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+function renderAntrian(list) {
+  const el = document.getElementById('antrianBody');
+  document.getElementById('antrianCount').textContent = list.length;
+  if (!list.length) { el.innerHTML = '<div class="antrian-empty">Tidak ada antrian aktif saat ini</div>'; return; }
+
+  el.innerHTML = list.map(t => {
+    const itemsText = t.items.length
+      ? t.items.map(i => `${i.jumlah} ${i.satuan} ${i.nama_layanan}`).join(', ')
+      : '—';
+    const lunas = t.bayar >= t.total_bayar;
+    const nextStatus = t.status === 'pending' ? 'proses' : 'selesai';
+    const nextLabel  = t.status === 'pending' ? 'Mulai Proses' : 'Tandai Selesai';
+    const btnClass   = t.status === 'pending' ? 'btn-blue' : 'btn-green';
+    const hasPhone   = t.pelanggan_telepon;
+
+    return `<div class="antrian-item">
+      <div class="antrian-row1">
+        <div>
+          <div class="antrian-nomor">${t.nomor_transaksi}</div>
+          <div class="antrian-pelanggan">${t.pelanggan_nama || 'Non-member'} · ${fmtTime(t.tanggal_masuk)}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="badge badge-${t.status}">${t.status}</span>
+          ${!lunas ? `<span class="badge" style="background:var(--red-lt);color:var(--red)">Belum Lunas</span>` : ''}
+        </div>
+      </div>
+      <div class="antrian-row2">
+        <div class="antrian-items-text">${itemsText}</div>
+        <div style="font-size:12px;font-weight:700;">${fmtRp(t.total_bayar)}</div>
+      </div>
+      <div class="antrian-actions">
+        <button class="btn btn-sm ${btnClass}" onclick="updateStatus(${t.id}, '${nextStatus}', this)">${nextLabel}</button>
+        <button class="btn btn-sm btn-outline" onclick="updateStatus(${t.id}, 'dibatalkan', this)"
+          style="color:var(--red);border-color:var(--red);">Batalkan</button>
+        ${hasPhone ? `
+        <div class="wa-menu-wrap">
+          <button class="btn btn-sm btn-wa" onclick="toggleWaMenu(this)">WA ▾</button>
+          <div class="wa-menu">
+            <a href="#" onclick="openWa(${t.id},'nota');return false;">Kirim Nota</a>
+            <a href="#" onclick="openWa(${t.id},'tagihan');return false;">Tagihan</a>
+            <a href="#" onclick="openWa(${t.id},'notif');return false;">Notif Selesai</a>
+          </div>
+        </div>` : ''}
+        <a href="/api/v1/transaksi/${t.id}/struk" target="_blank"
+           class="btn btn-sm btn-outline">Struk</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTagihan(list) {
+  const el = document.getElementById('tagihanBody');
+  if (!list.length) { el.innerHTML = '<div class="empty-state">Semua tagihan sudah lunas</div>'; return; }
+  el.innerHTML = list.map(t => `
+    <div class="tagihan-item">
+      <div>
+        <div class="tagihan-nomor">${t.nomor_transaksi}</div>
+        <div class="tagihan-meta">${t.pelanggan_nama || 'Non-member'} · <span class="badge badge-${t.status}">${t.status}</span></div>
+      </div>
+      <div>
+        <div class="tagihan-sisa">${fmtRp(t.total_bayar - t.bayar)}</div>
+        <div style="font-size:11px;color:var(--gray-5);text-align:right;">sisa</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderPromo(list) {
+  const el = document.getElementById('promoBody');
+  if (!list.length) { el.innerHTML = '<div class="empty-state">Tidak ada promo aktif</div>'; return; }
+  el.innerHTML = list.map(p => {
+    const disc = p.diskon_persen > 0 ? `${p.diskon_persen}%` : fmtRp(p.diskon_nominal);
+    return `<div class="promo-item">
+      <div class="promo-nama">${p.nama}</div>
+      <div style="display:flex;justify-content:space-between;margin-top:2px;">
+        <span class="promo-disc">Diskon ${disc}</span>
+        <span class="promo-exp">${p.berlaku_sampai ? 'Sampai ' + fmtDate(p.berlaku_sampai) : 'Tidak terbatas'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderStok(list) {
+  const el = document.getElementById('stokBody');
+  if (!list.length) { el.innerHTML = '<div class="empty-state">Semua stok dalam batas aman</div>'; return; }
+  el.innerHTML = list.map(s => `
+    <div class="stok-item">
+      <div>
+        <div class="stok-nama">${s.nama}</div>
+        <div class="stok-min">Min: ${s.stok_minimum} ${s.satuan}</div>
+      </div>
+      <div class="stok-sisa">${s.stok_saat_ini} ${s.satuan}</div>
+    </div>`).join('');
+}
+
+function renderChart(data) {
+  const labels  = data.map(d => new Date(d.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'short' }));
+  const values  = data.map(d => Number(d.omset));
+  const ctx     = document.getElementById('omsetChart').getContext('2d');
+
+  if (chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Omset',
+        data: values,
+        backgroundColor: 'rgba(37,99,235,0.7)',
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => fmtRp(ctx.raw)
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false } },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: v => fmtRpShort(v)
+          }
+        }
+      }
+    }
+  });
+}
+
+async function loadDashboard() {
+  try {
+    const r = await fetch('/api/v1/dashboard');
+    if (r.status === 401) { location.href = '/login'; return; }
+    const d = await r.json();
+
+    document.getElementById('statOrder').textContent   = d.order_hari_ini;
+    document.getElementById('statOmset').textContent   = fmtRpShort(d.omset_hari_ini);
+    document.getElementById('statWa').textContent      = d.wa_terkirim_hari_ini;
+    document.getElementById('statTagihan').textContent = d.tagihan_belum_lunas;
+
+    renderChart(d.bar_chart_7hari);
+    renderAntrian(d.antrian_aktif);
+
+    // Tagihan belum lunas detail — fetch from transaksi API
+    const tagihanR = await fetch('/api/v1/transaksi?limit=10');
+    const tagihanD = await tagihanR.json();
+    const belumLunas = (tagihanD.data || []).filter(t =>
+      t.bayar < t.total_bayar && !['dibatalkan','diambil'].includes(t.status)
+    ).slice(0, 8);
+    renderTagihan(belumLunas);
+
+    renderPromo(d.promo_aktif_hari_ini);
+    renderStok(d.stok_hampir_habis);
+  } catch (err) {
+    console.error(err);
+    showToast('Gagal memuat dashboard');
+  }
+}
+
+// Page date
+const now = new Date();
+document.getElementById('pageDate').textContent =
+  now.toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+// Load user
+fetch('/api/v1/auth/me').then(r => r.json()).then(d => {
+  if (d.user) document.getElementById('userName').textContent = d.user.nama;
+}).catch(() => {});
+
+loadDashboard();
+
+// Auto-refresh setiap 60 detik
+setInterval(loadDashboard, 60000);
+</script>
+<script src="/js/nav.js"></script>
+</body>
+</html>
