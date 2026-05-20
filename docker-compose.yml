@@ -8,12 +8,14 @@ services:
     volumes:
       - pos-data:/app/data
     restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/bus/usb/001/003:/dev/bus/usb/001/003
     environment:
       - NODE_ENV=production
       - PORT=3000
       - SESSION_SECRET=${SESSION_SECRET}
       - DB_PATH=/app/data/laundry.db
-      - PRINTER_PORT=/dev/usb/lp0
       - PRINTER_TYPE=EPSON
       - PRINTER_WIDTH=58
       - PRINTER_HAS_CUTTER=false
