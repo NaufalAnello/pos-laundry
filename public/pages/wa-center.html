@@ -162,8 +162,8 @@
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
     <div class="wa-mode-wrap">
       <span class="wa-mode-lbl">Kirim via:</span>
-      <button class="wa-mode-btn active" id="waModeRegular" onclick="setWAMode('regular')">💬 WA Biasa</button>
-      <button class="wa-mode-btn" id="waModeBusiness" onclick="setWAMode('business')">💼 WA Business</button>
+      <button class="wa-mode-btn" id="waModeRegular" onclick="setWAMode('regular')">💬 WA Biasa</button>
+      <button class="wa-mode-btn active" id="waModeBusiness" onclick="setWAMode('business')">💼 WA Business</button>
     </div>
     <span style="font-size:11px;color:var(--gray-5)">WA Business terbuka jika terinstall di perangkat</span>
   </div>
@@ -313,7 +313,7 @@ let logPage = 1, logTotal = 1;
 let bcData = [];         // broadcast targets
 let stepIdx = 0;         // broadcast stepper index
 let bcMsg   = '';        // broadcast message (resolved per person)
-let waMode  = 'regular'; // per-sesi, default dari pengaturan
+let waMode  = 'business'; // per-sesi, default dari pengaturan
 
 // ── WA Mode ───────────────────────────────────────────────────────────────────
 function setWAMode(mode) {

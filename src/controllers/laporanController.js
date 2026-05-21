@@ -20,7 +20,8 @@ exports.index = async (req, res) => {
       harianRaw,
       poinStat,
       promoStat,
-      kasRow
+      kasRow,
+      depositStat
     ] = await Promise.all([
       db('transaksi')
         .whereNotIn('status', ['dibatalkan'])
@@ -98,7 +99,34 @@ exports.index = async (req, res) => {
         .select(
           db.raw("COALESCE(SUM(CASE WHEN jenis='masuk' THEN jumlah ELSE 0 END),0) as total_masuk"),
           db.raw("COALESCE(SUM(CASE WHEN jenis='keluar' THEN jumlah ELSE 0 END),0) as total_keluar")
-        ).first()
+        ).first(),
+
+      // deposit stats
+      (async () => {
+        try {
+          const [topupRow, bayarRow, kelebihanRow, saldoRow] = await Promise.all([
+            db('mutasi_deposit').where('jenis', 'topup')
+              .whereRaw("date(created_at) >= ?", [start])
+              .whereRaw("date(created_at) <= ?", [end])
+              .sum('nominal as total').first(),
+            db('mutasi_deposit').where('jenis', 'bayar')
+              .whereRaw("date(created_at) >= ?", [start])
+              .whereRaw("date(created_at) <= ?", [end])
+              .sum('nominal as total').first(),
+            db('mutasi_deposit').where('jenis', 'kelebihan')
+              .whereRaw("date(created_at) >= ?", [start])
+              .whereRaw("date(created_at) <= ?", [end])
+              .sum('nominal as total').first(),
+            db('deposit_pelanggan').sum('saldo as total').first()
+          ]);
+          return {
+            total_topup:      Number(topupRow?.total     ?? 0),
+            total_pemakaian:  Number(bayarRow?.total     ?? 0),
+            total_kelebihan:  Number(kelebihanRow?.total ?? 0),
+            saldo_beredar:    Number(saldoRow?.total     ?? 0)
+          };
+        } catch { return { total_topup: 0, total_pemakaian: 0, total_kelebihan: 0, saldo_beredar: 0 }; }
+      })()
     ]);
 
     const statusMap = {};
@@ -131,7 +159,8 @@ exports.index = async (req, res) => {
         pendapatan:  Number(kasRow?.total_masuk  ?? 0),
         pengeluaran: Number(kasRow?.total_keluar ?? 0),
         laba:        Number(kasRow?.total_masuk  ?? 0) - Number(kasRow?.total_keluar ?? 0)
-      }
+      },
+      deposit: depositStat
     });
   } catch (err) {
     console.error('[laporan:index]', err);

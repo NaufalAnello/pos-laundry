@@ -526,7 +526,7 @@ async function loadSettings() {
     document.getElementById('tReminderHari').value = data.wa_reminder_hari || '3';
 
     // WA mode default
-    const waMode = data.wa_mode || 'regular';
+    const waMode = data.wa_mode_default || data.wa_mode || 'business';
     document.getElementById(waMode === 'business' ? 'rModeBusiness' : 'rModeRegular').checked = true;
     highlightWAMode(waMode);
 

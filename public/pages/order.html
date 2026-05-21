@@ -270,8 +270,29 @@
     .empty-items {
       text-align: center; padding: 24px; color: var(--gray-5); font-size: 13px;
     }
-    .kembalian-ok { color: var(--green); }
-    .kembalian-kurang { color: var(--red); }
+    .kembalian-ok    { color: var(--green); }
+    .kembalian-kurang{ color: var(--red); }
+    .keleb-btn.active {
+      border-color: var(--blue) !important;
+      background: var(--blue-lt) !important;
+      color: var(--blue) !important;
+    }
+    .keleb-btn-green.active {
+      border-color: var(--green) !important;
+      background: var(--green-lt) !important;
+      color: var(--green) !important;
+    }
+
+    /* ── Printer status bar ── */
+    .printer-status-bar {
+      display: flex; align-items: center; gap: 6px;
+      margin-top: 5px; font-size: 11px; color: var(--gray-5);
+      justify-content: center;
+    }
+    .printer-dot { width: 8px; height: 8px; border-radius: 50%;
+                   background: var(--gray-3); flex-shrink: 0; }
+    .printer-dot.on  { background: var(--green); box-shadow: 0 0 4px rgba(22,163,74,.5); }
+    .printer-dot.off { background: var(--red); }
   </style>
 </head>
 <body>
@@ -414,22 +435,67 @@
             <button class="pay-method-btn" data-method="qris">
               <span class="pay-method-icon">📱</span>QRIS
             </button>
+            <button class="pay-method-btn" data-method="deposit">
+              <span class="pay-method-icon">💳</span>Deposit
+            </button>
           </div>
         </div>
 
-        <div class="row-2">
-          <div class="field">
-            <label>Bayar (Rp)</label>
-            <input type="number" id="bayarInput" min="0" step="1000" value="0" />
-          </div>
-          <div class="field">
-            <label>Kembalian</label>
-            <input type="text" id="kembalianDisplay" readonly style="background:var(--gray-1);font-weight:700" />
+        <!-- Panel deposit saldo pelanggan -->
+        <div id="depositPanel" style="display:none;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;padding:12px 14px;margin-top:4px;">
+          <div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:6px;">💳 Saldo Deposit</div>
+          <div id="depositSaldoInfo" style="font-size:13px;color:#1e40af;">Pilih pelanggan untuk lihat saldo</div>
+          <div id="depositKurangInfo" style="display:none;margin-top:8px;padding:8px;background:#fef2f2;border-radius:6px;border:1px solid #fecaca;">
+            <div style="font-size:12px;color:var(--red);font-weight:700;margin-bottom:6px;" id="depositKurangTxt"></div>
+            <label style="font-size:11px;font-weight:700;color:var(--gray-5);text-transform:uppercase;margin-bottom:4px;display:block;">Bayar kekurangan dengan:</label>
+            <div style="display:flex;gap:6px;margin-bottom:8px;">
+              <button class="pay-method-btn active" data-kk="tunai" style="flex:1;min-width:60px;font-size:12px;padding:6px;">💵 Tunai</button>
+              <button class="pay-method-btn" data-kk="transfer" style="flex:1;min-width:60px;font-size:12px;padding:6px;">🏦 Transfer</button>
+              <button class="pay-method-btn" data-kk="qris" style="flex:1;min-width:60px;font-size:12px;padding:6px;">📱 QRIS</button>
+            </div>
+            <label style="font-size:11px;font-weight:700;color:var(--gray-5);text-transform:uppercase;margin-bottom:4px;display:block;">Bayar kekurangan (Rp)</label>
+            <input type="number" id="kekuranganInput" min="0" step="1000" value="0" style="font-size:13px;padding:7px 10px;" />
           </div>
         </div>
+
+        <!-- Nominal diterima (tunai/transfer/qris) -->
+        <div id="tunaiPanel">
+          <div class="field" style="margin-top:4px;">
+            <label>Nominal Diterima (Rp)</label>
+            <input type="number" id="bayarInput" min="0" step="1000" value="0" placeholder="0" />
+          </div>
+
+          <!-- Preview kembalian / kelebihan -->
+          <div id="kembalianPreview" style="display:none;margin-top:2px;padding:10px 12px;border-radius:8px;font-size:13px;background:var(--gray-1);border:1.5px solid var(--gray-3);">
+          </div>
+
+          <!-- Kelebihan bayar → deposit (hanya muncul jika ada pelanggan & kelebihan > 0) -->
+          <div id="kelebihanPanel" style="display:none;margin-top:6px;padding:10px 12px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;">
+            <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px;" id="kelebihanInfo"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <button id="btnKembaliTunai" class="keleb-btn" onclick="setKelebihanMode('tunai')"
+                style="padding:8px 6px;border:1.5px solid var(--gray-3);border-radius:8px;
+                       background:var(--gray-1);cursor:pointer;font-size:12px;font-weight:600;
+                       color:var(--gray-5);transition:all .15s;text-align:center;">
+                💵 Kembalikan tunai
+              </button>
+              <button id="btnMasukDeposit" class="keleb-btn active" onclick="setKelebihanMode('deposit')"
+                style="padding:8px 6px;border:1.5px solid var(--blue);border-radius:8px;
+                       background:var(--blue-lt);cursor:pointer;font-size:12px;font-weight:600;
+                       color:var(--blue);transition:all .15s;text-align:center;">
+                💳 Masuk deposit
+              </button>
+            </div>
+            <!-- Preview saldo baru jika masuk deposit -->
+            <div id="kelebihanDepositPreview" style="display:none;margin-top:8px;padding:8px 10px;background:#dcfce7;border-radius:6px;font-size:12px;color:var(--green);font-weight:600;"></div>
+          </div>
+        </div>
+
+        <!-- Preview ringkasan pembayaran deposit (tunggal/kekurangan) -->
+        <div id="depositPreviewBox" style="display:none;margin-top:6px;padding:10px 12px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;font-size:13px;"></div>
 
         <!-- Estimasi selesai -->
-        <div class="field">
+        <div class="field" style="margin-top:10px;">
           <label>Estimasi Selesai</label>
           <input type="date" id="tanggalSelesai" />
         </div>
@@ -458,6 +524,10 @@
       <button class="btn btn-primary" id="savePrintBtn">
         <span>🖨️</span> Simpan & Cetak
       </button>
+      <div class="printer-status-bar">
+        <span class="printer-dot" id="printerDotOrder"></span>
+        <span id="printerStatusTxtOrder">Cek printer...</span>
+      </div>
       <button class="btn btn-secondary" id="saveBtn">
         <span>💾</span> Simpan Saja
       </button>
@@ -470,14 +540,18 @@
 // STATE
 // ════════════════════════════════════════════════════════
 const state = {
-  pelanggan:    null,
-  items:        [],     // { id, layanan_id, nama, harga, satuan, jumlah, subtotal }
-  promo:        null,
-  poinDigunakan: 0,
-  usePoin:      false,
-  metodeBayar:  'tunai',
-  bayar:        0,
-  settings:     { perNominal: 10000, nilaiPerPoin: 100, minRedeem: 100 }
+  pelanggan:       null,
+  items:           [],     // { id, layanan_id, nama, harga, satuan, jumlah, subtotal }
+  promo:           null,
+  poinDigunakan:   0,
+  usePoin:         false,
+  metodeBayar:     'tunai',
+  bayar:           0,
+  depositSaldo:    0,
+  metodKekurangan: 'tunai',
+  kelebihanMode:   'deposit', // 'tunai' | 'deposit'  — default: masuk deposit
+  _totalBayar:     0,
+  settings:        { perNominal: 10000, nilaiPerPoin: 100, minRedeem: 100 }
 };
 
 let layananList = [];
@@ -600,7 +674,7 @@ async function doSearch(q) {
   });
 }
 
-function selectCustomer(p) {
+async function selectCustomer(p) {
   state.pelanggan = p;
   searchEl.value  = '';
   dropdownEl.classList.add('hidden');
@@ -631,6 +705,12 @@ function selectCustomer(p) {
   }
   document.getElementById('poinAvail').textContent =
     `Poin tersedia: ${p.total_poin} (nilai: Rp ${fmtRp(p.total_poin * state.settings.nilaiPerPoin)})`;
+
+  // Load saldo deposit pelanggan
+  const dr = await apiFetch(`/api/v1/deposit/${p.id}`);
+  state.depositSaldo = dr?.data?.saldo ?? 0;
+  updateDepositPanel();
+  updatePaymentPreview();
   calcTotal();
 }
 
@@ -638,6 +718,7 @@ document.getElementById('clearCustomer').addEventListener('click', () => {
   state.pelanggan = null;
   state.poinDigunakan = 0;
   state.usePoin = false;
+  state.depositSaldo = 0;
   customerInfo.classList.add('hidden');
   document.getElementById('usePoin').checked  = false;
   document.getElementById('usePoin').disabled = true;
@@ -646,6 +727,15 @@ document.getElementById('clearCustomer').addEventListener('click', () => {
   document.getElementById('poinSection').classList.add('hidden');
   document.getElementById('poinToggleSub').textContent = 'Pilih pelanggan terlebih dahulu';
   document.getElementById('waToggleSub').textContent   = 'Pilih pelanggan dengan nomor WA';
+  // Reset ke tunai jika sedang deposit
+  if (state.metodeBayar === 'deposit') {
+    document.querySelectorAll('.pay-method-btn[data-method]').forEach(b => b.classList.remove('active'));
+    document.querySelector('.pay-method-btn[data-method="tunai"]').classList.add('active');
+    state.metodeBayar = 'tunai';
+  }
+  state.kelebihanMode = 'deposit'; // reset default
+  updateDepositPanel();
+  updatePaymentPreview();
   calcTotal();
 });
 
@@ -788,17 +878,144 @@ document.getElementById('poinInput').addEventListener('input', (e) => {
 // ════════════════════════════════════════════════════════
 // PAYMENT
 // ════════════════════════════════════════════════════════
-document.querySelectorAll('.pay-method-btn').forEach(btn => {
+document.querySelectorAll('.pay-method-btn[data-method]').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.pay-method-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.pay-method-btn[data-method]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     state.metodeBayar = btn.dataset.method;
+    updateDepositPanel();
+    calcTotal();
   });
 });
 
+// Kekurangan metode buttons
+document.querySelectorAll('.pay-method-btn[data-kk]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pay-method-btn[data-kk]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.metodKekurangan = btn.dataset.kk;
+  });
+});
+
+document.getElementById('kekuranganInput')?.addEventListener('input', updatePaymentPreview);
+
+// ── updateDepositPanel: tampilkan status saldo & preview di mode deposit ────
+function updateDepositPanel() {
+  const isDeposit = state.metodeBayar === 'deposit';
+  const total     = state._totalBayar || 0;
+
+  // Sembunyikan panel deposit jika bukan mode deposit
+  document.getElementById('depositPanel').style.display = isDeposit ? 'block' : 'none';
+  document.getElementById('tunaiPanel').style.display   = isDeposit ? 'none'  : 'block';
+  document.getElementById('depositPreviewBox').style.display = 'none';
+
+  // Tombol Deposit: dim jika belum pilih pelanggan
+  const btnDeposit = document.querySelector('.pay-method-btn[data-method="deposit"]');
+  if (btnDeposit) {
+    btnDeposit.style.opacity = state.pelanggan ? '1' : '0.45';
+    btnDeposit.title = state.pelanggan ? '' : 'Pilih pelanggan terlebih dahulu';
+  }
+
+  if (!isDeposit) return;
+
+  if (!state.pelanggan) {
+    document.getElementById('depositSaldoInfo').innerHTML =
+      '<span style="color:var(--gray-5);">Pilih pelanggan untuk lihat saldo deposit</span>';
+    document.getElementById('depositKurangInfo').style.display = 'none';
+    return;
+  }
+
+  const saldo = state.depositSaldo;
+  const cukup = saldo >= total && total > 0;
+  const kurang = Math.max(0, total - saldo);
+
+  document.getElementById('depositSaldoInfo').innerHTML =
+    `Saldo deposit: <strong>Rp ${fmtRp(saldo)}</strong>` +
+    (cukup ? ' <span style="color:var(--green);font-weight:700;">✓ Cukup, order lunas</span>'
+           : total > 0 ? ` <span style="color:var(--red);font-weight:700;">⚠ Kurang Rp ${fmtRp(kurang)}</span>` : '');
+
+  if (kurang > 0 && total > 0) {
+    document.getElementById('depositKurangInfo').style.display = 'block';
+    document.getElementById('depositKurangTxt').textContent =
+      `Saldo deposit tidak cukup. Kekurangan Rp ${fmtRp(kurang)}`;
+    // Auto-fill kekurangan
+    const inp = document.getElementById('kekuranganInput');
+    if (parseFloat(inp.value) === 0) inp.value = kurang;
+  } else {
+    document.getElementById('depositKurangInfo').style.display = 'none';
+  }
+
+  // Preview box
+  const depPrev = document.getElementById('depositPreviewBox');
+  depPrev.style.display = 'block';
+  if (cukup) {
+    const saldoSesudah = saldo - total;
+    depPrev.innerHTML = `
+      <div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:6px;">📋 Preview Pembayaran</div>
+      <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">
+        <span>Total Order</span><span style="font-weight:700;">Rp ${fmtRp(total)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">
+        <span>Saldo Deposit Sebelum</span><span>Rp ${fmtRp(saldo)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;color:var(--red);">
+        <span>Dipotong</span><span>- Rp ${fmtRp(total)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0 0;font-size:13px;font-weight:700;border-top:1px solid #bfdbfe;margin-top:4px;color:var(--green);">
+        <span>Saldo Deposit Sesudah</span><span>Rp ${fmtRp(saldoSesudah)}</span>
+      </div>`;
+  } else if (kurang > 0) {
+    const bayarKekurangan = parseFloat(document.getElementById('kekuranganInput')?.value) || 0;
+    const saldoSesudah = saldo > 0 ? 0 : 0;
+    depPrev.innerHTML = `
+      <div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:6px;">📋 Preview Pembayaran Kombinasi</div>
+      <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">
+        <span>Total Order</span><span style="font-weight:700;">Rp ${fmtRp(total)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;color:#1d4ed8;">
+        <span>Bayar Deposit</span><span>Rp ${fmtRp(saldo)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">
+        <span>Bayar Kekurangan (${state.metodKekurangan})</span><span>Rp ${fmtRp(bayarKekurangan)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0 0;font-size:13px;font-weight:700;border-top:1px solid #bfdbfe;margin-top:4px;color:var(--green);">
+        <span>Saldo Deposit Sesudah</span><span>Rp 0</span>
+      </div>`;
+  }
+}
+
+// ── setKelebihanMode: pilih kembalian tunai atau masuk deposit ───────────────
+function setKelebihanMode(mode) {
+  state.kelebihanMode = mode;
+  const btnTunai  = document.getElementById('btnKembaliTunai');
+  const btnDepo   = document.getElementById('btnMasukDeposit');
+
+  // Reset both
+  [btnTunai, btnDepo].forEach(b => {
+    b.classList.remove('active');
+    b.style.borderColor = 'var(--gray-3)';
+    b.style.background  = 'var(--gray-1)';
+    b.style.color       = 'var(--gray-5)';
+  });
+
+  if (mode === 'tunai') {
+    btnTunai.classList.add('active');
+    btnTunai.style.borderColor = 'var(--green)';
+    btnTunai.style.background  = 'var(--green-lt)';
+    btnTunai.style.color       = 'var(--green)';
+  } else {
+    btnDepo.classList.add('active');
+    btnDepo.style.borderColor = 'var(--blue)';
+    btnDepo.style.background  = 'var(--blue-lt)';
+    btnDepo.style.color       = 'var(--blue)';
+  }
+
+  updatePaymentPreview();
+}
+
 document.getElementById('bayarInput').addEventListener('input', (e) => {
   state.bayar = parseFloat(e.target.value) || 0;
-  updateKembalian();
+  updatePaymentPreview();
 });
 
 document.getElementById('antarJemput').addEventListener('change', (e) => {
@@ -838,7 +1055,8 @@ function calcTotal() {
 
   document.getElementById('sumTotal').textContent = 'Rp ' + fmtRp(total);
   state._totalBayar = total;
-  updateKembalian();
+  updateDepositPanel();
+  updatePaymentPreview();
 
   // Hitung estimasi poin yang akan didapat
   if (state.pelanggan) {
@@ -852,12 +1070,95 @@ function calcTotal() {
   }
 }
 
-function updateKembalian() {
-  const total    = state._totalBayar || 0;
-  const kembalian = Math.max(0, state.bayar - total);
-  const el       = document.getElementById('kembalianDisplay');
-  el.value       = 'Rp ' + fmtRp(kembalian);
-  el.className   = state.bayar >= total && total > 0 ? 'kembalian-ok' : 'kembalian-kurang';
+// ── updatePaymentPreview: hitung & tampilkan kembalian / kelebihan / preview ──
+function updatePaymentPreview() {
+  if (state.metodeBayar === 'deposit') {
+    updateDepositPanel(); // sudah handle semuanya
+    return;
+  }
+
+  const total     = state._totalBayar || 0;
+  const nominal   = state.bayar;
+  const kembalian = Math.max(0, nominal - total);
+  const kurang    = Math.max(0, total - nominal);
+
+  // Preview box kembalian
+  const prevEl = document.getElementById('kembalianPreview');
+  if (nominal > 0 || total > 0) {
+    prevEl.style.display = 'block';
+    const lunas = nominal >= total && total > 0;
+    let html = `<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px;">
+      <span>Total Order</span><span style="font-weight:700;">Rp ${fmtRp(total)}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px;">
+      <span>Nominal Diterima</span><span>Rp ${fmtRp(nominal)}</span>
+    </div>`;
+
+    if (kembalian > 0) {
+      html += `<div style="display:flex;justify-content:space-between;padding:2px 0 0;font-size:13px;font-weight:700;
+               border-top:1px solid var(--gray-3);margin-top:4px;color:var(--green);">
+        <span>Kembalian</span><span>Rp ${fmtRp(kembalian)}</span>
+      </div>`;
+      prevEl.style.borderColor = '#bbf7d0';
+      prevEl.style.background  = '#f0fdf4';
+    } else if (kurang > 0) {
+      html += `<div style="display:flex;justify-content:space-between;padding:2px 0 0;font-size:13px;font-weight:700;
+               border-top:1px solid var(--gray-3);margin-top:4px;color:var(--red);">
+        <span>Kekurangan</span><span>Rp ${fmtRp(kurang)}</span>
+      </div>`;
+      prevEl.style.borderColor = '#fecaca';
+      prevEl.style.background  = '#fef2f2';
+    } else if (lunas) {
+      html += `<div style="padding:2px 0 0;font-size:12px;color:var(--green);font-weight:700;
+               border-top:1px solid var(--gray-3);margin-top:4px;">✓ Pas — Tidak ada kembalian</div>`;
+      prevEl.style.borderColor = '#bbf7d0';
+      prevEl.style.background  = '#f0fdf4';
+    } else {
+      prevEl.style.borderColor = 'var(--gray-3)';
+      prevEl.style.background  = 'var(--gray-1)';
+    }
+    prevEl.innerHTML = html;
+  } else {
+    prevEl.style.display = 'none';
+  }
+
+  // Panel kelebihan → deposit (hanya jika ada pelanggan & kelebihan > 0)
+  const kelebihanPanel = document.getElementById('kelebihanPanel');
+  const adaPelanggan   = !!state.pelanggan;
+
+  if (kembalian > 0 && adaPelanggan) {
+    kelebihanPanel.style.display = 'block';
+    document.getElementById('kelebihanInfo').textContent =
+      `Kelebihan Rp ${fmtRp(kembalian)} — kemana uang ini?`;
+
+    // Default ke deposit jika belum diset
+    if (!state.kelebihanMode) state.kelebihanMode = 'deposit';
+
+    // Re-apply button style
+    const btnT = document.getElementById('btnKembaliTunai');
+    const btnD = document.getElementById('btnMasukDeposit');
+    if (state.kelebihanMode === 'tunai') {
+      btnT.style.borderColor = 'var(--green)'; btnT.style.background = 'var(--green-lt)'; btnT.style.color = 'var(--green)';
+      btnD.style.borderColor = 'var(--gray-3)'; btnD.style.background = 'var(--gray-1)'; btnD.style.color = 'var(--gray-5)';
+    } else {
+      btnD.style.borderColor = 'var(--blue)'; btnD.style.background = 'var(--blue-lt)'; btnD.style.color = 'var(--blue)';
+      btnT.style.borderColor = 'var(--gray-3)'; btnT.style.background = 'var(--gray-1)'; btnT.style.color = 'var(--gray-5)';
+    }
+
+    // Preview saldo baru jika masuk deposit
+    const depKelPreview = document.getElementById('kelebihanDepositPreview');
+    if (state.kelebihanMode === 'deposit') {
+      const saldoBaru = state.depositSaldo + kembalian;
+      depKelPreview.style.display = 'block';
+      depKelPreview.innerHTML =
+        `💳 Saldo deposit: Rp ${fmtRp(state.depositSaldo)} → <strong>Rp ${fmtRp(saldoBaru)}</strong> setelah kelebihan masuk`;
+    } else {
+      depKelPreview.style.display = 'none';
+    }
+  } else {
+    kelebihanPanel.style.display = 'none';
+    document.getElementById('kelebihanDepositPreview').style.display = 'none';
+  }
 }
 
 // ════════════════════════════════════════════════════════
@@ -867,19 +1168,44 @@ async function submitOrder(kirimWa, cetakSetelah) {
   const validItems = state.items.filter(i => i.layanan_id && i.jumlah > 0);
   if (validItems.length === 0) { showToast('Tambahkan minimal 1 item', 'error'); return; }
 
+  const total = state._totalBayar || 0;
+
+  // Validasi deposit
+  if (state.metodeBayar === 'deposit' && !state.pelanggan) {
+    showToast('Pilih pelanggan untuk bayar dengan deposit', 'error'); return;
+  }
+  if (state.metodeBayar === 'deposit' && state.depositSaldo < total) {
+    // Harus isi kekurangan
+    const kekurangan = parseFloat(document.getElementById('kekuranganInput').value) || 0;
+    if (kekurangan <= 0) {
+      showToast('Masukkan nominal kekurangan yang akan dibayar', 'error'); return;
+    }
+  }
+
+  const kelebihan = Math.max(0, state.bayar - total);
+  const isDepositMode = state.metodeBayar === 'deposit';
+
   const body = {
     pelanggan_id:    state.pelanggan?.id   || null,
     paket_promo_id:  state.promo?.id       || null,
     poin_digunakan:  state.usePoin ? state.poinDigunakan : 0,
     items:           validItems.map(i => ({ layanan_id: i.layanan_id, jumlah: i.jumlah })),
     metode_bayar:    state.metodeBayar,
-    bayar:           state.bayar,
+    bayar:           isDepositMode ? 0 : state.bayar,
     catatan:         document.getElementById('catatan').value.trim() || null,
     tanggal_selesai: document.getElementById('tanggalSelesai').value || null,
     antar_jemput:    document.getElementById('antarJemput').checked,
     alamat_jemput:   document.getElementById('alamatJemput').value.trim() || null,
-    kirim_wa:        kirimWa && document.getElementById('kirimWa').checked
+    kirim_wa:        kirimWa && document.getElementById('kirimWa').checked,
+    kelebihan_ke_deposit:
+      !isDepositMode && kelebihan > 0 && !!state.pelanggan && state.kelebihanMode === 'deposit'
   };
+
+  // Deposit kekurangan: saldo tidak cukup, bayar sebagian pakai tunai/transfer/qris
+  if (isDepositMode && state.depositSaldo < total) {
+    body.metode_kekurangan = state.metodKekurangan;
+    body.bayar_kekurangan  = parseFloat(document.getElementById('kekuranganInput').value) || 0;
+  }
 
   setLoading(true);
   const res = await fetch('/api/v1/transaksi', {
@@ -893,15 +1219,78 @@ async function submitOrder(kirimWa, cetakSetelah) {
   const data = await res.json();
   if (!res.ok) { showToast(data.error || 'Gagal menyimpan', 'error'); return; }
 
-  showToast(`✓ Order ${data.data.nomor_transaksi} berhasil disimpan`, 'success');
+  // Compose result toast with deposit info if applicable
+  let toastMsg = `✓ Order ${data.data.nomor_transaksi} berhasil disimpan`;
+  const di = data.deposit_info;
+  if (di) {
+    if (di.saldoSesudah !== undefined) {
+      toastMsg += ` — Saldo deposit: Rp ${Number(di.saldoSesudah).toLocaleString('id-ID')}`;
+    } else if (di.kelebihan) {
+      toastMsg += ` — Kelebihan Rp ${Number(di.kelebihan).toLocaleString('id-ID')} masuk deposit`;
+    }
+  }
+  showToast(toastMsg, 'success');
 
   if (cetakSetelah) {
-    setTimeout(() => window.print(), 500);
+    await cetakStrukOrder(data.data.id);
   }
 
-  // Reset form setelah 1.5 detik
-  setTimeout(() => window.location.reload(), 1500);
+  // Reset form setelah save/print selesai
+  setTimeout(() => window.location.reload(), cetakSetelah ? 2000 : 1500);
 }
+
+// ════════════════════════════════════════════════════════
+// PRINTER THERMAL
+// ════════════════════════════════════════════════════════
+async function cetakStrukOrder(transaksiId) {
+  const btn = document.getElementById('savePrintBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span> Mencetak...';
+  try {
+    const res = await fetch(`/api/v1/transaksi/${transaksiId}/print`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const d = await res.json();
+    if (d.success) {
+      showToast('🖨️ Struk berhasil dicetak!', 'success');
+    } else {
+      showToast('Gagal cetak: ' + (d.error || 'Error printer'), 'error');
+      window.open(`/api/v1/transaksi/${transaksiId}/struk`, '_blank');
+    }
+  } catch {
+    showToast('Printer tidak terhubung — buka struk di tab baru', 'error');
+    window.open(`/api/v1/transaksi/${transaksiId}/struk`, '_blank');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>🖨️</span> Simpan & Cetak';
+  }
+}
+
+async function cekStatusPrinter() {
+  const dot = document.getElementById('printerDotOrder');
+  const txt = document.getElementById('printerStatusTxtOrder');
+  if (!dot || !txt) return;
+  try {
+    const r = await fetch('/api/v1/printer/status', { credentials: 'include' });
+    const d = await r.json();
+    if (d.connected) {
+      dot.className = 'printer-dot on';
+      txt.textContent = 'Printer terhubung';
+    } else {
+      dot.className = 'printer-dot off';
+      txt.textContent = 'Printer tidak terhubung';
+    }
+  } catch {
+    dot.className = 'printer-dot off';
+    txt.textContent = 'Gagal cek printer';
+  }
+}
+
+// Poll status printer setiap 10 detik
+cekStatusPrinter();
+setInterval(cekStatusPrinter, 10000);
 
 document.getElementById('saveBtn').addEventListener('click',      () => submitOrder(false, false));
 document.getElementById('savePrintBtn').addEventListener('click', () => submitOrder(false, true));

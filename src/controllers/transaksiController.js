@@ -4,6 +4,7 @@ const layananModel    = require('../models/layananModel');
 const paketPromoModel = require('../models/paketPromoModel');
 const pelangganModel  = require('../models/pelangganModel');
 const svc             = require('../services/transaksiService');
+const depositModel    = require('../models/deposit.model');
 
 // ── Validation schemas ───────────────────────────────────────────────────────
 const itemSchema = Joi.object({
@@ -13,17 +14,20 @@ const itemSchema = Joi.object({
 });
 
 const createSchema = Joi.object({
-  pelanggan_id:   Joi.number().integer().positive().allow(null),
-  paket_promo_id: Joi.number().integer().positive().allow(null),
-  items:          Joi.array().items(itemSchema).min(1).required(),
-  poin_digunakan: Joi.number().integer().min(0).default(0),
-  metode_bayar:   Joi.string().valid('tunai', 'transfer', 'qris').default('tunai'),
-  bayar:          Joi.number().min(0).default(0),
-  catatan:        Joi.string().allow('', null),
+  pelanggan_id:    Joi.number().integer().positive().allow(null),
+  paket_promo_id:  Joi.number().integer().positive().allow(null),
+  items:           Joi.array().items(itemSchema).min(1).required(),
+  poin_digunakan:  Joi.number().integer().min(0).default(0),
+  metode_bayar:    Joi.string().valid('tunai', 'transfer', 'qris', 'deposit').default('tunai'),
+  bayar:           Joi.number().min(0).default(0),
+  metode_kekurangan: Joi.string().valid('tunai', 'transfer', 'qris').allow(null),
+  bayar_kekurangan:  Joi.number().min(0).allow(null),
+  kelebihan_ke_deposit: Joi.boolean().default(false),
+  catatan:         Joi.string().allow('', null),
   tanggal_selesai: Joi.date().iso().allow(null),
-  antar_jemput:   Joi.boolean().default(false),
-  alamat_jemput:  Joi.string().allow('', null),
-  kirim_wa:       Joi.boolean().default(false)
+  antar_jemput:    Joi.boolean().default(false),
+  alamat_jemput:   Joi.string().allow('', null),
+  kirim_wa:        Joi.boolean().default(false)
 });
 
 const statusSchema = Joi.object({
@@ -115,7 +119,53 @@ exports.store = async (req, res) => {
     const { totalHarga, diskon, totalBayar } = svc.hitungTotal(
       resolvedItems, promo, value.poin_digunakan, settings.nilaiPerPoin
     );
-    const kembalian = Math.max(0, value.bayar - totalBayar);
+
+    // ── Deposit payment logic ───────────────────────────────────────────────
+    let bayarFinal   = value.bayar;
+    let kembalian    = 0;
+    let metodeBayar  = value.metode_bayar;
+    let depositInfo  = null; // { saldo_sebelum, saldo_sesudah }
+
+    if (value.metode_bayar === 'deposit') {
+      if (!pelanggan) {
+        return res.status(400).json({ error: 'Pilih pelanggan untuk menggunakan deposit' });
+      }
+      const saldoRow = await depositModel.getSaldo(pelanggan.id);
+      const saldo    = Number(saldoRow.saldo);
+
+      if (saldo >= totalBayar) {
+        // Saldo cukup — bayar penuh dengan deposit
+        bayarFinal = totalBayar;
+        kembalian  = 0;
+      } else if (value.metode_kekurangan && value.bayar_kekurangan != null) {
+        // Saldo tidak cukup — bayar sebagian deposit, sebagian metode lain
+        // bayarFinal = deposit (saldo) + kekurangan
+        bayarFinal  = saldo + Number(value.bayar_kekurangan);
+        kembalian   = Math.max(0, bayarFinal - totalBayar);
+        // Simpan info agar bisa dicatat di struk
+        metodeBayar = 'deposit';
+      } else {
+        // Saldo tidak cukup tanpa kekurangan — tolak
+        const kekurangan = totalBayar - saldo;
+        return res.status(400).json({
+          error:       `Saldo tidak cukup (Rp ${saldo.toLocaleString('id-ID')}). Kekurangan Rp ${kekurangan.toLocaleString('id-ID')}`,
+          saldo,
+          kekurangan
+        });
+      }
+    } else {
+      kembalian = Math.max(0, value.bayar - totalBayar);
+
+      // Kelebihan bayar → masuk deposit
+      if (
+        kembalian > 0 &&
+        value.kelebihan_ke_deposit &&
+        pelanggan
+      ) {
+        // Kembalian akan masuk deposit, kembalian tunai = 0
+        kembalian = 0;
+      }
+    }
 
     // Hitung estimasi selesai
     const maxHari = Math.max(...resolvedItems.map(i => {
@@ -127,7 +177,7 @@ exports.store = async (req, res) => {
       : new Date(Date.now() + maxHari * 86400000);
 
     const nomor = await transaksiModel.generateNomor();
-    const lunas = value.bayar >= totalBayar && totalBayar > 0;
+    const lunas = bayarFinal >= totalBayar && totalBayar > 0;
 
     const transaksiData = {
       nomor_transaksi: nomor,
@@ -141,9 +191,9 @@ exports.store = async (req, res) => {
       diskon,
       poin_digunakan:  value.poin_digunakan,
       total_bayar:     totalBayar,
-      bayar:           value.bayar,
+      bayar:           bayarFinal,
       kembalian,
-      metode_bayar:    value.metode_bayar,
+      metode_bayar:    metodeBayar,
       catatan:         value.catatan        || null,
       antar_jemput:    value.antar_jemput   ? 1 : 0,
       alamat_jemput:   value.alamat_jemput  || null,
@@ -171,6 +221,39 @@ exports.store = async (req, res) => {
           'tambah', `Poin dari ${nomor}`
         );
       }
+
+      // ── Deposit: potong saldo jika bayar pakai deposit ──────────────────
+      if (value.metode_bayar === 'deposit') {
+        const saldoRow   = await depositModel.getSaldo(pelanggan.id);
+        const saldo      = Number(saldoRow.saldo);
+        const potongDepo = Math.min(saldo, totalBayar);
+        depositInfo = await depositModel.bayar({
+          pelangganId:  pelanggan.id,
+          nominal:      potongDepo,
+          transaksiId,
+          createdBy:    req.session.user.id
+        });
+
+        // Cek saldo tipis setelah pemotongan
+        const waService = require('../services/wa.service');
+        await waService.cekNotifDepositTipis(pelanggan, depositInfo.saldoSesudah, transaksiId);
+      }
+
+      // ── Deposit: kelebihan bayar masuk deposit ──────────────────────────
+      if (
+        value.metode_bayar !== 'deposit' &&
+        value.kelebihan_ke_deposit &&
+        value.bayar > totalBayar
+      ) {
+        const kelebihan = value.bayar - totalBayar;
+        await depositModel.tambahKelebihan({
+          pelangganId:  pelanggan.id,
+          nominal:      kelebihan,
+          transaksiId,
+          createdBy:    req.session.user.id
+        });
+        depositInfo = { kelebihan, jenis: 'kelebihan' };
+      }
     }
 
     // Kas pemasukan jika lunas
@@ -184,7 +267,7 @@ exports.store = async (req, res) => {
       await svc.logWa(pelanggan.telepon, pesan, transaksiId);
     }
 
-    res.status(201).json({ message: 'Transaksi berhasil dibuat', data: created });
+    res.status(201).json({ message: 'Transaksi berhasil dibuat', data: created, deposit_info: depositInfo });
   } catch (err) {
     console.error('[transaksi:store]', err);
     res.status(500).json({ error: 'Gagal membuat transaksi' });

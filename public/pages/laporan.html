@@ -223,6 +223,17 @@
       </div>
     </div>
   </div>
+
+  <!-- Deposit section -->
+  <div class="card" style="margin-top:14px;">
+    <div class="card-head" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>💳 Deposit Pelanggan</span>
+      <a href="/deposit" style="font-size:12px;color:var(--blue);text-decoration:none;font-weight:600;">Kelola Deposit →</a>
+    </div>
+    <div class="card-body" id="depositLaporanBody">
+      <div class="loading">Memuat…</div>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -283,10 +294,11 @@ async function load() {
   ['sOmset','sTrx','sAvg','sPelanggan','sPoin','sPromo'].forEach(id => {
     document.getElementById(id).textContent = '…';
   });
-  document.getElementById('distribusiBody').innerHTML = '<div class="loading">Memuat…</div>';
-  document.getElementById('labaRugiBody').innerHTML   = '<div class="loading">Memuat…</div>';
-  document.getElementById('statusBody').innerHTML     = '<div class="loading">Memuat…</div>';
-  document.getElementById('poinPromoBody').innerHTML  = '<div class="loading">Memuat…</div>';
+  document.getElementById('distribusiBody').innerHTML    = '<div class="loading">Memuat…</div>';
+  document.getElementById('labaRugiBody').innerHTML      = '<div class="loading">Memuat…</div>';
+  document.getElementById('statusBody').innerHTML        = '<div class="loading">Memuat…</div>';
+  document.getElementById('poinPromoBody').innerHTML     = '<div class="loading">Memuat…</div>';
+  document.getElementById('depositLaporanBody').innerHTML = '<div class="loading">Memuat…</div>';
 
   try {
     const data = await apiFetch(`/api/v1/laporan?start=${start}&end=${end}`);
@@ -413,6 +425,19 @@ function renderAll(d) {
     <div class="info-chips">
       <div class="chip"><div class="cv" style="color:var(--blue)">${promo.jumlah_pakai}x</div><div class="cl">Transaksi Pakai Promo</div></div>
       <div class="chip"><div class="cv" style="font-size:14px;color:var(--red)">${rupiah(promo.total_diskon)}</div><div class="cl">Total Nilai Diskon Promo</div></div>
+    </div>
+  `;
+
+  // Deposit
+  const dep = d.deposit || {};
+  document.getElementById('depositLaporanBody').innerHTML = `
+    <div class="info-chips" style="margin-bottom:14px">
+      <div class="chip"><div class="cv" style="color:var(--blue);font-size:14px">${rupiah(dep.total_topup)}</div><div class="cl">Total Top-up</div></div>
+      <div class="chip"><div class="cv" style="color:var(--red);font-size:14px">${rupiah(dep.total_pemakaian)}</div><div class="cl">Total Pemakaian</div></div>
+    </div>
+    <div class="info-chips">
+      <div class="chip"><div class="cv" style="color:var(--green);font-size:14px">${rupiah(dep.total_kelebihan)}</div><div class="cl">Kelebihan → Deposit</div></div>
+      <div class="chip"><div class="cv" style="color:var(--purple);font-size:14px">${rupiah(dep.saldo_beredar)}</div><div class="cl">Saldo Beredar</div></div>
     </div>
   `;
 }

@@ -1,6 +1,11 @@
 const db                 = require('../database/connection');
 const transaksiModel     = require('../models/transaksiModel');
-const { buildNota, buildTagihan, buildNotifSelesai, generateURL, buildBroadcast } = require('../services/wa.service');
+const { buildNota, buildTagihan, buildNotifSelesai, generateURL, buildBroadcast, getSettings } = require('../services/wa.service');
+
+const getDefaultWAMode = async () => {
+  const s = await getSettings();
+  return s.wa_mode_default || s.wa_mode || 'business';
+};
 
 // ── Helper: ambil transaksi + pastikan punya pelanggan ber-WA ────────────────
 const getTransaksiWithPhone = async (id) => {
@@ -17,7 +22,8 @@ exports.nota = async (req, res) => {
     const { t, error, code } = await getTransaksiWithPhone(req.params.id);
     if (error) return res.status(code).json({ error });
 
-    const mode = ['regular', 'business'].includes(req.query.mode) ? req.query.mode : 'regular';
+    const defaultMode = await getDefaultWAMode();
+    const mode = ['regular', 'business'].includes(req.query.mode) ? req.query.mode : defaultMode;
     const teks = await buildNota(t, mode);
     const url  = generateURL(t.pelanggan_telepon, teks, mode);
     res.json({ url, teks, telepon: t.pelanggan_telepon, pelanggan: t.pelanggan_nama, mode });
@@ -33,7 +39,8 @@ exports.tagihan = async (req, res) => {
     const { t, error, code } = await getTransaksiWithPhone(req.params.id);
     if (error) return res.status(code).json({ error });
 
-    const mode = ['regular', 'business'].includes(req.query.mode) ? req.query.mode : 'regular';
+    const defaultMode = await getDefaultWAMode();
+    const mode = ['regular', 'business'].includes(req.query.mode) ? req.query.mode : defaultMode;
     const teks = await buildTagihan(t, mode);
     const url  = generateURL(t.pelanggan_telepon, teks, mode);
     res.json({ url, teks, telepon: t.pelanggan_telepon, pelanggan: t.pelanggan_nama, mode });
@@ -49,7 +56,8 @@ exports.notif = async (req, res) => {
     const { t, error, code } = await getTransaksiWithPhone(req.params.id);
     if (error) return res.status(code).json({ error });
 
-    const mode = ['regular', 'business'].includes(req.query.mode) ? req.query.mode : 'regular';
+    const defaultMode = await getDefaultWAMode();
+    const mode = ['regular', 'business'].includes(req.query.mode) ? req.query.mode : defaultMode;
     const teks = await buildNotifSelesai(t, mode);
     const url  = generateURL(t.pelanggan_telepon, teks, mode);
     res.json({ url, teks, telepon: t.pelanggan_telepon, pelanggan: t.pelanggan_nama, mode });
@@ -119,8 +127,9 @@ exports.tagihanList = async (req, res) => {
 // ── POST /api/v1/wa/broadcast ─────────────────────────────────────────────────
 exports.broadcast = async (req, res) => {
   try {
-    const { pesan, pelanggan_ids = [], level_filter, mode = 'regular' } = req.body;
-    const waMode = ['regular', 'business'].includes(mode) ? mode : 'regular';
+    const { pesan, pelanggan_ids = [], level_filter, mode: reqMode } = req.body;
+    const defaultMode = await getDefaultWAMode();
+    const waMode = ['regular', 'business'].includes(reqMode) ? reqMode : defaultMode;
     if (!pesan?.trim()) return res.status(400).json({ error: 'Pesan wajib diisi' });
 
     let query = db('pelanggan').whereNotNull('telepon').where('telepon', '!=', '');
@@ -154,7 +163,7 @@ exports.broadcast = async (req, res) => {
 // ── POST /api/v1/wa/log — catat WA terkirim ─────────────────────────────────
 exports.log = async (req, res) => {
   try {
-    const { telepon, pesan, transaksi_id, status = 'terkirim', wa_mode = 'regular' } = req.body;
+    const { telepon, pesan, transaksi_id, status = 'terkirim', wa_mode = 'business' } = req.body;
     if (!telepon || !pesan) {
       return res.status(400).json({ error: 'telepon dan pesan wajib diisi' });
     }

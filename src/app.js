@@ -21,6 +21,7 @@ const laporanRoutes     = require('./routes/laporanRoutes');
 const pengaturanRoutes  = require('./routes/pengaturanRoutes');
 const usersRoutes       = require('./routes/usersRoutes');
 const printerRoutes     = require('./routes/printerRoutes');
+const depositRoutes     = require('./routes/depositRoutes');
 
 const app = express();
 
@@ -104,6 +105,9 @@ app.use('/api/v1/users', usersRoutes);
 // Printer thermal
 app.use('/api/v1/printer', printerRoutes);
 
+// Deposit pelanggan
+app.use('/api/v1/deposit', depositRoutes);
+
 // ── Web page routes ────────────────────────────────────────────────────────────
 
 // Halaman login
@@ -182,6 +186,12 @@ app.get('/wa-center', (req, res) => {
 app.get('/pengaturan', (req, res) => {
   if (!req.session?.userId) return res.redirect('/login');
   res.sendFile(path.join(__dirname, '../public/pages/pengaturan.html'));
+});
+
+// Deposit
+app.get('/deposit', (req, res) => {
+  if (!req.session?.userId) return res.redirect('/login');
+  res.sendFile(path.join(__dirname, '../public/pages/deposit.html'));
 });
 
 // Semua route web lain → redirect ke dashboard

@@ -340,10 +340,10 @@
       <div class="wa-mode-body">
         <div class="wa-mode-label">Kirim via:</div>
         <div class="wa-mode-btns">
-          <button class="wa-mode-btn active" id="modeRegularBtn" onclick="setWAMode('regular')">
+          <button class="wa-mode-btn" id="modeRegularBtn" onclick="setWAMode('regular')">
             💬 WhatsApp Biasa
           </button>
-          <button class="wa-mode-btn" id="modeBusinessBtn" onclick="setWAMode('business')">
+          <button class="wa-mode-btn active" id="modeBusinessBtn" onclick="setWAMode('business')">
             💼 WhatsApp Business
           </button>
         </div>
@@ -376,7 +376,7 @@ let currentUrl     = null;
 let currentPhone   = null;
 let transaksiData  = null;
 let cache          = {};   // type → { url, teks, telepon, pelanggan }
-let waMode         = 'regular';
+let waMode         = 'business';
 
 // ════════════════════════════════════════
 // HELPERS

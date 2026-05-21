@@ -45,8 +45,13 @@ exports.updateBulk = async (req, res) => {
 // ── GET /api/v1/pengaturan/wa-mode ───────────────────────────────────────────
 exports.getWAMode = async (req, res) => {
   try {
-    const row = await db('pengaturan').where({ kunci: 'wa_mode' }).first();
-    res.json({ wa_mode: row?.nilai || 'regular' });
+    const row = await db('pengaturan').where({ kunci: 'wa_mode_default' }).first();
+    if (!row) {
+      // fallback to legacy key
+      const legacy = await db('pengaturan').where({ kunci: 'wa_mode' }).first();
+      return res.json({ wa_mode: legacy?.nilai || 'business' });
+    }
+    res.json({ wa_mode: row.nilai || 'business' });
   } catch (err) {
     console.error('[pengaturan:getWAMode]', err);
     res.status(500).json({ error: 'Gagal mengambil mode WA' });
@@ -60,12 +65,12 @@ exports.updateWAMode = async (req, res) => {
     return res.status(400).json({ error: 'Mode tidak valid. Gunakan "regular" atau "business"' });
   }
   try {
-    const existing = await db('pengaturan').where({ kunci: 'wa_mode' }).first();
+    const existing = await db('pengaturan').where({ kunci: 'wa_mode_default' }).first();
     if (existing) {
-      await db('pengaturan').where({ kunci: 'wa_mode' }).update({ nilai: mode, updated_at: new Date() });
+      await db('pengaturan').where({ kunci: 'wa_mode_default' }).update({ nilai: mode, updated_at: new Date() });
     } else {
       await db('pengaturan').insert({
-        kunci: 'wa_mode', nilai: mode, deskripsi: 'Mode WhatsApp default',
+        kunci: 'wa_mode_default', nilai: mode, deskripsi: 'Mode WhatsApp default (regular/business)',
         created_at: new Date(), updated_at: new Date()
       });
     }

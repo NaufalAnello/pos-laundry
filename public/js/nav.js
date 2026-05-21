@@ -36,6 +36,7 @@
       group: 'Keuangan',
       items: [
         { href: '/kas',     icon: '💰', label: 'Buku Kas' },
+        { href: '/deposit', icon: '💳', label: 'Deposit'  },
         { href: '/laporan', icon: '📊', label: 'Laporan'  },
       ]
     },
@@ -67,6 +68,7 @@
   const MORE_ITEMS = [
     { href: '/order/baru', icon: '➕', label: 'Order Baru' },
     { href: '/kas',        icon: '💰', label: 'Buku Kas'   },
+    { href: '/deposit',    icon: '💳', label: 'Deposit'    },
     { href: '/promo',      icon: '🎁', label: 'Promo'      },
     { href: '/poin',       icon: '⭐', label: 'Poin'       },
     { href: '/laporan',    icon: '📊', label: 'Laporan'    },

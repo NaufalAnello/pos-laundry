@@ -12,7 +12,8 @@ exports.index = async (req, res) => {
       antrianAktif,
       chart7Hari,
       promoAktif,
-      stokHampirHabis
+      stokHampirHabis,
+      depositStats
     ] = await Promise.all([
       // order_hari_ini
       db('transaksi')
@@ -92,7 +93,24 @@ exports.index = async (req, res) => {
       db('stok_bahan')
         .whereRaw('stok_saat_ini <= stok_minimum')
         .orderBy('stok_saat_ini', 'asc')
-        .select('id', 'nama', 'satuan', 'stok_saat_ini', 'stok_minimum')
+        .select('id', 'nama', 'satuan', 'stok_saat_ini', 'stok_minimum'),
+
+      // deposit stats
+      (async () => {
+        try {
+          const threshold = await db('pengaturan').where('kunci', 'deposit_notif_threshold').first();
+          const thresholdVal = Number(threshold?.nilai || 20000);
+          const [totalRow, tipisRow] = await Promise.all([
+            db('deposit_pelanggan').sum('saldo as total').first(),
+            db('deposit_pelanggan').where('saldo', '<', thresholdVal).where('saldo', '>', 0).count('id as total').first()
+          ]);
+          return {
+            total_saldo:           Number(totalRow?.total  ?? 0),
+            pelanggan_saldo_tipis: Number(tipisRow?.total  ?? 0),
+            threshold:             thresholdVal
+          };
+        } catch { return { total_saldo: 0, pelanggan_saldo_tipis: 0, threshold: 20000 }; }
+      })()
     ]);
 
     // Attach items count per antrian row
@@ -120,7 +138,8 @@ exports.index = async (req, res) => {
       antrian_aktif:       antrian,
       bar_chart_7hari:     chart7Hari,
       promo_aktif_hari_ini: promoAktif,
-      stok_hampir_habis:   stokHampirHabis
+      stok_hampir_habis:   stokHampirHabis,
+      deposit:             depositStats
     });
   } catch (err) {
     console.error('[dashboard:index]', err);

@@ -1,4 +1,5 @@
 const transaksiModel = require('../models/transaksiModel');
+const depositModel   = require('../models/deposit.model');
 const { getSettings, getPoinEarned, fmtRp, fmtDate } = require('../services/wa.service');
 
 const WIDTH_MAP = { '58mm': '58mm', '80mm': '80mm', 'A5': '148mm' };
@@ -8,6 +9,14 @@ exports.show = async (req, res) => {
   try {
     const t = await transaksiModel.findById(req.params.id);
     if (!t) return res.status(404).json({ error: 'Transaksi tidak ditemukan' });
+
+    // Ambil info mutasi deposit untuk transaksi ini (jika ada)
+    const depositMutasi = t.pelanggan_id
+      ? await require('../database/connection')('mutasi_deposit')
+          .where({ transaksi_id: t.id })
+          .orderBy('id', 'asc')
+          .select('jenis', 'nominal', 'saldo_sebelum', 'saldo_sesudah')
+      : [];
 
     const [s, poinEarned] = await Promise.all([
       getSettings(),
@@ -32,10 +41,13 @@ exports.show = async (req, res) => {
         <td class="num">Rp&nbsp;${fmtRp(it.subtotal)}</td>
       </tr>`).join('');
 
-    const adaDiskon = (t.diskon || 0) > 0;
-    const adaPoin   = (t.poin_digunakan || 0) > 0;
-    const adaWa     = t.kirim_wa;
-    const lunas     = (t.bayar || 0) >= t.total_bayar;
+    const adaDiskon   = (t.diskon || 0) > 0;
+    const adaPoin     = (t.poin_digunakan || 0) > 0;
+    const adaWa       = t.kirim_wa;
+    const lunas       = (t.bayar || 0) >= t.total_bayar;
+    const isDeposit   = t.metode_bayar === 'deposit';
+    const mutasiBayar = depositMutasi.find(m => m.jenis === 'bayar');
+    const mutasiKeleb = depositMutasi.find(m => m.jenis === 'kelebihan');
 
     const html = `<!DOCTYPE html>
 <html lang="id">
@@ -238,14 +250,41 @@ ${t.pelanggan_nama ? `
     <td class="lbl">TOTAL BAYAR</td>
     <td class="amt">Rp ${fmtRp(t.total_bayar)}</td>
   </tr>
+  ${isDeposit && mutasiBayar ? `
+  <tr>
+    <td class="lbl">Metode Bayar</td>
+    <td class="amt">DEPOSIT</td>
+  </tr>
+  <tr>
+    <td class="lbl">Saldo Sebelum</td>
+    <td class="amt">Rp ${fmtRp(mutasiBayar.saldo_sebelum)}</td>
+  </tr>
+  <tr>
+    <td class="lbl">Dipotong</td>
+    <td class="amt">- Rp ${fmtRp(mutasiBayar.nominal)}</td>
+  </tr>
+  <tr>
+    <td class="lbl bold">Saldo Sesudah</td>
+    <td class="amt bold">Rp ${fmtRp(mutasiBayar.saldo_sesudah)}</td>
+  </tr>` : `
   <tr>
     <td class="lbl">Bayar (${escHtml(t.metode_bayar || 'tunai')})</td>
     <td class="amt">Rp ${fmtRp(t.bayar)}</td>
   </tr>
+  ${mutasiKeleb ? `
+  <tr>
+    <td class="lbl">+Deposit</td>
+    <td class="amt">Rp ${fmtRp(mutasiKeleb.nominal)}</td>
+  </tr>
+  <tr>
+    <td class="lbl">Saldo Deposit</td>
+    <td class="amt bold">Rp ${fmtRp(mutasiKeleb.saldo_sesudah)}</td>
+  </tr>` : `
   <tr>
     <td class="lbl">Kembalian</td>
     <td class="amt bold">Rp ${fmtRp(t.kembalian)}</td>
-  </tr>
+  </tr>`}
+  `}
 </table>
 
 <hr class="divider"/>

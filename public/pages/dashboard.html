@@ -282,6 +282,17 @@
           <div class="empty-state">Memuat...</div>
         </div>
       </div>
+
+      <!-- Deposit -->
+      <div class="card">
+        <div class="card-header">
+          <h2>💳 Deposit Pelanggan</h2>
+          <a href="/deposit" style="font-size:12px;color:var(--blue);text-decoration:none;">Lihat Deposit →</a>
+        </div>
+        <div class="card-body" id="depositBody">
+          <div class="empty-state">Memuat...</div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -447,6 +458,29 @@ function renderStok(list) {
     </div>`).join('');
 }
 
+function renderDeposit(d) {
+  const el = document.getElementById('depositBody');
+  if (!d) { el.innerHTML = '<div class="empty-state">Tidak ada data deposit</div>'; return; }
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:13px;color:var(--gray-5);">Total Saldo Beredar</span>
+        <span style="font-size:16px;font-weight:800;color:var(--blue);">${fmtRp(d.total_saldo)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:13px;color:var(--gray-5);">Pelanggan Aktif Deposit</span>
+        <span style="font-size:14px;font-weight:700;">${d.jumlah_pelanggan} pelanggan</span>
+      </div>
+      ${d.pelanggan_saldo_tipis > 0 ? `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--red-lt);border-radius:7px;">
+        <span style="font-size:12px;color:var(--red);font-weight:600;">⚠ Saldo Tipis (&lt; ${fmtRp(d.threshold)})</span>
+        <span style="font-size:14px;font-weight:800;color:var(--red);">${d.pelanggan_saldo_tipis} pelanggan</span>
+      </div>` : `
+      <div style="font-size:12px;color:var(--green);padding:6px 0;">✓ Semua saldo dalam kondisi aman</div>`}
+      <a href="/deposit" class="btn btn-blue btn-sm" style="justify-content:center;text-decoration:none;">💳 Kelola Deposit</a>
+    </div>`;
+}
+
 function renderChart(data) {
   const labels  = data.map(d => new Date(d.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'short' }));
   const values  = data.map(d => Number(d.omset));
@@ -513,6 +547,7 @@ async function loadDashboard() {
 
     renderPromo(d.promo_aktif_hari_ini);
     renderStok(d.stok_hampir_habis);
+    renderDeposit(d.deposit);
   } catch (err) {
     console.error(err);
     showToast('Gagal memuat dashboard');

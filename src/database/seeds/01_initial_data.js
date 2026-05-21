@@ -75,7 +75,7 @@ exports.seed = async function (knex) {
     { kunci: 'wa_notif_aktif',   nilai: 'false',                                            deskripsi: 'Aktifkan notifikasi WhatsApp otomatis (true/false)' },
     { kunci: 'logo_toko',        nilai: '',                                                 deskripsi: 'Path / URL logo toko' },
     { kunci: 'footer_struk',     nilai: 'Terima kasih telah menggunakan layanan kami!',     deskripsi: 'Teks footer pada struk transaksi' },
-    { kunci: 'wa_mode',          nilai: 'regular',                                          deskripsi: 'Mode WhatsApp default (regular/business)' }
+    { kunci: 'wa_mode_default',  nilai: 'business',                                         deskripsi: 'Mode WhatsApp default (regular/business)' }
   ]);
 
   console.log('✓ Seed selesai: 1 admin, 5 kategori, 13 layanan, 13 pengaturan');

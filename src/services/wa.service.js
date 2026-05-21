@@ -21,7 +21,7 @@ const formatPhone = (telepon) => {
  * @param {string} [mode=regular]  — 'regular' (wa.me) | 'business' (api.whatsapp.com)
  * @returns {string|null}
  */
-const generateURL = (nomor, teks, mode = 'regular') => {
+const generateURL = (nomor, teks, mode = 'business') => {
   const phone = formatPhone(nomor);
   if (!phone) return null;
   const encoded = encodeURIComponent(teks);
@@ -123,6 +123,41 @@ const buildNotifSelesai = async (transaksi, mode = 'regular') => {
   return render(template, vars);
 };
 
+// ── buildNotifDepositTipis — saldo deposit hampir habis ─────────────────────
+const buildNotifDepositTipis = async (pelanggan, saldo) => {
+  const s = await getSettings();
+  const template = s.wa_template_deposit_tipis ||
+    'Halo {nama}, saldo deposit Anda di {nama_toko} tinggal *Rp {saldo}*. Silakan lakukan top-up agar bisa digunakan untuk pembayaran berikutnya. Info: {telepon_toko}.';
+  return render(template, {
+    nama:       pelanggan.nama || 'Pelanggan',
+    saldo:      fmtRp(saldo),
+    nama_toko:  s.nama_toko    || 'Laundry',
+    telepon_toko: s.telepon_toko || ''
+  });
+};
+
+// Cek dan catat log notif deposit tipis (tidak kirim otomatis, hanya log)
+const cekNotifDepositTipis = async (pelanggan, saldoSesudah, transaksiId) => {
+  try {
+    const s = await getSettings();
+    const threshold = Number(s.deposit_notif_threshold || 20000);
+    if (saldoSesudah >= threshold || !pelanggan?.telepon) return;
+
+    const pesan = await buildNotifDepositTipis(pelanggan, saldoSesudah);
+    const url   = generateURL(pelanggan.telepon, pesan, s.wa_mode_default || s.wa_mode || 'business');
+
+    await db('wa_log').insert({
+      telepon:      pelanggan.telepon,
+      pesan,
+      url,
+      status:       'pending',
+      jenis:        'deposit_tipis',
+      transaksi_id: transaksiId || null,
+      created_at:   new Date()
+    });
+  } catch (_) { /* non-critical */ }
+};
+
 // ── buildBroadcast — pesan broadcast ke banyak pelanggan ────────────────────
 /**
  * @param {string}   pesan       — teks pesan yang akan dikirim
@@ -130,7 +165,7 @@ const buildNotifSelesai = async (transaksi, mode = 'regular') => {
  * @param {string}   mode        — 'regular' | 'business'
  * @returns {Array}              — array { pelanggan, url }
  */
-const buildBroadcast = (pesan, pelanggan = [], mode = 'regular') =>
+const buildBroadcast = (pesan, pelanggan = [], mode = 'business') =>
   pelanggan
     .filter(p => p.telepon)
     .map(p => ({
@@ -143,6 +178,8 @@ module.exports = {
   buildNota,
   buildTagihan,
   buildNotifSelesai,
+  buildNotifDepositTipis,
+  cekNotifDepositTipis,
   buildBroadcast,
   getSettings,          // dipakai struk controller
   getPoinEarned,
