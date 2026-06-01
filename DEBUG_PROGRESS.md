@@ -9,7 +9,7 @@
 - [x] AREA 3 — Autentikasi & session — selesai, tidak ada bug (verified live)
 - [x] AREA 4 — Order baru (KRITIS) — selesai, 2 bug diperbaiki & diuji live
 - [x] AREA 5 — Print thermal (KRITIS) — selesai, pesan error dirapikan
-- [ ] AREA 6 — WhatsApp Business (KRITIS)
+- [x] AREA 6 — WhatsApp Business (KRITIS) — selesai, verified live, 1 fix minor
 - [ ] AREA 7 — Deposit
 - [ ] AREA 8 — Poin pelanggan
 - [ ] AREA 9 — Promo & paket
@@ -26,6 +26,7 @@
 | 3  | transaksiController.js | `estimasi_hari` layanan DIABAIKAN — `maxHari` baca dari `value.items` (request) yg tdk punya field itu → estimasi selesai SELALU +2 hari. Diperbaiki baca dari layanan (estimasiList). Diuji: layanan estimasi 3 → estimasi benar 3 hari | FIXED |
 | 4  | transaksiController.js + transaksiService.js | Poin earned diberikan saat create TANPA cek lunas (order DP/belum bayar pun dapat poin, tdk sesuai spec). Dibuat helper `awardPoinJikaLunas` (idempotent), dipanggil di create/update/updateStatus hanya saat lunas. Diuji: belum lunas=0 poin, lunas=+poin, bayar ulang=tdk dobel | FIXED |
 | 5  | printer.service.js | Pesan error printer berupa raw Python traceback (jelek di indikator & toast). Dirapikan jadi pesan ringkas: "Library pyusb belum terpasang" / "Printer tidak terhubung" / "Akses USB ditolak" | FIXED |
+| 6  | waController.js | Fallback wa_mode di endpoint log = 'regular' (inkonsisten dgn default 'business'). Diselaraskan ke 'business' | FIXED |
 
 ## Catatan AREA 1 (bukan bug, informasi):
 - Semua dependency ARM64-compatible: better-sqlite3 compile from source (python3/make/g++ ada di Dockerfile), sisanya pure-JS (bcryptjs, joi, express, knex). Tidak ada package x86-only.
@@ -81,5 +82,14 @@
 - getPoinEarned (untuk poin di struk) query SUM riwayat_poin jenis=tambah → tetap akurat
   setelah perubahan poin di AREA 4 (1 entri earn per transaksi).
 
+## Catatan AREA 6 (informasi, semua LULUS):
+- generateURL default 'business' → api.whatsapp.com; 'regular' → wa.me. Diuji LIVE semua endpoint.
+- nota/tagihan/notif: baca default dari wa_mode_default (DB), terima override ?mode. Diuji ✓.
+- broadcast: baca default + terima body.mode. Default business, host api.whatsapp.com ✓.
+- DB pengaturan: wa_mode_default=business (legacy wa_mode sudah di-rename, tidak ada lagi).
+- Template wa_template_nota/tagihan/notif_selesai: SEMUA variabel {..} tersedia di builder.
+  render() aman untuk var tak dikenal (dibiarkan sebagai {var}).
+- formatPhone: strip non-digit, 0→62, prepend 62. Benar.
+
 ## Langkah berikutnya saat sesi lanjut:
-Lanjut ke AREA 6 — WhatsApp Business (KRITIS)
+Lanjut ke AREA 7 — Deposit

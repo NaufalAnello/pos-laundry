@@ -172,7 +172,7 @@ exports.log = async (req, res) => {
       telepon,
       pesan,
       status,
-      wa_mode: ['regular', 'business'].includes(wa_mode) ? wa_mode : 'regular',
+      wa_mode: ['regular', 'business'].includes(wa_mode) ? wa_mode : 'business',
       transaksi_id: transaksi_id || null,
       response_api: null,
       created_at:   new Date()
