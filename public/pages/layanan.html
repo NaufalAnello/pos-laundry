@@ -146,6 +146,29 @@
     .color-opt.selected { border-color:var(--gray-9); }
     .color-custom { padding:3px; border:1px solid var(--gray-3); border-radius:50%; cursor:pointer; width:28px; height:28px; }
 
+    /* ── Margin preview ── */
+    .margin-preview { background:var(--gray-1); border:1px solid var(--gray-3); border-radius:8px;
+                      padding:10px 14px; font-size:12px; margin-top:8px; display:none; }
+    .margin-preview.show { display:block; }
+    .margin-preview table { width:100%; border-collapse:collapse; }
+    .margin-preview td  { padding:2px 0; }
+    .margin-preview .lbl { color:var(--gray-5); width:50%; }
+    .margin-preview .val { font-weight:700; text-align:right; }
+    .margin-preview .val.green { color:var(--green); }
+    .margin-preview .val.big   { font-size:14px; color:var(--blue); }
+
+    /* ── Margin toggle ── */
+    .mode-toggle { display:flex; border:1.5px solid var(--gray-3); border-radius:8px; overflow:hidden; margin-bottom:12px; }
+    .mode-btn { flex:1; padding:8px; font-size:12px; font-weight:600; border:none; background:var(--gray-1);
+                color:var(--gray-5); cursor:pointer; transition:all .15s; }
+    .mode-btn.active { background:var(--blue-lt); color:var(--blue); }
+
+    /* ── Margin info row in accordion ── */
+    .margin-info { font-size:11px; color:var(--gray-5); margin-top:3px; }
+    .margin-info .isi { color:var(--green); font-weight:600; }
+    .margin-info a { color:var(--blue); text-decoration:none; font-size:11px; }
+    .margin-info a:hover { text-decoration:underline; }
+
     /* ── Toast ── */
     #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
              background:#111; color:#fff; padding:10px 20px; border-radius:99px;
@@ -225,23 +248,84 @@
         <label class="form-label">Kategori</label>
         <select id="layKategori" class="form-select"></select>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Harga (Rp) *</label>
-          <input type="number" id="layHarga" class="form-input" placeholder="5000" min="0"/>
+
+      <!-- Harga & Margin Section -->
+      <div class="form-group">
+        <label class="form-label">Harga & Margin</label>
+        <div class="mode-toggle">
+          <button type="button" class="mode-btn active" id="modeBtnManual" onclick="setHargaMode('manual')">Manual</button>
+          <button type="button" class="mode-btn" id="modeBtnAuto" onclick="setHargaMode('auto')">Dari HPP + Margin</button>
         </div>
-        <div class="form-group">
-          <label class="form-label">Satuan</label>
-          <select id="laySatuan" class="form-select">
-            <option value="kg">kg</option>
-            <option value="item">item</option>
-            <option value="pcs">pcs</option>
-            <option value="lusin">lusin</option>
-            <option value="buah">buah</option>
-            <option value="pasang">pasang</option>
-          </select>
+
+        <!-- Mode Manual -->
+        <div id="hargaModeManual">
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label">Harga (Rp) *</label>
+              <input type="number" id="layHarga" class="form-input" placeholder="5000" min="0" oninput="updateMarginPreview()"/>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label">Satuan</label>
+              <select id="laySatuan" class="form-select">
+                <option value="kg">kg</option>
+                <option value="item">item</option>
+                <option value="pcs">pcs</option>
+                <option value="lusin">lusin</option>
+                <option value="buah">buah</option>
+                <option value="pasang">pasang</option>
+              </select>
+            </div>
+          </div>
+          <!-- HPP informatif saat mode manual -->
+          <div class="form-row" style="margin-top:10px">
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label">HPP (Rp) <span style="font-weight:400;color:var(--gray-5)">opsional</span></label>
+              <input type="number" id="layHppManual" class="form-input" placeholder="0" min="0" oninput="updateMarginPreview()"/>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label">Margin Target (%)</label>
+              <input type="number" id="layMarginManual" class="form-input" placeholder="0" min="0" oninput="updateMarginPreview()"/>
+            </div>
+          </div>
+          <div class="margin-preview" id="marginPreviewManual"></div>
+        </div>
+
+        <!-- Mode Auto -->
+        <div id="hargaModeAuto" style="display:none">
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label">HPP per <span id="satuanLabelAuto">unit</span> (Rp) *</label>
+              <input type="number" id="layHppAuto" class="form-input" placeholder="4200" min="0" oninput="updateMarginPreview()"/>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label">Target Margin (%)</label>
+              <input type="number" id="layMarginAuto" class="form-input" placeholder="40" min="0" step="0.5" oninput="updateMarginPreview()"/>
+            </div>
+          </div>
+          <!-- Satuan (hidden in manual, shown here for auto) -->
+          <div class="form-group" style="margin-top:10px;margin-bottom:0">
+            <label class="form-label">Satuan</label>
+            <select id="laySatuanAuto" class="form-select" onchange="document.getElementById('satuanLabelAuto').textContent=this.value">
+              <option value="kg">kg</option>
+              <option value="item">item</option>
+              <option value="pcs">pcs</option>
+              <option value="lusin">lusin</option>
+              <option value="buah">buah</option>
+              <option value="pasang">pasang</option>
+            </select>
+          </div>
+          <div class="margin-preview show" id="marginPreviewAuto">
+            <table>
+              <tr><td class="lbl">HPP</td><td class="val" id="pvHpp">Rp 0</td></tr>
+              <tr><td class="lbl">Margin</td><td class="val" id="pvMarginNominal">+ Rp 0</td></tr>
+              <tr><td class="lbl">Harga Jual</td><td class="val big" id="pvHargaJual">Rp 0</td></tr>
+              <tr><td class="lbl">Untung/unit</td><td class="val green" id="pvUntung">Rp 0</td></tr>
+            </table>
+            <input type="hidden" id="layHarga" value="0"/>
+          </div>
         </div>
       </div>
+
       <div class="form-group">
         <label class="form-label">Estimasi Selesai (hari)</label>
         <input type="number" id="layEstimasi" class="form-input" value="2" min="1"/>
@@ -376,8 +460,6 @@ function openKategoriModal(existing = null) {
 function openLayananModal(existing = null, defaultKategoriId = null) {
   document.getElementById('layId').value       = existing?.id || '';
   document.getElementById('layNama').value     = existing?.nama || '';
-  document.getElementById('layHarga').value    = existing?.harga || '';
-  document.getElementById('laySatuan').value   = existing?.satuan || 'kg';
   document.getElementById('layEstimasi').value = existing?.estimasi_hari || 2;
   document.getElementById('layDeskripsi').value= existing?.deskripsi || '';
   document.getElementById('layAktif').checked  = existing?.aktif !== 0;
@@ -390,7 +472,61 @@ function openLayananModal(existing = null, defaultKategoriId = null) {
       (existing?.kategori_id ?? defaultKategoriId) == k.id ? 'selected' : ''
     }>${k.nama}</option>`).join('');
 
+  const isAuto = Number(existing?.harga_auto) === 1;
+  setHargaMode(isAuto ? 'auto' : 'manual');
+
+  if (isAuto) {
+    document.getElementById('layHppAuto').value    = existing?.hpp || '';
+    document.getElementById('layMarginAuto').value = existing?.margin_persen || '';
+    document.getElementById('laySatuanAuto').value = existing?.satuan || 'kg';
+    document.getElementById('satuanLabelAuto').textContent = existing?.satuan || 'unit';
+  } else {
+    document.getElementById('layHarga').value      = existing?.harga || '';
+    document.getElementById('laySatuan').value     = existing?.satuan || 'kg';
+    document.getElementById('layHppManual').value  = existing?.hpp || '';
+    document.getElementById('layMarginManual').value = existing?.margin_persen || '';
+  }
+  updateMarginPreview();
   document.getElementById('layModal').classList.add('open');
+}
+
+function setHargaMode(mode) {
+  const isAuto = mode === 'auto';
+  document.getElementById('hargaModeManual').style.display = isAuto ? 'none' : '';
+  document.getElementById('hargaModeAuto').style.display   = isAuto ? '' : 'none';
+  document.getElementById('modeBtnManual').classList.toggle('active', !isAuto);
+  document.getElementById('modeBtnAuto').classList.toggle('active',  isAuto);
+}
+
+function updateMarginPreview() {
+  const isAuto = document.getElementById('hargaModeAuto').style.display !== 'none';
+
+  if (isAuto) {
+    const hpp    = parseFloat(document.getElementById('layHppAuto').value) || 0;
+    const margin = parseFloat(document.getElementById('layMarginAuto').value) || 0;
+    if (hpp > 0) {
+      const marNominal = hpp * margin / 100;
+      const harga      = Math.ceil(hpp * (1 + margin / 100) / 100) * 100;
+      const untung     = harga - hpp;
+      document.getElementById('pvHpp').textContent         = 'Rp ' + fmtRp(hpp);
+      document.getElementById('pvMarginNominal').textContent = '+ Rp ' + fmtRp(Math.round(marNominal));
+      document.getElementById('pvHargaJual').textContent   = 'Rp ' + fmtRp(harga);
+      document.getElementById('pvUntung').textContent      = 'Rp ' + fmtRp(untung);
+      document.getElementById('layHarga').value            = harga;
+    }
+  } else {
+    const hpp   = parseFloat(document.getElementById('layHppManual').value) || 0;
+    const harga = parseFloat(document.getElementById('layHarga').value) || 0;
+    const prev  = document.getElementById('marginPreviewManual');
+    if (hpp > 0 && harga > 0) {
+      const margin = ((harga - hpp) / hpp * 100).toFixed(1);
+      const untung = harga - hpp;
+      prev.innerHTML = `HPP: Rp ${fmtRp(hpp)} · Margin: ${margin}% · Untung: <strong>Rp ${fmtRp(untung)}/unit</strong>`;
+      prev.classList.add('show');
+    } else {
+      prev.classList.remove('show');
+    }
+  }
 }
 
 // ── Save / API calls ──────────────────────────────────────────────────────────
@@ -421,15 +557,27 @@ async function saveKategori() {
 }
 
 async function saveLayanan() {
-  const id   = document.getElementById('layId').value;
+  const id     = document.getElementById('layId').value;
+  const isAuto = document.getElementById('hargaModeAuto').style.display !== 'none';
+
+  const hpp          = parseFloat(isAuto ? document.getElementById('layHppAuto').value : document.getElementById('layHppManual').value) || 0;
+  const marginPersen = parseFloat(isAuto ? document.getElementById('layMarginAuto').value : document.getElementById('layMarginManual').value) || 0;
+  const satuan       = isAuto ? document.getElementById('laySatuanAuto').value : document.getElementById('laySatuan').value;
+  const harga        = isAuto
+    ? Math.ceil(hpp * (1 + marginPersen / 100) / 100) * 100
+    : parseFloat(document.getElementById('layHarga').value) || 0;
+
   const body = {
     nama:          document.getElementById('layNama').value.trim(),
     kategori_id:   parseInt(document.getElementById('layKategori').value) || null,
-    harga:         parseFloat(document.getElementById('layHarga').value) || 0,
-    satuan:        document.getElementById('laySatuan').value,
+    harga,
+    satuan,
     estimasi_hari: parseInt(document.getElementById('layEstimasi').value) || 2,
     deskripsi:     document.getElementById('layDeskripsi').value.trim(),
-    aktif:         document.getElementById('layAktif').checked
+    aktif:         document.getElementById('layAktif').checked,
+    hpp,
+    margin_persen: marginPersen,
+    harga_auto:    isAuto ? 1 : 0
   };
   if (!body.nama)  { showToast('Nama layanan wajib diisi'); return; }
   if (!body.harga) { showToast('Harga wajib diisi'); return; }
@@ -539,10 +687,19 @@ function renderAkordion(data) {
     const ikon    = k.ikon  || 'category';
     const isOpen  = true; // default open
 
-    const layananRows = (k.layanan || []).map(l => `
+    const layananRows = (k.layanan || []).map(l => {
+      const hpp    = Number(l.hpp || 0);
+      const untung = hpp > 0 ? l.harga - hpp : null;
+      const mar    = hpp > 0 ? ((l.harga - hpp) / hpp * 100).toFixed(0) : null;
+      const marginInfo = hpp > 0
+        ? `<div class="margin-info">HPP Rp${fmtRp(hpp)} · <span class="isi">Margin ${mar}% · Untung Rp${fmtRp(untung)}/unit</span></div>`
+        : `<div class="margin-info"><a href="#" onclick="openLayananModal(${JSON.stringify(l).replace(/"/g,'&quot;')});return false">+ Isi HPP untuk lihat margin</a></div>`;
+
+      return `
       <tr>
         <td><span style="font-weight:600">${l.nama}</span>
             ${!l.aktif ? '<span class="badge badge-nonaktif" style="margin-left:6px">Nonaktif</span>' : ''}
+            ${marginInfo}
         </td>
         <td>
           <span id="harga-disp-${l.id}" class="harga-display" onclick="showHargaInput(${l.id})"
@@ -573,7 +730,8 @@ function renderAkordion(data) {
             </button>
           </div>
         </td>
-      </tr>`).join('');
+      </tr>`;
+    }).join('');
 
     const emptyRow = !k.layanan?.length
       ? `<tr class="empty-row"><td colspan="6">Belum ada layanan di kategori ini.</td></tr>` : '';

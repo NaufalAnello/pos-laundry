@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const db  = require('../database/connection');
+const { hitungHargaJual, hitungMarginDariHarga, hitungKeuntungan } = require('../utils/margin');
 
 // ── Schemas ──────────────────────────────────────────────────────────────────
 const kategoriSchema = Joi.object({
@@ -17,7 +18,10 @@ const layananSchema = Joi.object({
   satuan:        Joi.string().max(20).default('kg'),
   estimasi_hari: Joi.number().integer().min(1).default(2),
   deskripsi:     Joi.string().allow('', null),
-  aktif:         Joi.boolean().default(true)
+  aktif:         Joi.boolean().default(true),
+  hpp:           Joi.number().min(0).default(0),
+  margin_persen: Joi.number().min(0).max(10000).default(0),
+  harga_auto:    Joi.number().integer().min(0).max(1).default(0)
 });
 
 const hargaSchema = Joi.object({
@@ -60,14 +64,24 @@ exports.perKategori = async (req, res) => {
       .orderBy(['k.nama', 'l.nama'])
       .select(
         'l.id', 'l.nama', 'l.harga', 'l.satuan', 'l.estimasi_hari',
-        'l.deskripsi', 'l.aktif', 'l.kategori_id', 'l.created_at'
+        'l.deskripsi', 'l.aktif', 'l.kategori_id', 'l.created_at',
+        'l.hpp', 'l.margin_persen', 'l.harga_auto'
       );
 
     const byKategori = {};
     layananRows.forEach(l => {
       const k = l.kategori_id || 0;
       if (!byKategori[k]) byKategori[k] = [];
-      byKategori[k].push(l);
+      const hpp = Number(l.hpp || 0);
+      byKategori[k].push({
+        ...l,
+        hpp,
+        margin_persen:      Number(l.margin_persen || 0),
+        harga_auto:         Number(l.harga_auto || 0),
+        keuntungan_per_satuan: hpp > 0 ? l.harga - hpp : null,
+        margin_aktual:      hpp > 0 ? hitungMarginDariHarga(hpp, l.harga) : null,
+        hpp_terisi:         hpp > 0,
+      });
     });
 
     const data = kategoriList.map(k => ({
@@ -170,6 +184,7 @@ exports.indexLayanan = async (req, res) => {
       .select(
         'l.id', 'l.nama', 'l.harga', 'l.satuan', 'l.estimasi_hari',
         'l.deskripsi', 'l.aktif', 'l.kategori_id', 'l.created_at',
+        'l.hpp', 'l.margin_persen', 'l.harga_auto',
         'k.nama as kategori_nama'
       );
     res.json({ data: rows });
@@ -190,6 +205,10 @@ exports.storeLayanan = async (req, res) => {
       if (!kat) return res.status(400).json({ error: 'Kategori tidak ditemukan' });
     }
 
+    if (value.harga_auto && value.hpp > 0 && value.margin_persen > 0) {
+      value.harga = hitungHargaJual(value.hpp, value.margin_persen);
+    }
+
     const [id] = await db('layanan').insert({ ...value, created_at: new Date(), updated_at: new Date() });
     const created = await db('layanan').where({ id }).first();
     res.status(201).json({ message: 'Layanan berhasil dibuat', data: created });
@@ -207,6 +226,10 @@ exports.updateLayanan = async (req, res) => {
   try {
     const existing = await db('layanan').where({ id: req.params.id }).first();
     if (!existing) return res.status(404).json({ error: 'Layanan tidak ditemukan' });
+
+    if (value.harga_auto && value.hpp > 0 && value.margin_persen > 0) {
+      value.harga = hitungHargaJual(value.hpp, value.margin_persen);
+    }
 
     await db('layanan').where({ id: req.params.id }).update({ ...value, updated_at: new Date() });
     const updated = await db('layanan').where({ id: req.params.id }).first();

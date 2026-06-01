@@ -152,6 +152,7 @@
     <button class="tab active" onclick="switchTab('umum',this)">🏪 Profil Usaha</button>
     <button class="tab" onclick="switchTab('wa',this)">📱 WhatsApp</button>
     <button class="tab" onclick="switchTab('printer',this)">🖨️ Printer</button>
+    <button class="tab" onclick="switchTab('margin',this)">📊 Margin & HPP</button>
     <button class="tab" onclick="switchTab('user',this)">👤 Manajemen User</button>
     <button class="tab" onclick="switchTab('backup',this)">💾 Backup & Restore</button>
   </div>
@@ -361,6 +362,43 @@
     </div>
   </div>
 
+  <!-- ── TAB: Margin & HPP ── -->
+  <div id="sec-margin" class="tab-section">
+    <div class="card">
+      <div class="card-head">📊 Pengaturan Margin & HPP</div>
+      <div class="card-body">
+        <div class="form-group">
+          <label class="form-label">Pembulatan Harga Otomatis</label>
+          <select id="marginPembulatan" class="form-select">
+            <option value="ratusan">Ke ratusan terdekat (Rp 5.880 → Rp 6.000)</option>
+            <option value="ribuan">Ke ribuan terdekat (Rp 5.880 → Rp 6.000)</option>
+            <option value="tanpa">Tanpa pembulatan (Rp 5.880)</option>
+          </select>
+          <div class="form-hint">Berlaku saat harga dihitung otomatis dari HPP + Margin</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Target Margin Default (%)</label>
+          <input type="number" id="marginDefault" class="form-input" placeholder="40" min="0" max="1000" style="max-width:160px"/>
+          <div class="form-hint">Nilai awal margin saat menambah layanan baru</div>
+        </div>
+        <div class="form-group" style="display:flex;align-items:center;gap:10px">
+          <label class="toggle">
+            <input type="checkbox" id="marginTampilkan" checked/>
+            <span class="slider"></span>
+          </label>
+          <span style="font-size:13px;font-weight:600">Tampilkan info margin di daftar layanan</span>
+        </div>
+        <button class="btn btn-blue" onclick="saveMarginSettings()">💾 Simpan Pengaturan Margin</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="card-head">📈 Ringkasan HPP Layanan</div>
+      <div class="card-body" id="marginSummaryBody">
+        <div style="color:var(--gray-5);text-align:center;padding:16px">Memuat...</div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── TAB: User ── -->
   <div id="sec-user" class="tab-section">
     <div class="card">
@@ -502,6 +540,7 @@ function switchTab(id, btn) {
   btn.classList.add('active');
   if (id === 'user')    loadUsers();
   if (id === 'printer') cekPrinter();
+  if (id === 'margin')  loadMarginSummary();
 }
 
 // ── Load settings ─────────────────────────────────────────────────────────────
@@ -540,6 +579,11 @@ async function loadSettings() {
     document.getElementById('tplNota').value    = data.wa_template_nota           || '';
     document.getElementById('tplTagihan').value = data.wa_template_tagihan        || '';
     document.getElementById('tplNotif').value   = data.wa_template_notif_selesai  || '';
+
+    // Margin settings
+    document.getElementById('marginPembulatan').value = data.margin_pembulatan || 'ratusan';
+    document.getElementById('marginDefault').value    = data.margin_default_persen || '40';
+    document.getElementById('marginTampilkan').checked = data.margin_tampilkan_info !== '0';
   } catch (e) { toast('Gagal memuat pengaturan: ' + e.message, true); }
 }
 
@@ -799,6 +843,54 @@ async function uploadRestore() {
     alert('✅ ' + j.message + '\n\n' + (j.note || ''));
     toast('File backup berhasil diupload');
   } catch (e) { toast(e.message, true); }
+}
+
+// ── Margin Settings ──────────────────────────────────────────────────────────
+async function saveMarginSettings() {
+  try {
+    await api('/api/v1/pengaturan', {
+      method: 'PUT',
+      body: JSON.stringify({
+        margin_pembulatan:      document.getElementById('marginPembulatan').value,
+        margin_default_persen:  document.getElementById('marginDefault').value || '40',
+        margin_tampilkan_info:  document.getElementById('marginTampilkan').checked ? '1' : '0',
+      })
+    });
+    toast('Pengaturan margin disimpan');
+  } catch (e) { toast(e.message, true); }
+}
+
+async function loadMarginSummary() {
+  const el = document.getElementById('marginSummaryBody');
+  if (!el) return;
+  try {
+    const r = await fetch('/api/v1/layanan/all');
+    const d = await r.json();
+    const rows = (d.data || []).filter(l => l.aktif);
+    const withHpp = rows.filter(l => Number(l.hpp) > 0);
+    if (!withHpp.length) {
+      el.innerHTML = '<div style="color:var(--gray-5);font-size:13px">Belum ada layanan dengan HPP yang diisi. <a href="/layanan" style="color:var(--blue)">Isi di halaman Layanan →</a></div>';
+      return;
+    }
+    const tableRows = withHpp.map(l => {
+      const hpp = Number(l.hpp);
+      const mar = hpp > 0 ? ((l.harga - hpp) / hpp * 100).toFixed(0) : 0;
+      const untung = l.harga - hpp;
+      const mc = mar >= 30 ? 'var(--green)' : mar >= 20 ? 'var(--yellow)' : 'var(--red)';
+      return `<tr>
+        <td style="font-weight:600">${esc(l.nama)}</td>
+        <td>Rp ${Number(hpp).toLocaleString('id-ID')}</td>
+        <td>Rp ${Number(l.harga).toLocaleString('id-ID')}</td>
+        <td style="color:${mc};font-weight:700">${mar}%</td>
+        <td style="color:var(--green)">Rp ${Number(untung).toLocaleString('id-ID')}</td>
+      </tr>`;
+    }).join('');
+    el.innerHTML = `<table>
+      <thead><tr><th>Layanan</th><th>HPP</th><th>Harga Jual</th><th>Margin</th><th>Untung/unit</th></tr></thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+    <div style="margin-top:8px;font-size:12px;color:var(--gray-5)">${rows.length - withHpp.length} layanan aktif belum ada HPP</div>`;
+  } catch { el.innerHTML = '<div style="color:var(--red)">Gagal memuat data</div>'; }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

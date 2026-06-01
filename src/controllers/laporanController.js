@@ -47,6 +47,7 @@ exports.index = async (req, res) => {
 
       db('detail_transaksi as d')
         .leftJoin('transaksi as t', 't.id', 'd.transaksi_id')
+        .leftJoin('layanan as l', 'l.id', 'd.layanan_id')
         .whereNotIn('t.status', ['dibatalkan'])
         .whereRaw("date(t.tanggal_masuk) >= ?", [start])
         .whereRaw("date(t.tanggal_masuk) <= ?", [end])
@@ -56,7 +57,9 @@ exports.index = async (req, res) => {
         .select(
           'd.nama_layanan',
           db.raw('SUM(d.jumlah) as total_jumlah'),
-          db.raw('COALESCE(SUM(d.subtotal), 0) as total_omset')
+          db.raw('COALESCE(SUM(d.subtotal), 0) as total_omset'),
+          db.raw('MAX(COALESCE(l.hpp, 0)) as hpp'),
+          db.raw('MAX(COALESCE(l.margin_persen, 0)) as margin_persen')
         ),
 
       db.raw(`

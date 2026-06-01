@@ -75,7 +75,10 @@ exports.seed = async function (knex) {
     { kunci: 'wa_notif_aktif',   nilai: 'false',                                            deskripsi: 'Aktifkan notifikasi WhatsApp otomatis (true/false)' },
     { kunci: 'logo_toko',        nilai: '',                                                 deskripsi: 'Path / URL logo toko' },
     { kunci: 'footer_struk',     nilai: 'Terima kasih telah menggunakan layanan kami!',     deskripsi: 'Teks footer pada struk transaksi' },
-    { kunci: 'wa_mode_default',  nilai: 'business',                                         deskripsi: 'Mode WhatsApp default (regular/business)' }
+    { kunci: 'wa_mode_default',       nilai: 'business', deskripsi: 'Mode WhatsApp default (regular/business)' },
+    { kunci: 'margin_pembulatan',     nilai: 'ratusan',  deskripsi: 'Pembulatan harga otomatis (ratusan/ribuan/tanpa)' },
+    { kunci: 'margin_default_persen', nilai: '40',       deskripsi: 'Target margin default saat tambah layanan baru (%)' },
+    { kunci: 'margin_tampilkan_info', nilai: '1',        deskripsi: 'Tampilkan info margin di daftar layanan (1/0)' }
   ]);
 
   console.log('✓ Seed selesai: 1 admin, 5 kategori, 13 layanan, 13 pengaturan');

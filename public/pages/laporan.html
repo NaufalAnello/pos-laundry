@@ -234,6 +234,14 @@
       <div class="loading">Memuat…</div>
     </div>
   </div>
+
+  <!-- Profitabilitas section -->
+  <div class="card" style="margin-top:14px;" id="profitCard">
+    <div class="card-head">📊 Profitabilitas Layanan <span style="font-size:11px;font-weight:400;color:var(--gray-5)">berdasarkan HPP yang diisi</span></div>
+    <div class="card-body" id="profitBody">
+      <div class="loading">Memuat…</div>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -299,6 +307,7 @@ async function load() {
   document.getElementById('statusBody').innerHTML        = '<div class="loading">Memuat…</div>';
   document.getElementById('poinPromoBody').innerHTML     = '<div class="loading">Memuat…</div>';
   document.getElementById('depositLaporanBody').innerHTML = '<div class="loading">Memuat…</div>';
+  document.getElementById('profitBody').innerHTML        = '<div class="loading">Memuat…</div>';
 
   try {
     const data = await apiFetch(`/api/v1/laporan?start=${start}&end=${end}`);
@@ -428,6 +437,9 @@ function renderAll(d) {
     </div>
   `;
 
+  // Profitabilitas
+  renderProfitabilitas(distribusi_layanan || []);
+
   // Deposit
   const dep = d.deposit || {};
   document.getElementById('depositLaporanBody').innerHTML = `
@@ -440,6 +452,78 @@ function renderAll(d) {
       <div class="chip"><div class="cv" style="color:var(--purple);font-size:14px">${rupiah(dep.saldo_beredar)}</div><div class="cl">Saldo Beredar</div></div>
     </div>
   `;
+}
+
+// ── Profitabilitas ────────────────────────────────────────────────────────────
+function renderProfitabilitas(distribusi) {
+  const el = document.getElementById('profitBody');
+  const withHpp = distribusi.filter(r => Number(r.hpp) > 0);
+
+  if (!withHpp.length) {
+    el.innerHTML = `<div style="text-align:center;color:var(--gray-5);padding:20px;font-size:13px">
+      Belum ada layanan dengan HPP yang diisi. <a href="/layanan" style="color:var(--blue)">Isi HPP di halaman Layanan →</a>
+    </div>`;
+    return;
+  }
+
+  // Hitung per layanan
+  const rows = withHpp.map(r => {
+    const hpp       = Number(r.hpp);
+    const omset     = Number(r.total_omset);
+    const vol       = Number(r.total_jumlah);
+    const estHpp    = hpp * vol;
+    const estProfit = omset - estHpp;
+    const marginPct = omset > 0 ? (estProfit / omset * 100) : 0;
+    return { ...r, hpp, omset, vol, estHpp, estProfit, marginPct };
+  }).sort((a, b) => b.marginPct - a.marginPct);
+
+  // Kartu ringkasan
+  const best    = rows[0];
+  const needEval = rows.filter(r => r.marginPct < 20);
+  const totalProfit = rows.reduce((s, r) => s + r.estProfit, 0);
+
+  const cards = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+      <div class="chip">
+        <div class="cv" style="color:var(--green);font-size:14px">${esc(best.nama_layanan)}</div>
+        <div class="cl">Margin tertinggi (${best.marginPct.toFixed(0)}%)</div>
+      </div>
+      <div class="chip">
+        <div class="cv" style="color:var(--yellow)">${needEval.length} layanan</div>
+        <div class="cl">Perlu evaluasi (margin &lt; 20%)</div>
+      </div>
+      <div class="chip">
+        <div class="cv" style="color:var(--blue);font-size:14px">${rupiah(totalProfit)}</div>
+        <div class="cl">Est. total profit periode ini</div>
+      </div>
+    </div>`;
+
+  const tableRows = rows.map(r => {
+    const mc = r.marginPct >= 30 ? 'var(--green)' : r.marginPct >= 20 ? 'var(--yellow)' : 'var(--red)';
+    return `<tr>
+      <td style="font-weight:600">${esc(r.nama_layanan)}</td>
+      <td class="num-cell">${Number(r.vol).toLocaleString('id-ID')}</td>
+      <td class="num-cell">${rupiah(r.omset)}</td>
+      <td class="num-cell">${rupiah(r.estHpp)}</td>
+      <td class="num-cell" style="color:${r.estProfit >= 0 ? 'var(--green)' : 'var(--red)'}">
+        ${rupiah(r.estProfit)}</td>
+      <td class="num-cell" style="font-weight:700;color:${mc}">${r.marginPct.toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = cards + `
+    <table>
+      <thead><tr>
+        <th>Layanan</th>
+        <th style="text-align:right">Volume</th>
+        <th style="text-align:right">Omset</th>
+        <th style="text-align:right">Est. HPP</th>
+        <th style="text-align:right">Est. Profit</th>
+        <th style="text-align:right">Margin</th>
+      </tr></thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+    <div style="margin-top:8px;font-size:11px;color:var(--gray-5)">* Estimasi berdasarkan HPP × volume transaksi pada periode ini</div>`;
 }
 
 // ── Export CSV ────────────────────────────────────────────────────────────────
