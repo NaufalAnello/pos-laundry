@@ -1,7 +1,7 @@
 # Debug Progress POS Laundry
 
-## Status: IN PROGRESS
-## Terakhir diupdate: 2026-06-01 (sesi 1)
+## Status: SELESAI
+## Terakhir diupdate: 2026-06-01 (sesi 1) — SEMUA 13 AREA TUNTAS
 
 ## Area yang SUDAH selesai di-debug:
 - [x] AREA 1 — Dependency & setup — selesai, 1 bug ditemukan & diperbaiki
@@ -16,7 +16,7 @@
 - [x] AREA 10 — Margin layanan — selesai, 1 bug diperbaiki (verified live)
 - [x] AREA 11 — Laporan & kas — selesai, 1 BUG KRITIS + 3 bug diperbaiki (verified live)
 - [x] AREA 12 — Responsif & UI — selesai, fondasi solid, 1 fix overflow tabel laporan
-- [ ] AREA 13 — Keamanan
+- [x] AREA 13 — Keamanan — selesai, rate limiting + hardening SESSION_SECRET
 
 ## Bug yang ditemukan dan diperbaiki:
 | No | File | Bug | Status |
@@ -36,6 +36,8 @@
 | 13 | dashboardController.js | Chart 7-hari axis pakai date('now','localtime') tapi bucketing UTC (unixepoch) & `today`=toISOString(UTC) → bar terakhir bisa tdk sejajar hari ini. Selaraskan axis ke UTC (hapus 'localtime') | FIXED |
 | 14 | laporanController.js | Export CSV kolom tanggal tampil angka ms-epoch (1780301912417), tdk terbaca. Format pakai datetime(.../1000,'unixepoch') → "2026-06-01 08:23:58" | FIXED |
 | 15 | laporan.html | Tabel profitabilitas (6 kolom) & distribusi tanpa overflow-x → overflow halaman di HP 375px. Tambah overflow-x:auto + min-width tabel agar scroll dalam card | FIXED |
+| 16 | middleware/rateLimit.js + authRoutes.js | TIDAK ada rate limiting di /login (risiko brute-force). Tambah rate limiter in-memory (tanpa dependency) 20 percobaan/5mnt/IP. Diuji: attempt 21 → HTTP 429 | FIXED |
+| 17 | .env | SESSION_SECRET masih placeholder 'ganti_ini' (cookie sesi bisa dipalsukan). Diganti random 96-hex (lokal, gitignored). PRODUKSI wajib set sendiri via env SESSION_SECRET di docker-compose | FIXED (lokal) |
 
 ## Catatan AREA 1 (bukan bug, informasi):
 - Semua dependency ARM64-compatible: better-sqlite3 compile from source (python3/make/g++ ada di Dockerfile), sisanya pure-JS (bcryptjs, joi, express, knex). Tidak ada package x86-only.
@@ -151,6 +153,25 @@
 - Pertimbangkan normalisasi penyimpanan tanggal ke ISO string di masa depan agar query lebih
   sederhana & mendukung timezone lokal eksplisit. Saat ini sudah konsisten (UTC) & berfungsi.
 
+## Catatan AREA 13 (Keamanan, semua LULUS):
+- Password: bcrypt SALT_ROUNDS=12 di authController & usersController (create+update). ✓
+- SQL injection: knex parameterized; tidak ada interpolasi user-input di raw SQL; tidak ada
+  kolom orderBy/where dinamis dari input. whereRaw pakai binding `?`. AMAN. ✓
+- Input: validasi Joi di endpoint data utama; frontend pakai esc() utk XSS. ✓
+- Rate limiting: DITAMBAHKAN di /login (20/5mnt/IP), diuji 429. ✓
+- SESSION_SECRET: dikuatkan ke 96-hex acak (lokal). trust proxy sengaja TIDAK di-set
+  (hindari spoof X-Forwarded-For; req.ip = socket IP, cukup utk LAN POS).
+- PRODUKSI (HG680P): set SESSION_SECRET kuat via environment di docker-compose (bukan 'ganti_ini').
+
+## ════════ RINGKASAN AKHIR DEBUG (17 bug diperbaiki) ════════
+- 1 KRITIS: date(ms-epoch) bikin SELURUH laporan/dashboard/filter tanggal = 0 (bug #12)
+- 1 SERIUS: desync poin → poin pelanggan hilang tiap transaksi stlh penyesuaian manual (bug #7)
+- 15 bug/perbaikan lain: USB docker, index DB, estimasi_hari, poin-saat-lunas, pesan printer,
+  wa fallback, threshold broadcast, promo periode/hari, pembulatan margin, poin_ditukarkan,
+  chart timezone, CSV tanggal, overflow tabel, rate limiting, session secret.
+- Sisa MEDIUM/LOW (belum diperbaiki, lihat tabel di bawah): generateNomor race (L1),
+  atomicity order+deposit (L2). Keduanya risiko kecil utk single-kasir.
+
 ## Catatan AREA 12 (informasi):
 - Fondasi responsif (layout.css + nav.js) SOLID: desktop ≥768px sidebar fixed 196px + .pos-main
   margin-left; mobile <768px sidebar hidden, topbar + bottom-nav (5 item + More sheet) muncul,
@@ -168,4 +189,6 @@
   (struktur sudah benar, ini konfirmasi pixel-level).
 
 ## Langkah berikutnya saat sesi lanjut:
-Lanjut ke AREA 13 — Keamanan
+SELESAI — semua 13 area sudah di-debug. Opsional: (1) verifikasi visual UI di DevTools pada
+375/414/768/1024/1280px; (2) pertimbangkan perbaikan MEDIUM L2 (bungkus order+deposit dalam 1
+DB transaction); (3) set SESSION_SECRET produksi di HG680P.
