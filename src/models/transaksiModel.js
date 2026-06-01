@@ -39,7 +39,7 @@ const findAll = ({ status, tanggal, pelanggan_id, q, page = 1, limit = 20 } = {}
 
   if (status)       query.where('t.status', status);
   if (pelanggan_id) query.where('t.pelanggan_id', pelanggan_id);
-  if (tanggal)      query.whereRaw("date(t.tanggal_masuk) = ?", [tanggal]);
+  if (tanggal)      query.whereRaw("date(t.tanggal_masuk/1000,'unixepoch') = ?", [tanggal]);
   if (q)            query.where(function () {
     this.where('t.nomor_transaksi', 'like', `%${q}%`).orWhere('p.nama', 'like', `%${q}%`);
   });
@@ -53,7 +53,7 @@ const countAll = ({ status, tanggal, pelanggan_id, q } = {}) => {
     .count('t.id as total').first();
   if (status)       query.where('t.status', status);
   if (pelanggan_id) query.where('t.pelanggan_id', pelanggan_id);
-  if (tanggal)      query.whereRaw("date(t.tanggal_masuk) = ?", [tanggal]);
+  if (tanggal)      query.whereRaw("date(t.tanggal_masuk/1000,'unixepoch') = ?", [tanggal]);
   if (q)            query.where(function () {
     this.where('t.nomor_transaksi', 'like', `%${q}%`).orWhere('p.nama', 'like', `%${q}%`);
   });

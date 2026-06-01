@@ -17,21 +17,21 @@ exports.index = async (req, res) => {
     ] = await Promise.all([
       // order_hari_ini
       db('transaksi')
-        .whereRaw("date(tanggal_masuk) = ?", [today])
+        .whereRaw("date(tanggal_masuk/1000,'unixepoch') = ?", [today])
         .whereNot('status', 'dibatalkan')
         .count('id as total')
         .first(),
 
       // omset_hari_ini — hanya dari transaksi yang sudah ada pembayaran (bayar > 0)
       db('transaksi')
-        .whereRaw("date(tanggal_masuk) = ?", [today])
+        .whereRaw("date(tanggal_masuk/1000,'unixepoch') = ?", [today])
         .whereIn('status', ['selesai', 'diambil'])
         .sum('total_bayar as total')
         .first(),
 
       // wa_terkirim_hari_ini
       db('wa_log')
-        .whereRaw("date(created_at) = ?", [today])
+        .whereRaw("date(created_at/1000,'unixepoch') = ?", [today])
         .where('status', 'terkirim')
         .count('id as total')
         .first(),
@@ -60,18 +60,19 @@ exports.index = async (req, res) => {
         ),
 
       // bar_chart_7hari — omset per hari 7 hari terakhir (termasuk hari ini)
+      // Axis tanggal & bucketing sama-sama UTC (konsisten dgn `today`=toISOString & kas.tanggal)
       db.raw(`
         WITH RECURSIVE dates(d) AS (
-          SELECT date('now', 'localtime', '-6 days')
+          SELECT date('now', '-6 days')
           UNION ALL
-          SELECT date(d, '+1 day') FROM dates WHERE d < date('now', 'localtime')
+          SELECT date(d, '+1 day') FROM dates WHERE d < date('now')
         )
         SELECT
           dates.d AS tanggal,
           COALESCE(SUM(t.total_bayar), 0) AS omset
         FROM dates
         LEFT JOIN transaksi t
-          ON date(t.tanggal_masuk) = dates.d
+          ON date(t.tanggal_masuk/1000,'unixepoch') = dates.d
           AND t.status IN ('selesai','diambil')
         GROUP BY dates.d
         ORDER BY dates.d ASC

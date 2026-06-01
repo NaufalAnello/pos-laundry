@@ -154,8 +154,8 @@ router.get('/mutasi/semua', async (req, res) => {
 
     if (pelanggan_id) query.where('m.pelanggan_id', pelanggan_id);
     if (jenis)        query.where('m.jenis', jenis);
-    if (start)        query.whereRaw("date(m.created_at) >= ?", [start]);
-    if (end)          query.whereRaw("date(m.created_at) <= ?", [end]);
+    if (start)        query.whereRaw("date(m.created_at/1000,'unixepoch') >= ?", [start]);
+    if (end)          query.whereRaw("date(m.created_at/1000,'unixepoch') <= ?", [end]);
 
     const [rows, countRow] = await Promise.all([
       query.clone().limit(Number(limit)).offset(offset),
@@ -191,8 +191,8 @@ router.get('/mutasi/export', async (req, res) => {
 
     if (pelanggan_id) query.where('m.pelanggan_id', pelanggan_id);
     if (jenis)        query.where('m.jenis', jenis);
-    if (start)        query.whereRaw("date(m.created_at) >= ?", [start]);
-    if (end)          query.whereRaw("date(m.created_at) <= ?", [end]);
+    if (start)        query.whereRaw("date(m.created_at/1000,'unixepoch') >= ?", [start]);
+    if (end)          query.whereRaw("date(m.created_at/1000,'unixepoch') <= ?", [end]);
 
     const rows = await query;
 

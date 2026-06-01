@@ -14,7 +14,7 @@
 - [x] AREA 8 — Poin pelanggan — selesai, 1 BUG SERIUS + 1 konsistensi diperbaiki (verified live)
 - [x] AREA 9 — Promo & paket — selesai, 1 bug diperbaiki (verified live)
 - [x] AREA 10 — Margin layanan — selesai, 1 bug diperbaiki (verified live)
-- [ ] AREA 11 — Laporan & kas
+- [x] AREA 11 — Laporan & kas — selesai, 1 BUG KRITIS + 3 bug diperbaiki (verified live)
 - [ ] AREA 12 — Responsif & UI
 - [ ] AREA 13 — Keamanan
 
@@ -31,6 +31,10 @@
 | 8  | waController.js | Filter level broadcast pakai threshold hardcode (5000/2000/500), tdk ikut pengaturan level_*_min. Diperbaiki baca dari pengaturan | FIXED |
 | 9  | paketPromoModel.js + transaksiController.js | findById saat order HANYA cek aktif, TIDAK validasi periode/hari → promo kedaluwarsa/di luar hari bisa dipakai via ID langsung (diskon tetap jalan). Tambah findByIdValid (cek periode+hari) & dipakai di store. Diuji: promo expired & promo hari-lain DITOLAK saat order; promo valid 10% diterapkan (8000→7200) | FIXED |
 | 10 | layananController.js | Setting `margin_pembulatan` (ratusan/ribuan/tanpa) di pengaturan TIDAK dipakai — hitungHargaJual dipanggil tanpa arg pembulatan (selalu ratusan). Tambah getPembulatan() & teruskan ke store/update. Diuji: ribuan→6000, ratusan→5900 | FIXED |
+| 11 | laporanController.js | poin_ditukarkan jumlahkan jenis='redeem' padahal kode catat 'kurang' → selalu 0. Ganti ke 'kurang' | FIXED |
+| 12 | laporanController, dashboardController, transaksiModel, depositRoutes | **KRITIS**: kolom tanggal disimpan ms-epoch (new Date()), tapi query pakai `date(kolom)` → SQLite tafsir Julian → NULL → SELURUH laporan (omset/jumlah/distribusi/poin/promo/pelanggan_baru/chart), dashboard order_hari_ini & chart, filter transaksi & mutasi deposit by tanggal SEMUA 0/kosong. Ganti `date(kolom)`→`date(kolom/1000,'unixepoch')` di semua titik. Diuji: omset 0→80000, jumlah 1, poin 8, distribusi 1 item, filter transaksi 1 hasil | FIXED |
+| 13 | dashboardController.js | Chart 7-hari axis pakai date('now','localtime') tapi bucketing UTC (unixepoch) & `today`=toISOString(UTC) → bar terakhir bisa tdk sejajar hari ini. Selaraskan axis ke UTC (hapus 'localtime') | FIXED |
+| 14 | laporanController.js | Export CSV kolom tanggal tampil angka ms-epoch (1780301912417), tdk terbaca. Format pakai datetime(.../1000,'unixepoch') → "2026-06-01 08:23:58" | FIXED |
 
 ## Catatan AREA 1 (bukan bug, informasi):
 - Semua dependency ARM64-compatible: better-sqlite3 compile from source (python3/make/g++ ada di Dockerfile), sisanya pure-JS (bcryptjs, joi, express, knex). Tidak ada package x86-only.
@@ -131,5 +135,20 @@
 - API: hpp/margin/harga_auto tersimpan; harga auto-hitung; pembulatan dari setting dihormati.
 - /layanan/per-kategori: keuntungan_per_satuan, margin_aktual, hpp_terisi tampil benar.
 
+## Catatan AREA 11 (PENTING):
+- AKAR MASALAH umum: knex+better-sqlite3 menyimpan JS `new Date()` sebagai ANGKA ms-epoch,
+  bukan string ISO. Akibatnya `date(kolom)` SQLite GAGAL (Julian→NULL). Semua filter tanggal
+  yg pakai kolom ms-epoch harus `date(kolom/1000,'unixepoch')`. kas.tanggal beda (disimpan string
+  'YYYY-MM-DD' via toISOString().slice) → tetap pakai perbandingan string biasa.
+- Timezone: seluruh sistem konsisten UTC (today & kas pakai toISOString; unixepoch=UTC).
+  Utk jam operasional laundry 08–21 WITA (=00–13 UTC) tanggal UTC == tanggal lokal, jadi aman.
+- Kas akurat: dicatat saat lunas (buatEntriKas, dedup transaksi_id), laba_rugi = kas masuk−keluar.
+- Diuji LIVE: laporan omset/jumlah/poin/distribusi/chart benar; dashboard order_hari_ini benar;
+  CSV export lengkap & tanggal terbaca; filter transaksi & deposit by tanggal jalan.
+
+## REKOMENDASI (belum dikerjakan, untuk pertimbangan):
+- Pertimbangkan normalisasi penyimpanan tanggal ke ISO string di masa depan agar query lebih
+  sederhana & mendukung timezone lokal eksplisit. Saat ini sudah konsisten (UTC) & berfungsi.
+
 ## Langkah berikutnya saat sesi lanjut:
-Lanjut ke AREA 11 — Laporan & kas
+Lanjut ke AREA 12 — Responsif & UI

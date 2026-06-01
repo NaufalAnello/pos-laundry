@@ -25,8 +25,8 @@ exports.index = async (req, res) => {
     ] = await Promise.all([
       db('transaksi')
         .whereNotIn('status', ['dibatalkan'])
-        .whereRaw("date(tanggal_masuk) >= ?", [start])
-        .whereRaw("date(tanggal_masuk) <= ?", [end])
+        .whereRaw("date(tanggal_masuk/1000,'unixepoch') >= ?", [start])
+        .whereRaw("date(tanggal_masuk/1000,'unixepoch') <= ?", [end])
         .select(
           db.raw('COALESCE(SUM(total_bayar), 0) as total_omset'),
           db.raw('COUNT(*) as jumlah_transaksi'),
@@ -35,22 +35,22 @@ exports.index = async (req, res) => {
         ).first(),
 
       db('transaksi')
-        .whereRaw("date(tanggal_masuk) >= ?", [start])
-        .whereRaw("date(tanggal_masuk) <= ?", [end])
+        .whereRaw("date(tanggal_masuk/1000,'unixepoch') >= ?", [start])
+        .whereRaw("date(tanggal_masuk/1000,'unixepoch') <= ?", [end])
         .groupBy('status')
         .select('status', db.raw('COUNT(*) as jumlah')),
 
       db('pelanggan')
-        .whereRaw("date(created_at) >= ?", [start])
-        .whereRaw("date(created_at) <= ?", [end])
+        .whereRaw("date(created_at/1000,'unixepoch') >= ?", [start])
+        .whereRaw("date(created_at/1000,'unixepoch') <= ?", [end])
         .count('id as total').first(),
 
       db('detail_transaksi as d')
         .leftJoin('transaksi as t', 't.id', 'd.transaksi_id')
         .leftJoin('layanan as l', 'l.id', 'd.layanan_id')
         .whereNotIn('t.status', ['dibatalkan'])
-        .whereRaw("date(t.tanggal_masuk) >= ?", [start])
-        .whereRaw("date(t.tanggal_masuk) <= ?", [end])
+        .whereRaw("date(t.tanggal_masuk/1000,'unixepoch') >= ?", [start])
+        .whereRaw("date(t.tanggal_masuk/1000,'unixepoch') <= ?", [end])
         .groupBy('d.nama_layanan')
         .orderByRaw('SUM(d.subtotal) DESC')
         .limit(10)
@@ -73,24 +73,25 @@ exports.index = async (req, res) => {
                COALESCE(COUNT(t.id),0) AS jumlah
         FROM dates
         LEFT JOIN transaksi t
-          ON date(t.tanggal_masuk)=dates.d AND t.status NOT IN ('dibatalkan')
+          ON date(t.tanggal_masuk/1000,'unixepoch')=dates.d AND t.status NOT IN ('dibatalkan')
         GROUP BY dates.d
         ORDER BY dates.d ASC
       `, [start, end]),
 
       db('riwayat_poin')
-        .whereRaw("date(created_at) >= ?", [start])
-        .whereRaw("date(created_at) <= ?", [end])
+        .whereRaw("date(created_at/1000,'unixepoch') >= ?", [start])
+        .whereRaw("date(created_at/1000,'unixepoch') <= ?", [end])
         .select(
           db.raw("COALESCE(SUM(CASE WHEN jenis='tambah' THEN jumlah_poin ELSE 0 END),0) as poin_diberikan"),
-          db.raw("COALESCE(SUM(CASE WHEN jenis='redeem' THEN jumlah_poin ELSE 0 END),0) as poin_ditukarkan")
+          // jenis poin terpakai dicatat sbg 'kurang' (bukan 'redeem') — sebelumnya selalu 0
+          db.raw("COALESCE(SUM(CASE WHEN jenis='kurang' THEN jumlah_poin ELSE 0 END),0) as poin_ditukarkan")
         ).first(),
 
       db('transaksi')
         .whereNotNull('paket_promo_id')
         .whereNotIn('status', ['dibatalkan'])
-        .whereRaw("date(tanggal_masuk) >= ?", [start])
-        .whereRaw("date(tanggal_masuk) <= ?", [end])
+        .whereRaw("date(tanggal_masuk/1000,'unixepoch') >= ?", [start])
+        .whereRaw("date(tanggal_masuk/1000,'unixepoch') <= ?", [end])
         .select(
           db.raw('COUNT(*) as jumlah_pakai_promo'),
           db.raw('COALESCE(SUM(diskon),0) as total_diskon_promo')
@@ -109,16 +110,16 @@ exports.index = async (req, res) => {
         try {
           const [topupRow, bayarRow, kelebihanRow, saldoRow] = await Promise.all([
             db('mutasi_deposit').where('jenis', 'topup')
-              .whereRaw("date(created_at) >= ?", [start])
-              .whereRaw("date(created_at) <= ?", [end])
+              .whereRaw("date(created_at/1000,'unixepoch') >= ?", [start])
+              .whereRaw("date(created_at/1000,'unixepoch') <= ?", [end])
               .sum('nominal as total').first(),
             db('mutasi_deposit').where('jenis', 'bayar')
-              .whereRaw("date(created_at) >= ?", [start])
-              .whereRaw("date(created_at) <= ?", [end])
+              .whereRaw("date(created_at/1000,'unixepoch') >= ?", [start])
+              .whereRaw("date(created_at/1000,'unixepoch') <= ?", [end])
               .sum('nominal as total').first(),
             db('mutasi_deposit').where('jenis', 'kelebihan')
-              .whereRaw("date(created_at) >= ?", [start])
-              .whereRaw("date(created_at) <= ?", [end])
+              .whereRaw("date(created_at/1000,'unixepoch') >= ?", [start])
+              .whereRaw("date(created_at/1000,'unixepoch') <= ?", [end])
               .sum('nominal as total').first(),
             db('deposit_pelanggan').sum('saldo as total').first()
           ]);
@@ -180,11 +181,14 @@ exports.exportCsv = async (req, res) => {
       .leftJoin('pelanggan as p',    'p.id',  't.pelanggan_id')
       .leftJoin('users as u',        'u.id',  't.user_id')
       .leftJoin('paket_promo as pr', 'pr.id', 't.paket_promo_id')
-      .whereRaw("date(t.tanggal_masuk) >= ?", [start])
-      .whereRaw("date(t.tanggal_masuk) <= ?", [end])
+      .whereRaw("date(t.tanggal_masuk/1000,'unixepoch') >= ?", [start])
+      .whereRaw("date(t.tanggal_masuk/1000,'unixepoch') <= ?", [end])
       .orderBy('t.tanggal_masuk')
       .select(
-        't.nomor_transaksi', 't.tanggal_masuk', 't.status',
+        't.nomor_transaksi',
+        // tanggal_masuk tersimpan ms-epoch → format jadi tanggal terbaca untuk CSV
+        db.raw("datetime(t.tanggal_masuk/1000,'unixepoch') as tanggal_masuk"),
+        't.status',
         'p.nama as pelanggan', 'p.telepon as telepon_pelanggan',
         't.total_harga', 't.diskon', 't.poin_digunakan',
         't.total_bayar', 't.metode_bayar',
