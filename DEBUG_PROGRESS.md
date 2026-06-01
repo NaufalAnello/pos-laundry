@@ -10,7 +10,7 @@
 - [x] AREA 4 — Order baru (KRITIS) — selesai, 2 bug diperbaiki & diuji live
 - [x] AREA 5 — Print thermal (KRITIS) — selesai, pesan error dirapikan
 - [x] AREA 6 — WhatsApp Business (KRITIS) — selesai, verified live, 1 fix minor
-- [ ] AREA 7 — Deposit
+- [x] AREA 7 — Deposit — selesai, semua check LULUS (verified live), tidak ada bug kode
 - [ ] AREA 8 — Poin pelanggan
 - [ ] AREA 9 — Promo & paket
 - [ ] AREA 10 — Margin layanan
@@ -64,10 +64,11 @@
 - Data test transaksi yg dibuat saat audit sudah DIHAPUS, poin & deposit pelanggan
   di-recompute ke nilai semula (8 poin, 29000 deposit).
 
-## Bug LOW-priority belum diperbaiki:
+## Bug LOW/MEDIUM-priority belum diperbaiki:
 | No | File | Bug | Priority |
 |----|------|-----|----------|
-| L1 | transaksiModel.js | generateNomor tidak atomic (race condition teoretis) | LOW |
+| L1 | transaksiModel.js | generateNomor tidak atomic (race condition teoretis), tapi UNIQUE constraint melindungi | LOW |
+| L2 | transaksiController.js store() | Pembuatan transaksi + potong deposit + poin + kas TIDAK dalam 1 DB transaction. Jika deposit.bayar gagal SETELAH transaksi dibuat → bisa phantom transaksi. Dilindungi pre-check saldo (line 133) utk kasus umum; risiko nyata kecil di single-kasir. Perlu refactor besar (pass trx) → ditunda | MEDIUM |
 
 ## Catatan AREA 5 (informasi, semua LULUS):
 - order.html: tombol "Simpan & Cetak" → submitOrder → cetakStrukOrder → POST /api/v1/transaksi/:id/print.
@@ -91,5 +92,15 @@
   render() aman untuk var tak dikenal (dibiarkan sebagai {var}).
 - formatPhone: strip non-digit, 0→62, prepend 62. Benar.
 
+## Catatan AREA 7 (informasi, semua LULUS):
+- Model deposit (getSaldo/topup/bayar/tambahKelebihan) pakai db.transaction atomik + catat mutasi.
+- Diuji LIVE: topup 50k→mutasi tercatat; topup negatif ditolak (Joi positive);
+  bayar deposit > saldo tanpa kekurangan → error "Saldo tidak cukup" (pre-check, tdk buat transaksi);
+  bayar deposit+kekurangan → saldo jadi 0 (TIDAK minus); notif WA saldo tipis ter-log otomatis.
+- bayar() throw bila saldo < nominal → saldo tidak pernah minus.
+- Akunting: topup tidak masuk kas; kas dicatat saat deposit DIPAKAI (total_bayar order). Single-count, konsisten.
+- Routing depositRoutes aman (Express cocokkan jumlah segmen; /mutasi/semua & /mutasi/export tak bentrok /:pelangganId).
+- Data test (pelanggan DepoTest id=3) sudah DIHAPUS bersih.
+
 ## Langkah berikutnya saat sesi lanjut:
-Lanjut ke AREA 7 — Deposit
+Lanjut ke AREA 8 — Poin pelanggan
