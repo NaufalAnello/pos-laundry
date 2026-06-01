@@ -2,6 +2,12 @@ const Joi = require('joi');
 const db  = require('../database/connection');
 const { hitungHargaJual, hitungMarginDariHarga, hitungKeuntungan } = require('../utils/margin');
 
+// Ambil mode pembulatan harga dari pengaturan (ratusan/ribuan/tanpa)
+const getPembulatan = async () => {
+  const row = await db('pengaturan').where({ kunci: 'margin_pembulatan' }).first();
+  return ['ratusan', 'ribuan', 'tanpa'].includes(row?.nilai) ? row.nilai : 'ratusan';
+};
+
 // ── Schemas ──────────────────────────────────────────────────────────────────
 const kategoriSchema = Joi.object({
   nama:     Joi.string().max(100).required(),
@@ -206,7 +212,7 @@ exports.storeLayanan = async (req, res) => {
     }
 
     if (value.harga_auto && value.hpp > 0 && value.margin_persen > 0) {
-      value.harga = hitungHargaJual(value.hpp, value.margin_persen);
+      value.harga = hitungHargaJual(value.hpp, value.margin_persen, await getPembulatan());
     }
 
     const [id] = await db('layanan').insert({ ...value, created_at: new Date(), updated_at: new Date() });
@@ -228,7 +234,7 @@ exports.updateLayanan = async (req, res) => {
     if (!existing) return res.status(404).json({ error: 'Layanan tidak ditemukan' });
 
     if (value.harga_auto && value.hpp > 0 && value.margin_persen > 0) {
-      value.harga = hitungHargaJual(value.hpp, value.margin_persen);
+      value.harga = hitungHargaJual(value.hpp, value.margin_persen, await getPembulatan());
     }
 
     await db('layanan').where({ id: req.params.id }).update({ ...value, updated_at: new Date() });

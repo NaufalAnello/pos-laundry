@@ -13,7 +13,7 @@
 - [x] AREA 7 — Deposit — selesai, semua check LULUS (verified live), tidak ada bug kode
 - [x] AREA 8 — Poin pelanggan — selesai, 1 BUG SERIUS + 1 konsistensi diperbaiki (verified live)
 - [x] AREA 9 — Promo & paket — selesai, 1 bug diperbaiki (verified live)
-- [ ] AREA 10 — Margin layanan
+- [x] AREA 10 — Margin layanan — selesai, 1 bug diperbaiki (verified live)
 - [ ] AREA 11 — Laporan & kas
 - [ ] AREA 12 — Responsif & UI
 - [ ] AREA 13 — Keamanan
@@ -30,6 +30,7 @@
 | 7  | transaksiService.js + poinController.js | **SERIUS**: poin punya 2 sumber kebenaran (kolom pelanggan.total_poin & tabel poin_pelanggan). `sesuaikan` update poin_pelanggan (no-op kalau row blm ada) tapi `upsertPoinPelanggan` hitung dari poin_pelanggan (kosong=0) lalu TIMPA pelanggan.total_poin→0. Akibat: poin pelanggan HILANG tiap transaksi setelah penyesuaian manual. Fix: pelanggan.total_poin jadi sumber kebenaran tunggal, poin_pelanggan di-upsert sbg cache sinkron. Diuji: sesuaikan+500→tukar200→300 (bukan 0), earn lunas→308 | FIXED |
 | 8  | waController.js | Filter level broadcast pakai threshold hardcode (5000/2000/500), tdk ikut pengaturan level_*_min. Diperbaiki baca dari pengaturan | FIXED |
 | 9  | paketPromoModel.js + transaksiController.js | findById saat order HANYA cek aktif, TIDAK validasi periode/hari → promo kedaluwarsa/di luar hari bisa dipakai via ID langsung (diskon tetap jalan). Tambah findByIdValid (cek periode+hari) & dipakai di store. Diuji: promo expired & promo hari-lain DITOLAK saat order; promo valid 10% diterapkan (8000→7200) | FIXED |
+| 10 | layananController.js | Setting `margin_pembulatan` (ratusan/ribuan/tanpa) di pengaturan TIDAK dipakai — hitungHargaJual dipanggil tanpa arg pembulatan (selalu ratusan). Tambah getPembulatan() & teruskan ke store/update. Diuji: ribuan→6000, ratusan→5900 | FIXED |
 
 ## Catatan AREA 1 (bukan bug, informasi):
 - Semua dependency ARM64-compatible: better-sqlite3 compile from source (python3/make/g++ ada di Dockerfile), sisanya pure-JS (bcryptjs, joi, express, knex). Tidak ada package x86-only.
@@ -124,5 +125,11 @@
 - Diuji LIVE: dropdown /promo/aktif sembunyikan expired & hari-lain; order tolak keduanya;
   promo valid 10% diterapkan benar.
 
+## Catatan AREA 10 (informasi, semua LULUS):
+- Unit test margin.js: ratusan(4200,40%)=5900, ribuan=6000, tanpa=5880, hpp0=0,
+  hitungKeuntungan(4200,5900,3)=5100. Semua benar.
+- API: hpp/margin/harga_auto tersimpan; harga auto-hitung; pembulatan dari setting dihormati.
+- /layanan/per-kategori: keuntungan_per_satuan, margin_aktual, hpp_terisi tampil benar.
+
 ## Langkah berikutnya saat sesi lanjut:
-Lanjut ke AREA 10 — Margin layanan
+Lanjut ke AREA 11 — Laporan & kas
