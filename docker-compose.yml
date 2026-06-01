@@ -5,12 +5,13 @@ services:
     container_name: pos-laundry
     ports:
       - "3000:3000"
-    volumes:
-      - pos-data:/app/data
     restart: unless-stopped
     privileged: true
-    devices:
-      - /dev/bus/usb/001/003:/dev/bus/usb/001/003
+    # Mount seluruh bus USB agar tidak tergantung path device spesifik
+    # (path /dev/bus/usb/XXX/YYY berubah saat printer dicabut/ganti port)
+    volumes:
+      - pos-data:/app/data
+      - /dev/bus/usb:/dev/bus/usb
     environment:
       - NODE_ENV=production
       - PORT=3000
