@@ -6,7 +6,7 @@
 ## Area yang SUDAH selesai di-debug:
 - [x] AREA 1 — Dependency & setup — selesai, 1 bug ditemukan & diperbaiki
 - [x] AREA 2 — Database & migration — selesai, index performa ditambahkan
-- [ ] AREA 3 — Autentikasi & session
+- [x] AREA 3 — Autentikasi & session — selesai, tidak ada bug (verified live)
 - [ ] AREA 4 — Order baru (KRITIS)
 - [ ] AREA 5 — Print thermal (KRITIS)
 - [ ] AREA 6 — WhatsApp Business (KRITIS)
@@ -41,5 +41,15 @@
 - Query agregasi laporan TIDAK crash saat data kosong (pakai COALESCE).
 - Rollback + re-apply migration index teruji OK.
 
+## Catatan AREA 3 (informasi, semua LULUS):
+- Login/logout berfungsi (bcrypt.compare, session.destroy + clearCookie).
+- Session store = connect-session-knex (tabel `sessions` di SQLite), BUKAN MemoryStore.
+- Diuji LIVE: login→cookie→/me OK; protected route tanpa cookie=401, dengan cookie=data.
+- Session PERSISTENT lintas restart server (cookie lama tetap valid setelah restart) ✓.
+- /api/* dilindungi requireAuth (health & /auth/login publik, sesuai desain).
+- Role: blockOperatorDelete global (non-admin tdk bisa DELETE), usersRoutes requireAdmin.
+- SESSION_SECRET punya fallback non-kosong → cookie stabil lintas restart.
+- CATATAN: belum ada rate limiting di /login → ditangani di AREA 13.
+
 ## Langkah berikutnya saat sesi lanjut:
-Lanjut ke AREA 3 — Autentikasi & session
+Lanjut ke AREA 4 — Order baru (KRITIS)
