@@ -12,7 +12,7 @@
 - [x] AREA 6 — WhatsApp Business (KRITIS) — selesai, verified live, 1 fix minor
 - [x] AREA 7 — Deposit — selesai, semua check LULUS (verified live), tidak ada bug kode
 - [x] AREA 8 — Poin pelanggan — selesai, 1 BUG SERIUS + 1 konsistensi diperbaiki (verified live)
-- [ ] AREA 9 — Promo & paket
+- [x] AREA 9 — Promo & paket — selesai, 1 bug diperbaiki (verified live)
 - [ ] AREA 10 — Margin layanan
 - [ ] AREA 11 — Laporan & kas
 - [ ] AREA 12 — Responsif & UI
@@ -29,6 +29,7 @@
 | 6  | waController.js | Fallback wa_mode di endpoint log = 'regular' (inkonsisten dgn default 'business'). Diselaraskan ke 'business' | FIXED |
 | 7  | transaksiService.js + poinController.js | **SERIUS**: poin punya 2 sumber kebenaran (kolom pelanggan.total_poin & tabel poin_pelanggan). `sesuaikan` update poin_pelanggan (no-op kalau row blm ada) tapi `upsertPoinPelanggan` hitung dari poin_pelanggan (kosong=0) lalu TIMPA pelanggan.total_poin→0. Akibat: poin pelanggan HILANG tiap transaksi setelah penyesuaian manual. Fix: pelanggan.total_poin jadi sumber kebenaran tunggal, poin_pelanggan di-upsert sbg cache sinkron. Diuji: sesuaikan+500→tukar200→300 (bukan 0), earn lunas→308 | FIXED |
 | 8  | waController.js | Filter level broadcast pakai threshold hardcode (5000/2000/500), tdk ikut pengaturan level_*_min. Diperbaiki baca dari pengaturan | FIXED |
+| 9  | paketPromoModel.js + transaksiController.js | findById saat order HANYA cek aktif, TIDAK validasi periode/hari → promo kedaluwarsa/di luar hari bisa dipakai via ID langsung (diskon tetap jalan). Tambah findByIdValid (cek periode+hari) & dipakai di store. Diuji: promo expired & promo hari-lain DITOLAK saat order; promo valid 10% diterapkan (8000→7200) | FIXED |
 
 ## Catatan AREA 1 (bukan bug, informasi):
 - Semua dependency ARM64-compatible: better-sqlite3 compile from source (python3/make/g++ ada di Dockerfile), sisanya pure-JS (bcryptjs, joi, express, knex). Tidak ada package x86-only.
@@ -115,5 +116,13 @@
   earn saat lunas, level Silver pada 500 poin.
 - Pelanggan asli: TIDAK ada desync poin saat audit (data konsisten).
 
+## Catatan AREA 9 (informasi):
+- hari_berlaku = JSON array hari [0..6] (0=Minggu). Match pakai LIKE %dow%. Aman krn hari
+  cuma 1 digit (0-6), tidak ada false-match substring.
+- hitungTotal: diskon_persen → round(total*persen/100); diskon_nominal → nominal;
+  jika total < min_pembelian → diskon=0. Benar.
+- Diuji LIVE: dropdown /promo/aktif sembunyikan expired & hari-lain; order tolak keduanya;
+  promo valid 10% diterapkan benar.
+
 ## Langkah berikutnya saat sesi lanjut:
-Lanjut ke AREA 9 — Promo & paket
+Lanjut ke AREA 10 — Margin layanan

@@ -98,8 +98,9 @@ exports.store = async (req, res) => {
     // Resolve promo
     let promo = null;
     if (value.paket_promo_id) {
-      promo = await paketPromoModel.findById(value.paket_promo_id);
-      if (!promo) return res.status(400).json({ error: 'Paket promo tidak ditemukan atau tidak aktif' });
+      // Validasi termasuk periode & hari berlaku — cegah promo kedaluwarsa dipakai via ID
+      promo = await paketPromoModel.findByIdValid(value.paket_promo_id);
+      if (!promo) return res.status(400).json({ error: 'Paket promo tidak ditemukan, tidak aktif, atau di luar periode/hari berlaku' });
     }
 
     // Validasi poin
