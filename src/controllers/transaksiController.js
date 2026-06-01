@@ -79,6 +79,7 @@ exports.store = async (req, res) => {
 
     // Resolve layanan + hitung subtotal per item
     const resolvedItems = [];
+    const estimasiList  = []; // estimasi_hari per layanan (tidak disimpan di detail_transaksi)
     for (const it of value.items) {
       const layanan = await layananModel.findById(it.layanan_id);
       if (!layanan) return res.status(400).json({ error: `Layanan ID ${it.layanan_id} tidak ditemukan` });
@@ -91,6 +92,7 @@ exports.store = async (req, res) => {
         subtotal:      layanan.harga * it.jumlah,
         catatan:       it.catatan || null
       });
+      estimasiList.push(Number(layanan.estimasi_hari) || 2);
     }
 
     // Resolve promo
@@ -167,11 +169,8 @@ exports.store = async (req, res) => {
       }
     }
 
-    // Hitung estimasi selesai
-    const maxHari = Math.max(...resolvedItems.map(i => {
-      const l = value.items.find(x => x.layanan_id === i.layanan_id);
-      return l?.estimasi_hari ?? 2;
-    }), 2);
+    // Hitung estimasi selesai dari estimasi_hari layanan terbesar (min 1 hari)
+    const maxHari = Math.max(...estimasiList, 1);
     const tanggalSelesai = value.tanggal_selesai
       ? new Date(value.tanggal_selesai)
       : new Date(Date.now() + maxHari * 86400000);
@@ -213,14 +212,8 @@ exports.store = async (req, res) => {
           'kurang', `Tukar poin untuk ${nomor}`
         );
       }
-      // Tambah poin dari transaksi
-      const poinEarned = Math.floor(totalBayar / settings.perNominal);
-      if (poinEarned > 0) {
-        await svc.upsertPoinPelanggan(
-          pelanggan.id, poinEarned, transaksiId,
-          'tambah', `Poin dari ${nomor}`
-        );
-      }
+      // Tambah poin dari transaksi — HANYA jika sudah lunas (sesuai spec)
+      await svc.awardPoinJikaLunas(created, settings.perNominal);
 
       // ── Deposit: potong saldo jika bayar pakai deposit ──────────────────
       if (value.metode_bayar === 'deposit') {
@@ -291,13 +284,16 @@ exports.update = async (req, res) => {
     }
 
     await transaksiModel.update(req.params.id, patch);
+    const fresh = await transaksiModel.findById(req.params.id);
 
-    // Buat kas jika baru lunas
-    if (patch.bayar >= t.total_bayar && t.total_bayar > 0) {
-      await svc.buatEntriKas({ ...t, user_id: req.session.user.id });
+    // Buat kas + beri poin jika order menjadi lunas (idempotent — aman dipanggil ulang)
+    if ((Number(fresh.bayar) || 0) >= Number(fresh.total_bayar) && Number(fresh.total_bayar) > 0) {
+      const settings = await svc.getPoinSettings();
+      await svc.buatEntriKas({ ...fresh, user_id: req.session.user.id });
+      await svc.awardPoinJikaLunas(fresh, settings.perNominal);
     }
 
-    res.json({ message: 'Transaksi berhasil diupdate', data: await transaksiModel.findById(req.params.id) });
+    res.json({ message: 'Transaksi berhasil diupdate', data: fresh });
   } catch (err) {
     console.error('[transaksi:update]', err);
     res.status(500).json({ error: 'Gagal update transaksi' });
@@ -322,13 +318,18 @@ exports.updateStatus = async (req, res) => {
     }
 
     await transaksiModel.updateStatus(req.params.id, value.status, extra);
+    const fresh = await transaksiModel.findById(req.params.id);
 
-    const bayarFinal = extra.bayar ?? t.bayar;
-    if (value.status === 'diambil' && bayarFinal >= t.total_bayar) {
-      await svc.buatEntriKas({ ...t, bayar: bayarFinal, user_id: req.session.user.id });
+    // Buat kas + beri poin jika lunas (idempotent). Tidak berlaku jika dibatalkan.
+    if (value.status !== 'dibatalkan'
+        && (Number(fresh.bayar) || 0) >= Number(fresh.total_bayar)
+        && Number(fresh.total_bayar) > 0) {
+      const settings = await svc.getPoinSettings();
+      await svc.buatEntriKas({ ...fresh, user_id: req.session.user.id });
+      await svc.awardPoinJikaLunas(fresh, settings.perNominal);
     }
 
-    res.json({ message: `Status diubah ke "${value.status}"`, data: await transaksiModel.findById(req.params.id) });
+    res.json({ message: `Status diubah ke "${value.status}"`, data: fresh });
   } catch (err) {
     console.error('[transaksi:updateStatus]', err);
     res.status(500).json({ error: 'Gagal update status' });

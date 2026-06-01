@@ -68,6 +68,31 @@ const upsertPoinPelanggan = async (pelangganId, delta, transaksiId, jenis, keter
   });
 };
 
+// ── Beri poin earned HANYA jika lunas (idempotent / anti-dobel) ─────────────
+// Dipakai saat create (jika langsung lunas) & saat order menjadi lunas kemudian.
+const awardPoinJikaLunas = async (transaksi, perNominal) => {
+  if (!transaksi?.pelanggan_id) return 0;
+  const lunas = (Number(transaksi.bayar) || 0) >= Number(transaksi.total_bayar)
+                && Number(transaksi.total_bayar) > 0;
+  if (!lunas) return 0;
+
+  // Dedup: jangan beri poin earned dua kali untuk transaksi yang sama
+  const sudah = await db('riwayat_poin')
+    .where({ transaksi_id: transaksi.id, jenis: 'tambah' })
+    .andWhere('keterangan', 'like', 'Poin dari%')
+    .first();
+  if (sudah) return 0;
+
+  const poinEarned = Math.floor(Number(transaksi.total_bayar) / perNominal);
+  if (poinEarned > 0) {
+    await upsertPoinPelanggan(
+      transaksi.pelanggan_id, poinEarned, transaksi.id,
+      'tambah', `Poin dari ${transaksi.nomor_transaksi}`
+    );
+  }
+  return poinEarned;
+};
+
 // ── Buat entri kas pemasukan ────────────────────────────────────────────────
 const buatEntriKas = async ({ nomor_transaksi, id, total_bayar, user_id }) => {
   const existing = await db('kas').where('transaksi_id', id).first();
@@ -98,4 +123,4 @@ const logWa = async (telepon, pesan, transaksiId) => {
   });
 };
 
-module.exports = { getPoinSettings, hitungTotal, upsertPoinPelanggan, buatEntriKas, logWa };
+module.exports = { getPoinSettings, hitungTotal, upsertPoinPelanggan, awardPoinJikaLunas, buatEntriKas, logWa };
