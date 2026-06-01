@@ -152,9 +152,16 @@ exports.sesuaikan = async (req, res) => {
       await trx('pelanggan').where({ id: req.params.id })
         .update({ total_poin: newTotal, updated_at: new Date() });
 
-      await trx('poin_pelanggan').where({ pelanggan_id: req.params.id }).update({
-        total_poin: newTotal, updated_at: new Date()
-      });
+      // Upsert cache poin_pelanggan (insert bila belum ada — cegah desync)
+      const existingPP = await trx('poin_pelanggan').where({ pelanggan_id: req.params.id }).first();
+      if (existingPP) {
+        await trx('poin_pelanggan').where({ pelanggan_id: req.params.id })
+          .update({ total_poin: newTotal, updated_at: new Date() });
+      } else {
+        await trx('poin_pelanggan').insert({
+          pelanggan_id: req.params.id, total_poin: newTotal, updated_at: new Date()
+        });
+      }
 
       await trx('riwayat_poin').insert({
         pelanggan_id: req.params.id,

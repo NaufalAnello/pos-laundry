@@ -37,25 +37,28 @@ const hitungTotal = (items, promo, poinDigunakan, nilaiPerPoin) => {
 // ── Tambah/kurang poin pelanggan ────────────────────────────────────────────
 const upsertPoinPelanggan = async (pelangganId, delta, transaksiId, jenis, keterangan) => {
   await db.transaction(async (trx) => {
-    const existing = await trx('poin_pelanggan').where('pelanggan_id', pelangganId).first();
-    const newTotal = Math.max(0, (existing?.total_poin || 0) + delta);
-
-    if (existing) {
-      await trx('poin_pelanggan')
-        .where('pelanggan_id', pelangganId)
-        .update({ total_poin: newTotal, updated_at: new Date() });
-    } else {
-      await trx('poin_pelanggan').insert({
-        pelanggan_id: pelangganId,
-        total_poin:   Math.max(0, delta),
-        updated_at:   new Date()
-      });
-    }
+    // SUMBER KEBENARAN tunggal = pelanggan.total_poin (selalu ada, dipakai seluruh app).
+    // poin_pelanggan dijaga sinkron sebagai cache, JANGAN dipakai sbg basis hitung
+    // (bisa kosong/desync utk pelanggan yg poinnya diubah via penyesuaian manual).
+    const pel  = await trx('pelanggan').where('id', pelangganId).first();
+    const base = Number(pel?.total_poin) || 0;
+    const newTotal = Math.max(0, base + delta);
 
     await trx('pelanggan').where('id', pelangganId).update({
       total_poin:  newTotal,
       updated_at:  new Date()
     });
+
+    // Jaga cache poin_pelanggan tetap sinkron (upsert)
+    const existing = await trx('poin_pelanggan').where('pelanggan_id', pelangganId).first();
+    if (existing) {
+      await trx('poin_pelanggan').where('pelanggan_id', pelangganId)
+        .update({ total_poin: newTotal, updated_at: new Date() });
+    } else {
+      await trx('poin_pelanggan').insert({
+        pelanggan_id: pelangganId, total_poin: newTotal, updated_at: new Date()
+      });
+    }
 
     await trx('riwayat_poin').insert({
       pelanggan_id: pelangganId,

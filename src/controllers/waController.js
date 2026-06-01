@@ -140,15 +140,22 @@ exports.broadcast = async (req, res) => {
 
     const pelanggan = await query.select('id', 'nama', 'telepon', 'total_poin').orderBy('nama');
 
+    // Ambil threshold level dari pengaturan (bukan hardcode) agar konsisten dgn modul poin
+    const thRows = await db('pengaturan')
+      .whereIn('kunci', ['level_silver_min', 'level_gold_min', 'level_platinum_min']);
+    const th = Object.fromEntries(thRows.map(r => [r.kunci, parseInt(r.nilai) || 0]));
+    const silverMin   = th.level_silver_min   || 500;
+    const goldMin     = th.level_gold_min     || 2000;
+    const platinumMin = th.level_platinum_min || 5000;
+
     // Filter by level if requested
     const targets = pelanggan.filter(p => {
       if (!level_filter || level_filter === 'all') return true;
       const poin = p.total_poin || 0;
-      // These thresholds are defaults — good enough for broadcast filter
-      if (level_filter === 'platinum') return poin >= 5000;
-      if (level_filter === 'gold')     return poin >= 2000 && poin < 5000;
-      if (level_filter === 'silver')   return poin >= 500  && poin < 2000;
-      if (level_filter === 'bronze')   return poin < 500;
+      if (level_filter === 'platinum') return poin >= platinumMin;
+      if (level_filter === 'gold')     return poin >= goldMin     && poin < platinumMin;
+      if (level_filter === 'silver')   return poin >= silverMin   && poin < goldMin;
+      if (level_filter === 'bronze')   return poin < silverMin;
       return true;
     });
 

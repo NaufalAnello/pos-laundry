@@ -11,7 +11,7 @@
 - [x] AREA 5 — Print thermal (KRITIS) — selesai, pesan error dirapikan
 - [x] AREA 6 — WhatsApp Business (KRITIS) — selesai, verified live, 1 fix minor
 - [x] AREA 7 — Deposit — selesai, semua check LULUS (verified live), tidak ada bug kode
-- [ ] AREA 8 — Poin pelanggan
+- [x] AREA 8 — Poin pelanggan — selesai, 1 BUG SERIUS + 1 konsistensi diperbaiki (verified live)
 - [ ] AREA 9 — Promo & paket
 - [ ] AREA 10 — Margin layanan
 - [ ] AREA 11 — Laporan & kas
@@ -27,6 +27,8 @@
 | 4  | transaksiController.js + transaksiService.js | Poin earned diberikan saat create TANPA cek lunas (order DP/belum bayar pun dapat poin, tdk sesuai spec). Dibuat helper `awardPoinJikaLunas` (idempotent), dipanggil di create/update/updateStatus hanya saat lunas. Diuji: belum lunas=0 poin, lunas=+poin, bayar ulang=tdk dobel | FIXED |
 | 5  | printer.service.js | Pesan error printer berupa raw Python traceback (jelek di indikator & toast). Dirapikan jadi pesan ringkas: "Library pyusb belum terpasang" / "Printer tidak terhubung" / "Akses USB ditolak" | FIXED |
 | 6  | waController.js | Fallback wa_mode di endpoint log = 'regular' (inkonsisten dgn default 'business'). Diselaraskan ke 'business' | FIXED |
+| 7  | transaksiService.js + poinController.js | **SERIUS**: poin punya 2 sumber kebenaran (kolom pelanggan.total_poin & tabel poin_pelanggan). `sesuaikan` update poin_pelanggan (no-op kalau row blm ada) tapi `upsertPoinPelanggan` hitung dari poin_pelanggan (kosong=0) lalu TIMPA pelanggan.total_poin→0. Akibat: poin pelanggan HILANG tiap transaksi setelah penyesuaian manual. Fix: pelanggan.total_poin jadi sumber kebenaran tunggal, poin_pelanggan di-upsert sbg cache sinkron. Diuji: sesuaikan+500→tukar200→300 (bukan 0), earn lunas→308 | FIXED |
+| 8  | waController.js | Filter level broadcast pakai threshold hardcode (5000/2000/500), tdk ikut pengaturan level_*_min. Diperbaiki baca dari pengaturan | FIXED |
 
 ## Catatan AREA 1 (bukan bug, informasi):
 - Semua dependency ARM64-compatible: better-sqlite3 compile from source (python3/make/g++ ada di Dockerfile), sisanya pure-JS (bcryptjs, joi, express, knex). Tidak ada package x86-only.
@@ -102,5 +104,16 @@
 - Routing depositRoutes aman (Express cocokkan jumlah segmen; /mutasi/semua & /mutasi/export tak bentrok /:pelangganId).
 - Data test (pelanggan DepoTest id=3) sudah DIHAPUS bersih.
 
+## Catatan AREA 8 (informasi):
+- TIDAK ADA "multiplier" earning per level. Poin earned flat = floor(total_bayar/poin_per_nominal).
+  Level Bronze/Silver/Gold/Platinum = TIER loyalitas (display/filter), bukan pengali earning.
+  getLevel pakai threshold konfigurabel (level_*_min) & dihitung benar. Bila bisnis ingin
+  Gold dapat poin lebih, itu FITUR BARU (bukan bug) — tidak diimplementasi.
+- Frontend wa-center.html getLevel masih hardcode 5000/2000/500 (hanya utk label di stepper
+  broadcast) — kosmetik, backend broadcast sudah pakai threshold dinamis. LOW priority.
+- Diuji: tukar poin kurangi saldo (verified setelah fix), riwayat_poin tercatat (tambah/kurang),
+  earn saat lunas, level Silver pada 500 poin.
+- Pelanggan asli: TIDAK ada desync poin saat audit (data konsisten).
+
 ## Langkah berikutnya saat sesi lanjut:
-Lanjut ke AREA 8 — Poin pelanggan
+Lanjut ke AREA 9 — Promo & paket
