@@ -74,6 +74,9 @@
     .card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3); box-shadow:var(--shadow); }
     .card-head { padding:14px 18px; border-bottom:1px solid var(--gray-3); font-weight:700; font-size:14px; display:flex; justify-content:space-between; align-items:center; }
     .card-body { padding:18px; }
+    /* Tabel lebar (mis. profitabilitas 6 kolom) bisa di-scroll horizontal di HP, tdk overflow halaman */
+    #profitBody, #distribusiBody { overflow-x:auto; }
+    #profitBody table, #distribusiBody table { min-width:520px; }
 
     .chart-wrap { position:relative; height:240px; }
 
