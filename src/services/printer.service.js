@@ -141,7 +141,14 @@ function sendToPrinter(buf) {
       if (code === 0 && stdout.trimStart().startsWith('OK')) {
         resolve(stdout.trim());
       } else {
-        reject(new Error(stdout.trim() || stderr.trim() || `print.py keluar dengan kode ${code}`));
+        // Ringkas error umum agar pesan ke pengguna jelas
+        const raw = (stderr + stdout);
+        let msg;
+        if (/No module named ['"]?usb/.test(raw))   msg = 'Library pyusb belum terpasang di server';
+        else if (/Printer tidak ditemukan/.test(raw)) msg = 'Printer tidak terhubung';
+        else if (/Access|Permission/i.test(raw))    msg = 'Akses USB ditolak (cek izin/privileged)';
+        else msg = (stdout.trim() || stderr.trim().split('\n').pop() || `print.py keluar kode ${code}`);
+        reject(new Error(msg));
       }
     });
 
@@ -166,11 +173,15 @@ async function cekPrinter() {
     proc.stderr.on('data', (d) => { err += d.toString(); });
     proc.on('close', () => {
       const connected = out.trim() === 'ok';
-      resolve({
-        connected,
-        port: 'USB 0x0fe6:0x811e',
-        error: connected ? undefined : (err.trim() || 'Printer tidak ditemukan di USB'),
-      });
+      // Ringkas pesan error agar ramah ditampilkan di indikator (bukan traceback mentah)
+      let error;
+      if (!connected) {
+        if (/No module named ['"]?usb/.test(err))      error = 'Library pyusb belum terpasang';
+        else if (out.trim() === 'not_found')           error = 'Printer tidak ditemukan di USB';
+        else if (/Access|Permission/i.test(err))       error = 'Akses USB ditolak (cek izin/privileged)';
+        else                                           error = 'Printer tidak ditemukan di USB';
+      }
+      resolve({ connected, port: 'USB 0x0fe6:0x811e', error });
     });
     proc.on('error', () => resolve({
       connected: false, port: 'USB 0x0fe6:0x811e', error: 'python3 tidak tersedia'
