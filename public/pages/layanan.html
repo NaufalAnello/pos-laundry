@@ -174,6 +174,53 @@
              background:#111; color:#fff; padding:10px 20px; border-radius:99px;
              font-size:13px; font-weight:600; z-index:9999; opacity:0; pointer-events:none; transition:opacity .25s; }
     #toast.show { opacity:1; }
+
+    /* ── Import Modal ── */
+    .import-modal { max-width:900px; }
+    .upload-zone { border:2px dashed var(--gray-3); border-radius:var(--radius); padding:40px 20px;
+                   text-align:center; background:var(--gray-1); cursor:pointer; transition:all .2s; }
+    .upload-zone:hover { border-color:var(--blue); background:var(--blue-lt); }
+    .upload-zone.dragging { border-color:var(--blue); background:var(--blue-lt); }
+    .upload-icon { font-size:48px; color:var(--gray-5); margin-bottom:12px; }
+    .upload-text { font-size:14px; font-weight:600; color:var(--gray-7); margin-bottom:4px; }
+    .upload-hint { font-size:12px; color:var(--gray-5); }
+    .template-links { margin-top:16px; display:flex; gap:12px; justify-content:center; }
+    .template-link { color:var(--blue); text-decoration:none; font-size:12px; font-weight:600; }
+    .template-link:hover { text-decoration:underline; }
+
+    /* ── Preview sections ── */
+    .preview-section { margin-top:20px; border:1px solid var(--gray-3); border-radius:var(--radius); overflow:hidden; }
+    .preview-header { padding:12px 16px; font-weight:700; font-size:13px; display:flex;
+                      justify-content:space-between; align-items:center; cursor:pointer; user-select:none; }
+    .preview-header.green  { background:var(--green-lt); color:var(--green); }
+    .preview-header.yellow { background:var(--yellow-lt); color:var(--yellow); }
+    .preview-header.red    { background:var(--red-lt); color:var(--red); }
+    .preview-body { max-height:300px; overflow-y:auto; display:none; }
+    .preview-section.open .preview-body { display:block; }
+    .preview-table { width:100%; border-collapse:collapse; font-size:12px; }
+    .preview-table th { padding:8px 12px; text-align:left; background:var(--gray-1); font-weight:700;
+                        border-bottom:1px solid var(--gray-3); position:sticky; top:0; }
+    .preview-table td { padding:8px 12px; border-bottom:1px solid var(--gray-3); }
+    .preview-table tr:hover td { background:var(--gray-1); }
+
+    /* ── Duplikat actions ── */
+    .aksi-toggle { display:flex; border:1px solid var(--gray-3); border-radius:6px; overflow:hidden; }
+    .aksi-btn { padding:4px 10px; border:none; background:#fff; cursor:pointer; font-size:11px;
+                font-weight:600; color:var(--gray-5); transition:all .15s; }
+    .aksi-btn.active { background:var(--blue); color:#fff; }
+    .bulk-actions { display:flex; gap:6px; font-size:12px; }
+    .bulk-actions a { color:var(--blue); cursor:pointer; text-decoration:none; }
+    .bulk-actions a:hover { text-decoration:underline; }
+
+    /* ── Result summary ── */
+    .result-summary { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+    .result-card { padding:16px; border-radius:8px; text-align:center; }
+    .result-card.green  { background:var(--green-lt); }
+    .result-card.blue   { background:var(--blue-lt); }
+    .result-card.yellow { background:var(--yellow-lt); }
+    .result-card.red    { background:var(--red-lt); }
+    .result-num { font-size:28px; font-weight:800; margin-bottom:4px; }
+    .result-label { font-size:12px; font-weight:600; color:var(--gray-7); }
   </style>
 </head>
 <body>
@@ -181,9 +228,20 @@
 <div class="page">
   <div class="page-header">
     <div class="page-title">Manajemen Layanan</div>
-    <button class="btn btn-blue" onclick="openKategoriModal()">
-      <i class="ti ti-folder-plus"></i> Tambah Kategori
-    </button>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn btn-outline" onclick="openImportModal()">
+        <i class="ti ti-file-import"></i> Import
+      </button>
+      <button class="btn btn-outline" onclick="exportLayanan('xlsx')">
+        <i class="ti ti-file-spreadsheet"></i> Export Excel
+      </button>
+      <button class="btn btn-outline" onclick="exportLayanan('csv')">
+        <i class="ti ti-file-text"></i> Export CSV
+      </button>
+      <button class="btn btn-blue" onclick="openKategoriModal()">
+        <i class="ti ti-folder-plus"></i> Tambah Kategori
+      </button>
+    </div>
   </div>
   <div class="cat-list" id="catList">
     <div style="text-align:center;padding:60px;color:var(--gray-5)">Memuat...</div>
@@ -345,6 +403,154 @@
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('layModal')">Batal</button>
       <button class="btn btn-blue" id="laySaveBtn" onclick="saveLayanan()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Import -->
+<div class="modal-bg" id="importModal">
+  <div class="modal import-modal">
+    <div class="modal-header">
+      <div class="modal-title">Import Layanan</div>
+      <button class="modal-close" onclick="closeImportModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <!-- Step 1: Upload -->
+      <div id="uploadStep">
+        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFileSelect(event)"/>
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon">📁</div>
+          <div class="upload-text">Klik untuk pilih file atau drag & drop</div>
+          <div class="upload-hint">Format: CSV atau Excel (.xlsx, .xls) • Maksimal 5MB</div>
+        </div>
+        <div class="template-links">
+          <a href="/api/v1/layanan/template?format=xlsx" class="template-link">
+            <i class="ti ti-download"></i> Download Template Excel
+          </a>
+          <a href="/api/v1/layanan/template?format=csv" class="template-link">
+            <i class="ti ti-download"></i> Download Template CSV
+          </a>
+        </div>
+      </div>
+
+      <!-- Step 2: Preview -->
+      <div id="previewStep" style="display:none">
+        <!-- Baru -->
+        <div class="preview-section open" id="sectionBaru" style="display:none">
+          <div class="preview-header green" onclick="togglePreviewSection('sectionBaru')">
+            <span>✓ Layanan Baru (<span id="countBaru">0</span> item)</span>
+            <i class="ti ti-chevron-down"></i>
+          </div>
+          <div class="preview-body">
+            <table class="preview-table">
+              <thead>
+                <tr>
+                  <th>Nama</th>
+                  <th>Kategori</th>
+                  <th>Harga</th>
+                  <th>Satuan</th>
+                  <th>HPP</th>
+                  <th>Margin %</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyBaru"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Duplikat -->
+        <div class="preview-section open" id="sectionDuplikat" style="display:none">
+          <div class="preview-header yellow" onclick="togglePreviewSection('sectionDuplikat')">
+            <span>⚠ Duplikat (<span id="countDuplikat">0</span> item — nama sudah ada)</span>
+            <div class="bulk-actions" onclick="event.stopPropagation()">
+              <a onclick="setSemuaDuplikat('skip')">Skip Semua</a>
+              <span>•</span>
+              <a onclick="setSemuaDuplikat('update')">Update Semua</a>
+            </div>
+          </div>
+          <div class="preview-body">
+            <table class="preview-table">
+              <thead>
+                <tr>
+                  <th>Nama</th>
+                  <th>Kategori</th>
+                  <th>Harga Lama</th>
+                  <th>Harga Baru</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyDuplikat"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div class="preview-section open" id="sectionError" style="display:none">
+          <div class="preview-header red" onclick="togglePreviewSection('sectionError')">
+            <span>✗ Error (<span id="countError">0</span> item — data tidak valid)</span>
+            <i class="ti ti-chevron-down"></i>
+          </div>
+          <div class="preview-body">
+            <table class="preview-table">
+              <thead>
+                <tr>
+                  <th style="width:60px">Baris</th>
+                  <th>Nama</th>
+                  <th>Pesan Error</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyError"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div style="margin-top:20px;padding:16px;background:var(--gray-1);border-radius:8px">
+          <div style="font-weight:700;font-size:13px;margin-bottom:10px">Ringkasan</div>
+          <div style="font-size:12px;color:var(--gray-7);line-height:1.8">
+            <div>• Akan ditambahkan: <strong id="summaryBaru">0</strong> layanan baru</div>
+            <div>• Akan diupdate: <strong id="summaryUpdate">0</strong> layanan</div>
+            <div>• Akan diskip: <strong id="summarySkip">0</strong> layanan</div>
+            <div>• Error (tidak diimport): <strong id="summaryError">0</strong> baris</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Result -->
+      <div id="resultStep" style="display:none">
+        <div style="text-align:center;margin-bottom:20px">
+          <div style="font-size:48px;margin-bottom:8px">✓</div>
+          <div style="font-size:16px;font-weight:700;margin-bottom:4px">Import Selesai</div>
+          <div style="font-size:12px;color:var(--gray-5)">Data layanan berhasil diimport</div>
+        </div>
+        <div class="result-summary">
+          <div class="result-card green">
+            <div class="result-num" id="resultBerhasil">0</div>
+            <div class="result-label">Berhasil Ditambahkan</div>
+          </div>
+          <div class="result-card blue">
+            <div class="result-num" id="resultUpdate">0</div>
+            <div class="result-label">Berhasil Diupdate</div>
+          </div>
+          <div class="result-card yellow">
+            <div class="result-num" id="resultSkip">0</div>
+            <div class="result-label">Diskip</div>
+          </div>
+          <div class="result-card red">
+            <div class="result-num" id="resultGagal">0</div>
+            <div class="result-label">Gagal / Error</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeImportModal()">Batal</button>
+      <button class="btn btn-blue" id="btnJalankanImport" style="display:none" onclick="jalankanImport()">
+        <i class="ti ti-check"></i> Jalankan Import
+      </button>
+      <button class="btn btn-blue" id="btnSelesai" style="display:none" onclick="selesaiImport()">
+        <i class="ti ti-check"></i> Selesai
+      </button>
     </div>
   </div>
 </div>
@@ -813,6 +1019,7 @@ fetch('/api/v1/auth/me').then(r => r.json()).then(d => {
 
 loadLayanan();
 </script>
+<script src="/js/import-layanan.js"></script>
 <script src="/js/nav.js"></script>
 </body>
 </html>

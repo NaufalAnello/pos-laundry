@@ -298,3 +298,168 @@ exports.destroyLayanan = async (req, res) => {
     res.status(500).json({ error: 'Gagal hapus layanan' });
   }
 };
+
+// ── POST /api/v1/layanan/import/preview ───────────────────────────────────────
+exports.importPreview = async (req, res) => {
+  const fs = require('fs');
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'File tidak ditemukan' });
+    }
+
+    const { prosesImport } = require('../services/import-layanan.service');
+
+    // Ambil semua kategori dan layanan
+    const kategori = await db('kategori_layanan').select('id', 'nama');
+    const layanan = await db('layanan').select('id', 'nama', 'harga');
+
+    // Proses file
+    const hasil = await prosesImport(
+      req.file.path,
+      req.file.mimetype,
+      kategori,
+      layanan
+    );
+
+    // Simpan preview di session untuk dipakai saat konfirmasi
+    req.session.importPreview = hasil;
+
+    // Hapus file upload setelah diproses
+    fs.unlinkSync(req.file.path);
+
+    res.json(hasil);
+  } catch (err) {
+    console.error('[layanan:importPreview]', err);
+    // Hapus file jika ada error
+    if (req.file?.path) {
+      try { fs.unlinkSync(req.file.path); } catch (e) {}
+    }
+    res.status(500).json({ error: err.message || 'Gagal memproses file import' });
+  }
+};
+
+// ── POST /api/v1/layanan/import/konfirmasi ────────────────────────────────────
+exports.importKonfirmasi = async (req, res) => {
+  try {
+    const preview = req.session.importPreview;
+    if (!preview) {
+      return res.status(400).json({ error: 'Preview tidak ditemukan. Silakan upload file lagi.' });
+    }
+
+    const { konfirmasiDuplikat } = req.body;
+    // konfirmasiDuplikat: array { nama, aksi: 'update'|'skip' }
+
+    let berhasil = 0, diupdate = 0, diskip = 0;
+    const errors = [];
+
+    // Import data baru
+    for (const item of preview.baru) {
+      try {
+        // Remove fields yang tidak ada di tabel
+        const { kategori_nama, ...insertData } = item;
+        await db('layanan').insert({
+          ...insertData,
+          created_at: new Date(),
+          updated_at: new Date()
+        });
+        berhasil++;
+      } catch (err) {
+        errors.push(`Gagal import ${item.nama}: ${err.message}`);
+      }
+    }
+
+    // Handle duplikat sesuai konfirmasi
+    for (const item of preview.duplikat) {
+      const conf = konfirmasiDuplikat?.find(k => k.nama === item.nama);
+      const aksi = conf ? conf.aksi : 'skip';
+
+      if (aksi === 'update') {
+        try {
+          const { existing_id, harga_lama, aksi, kategori_nama, ...updateData } = item;
+          await db('layanan')
+            .where({ id: existing_id })
+            .update({
+              ...updateData,
+              updated_at: new Date()
+            });
+          diupdate++;
+        } catch (err) {
+          errors.push(`Gagal update ${item.nama}: ${err.message}`);
+        }
+      } else {
+        diskip++;
+      }
+    }
+
+    // Hapus preview dari session
+    delete req.session.importPreview;
+
+    res.json({
+      berhasil,
+      diupdate,
+      diskip,
+      gagal: preview.error.length,
+      total: preview.total,
+      errors: errors.length > 0 ? errors : undefined
+    });
+  } catch (err) {
+    console.error('[layanan:importKonfirmasi]', err);
+    res.status(500).json({ error: 'Gagal mengimport data' });
+  }
+};
+
+// ── GET /api/v1/layanan/export?format=xlsx|csv ────────────────────────────────
+exports.exportLayanan = async (req, res) => {
+  try {
+    const format = req.query.format || 'xlsx';
+    const { exportKeExcel, exportKeCSV } = require('../services/export-layanan.service');
+
+    // Ambil semua layanan dengan kategori
+    const layanan = await db('layanan as l')
+      .leftJoin('kategori_layanan as k', 'k.id', 'l.kategori_id')
+      .orderBy(['k.nama', 'l.nama'])
+      .select(
+        'l.id', 'l.nama', 'l.harga', 'l.satuan', 'l.estimasi_hari',
+        'l.deskripsi', 'l.hpp', 'l.margin_persen', 'l.aktif',
+        'k.nama as kategori_nama'
+      );
+
+    if (format === 'csv') {
+      const csv = exportKeCSV(layanan);
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', 'attachment; filename=layanan.csv');
+      return res.send(csv);
+    } else {
+      const excel = exportKeExcel(layanan);
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename=layanan.xlsx');
+      return res.send(excel);
+    }
+  } catch (err) {
+    console.error('[layanan:export]', err);
+    res.status(500).json({ error: 'Gagal export data layanan' });
+  }
+};
+
+// ── GET /api/v1/layanan/template?format=xlsx|csv ──────────────────────────────
+exports.downloadTemplate = async (req, res) => {
+  try {
+    const format = req.query.format || 'xlsx';
+    const { buatTemplate } = require('../services/export-layanan.service');
+
+    if (format === 'csv') {
+      const csv = buatTemplate('csv');
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', 'attachment; filename=template-layanan.csv');
+      return res.send(csv);
+    } else {
+      const excel = buatTemplate('xlsx');
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename=template-layanan.xlsx');
+      return res.send(excel);
+    }
+  } catch (err) {
+    console.error('[layanan:template]', err);
+    res.status(500).json({ error: 'Gagal download template' });
+  }
+};
