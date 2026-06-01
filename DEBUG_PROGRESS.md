@@ -5,7 +5,7 @@
 
 ## Area yang SUDAH selesai di-debug:
 - [x] AREA 1 — Dependency & setup — selesai, 1 bug ditemukan & diperbaiki
-- [ ] AREA 2 — Database & migration
+- [x] AREA 2 — Database & migration — selesai, index performa ditambahkan
 - [ ] AREA 3 — Autentikasi & session
 - [ ] AREA 4 — Order baru (KRITIS)
 - [ ] AREA 5 — Print thermal (KRITIS)
@@ -22,6 +22,7 @@
 | No | File | Bug | Status |
 |----|------|-----|--------|
 | 1  | docker-compose.yml | USB device path di-hardcode `/dev/bus/usb/001/003` → container gagal start saat printer pindah port. Diganti mount seluruh `/dev/bus/usb` (privileged sudah aktif) | FIXED |
+| 2  | migrations/20260601000022 | Tidak ada index di kolom yang sering di-query (transaksi.tanggal_masuk/pelanggan_id/status, detail_transaksi.transaksi_id/layanan_id, dll) → lambat di ARM saat data tumbuh. Tambah 10 index | FIXED |
 
 ## Catatan AREA 1 (bukan bug, informasi):
 - Semua dependency ARM64-compatible: better-sqlite3 compile from source (python3/make/g++ ada di Dockerfile), sisanya pure-JS (bcryptjs, joi, express, knex). Tidak ada package x86-only.
@@ -34,5 +35,11 @@
 |----|------|-----|----------|
 | -  | .env | SESSION_SECRET masih placeholder `ganti_ini` | akan ditangani di AREA 13 |
 
+## Catatan AREA 2 (informasi):
+- 22 migration jalan fresh tanpa error; seed 01 & 02 OK.
+- FK integrity: PRAGMA foreign_key_check = NONE; foreign_keys=ON aktif via knexfile afterCreate.
+- Query agregasi laporan TIDAK crash saat data kosong (pakai COALESCE).
+- Rollback + re-apply migration index teruji OK.
+
 ## Langkah berikutnya saat sesi lanjut:
-Lanjut ke AREA 2 — Database & migration
+Lanjut ke AREA 3 — Autentikasi & session
