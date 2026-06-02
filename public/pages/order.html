@@ -110,6 +110,84 @@
     .level-Silver   { background: #f1f5f9; color: #475569; }
     .level-Bronze   { background: #fef9ee; color: #92400e; }
 
+    /* ── Searchable Service Select ── */
+    .svc-search-wrap { position: relative; }
+    .svc-search-input {
+      width: 100%; padding: 9px 12px 9px 36px;
+      border: 1.5px solid var(--gray-3); border-radius: 7px;
+      font-size: 14px; background: var(--gray-1);
+      color: var(--gray-9); outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .svc-search-input:focus {
+      border-color: var(--blue); background: #fff;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    }
+    .svc-search-input.filled { background: #fff; font-weight: 600; }
+    .svc-search-icon {
+      position: absolute; left: 12px; top: 50%;
+      transform: translateY(-50%); font-size: 16px;
+      color: var(--gray-5); pointer-events: none;
+    }
+    .svc-clear-btn {
+      position: absolute; right: 8px; top: 50%;
+      transform: translateY(-50%); width: 20px; height: 20px;
+      background: var(--gray-3); border: none; border-radius: 50%;
+      color: var(--gray-7); font-size: 12px; cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .svc-clear-btn:hover { background: var(--gray-5); color: #fff; }
+    .svc-search-input.filled ~ .svc-clear-btn { display: flex; }
+
+    .svc-dropdown {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: #fff; border: 1.5px solid var(--gray-3);
+      border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      z-index: 100; max-height: 300px; overflow-y: auto;
+    }
+    .svc-dropdown.hidden { display: none; }
+
+    .svc-category {
+      padding: 8px 14px 4px; font-size: 11px; font-weight: 700;
+      color: var(--gray-5); text-transform: uppercase; letter-spacing: .4px;
+      background: var(--gray-1); border-bottom: 1px solid var(--gray-3);
+    }
+    .svc-item {
+      padding: 10px 14px; cursor: pointer;
+      border-bottom: 1px solid var(--gray-3);
+      transition: background .1s;
+    }
+    .svc-item:last-child { border-bottom: none; }
+    .svc-item:hover { background: var(--blue-lt); }
+    .svc-item-name {
+      font-weight: 600; font-size: 13px; color: var(--gray-9);
+      margin-bottom: 3px;
+    }
+    .svc-item-price {
+      font-size: 12px; color: var(--gray-5);
+    }
+    .svc-item-price strong { color: var(--blue-dk); }
+    .svc-empty {
+      padding: 20px; text-align: center; color: var(--gray-5);
+      font-size: 13px;
+    }
+    .highlight { background: #fef08a; font-weight: 700; }
+
+    @media (max-width: 768px) {
+      .svc-dropdown {
+        position: fixed; bottom: 0; left: 0; right: 0;
+        top: auto; max-height: 60vh;
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -4px 24px rgba(0,0,0,.2);
+        animation: slideUp .2s ease-out;
+      }
+      @keyframes slideUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+      }
+    }
+
     /* ── Customer info panel ── */
     #customerInfo {
       background: var(--blue-lt); border-radius: 8px;
@@ -133,18 +211,28 @@
     /* ── Items table ── */
     .item-row {
       display: grid;
-      grid-template-columns: 1fr 80px 90px 100px 34px;
+      grid-template-columns: 2fr 80px 90px 100px 34px;
       gap: 8px; align-items: center;
       padding: 8px 0; border-bottom: 1px solid var(--gray-3);
     }
     .item-row:last-child { border-bottom: none; }
     .item-header {
       display: grid;
-      grid-template-columns: 1fr 80px 90px 100px 34px;
+      grid-template-columns: 2fr 80px 90px 100px 34px;
       gap: 8px; padding: 0 0 6px 0;
       border-bottom: 2px solid var(--gray-3);
       font-size: 11px; font-weight: 700; color: var(--gray-5);
       text-transform: uppercase; letter-spacing: .3px;
+    }
+    @media (max-width: 768px) {
+      .item-row, .item-header {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+      .item-header { display: none; }
+      .item-row .item-jumlah, .item-row .item-satuan, .item-row .item-subtotal {
+        font-size: 13px;
+      }
     }
     .item-subtotal { font-weight: 700; color: var(--blue-dk); }
     .btn-remove {
@@ -756,57 +844,169 @@ function addItemRow(defaults = {}) {
   row.className = 'item-row';
   row.dataset.itemId = id;
 
-  // Build layanan options grouped by kategori
-  const grouped = {};
-  layananList.forEach(l => {
-    const cat = l.kategori_nama || 'Lainnya';
-    if (!grouped[cat]) grouped[cat] = [];
-    grouped[cat].push(l);
-  });
-  let optionsHtml = '<option value="">— Pilih layanan —</option>';
-  Object.entries(grouped).forEach(([cat, items]) => {
-    optionsHtml += `<optgroup label="${cat}">`;
-    items.forEach(l => {
-      optionsHtml += `<option value="${l.id}" data-harga="${l.harga}" data-satuan="${l.satuan}"
-        ${defaults.layanan_id == l.id ? 'selected' : ''}>${l.nama} (Rp ${fmtRp(l.harga)}/${l.satuan})</option>`;
-    });
-    optionsHtml += '</optgroup>';
-  });
+  // Default layanan jika ada
+  let defaultNama = '';
+  if (defaults.layanan_id) {
+    const found = layananList.find(l => l.id === defaults.layanan_id);
+    if (found) defaultNama = found.nama;
+  }
 
   row.innerHTML = `
-    <select class="item-layanan">${optionsHtml}</select>
+    <div class="svc-search-wrap">
+      <span class="svc-search-icon">🔍</span>
+      <input type="text" class="svc-search-input" placeholder="Cari layanan..." autocomplete="off" value="${defaultNama}" />
+      <button class="svc-clear-btn" title="Hapus pilihan">✕</button>
+      <div class="svc-dropdown hidden"></div>
+    </div>
     <input type="number" class="item-jumlah" min="0.1" step="0.1" value="${defaults.jumlah || 1}" />
     <input type="text" class="item-satuan" readonly value="${defaults.satuan || ''}" style="background:var(--gray-1);color:var(--gray-5)" />
     <span class="item-subtotal">${defaults.subtotal ? 'Rp ' + fmtRp(defaults.subtotal) : 'Rp 0'}</span>
     <button class="btn-remove" title="Hapus">✕</button>
   `;
 
-  const selLayanan = row.querySelector('.item-layanan');
-  const inpJumlah  = row.querySelector('.item-jumlah');
-  const inpSatuan  = row.querySelector('.item-satuan');
-  const spanSub    = row.querySelector('.item-subtotal');
+  const searchInput = row.querySelector('.svc-search-input');
+  const dropdown    = row.querySelector('.svc-dropdown');
+  const clearBtn    = row.querySelector('.svc-clear-btn');
+  const inpJumlah   = row.querySelector('.item-jumlah');
+  const inpSatuan   = row.querySelector('.item-satuan');
+  const spanSub     = row.querySelector('.item-subtotal');
 
-  const updateRow = () => {
-    const opt   = selLayanan.options[selLayanan.selectedIndex];
-    const harga  = parseFloat(opt?.dataset.harga || 0);
-    const satuan = opt?.dataset.satuan || '';
+  let selectedLayanan = null;
+  let searchTimer = null;
+
+  // Jika ada default, set langsung
+  if (defaults.layanan_id) {
+    selectedLayanan = layananList.find(l => l.id === defaults.layanan_id);
+    if (selectedLayanan) {
+      searchInput.classList.add('filled');
+    }
+  }
+
+  // Search input
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    const q = searchInput.value.trim().toLowerCase();
+
+    // Jika kosong, clear selection
+    if (!q) {
+      selectedLayanan = null;
+      searchInput.classList.remove('filled');
+      dropdown.classList.add('hidden');
+      updateRow();
+      return;
+    }
+
+    searchTimer = setTimeout(() => {
+      const filtered = layananList.filter(l =>
+        l.nama.toLowerCase().includes(q)
+      );
+      renderServiceDropdown(filtered, q);
+    }, 200);
+  });
+
+  searchInput.addEventListener('focus', () => {
+    if (!selectedLayanan && searchInput.value.trim()) {
+      const q = searchInput.value.trim().toLowerCase();
+      const filtered = layananList.filter(l => l.nama.toLowerCase().includes(q));
+      renderServiceDropdown(filtered, q);
+    } else if (!selectedLayanan) {
+      renderServiceDropdown(layananList, '');
+    }
+  });
+
+  searchInput.addEventListener('blur', () => {
+    setTimeout(() => dropdown.classList.add('hidden'), 200);
+  });
+
+  // Clear button
+  clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    selectedLayanan = null;
+    searchInput.classList.remove('filled');
+    dropdown.classList.add('hidden');
+    searchInput.focus();
+    updateRow();
+  });
+
+  // Render dropdown
+  function renderServiceDropdown(services, query) {
+    if (services.length === 0) {
+      dropdown.innerHTML = '<div class="svc-empty">Layanan tidak ditemukan</div>';
+      dropdown.classList.remove('hidden');
+      return;
+    }
+
+    // Group by category
+    const grouped = {};
+    services.forEach(l => {
+      const cat = l.kategori_nama || 'Lainnya';
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(l);
+    });
+
+    let html = '';
+    Object.entries(grouped).forEach(([cat, items]) => {
+      html += `<div class="svc-category">${cat}</div>`;
+      items.forEach(l => {
+        const highlightedName = query
+          ? l.nama.replace(new RegExp(`(${escapeRegex(query)})`, 'gi'), '<span class="highlight">$1</span>')
+          : l.nama;
+        html += `
+          <div class="svc-item" data-id="${l.id}">
+            <div class="svc-item-name">${highlightedName}</div>
+            <div class="svc-item-price"><strong>Rp ${fmtRp(l.harga)}</strong> / ${l.satuan}</div>
+          </div>
+        `;
+      });
+    });
+
+    dropdown.innerHTML = html;
+    dropdown.classList.remove('hidden');
+
+    // Attach click handlers
+    dropdown.querySelectorAll('.svc-item[data-id]').forEach(el => {
+      el.addEventListener('click', () => {
+        const found = services.find(l => l.id == el.dataset.id);
+        if (found) selectService(found);
+      });
+    });
+  }
+
+  function selectService(layanan) {
+    selectedLayanan = layanan;
+    searchInput.value = layanan.nama;
+    searchInput.classList.add('filled');
+    dropdown.classList.add('hidden');
+    updateRow();
+  }
+
+  function updateRow() {
+    const harga  = selectedLayanan?.harga || 0;
+    const satuan = selectedLayanan?.satuan || '';
     const jumlah = parseFloat(inpJumlah.value) || 0;
     const sub    = harga * jumlah;
+
     inpSatuan.value = satuan;
     spanSub.textContent = 'Rp ' + fmtRp(sub);
 
     // Update state
     const existing = state.items.find(i => i.id === id);
-    const data = { id, layanan_id: parseInt(selLayanan.value) || 0, nama: opt?.text || '',
-                   harga, satuan, jumlah, subtotal: sub };
+    const data = {
+      id,
+      layanan_id: selectedLayanan?.id || 0,
+      nama: selectedLayanan?.nama || '',
+      harga,
+      satuan,
+      jumlah,
+      subtotal: sub
+    };
     if (existing) Object.assign(existing, data);
     else state.items.push(data);
 
     updateItemCount();
     calcTotal();
-  };
+  }
 
-  selLayanan.addEventListener('change', updateRow);
   inpJumlah.addEventListener('input', updateRow);
 
   row.querySelector('.btn-remove').addEventListener('click', () => {
@@ -822,6 +1022,11 @@ function addItemRow(defaults = {}) {
 
   container.appendChild(row);
   if (defaults.layanan_id) updateRow();
+}
+
+// Helper: escape regex special chars
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 document.getElementById('addItemBtn').addEventListener('click', () => addItemRow());
