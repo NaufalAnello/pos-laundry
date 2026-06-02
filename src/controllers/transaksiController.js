@@ -27,7 +27,8 @@ const createSchema = Joi.object({
   tanggal_selesai: Joi.date().iso().allow(null),
   antar_jemput:    Joi.boolean().default(false),
   alamat_jemput:   Joi.string().allow('', null),
-  kirim_wa:        Joi.boolean().default(false)
+  kirim_wa:        Joi.boolean().default(false),
+  waktu_transaksi: Joi.date().iso().allow(null)  // Backdate feature
 });
 
 const statusSchema = Joi.object({
@@ -75,6 +76,16 @@ exports.store = async (req, res) => {
   if (error) return res.status(400).json({ error: error.details.map(d => d.message).join(', ') });
 
   try {
+    // Validasi waktu_transaksi: tidak boleh waktu masa depan
+    if (value.waktu_transaksi) {
+      const waktu = new Date(value.waktu_transaksi);
+      if (waktu > new Date()) {
+        return res.status(400).json({
+          error: 'Waktu transaksi tidak boleh melebihi waktu saat ini'
+        });
+      }
+    }
+
     const settings = await svc.getPoinSettings();
 
     // Resolve layanan + hitung subtotal per item
@@ -170,11 +181,16 @@ exports.store = async (req, res) => {
       }
     }
 
+    // Tentukan waktu mulai transaksi (backdate atau waktu sekarang)
+    const waktuMasuk = value.waktu_transaksi
+      ? new Date(value.waktu_transaksi)
+      : new Date();
+
     // Hitung estimasi selesai dari estimasi_hari layanan terbesar (min 1 hari)
     const maxHari = Math.max(...estimasiList, 1);
     const tanggalSelesai = value.tanggal_selesai
       ? new Date(value.tanggal_selesai)
-      : new Date(Date.now() + maxHari * 86400000);
+      : new Date(waktuMasuk.getTime() + maxHari * 86400000);
 
     const nomor = await transaksiModel.generateNomor();
     const lunas = bayarFinal >= totalBayar && totalBayar > 0;
@@ -184,7 +200,7 @@ exports.store = async (req, res) => {
       pelanggan_id:    value.pelanggan_id   || null,
       user_id:         req.session.user.id,
       paket_promo_id:  value.paket_promo_id || null,
-      tanggal_masuk:   new Date(),
+      tanggal_masuk:   waktuMasuk,
       tanggal_selesai: tanggalSelesai,
       status:          'pending',
       total_harga:     totalHarga,

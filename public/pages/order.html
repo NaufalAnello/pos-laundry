@@ -388,6 +388,18 @@
                    background: var(--gray-3); flex-shrink: 0; }
     .printer-dot.on  { background: var(--green); box-shadow: 0 0 4px rgba(22,163,74,.5); }
     .printer-dot.off { background: var(--red); }
+
+    /* ── Waktu Transaksi Picker ── */
+    input[type="datetime-local"] {
+      width: 100%; padding: 9px 12px; border: 1.5px solid var(--gray-3);
+      border-radius: 7px; font-size: 14px; background: var(--gray-1);
+      color: var(--gray-9); outline: none; transition: border-color .15s, box-shadow .15s;
+      min-height: 42px;
+    }
+    input[type="datetime-local"]:focus {
+      border-color: var(--blue); background: #fff;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    }
   </style>
 </head>
 <body>
@@ -405,6 +417,30 @@
 
   <!-- ══ PANEL KIRI ══ -->
   <div class="panel-left">
+
+    <!-- Waktu Transaksi -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-body" style="padding:12px 18px;">
+        <div class="toggle-wrap" style="padding:0;">
+          <div>
+            <div class="toggle-label">🕒 Pilih Waktu Transaksi</div>
+            <div class="toggle-sub">Aktifkan jika ingin membuat transaksi yang waktunya sebelum saat ini</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="toggleWaktu" /><span class="toggle-slider"></span></label>
+        </div>
+        <!-- Datetime picker — hidden by default -->
+        <div id="waktuPicker" style="display:none;margin-top:12px;">
+          <label style="display:block;font-size:12px;font-weight:600;color:var(--gray-5);margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px;">Waktu Transaksi</label>
+          <input
+            type="datetime-local"
+            id="inputWaktuTransaksi"
+          />
+          <div style="font-size:11px;color:var(--gray-5);margin-top:4px;">
+            ⚠️ Tidak bisa memilih waktu yang akan datang
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Customer -->
     <div class="card">
@@ -716,6 +752,49 @@ function showToast(msg, type = '') {
 
 function setLoading(on) {
   document.getElementById('loadingOverlay').classList.toggle('show', on);
+}
+
+// ════════════════════════════════════════════════════════
+// WAKTU TRANSAKSI (BACKDATE)
+// ════════════════════════════════════════════════════════
+const toggleWaktuEl = document.getElementById('toggleWaktu');
+const waktuPickerEl = document.getElementById('waktuPicker');
+const inputWaktuEl  = document.getElementById('inputWaktuTransaksi');
+
+toggleWaktuEl.addEventListener('change', () => {
+  const isOn = toggleWaktuEl.checked;
+  if (isOn) {
+    waktuPickerEl.style.display = 'block';
+    // Set default ke waktu sekarang
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const formatted = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    inputWaktuEl.value = formatted;
+    // Set max ke waktu sekarang (tidak boleh future)
+    inputWaktuEl.max = formatted;
+  } else {
+    waktuPickerEl.style.display = 'none';
+    inputWaktuEl.value = '';
+  }
+});
+
+// Update max datetime setiap menit agar selalu akurat
+setInterval(() => {
+  if (toggleWaktuEl.checked) {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    inputWaktuEl.max = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  }
+}, 60000);
+
+// Fungsi untuk mendapatkan waktu transaksi yang dipilih
+function getWaktuTransaksi() {
+  const isOn = toggleWaktuEl.checked;
+  if (isOn) {
+    const val = inputWaktuEl.value;
+    if (val) return new Date(val).toISOString();
+  }
+  return null; // null = pakai waktu server
 }
 
 // ════════════════════════════════════════════════════════
@@ -1411,7 +1490,8 @@ async function submitOrder(kirimWa, cetakSetelah) {
     alamat_jemput:   document.getElementById('alamatJemput').value.trim() || null,
     kirim_wa:        kirimWa && document.getElementById('kirimWa').checked,
     kelebihan_ke_deposit:
-      !isDepositMode && kelebihan > 0 && !!state.pelanggan && state.kelebihanMode === 'deposit'
+      !isDepositMode && kelebihan > 0 && !!state.pelanggan && state.kelebihanMode === 'deposit',
+    waktu_transaksi: getWaktuTransaksi()  // null = pakai waktu server saat ini
   };
 
   // Deposit kekurangan: saldo tidak cukup, bayar sebagian pakai tunai/transfer/qris

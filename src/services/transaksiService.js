@@ -97,12 +97,17 @@ const awardPoinJikaLunas = async (transaksi, perNominal) => {
 };
 
 // ── Buat entri kas pemasukan ────────────────────────────────────────────────
-const buatEntriKas = async ({ nomor_transaksi, id, total_bayar, user_id }) => {
+const buatEntriKas = async ({ nomor_transaksi, id, total_bayar, user_id, tanggal_masuk }) => {
   const existing = await db('kas').where('transaksi_id', id).first();
   if (existing) return; // sudah ada, skip
 
+  // Gunakan tanggal_masuk transaksi (untuk backdate), bukan tanggal saat ini
+  const tanggalKas = tanggal_masuk
+    ? new Date(tanggal_masuk).toISOString().slice(0, 10)
+    : new Date().toISOString().slice(0, 10);
+
   await db('kas').insert({
-    tanggal:      new Date().toISOString().slice(0, 10),
+    tanggal:      tanggalKas,
     jenis:        'masuk',
     kategori:     'transaksi',
     keterangan:   `Pembayaran ${nomor_transaksi}`,
