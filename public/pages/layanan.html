@@ -385,8 +385,9 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">Estimasi Selesai (hari)</label>
-        <input type="number" id="layEstimasi" class="form-input" value="2" min="1"/>
+        <label class="form-label">Estimasi Selesai (jam)</label>
+        <input type="number" id="layEstimasi" class="form-input" value="48" min="1"/>
+        <div class="form-hint">Contoh: 5 jam, 24 jam (1 hari), 48 jam (2 hari), 72 jam (3 hari)</div>
       </div>
       <div class="form-group">
         <label class="form-label">Deskripsi</label>
@@ -598,6 +599,13 @@ let catData       = [];
 
 const fmtRp = n => Number(n||0).toLocaleString('id-ID');
 
+function formatEstimasi(jam) {
+  if (!jam || jam <= 0) return '-';
+  if (jam < 24) return jam + ' jam';
+  const hari = Math.round(jam / 24);
+  return hari + ' hari';
+}
+
 function showToast(msg, dur=2500) {
   const el = document.getElementById('toast');
   el.textContent = msg; el.classList.add('show');
@@ -666,7 +674,7 @@ function openKategoriModal(existing = null) {
 function openLayananModal(existing = null, defaultKategoriId = null) {
   document.getElementById('layId').value       = existing?.id || '';
   document.getElementById('layNama').value     = existing?.nama || '';
-  document.getElementById('layEstimasi').value = existing?.estimasi_hari || 2;
+  document.getElementById('layEstimasi').value = existing?.estimasi_jam || 48;
   document.getElementById('layDeskripsi').value= existing?.deskripsi || '';
   document.getElementById('layAktif').checked  = existing?.aktif !== 0;
   document.getElementById('layModalTitle').textContent = existing ? 'Edit Layanan' : 'Tambah Layanan';
@@ -778,7 +786,7 @@ async function saveLayanan() {
     kategori_id:   parseInt(document.getElementById('layKategori').value) || null,
     harga,
     satuan,
-    estimasi_hari: parseInt(document.getElementById('layEstimasi').value) || 2,
+    estimasi_jam:  parseInt(document.getElementById('layEstimasi').value) || 48,
     deskripsi:     document.getElementById('layDeskripsi').value.trim(),
     aktif:         document.getElementById('layAktif').checked,
     hpp,
@@ -918,7 +926,7 @@ function renderAkordion(data) {
           </div>
         </td>
         <td>${l.satuan}</td>
-        <td>${l.estimasi_hari} hr</td>
+        <td>${formatEstimasi(l.estimasi_jam)}</td>
         <td>
           <label class="toggle">
             <input type="checkbox" ${l.aktif ? 'checked' : ''}

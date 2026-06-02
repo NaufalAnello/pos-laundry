@@ -65,9 +65,9 @@ function validasiRow(row, index) {
     errors.push(`Baris ${no}: harga harus berupa angka`);
   }
 
-  // Cek estimasi_hari jika ada
-  if (row.estimasi_hari && row.estimasi_hari !== '' && isNaN(Number(row.estimasi_hari))) {
-    errors.push(`Baris ${no}: estimasi_hari harus berupa angka`);
+  // Cek estimasi_jam jika ada
+  if (row.estimasi_jam && row.estimasi_jam !== '' && isNaN(Number(row.estimasi_jam))) {
+    errors.push(`Baris ${no}: estimasi_jam harus berupa angka`);
   }
 
   // Cek hpp jika ada
@@ -132,7 +132,7 @@ async function prosesImport(filePath, mimeType, semuaKategori, semuaLayanan) {
       kategori_nama: kategori.nama,
       harga: Number(row.harga),
       satuan: String(row.satuan).toLowerCase(),
-      estimasi_hari: row.estimasi_hari ? Number(row.estimasi_hari) : 2,
+      estimasi_jam: row.estimasi_jam ? Number(row.estimasi_jam) : 48,
       deskripsi: row.deskripsi || row.keterangan || '',
       hpp: row.hpp ? Number(row.hpp) : 0,
       margin_persen: row.margin_persen ? Number(row.margin_persen) : 0,

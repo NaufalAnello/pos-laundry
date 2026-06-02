@@ -22,7 +22,7 @@ const layananSchema = Joi.object({
   nama:          Joi.string().max(100).required(),
   harga:         Joi.number().min(0).required(),
   satuan:        Joi.string().max(20).default('kg'),
-  estimasi_hari: Joi.number().integer().min(1).default(2),
+  estimasi_jam: Joi.number().integer().min(1).default(48),
   deskripsi:     Joi.string().allow('', null),
   aktif:         Joi.boolean().default(true),
   hpp:           Joi.number().min(0).default(0),
@@ -69,7 +69,7 @@ exports.perKategori = async (req, res) => {
       .leftJoin('kategori_layanan as k', 'k.id', 'l.kategori_id')
       .orderBy(['k.nama', 'l.nama'])
       .select(
-        'l.id', 'l.nama', 'l.harga', 'l.satuan', 'l.estimasi_hari',
+        'l.id', 'l.nama', 'l.harga', 'l.satuan', 'l.estimasi_jam',
         'l.deskripsi', 'l.aktif', 'l.kategori_id', 'l.created_at',
         'l.hpp', 'l.margin_persen', 'l.harga_auto'
       );
@@ -188,7 +188,7 @@ exports.indexLayanan = async (req, res) => {
       .leftJoin('kategori_layanan as k', 'k.id', 'l.kategori_id')
       .orderBy(['k.nama', 'l.nama'])
       .select(
-        'l.id', 'l.nama', 'l.harga', 'l.satuan', 'l.estimasi_hari',
+        'l.id', 'l.nama', 'l.harga', 'l.satuan', 'l.estimasi_jam',
         'l.deskripsi', 'l.aktif', 'l.kategori_id', 'l.created_at',
         'l.hpp', 'l.margin_persen', 'l.harga_auto',
         'k.nama as kategori_nama'
@@ -419,7 +419,7 @@ exports.exportLayanan = async (req, res) => {
       .leftJoin('kategori_layanan as k', 'k.id', 'l.kategori_id')
       .orderBy(['k.nama', 'l.nama'])
       .select(
-        'l.id', 'l.nama', 'l.harga', 'l.satuan', 'l.estimasi_hari',
+        'l.id', 'l.nama', 'l.harga', 'l.satuan', 'l.estimasi_jam',
         'l.deskripsi', 'l.hpp', 'l.margin_persen', 'l.aktif',
         'k.nama as kategori_nama'
       );
