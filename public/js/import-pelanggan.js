@@ -97,7 +97,7 @@ function renderPreview(data) {
       <tr>
         <td>${p.nama}</td>
         <td>${p.telepon || '-'}</td>
-        <td>${p.segmen}</td>
+        <td>${p.email || '-'}</td>
         <td>${p.alamat || '-'}</td>
       </tr>
     `).join('');
@@ -116,7 +116,7 @@ function renderPreview(data) {
     tbodyDuplikat.innerHTML = data.duplikat.map((p, idx) => `
       <tr>
         <td>${p.nama}</td>
-        <td>${p.segmen}</td>
+        <td>${p.email || '-'}</td>
         <td>${p.existing_telepon || '-'} → ${p.telepon || '-'}</td>
         <td>
           <div class="aksi-toggle">

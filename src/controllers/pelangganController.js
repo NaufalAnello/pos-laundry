@@ -271,7 +271,7 @@ exports.importPreview = [
         return res.status(400).json({ error: 'File tidak ditemukan' });
       }
 
-      const semuaPelanggan = await db('pelanggan').select('id', 'nama', 'telepon', 'segmen');
+      const semuaPelanggan = await db('pelanggan').select('id', 'nama', 'telepon');
       const hasil = await prosesImport(req.file.path, req.file.mimetype, semuaPelanggan);
 
       // Cleanup file

@@ -4,7 +4,6 @@ const fs = require('fs');
 
 // Kolom wajib yang harus ada di file
 const KOLOM_WAJIB = ['nama'];
-const SEGMEN_VALID = ['rumahan', 'kost', 'industri'];
 
 /**
  * Baca file CSV atau Excel dan return array of objects
@@ -55,16 +54,6 @@ function validasiRow(row, index) {
     }
   });
 
-  // Cek segmen valid
-  if (row.segmen && !SEGMEN_VALID.includes(String(row.segmen).toLowerCase())) {
-    errors.push(`Baris ${no}: segmen '${row.segmen}' tidak valid. Gunakan: rumahan/kost/industri`);
-  }
-
-  // Cek aktif jika ada (harus 0 atau 1)
-  if (row.aktif !== undefined && row.aktif !== '' && ![0, 1, '0', '1'].includes(row.aktif)) {
-    errors.push(`Baris ${no}: aktif harus 0 atau 1`);
-  }
-
   return errors;
 }
 
@@ -100,11 +89,9 @@ async function prosesImport(filePath, mimeType, semuaPelanggan) {
     // Siapkan data pelanggan
     const dataPelanggan = {
       nama: String(row.nama).trim(),
-      telepon: row.nomor_wa ? String(row.nomor_wa).trim() : null,
+      telepon: row.telepon ? String(row.telepon).trim() : null,
       alamat: row.alamat ? String(row.alamat).trim() : null,
-      segmen: row.segmen ? String(row.segmen).toLowerCase() : 'rumahan',
-      catatan: row.catatan ? String(row.catatan).trim() : null,
-      aktif: row.aktif !== undefined ? Number(row.aktif) : 1,
+      email: row.email ? String(row.email).trim() : null,
     };
 
     if (existing) {
@@ -112,7 +99,6 @@ async function prosesImport(filePath, mimeType, semuaPelanggan) {
         ...dataPelanggan,
         existing_id: existing.id,
         existing_telepon: existing.telepon,
-        existing_segmen: existing.segmen,
         aksi: 'skip', // default skip
       });
     } else {
@@ -138,13 +124,13 @@ async function eksekusiImport(db, preview, aksiDuplikat = {}) {
     // Insert baru
     if (preview.baru.length > 0) {
       const stmt = db.prepare(`
-        INSERT INTO pelanggan (nama, telepon, alamat, segmen, catatan, aktif)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO pelanggan (nama, telepon, alamat, email, total_poin, created_at, updated_at)
+        VALUES (?, ?, ?, ?, 0, datetime('now'), datetime('now'))
       `);
 
       preview.baru.forEach(p => {
         try {
-          stmt.run(p.nama, p.telepon, p.alamat, p.segmen, p.catatan, p.aktif);
+          stmt.run(p.nama, p.telepon, p.alamat, p.email);
           hasil.berhasil++;
         } catch (err) {
           console.error('[import-pelanggan] Insert error:', err.message);
@@ -157,7 +143,7 @@ async function eksekusiImport(db, preview, aksiDuplikat = {}) {
     if (preview.duplikat.length > 0) {
       const stmtUpdate = db.prepare(`
         UPDATE pelanggan
-        SET telepon = ?, alamat = ?, segmen = ?, catatan = ?, aktif = ?
+        SET telepon = ?, alamat = ?, email = ?, updated_at = datetime('now')
         WHERE id = ?
       `);
 
@@ -166,7 +152,7 @@ async function eksekusiImport(db, preview, aksiDuplikat = {}) {
 
         if (aksi === 'update') {
           try {
-            stmtUpdate.run(p.telepon, p.alamat, p.segmen, p.catatan, p.aktif, p.existing_id);
+            stmtUpdate.run(p.telepon, p.alamat, p.email, p.existing_id);
             hasil.diupdate++;
           } catch (err) {
             console.error('[import-pelanggan] Update error:', err.message);

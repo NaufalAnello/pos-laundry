@@ -7,11 +7,9 @@ const Papa = require('papaparse');
 function exportKeExcel(pelanggan) {
   const data = pelanggan.map(p => ({
     nama: p.nama,
-    nomor_wa: p.telepon || '',
+    telepon: p.telepon || '',
     alamat: p.alamat || '',
-    segmen: p.segmen || 'rumahan',
-    catatan: p.catatan || '',
-    aktif: p.aktif ? 1 : 0,
+    email: p.email || '',
   }));
 
   const ws = xlsx.utils.json_to_sheet(data);
@@ -27,11 +25,9 @@ function exportKeExcel(pelanggan) {
 function exportKeCSV(pelanggan) {
   const data = pelanggan.map(p => ({
     nama: p.nama,
-    nomor_wa: p.telepon || '',
+    telepon: p.telepon || '',
     alamat: p.alamat || '',
-    segmen: p.segmen || 'rumahan',
-    catatan: p.catatan || '',
-    aktif: p.aktif ? 1 : 0,
+    email: p.email || '',
   }));
 
   return Papa.unparse(data);
@@ -44,19 +40,15 @@ function buatTemplate(format = 'xlsx') {
   const contoh = [
     {
       nama: 'Budi Santoso',
-      nomor_wa: '081234567890',
+      telepon: '628123456789',
       alamat: 'Jl. Merdeka No. 123',
-      segmen: 'rumahan',
-      catatan: 'Pelanggan setia',
-      aktif: 1
+      email: 'budi@example.com',
     },
     {
-      nama: 'Siti Kost',
-      nomor_wa: '081298765432',
+      nama: 'Siti Rahayu',
+      telepon: '628198765432',
       alamat: 'Jl. Sudirman No. 45',
-      segmen: 'kost',
-      catatan: '',
-      aktif: 1
+      email: 'siti@example.com',
     },
   ];
 
