@@ -197,3 +197,121 @@ exports.waLog = async (req, res) => {
     res.status(500).json({ error: 'Gagal mengambil WA log pelanggan' });
   }
 };
+
+// ── IMPORT & EXPORT ───────────────────────────────────────────────────────────
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const { exportKeExcel, exportKeCSV, buatTemplate } = require('../services/export-pelanggan.service');
+const { prosesImport, eksekusiImport } = require('../services/import-pelanggan.service');
+
+const upload = multer({
+  dest: '/tmp/uploads',
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (['.csv', '.xlsx', '.xls'].includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Format file harus CSV atau Excel (.xlsx, .xls)'));
+    }
+  }
+});
+
+// GET /api/v1/pelanggan/export?format=xlsx|csv
+exports.exportPelanggan = async (req, res) => {
+  try {
+    const { format = 'xlsx' } = req.query;
+    const pelanggan = await db('pelanggan').orderBy('nama');
+
+    if (format === 'csv') {
+      const csv = exportKeCSV(pelanggan);
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=pelanggan.csv');
+      return res.send(csv);
+    }
+
+    // Excel
+    const buffer = exportKeExcel(pelanggan);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=pelanggan.xlsx');
+    res.send(buffer);
+  } catch (err) {
+    console.error('[pelanggan:export]', err);
+    res.status(500).json({ error: 'Gagal export pelanggan' });
+  }
+};
+
+// GET /api/v1/pelanggan/template?format=xlsx|csv
+exports.downloadTemplate = async (req, res) => {
+  try {
+    const { format = 'xlsx' } = req.query;
+    const buffer = buatTemplate(format);
+
+    if (format === 'csv') {
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=template-pelanggan.csv');
+    } else {
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename=template-pelanggan.xlsx');
+    }
+    res.send(buffer);
+  } catch (err) {
+    console.error('[pelanggan:template]', err);
+    res.status(500).json({ error: 'Gagal download template' });
+  }
+};
+
+// POST /api/v1/pelanggan/import/preview
+exports.importPreview = [
+  upload.single('file'),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'File tidak ditemukan' });
+      }
+
+      const semuaPelanggan = await db('pelanggan').select('id', 'nama', 'telepon', 'segmen');
+      const hasil = await prosesImport(req.file.path, req.file.mimetype, semuaPelanggan);
+
+      // Cleanup file
+      fs.unlinkSync(req.file.path);
+
+      res.json({
+        success: true,
+        data: hasil
+      });
+    } catch (err) {
+      console.error('[pelanggan:import-preview]', err);
+      if (req.file) fs.unlinkSync(req.file.path);
+      res.status(500).json({ error: err.message || 'Gagal memproses file' });
+    }
+  }
+];
+
+// POST /api/v1/pelanggan/import/konfirmasi
+exports.importKonfirmasi = async (req, res) => {
+  try {
+    const { preview, aksiDuplikat } = req.body;
+
+    if (!preview) {
+      return res.status(400).json({ error: 'Data preview tidak ditemukan' });
+    }
+
+    const Database = require('better-sqlite3');
+    const dbPath = path.join(__dirname, '../../data/laundry.db');
+    const sqlite = new Database(dbPath);
+
+    const hasil = await eksekusiImport(sqlite, preview, aksiDuplikat);
+    sqlite.close();
+
+    res.json({
+      success: true,
+      message: 'Import berhasil',
+      data: hasil
+    });
+  } catch (err) {
+    console.error('[pelanggan:import-konfirmasi]', err);
+    res.status(500).json({ error: err.message || 'Gagal import data' });
+  }
+};

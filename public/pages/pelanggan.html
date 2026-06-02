@@ -143,6 +143,26 @@
              font-size:13px; font-weight:600; z-index:99; transition:transform .3s; white-space:nowrap; }
     .toast.show { transform:translateX(-50%) translateY(0); }
     .toast.err  { background:var(--red); }
+
+    /* ── Import Modal ── */
+    .import-modal { max-width:900px; }
+    .modal-header { display:flex; align-items:center; justify-content:space-between; padding:18px 22px 0; }
+    .modal-title  { font-size:16px; font-weight:800; }
+    .modal-close  { background:none; border:none; font-size:22px; cursor:pointer; color:var(--gray-5); padding:0 4px; }
+    .modal-footer { padding:14px 22px; border-top:1px solid var(--gray-3); display:flex; justify-content:flex-end; gap:8px; }
+
+    .upload-zone { border:2px dashed var(--gray-3); border-radius:var(--radius); padding:40px 20px;
+                   text-align:center; background:var(--gray-1); cursor:pointer; transition:all .2s; }
+    .upload-zone:hover { border-color:var(--blue); background:var(--blue-lt); }
+    .upload-zone.dragging { border-color:var(--blue); background:var(--blue-lt); }
+    .upload-icon { font-size:48px; color:var(--gray-5); margin-bottom:12px; }
+    .upload-text { font-size:14px; font-weight:600; color:var(--gray-7); margin-bottom:4px; }
+    .upload-hint { font-size:12px; color:var(--gray-5); }
+
+    .aksi-toggle { display:flex; border:1px solid var(--gray-3); border-radius:6px; overflow:hidden; }
+    .aksi-btn { padding:4px 10px; border:none; background:#fff; cursor:pointer; font-size:11px;
+                font-weight:600; color:var(--gray-5); transition:all .15s; }
+    .aksi-btn.active { background:var(--blue); color:#fff; }
   </style>
 </head>
 <body>
@@ -150,7 +170,18 @@
 <div class="page">
   <div class="page-header">
     <div class="page-title">Pelanggan</div>
-    <button class="btn btn-blue" onclick="openAdd()">+ Tambah Pelanggan</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-outline" onclick="openImportModal()">
+        📥 Import
+      </button>
+      <button class="btn btn-outline" onclick="exportPelanggan('xlsx')">
+        📊 Export Excel
+      </button>
+      <button class="btn btn-outline" onclick="exportPelanggan('csv')">
+        📄 Export CSV
+      </button>
+      <button class="btn btn-blue" onclick="openAdd()">+ Tambah Pelanggan</button>
+    </div>
   </div>
 
   <div class="toolbar">
@@ -240,6 +271,149 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Modal Import -->
+<div class="modal-bg" id="importModal">
+  <div class="modal import-modal" style="max-width:900px">
+    <div class="modal-header">
+      <div class="modal-title">Import Pelanggan</div>
+      <button class="modal-close" onclick="closeImportModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <!-- Step 1: Upload -->
+      <div id="uploadStep">
+        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFileSelect(event)"/>
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon">📁</div>
+          <div class="upload-text">Klik untuk pilih file atau drag & drop</div>
+          <div class="upload-hint">Format: CSV atau Excel (.xlsx, .xls) • Maksimal 5MB</div>
+        </div>
+        <div class="template-links" style="display:flex;gap:12px;justify-content:center;margin-top:16px">
+          <a href="/api/v1/pelanggan/template?format=xlsx" class="template-link" style="color:var(--blue);text-decoration:none;font-size:12px;font-weight:600">
+            📥 Download Template Excel
+          </a>
+          <a href="/api/v1/pelanggan/template?format=csv" class="template-link" style="color:var(--blue);text-decoration:none;font-size:12px;font-weight:600">
+            📥 Download Template CSV
+          </a>
+        </div>
+      </div>
+
+      <!-- Step 2: Preview -->
+      <div id="previewStep" style="display:none">
+        <!-- Baru -->
+        <div class="preview-section open" id="sectionBaru" style="display:none;margin-bottom:12px">
+          <div class="preview-header green" onclick="togglePreviewSection('sectionBaru')" style="padding:12px 16px;background:var(--green-lt);color:var(--green);font-weight:700;font-size:13px;cursor:pointer">
+            ✓ Pelanggan Baru (<span id="countBaru">0</span> item)
+          </div>
+          <div class="preview-body" style="max-height:200px;overflow-y:auto">
+            <table style="width:100%;font-size:12px">
+              <thead>
+                <tr style="background:var(--gray-1)">
+                  <th style="padding:8px;text-align:left">Nama</th>
+                  <th style="padding:8px;text-align:left">No. WA</th>
+                  <th style="padding:8px;text-align:left">Segmen</th>
+                  <th style="padding:8px;text-align:left">Alamat</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyBaru"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Duplikat -->
+        <div class="preview-section open" id="sectionDuplikat" style="display:none;margin-bottom:12px">
+          <div class="preview-header yellow" onclick="togglePreviewSection('sectionDuplikat')" style="padding:12px 16px;background:var(--yellow-lt);color:var(--yellow);font-weight:700;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">
+            <span>⚠ Duplikat (<span id="countDuplikat">0</span> item)</span>
+            <div onclick="event.stopPropagation()" style="display:flex;gap:8px;font-size:11px">
+              <a onclick="setSemuaDuplikat('skip')" style="color:var(--yellow);cursor:pointer">Skip Semua</a>
+              <span>•</span>
+              <a onclick="setSemuaDuplikat('update')" style="color:var(--yellow);cursor:pointer">Update Semua</a>
+            </div>
+          </div>
+          <div class="preview-body" style="max-height:200px;overflow-y:auto">
+            <table style="width:100%;font-size:12px">
+              <thead>
+                <tr style="background:var(--gray-1)">
+                  <th style="padding:8px;text-align:left">Nama</th>
+                  <th style="padding:8px;text-align:left">Segmen</th>
+                  <th style="padding:8px;text-align:left">No. WA (Lama → Baru)</th>
+                  <th style="padding:8px;text-align:left">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyDuplikat"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div class="preview-section open" id="sectionError" style="display:none;margin-bottom:12px">
+          <div class="preview-header red" onclick="togglePreviewSection('sectionError')" style="padding:12px 16px;background:var(--red-lt);color:var(--red);font-weight:700;font-size:13px;cursor:pointer">
+            ✗ Error (<span id="countError">0</span> item)
+          </div>
+          <div class="preview-body" style="max-height:200px;overflow-y:auto">
+            <table style="width:100%;font-size:12px">
+              <thead>
+                <tr style="background:var(--gray-1)">
+                  <th style="padding:8px;width:60px">Baris</th>
+                  <th style="padding:8px;text-align:left">Nama</th>
+                  <th style="padding:8px;text-align:left">Error</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyError"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div style="padding:16px;background:var(--gray-1);border-radius:8px">
+          <div style="font-weight:700;font-size:13px;margin-bottom:10px">Ringkasan</div>
+          <div style="font-size:12px;color:var(--gray-7);line-height:1.8">
+            <div>• Akan ditambahkan: <strong id="summaryBaru">0</strong> pelanggan baru</div>
+            <div>• Akan diupdate: <strong id="summaryUpdate">0</strong> pelanggan</div>
+            <div>• Akan diskip: <strong id="summarySkip">0</strong> pelanggan</div>
+            <div>• Error (tidak diimport): <strong id="summaryError">0</strong> baris</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Result -->
+      <div id="resultStep" style="display:none">
+        <div style="text-align:center;margin-bottom:20px">
+          <div style="font-size:48px;margin-bottom:8px">✓</div>
+          <div style="font-size:16px;font-weight:700;margin-bottom:4px">Import Selesai</div>
+          <div style="font-size:12px;color:var(--gray-5)">Data pelanggan berhasil diimport</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+          <div style="padding:16px;background:var(--green-lt);border-radius:8px;text-align:center">
+            <div style="font-size:28px;font-weight:800;margin-bottom:4px;color:var(--green)" id="resultBerhasil">0</div>
+            <div style="font-size:12px;font-weight:600;color:var(--gray-7)">Berhasil Ditambahkan</div>
+          </div>
+          <div style="padding:16px;background:var(--blue-lt);border-radius:8px;text-align:center">
+            <div style="font-size:28px;font-weight:800;margin-bottom:4px;color:var(--blue)" id="resultUpdate">0</div>
+            <div style="font-size:12px;font-weight:600;color:var(--gray-7)">Berhasil Diupdate</div>
+          </div>
+          <div style="padding:16px;background:var(--yellow-lt);border-radius:8px;text-align:center">
+            <div style="font-size:28px;font-weight:800;margin-bottom:4px;color:var(--yellow)" id="resultSkip">0</div>
+            <div style="font-size:12px;font-weight:600;color:var(--gray-7)">Diskip</div>
+          </div>
+          <div style="padding:16px;background:var(--red-lt);border-radius:8px;text-align:center">
+            <div style="font-size:28px;font-weight:800;margin-bottom:4px;color:var(--red)" id="resultGagal">0</div>
+            <div style="font-size:12px;font-weight:600;color:var(--gray-7)">Gagal / Error</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--gray-3)">
+      <button class="btn btn-outline" onclick="closeImportModal()">Batal</button>
+      <button class="btn btn-blue" id="btnJalankanImport" style="display:none" onclick="jalankanImport()">
+        ✓ Jalankan Import
+      </button>
+      <button class="btn btn-blue" id="btnSelesai" style="display:none" onclick="selesaiImport()">
+        ✓ Selesai
+      </button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -544,7 +718,12 @@ function toast(msg, err = false) {
   el.className   = 'toast show' + (err ? ' err' : '');
   setTimeout(() => el.classList.remove('show'), 3000);
 }
+
+// Alias untuk compatibility dengan import script
+function loadPelanggan() { load(); }
+function showToast(msg) { toast(msg); }
 </script>
+<script src="/js/import-pelanggan.js"></script>
 <script src="/js/nav.js"></script>
 </body>
 </html>
