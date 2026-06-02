@@ -65,9 +65,10 @@ function validasiRow(row, index) {
     errors.push(`Baris ${no}: harga harus berupa angka`);
   }
 
-  // Cek estimasi_jam jika ada
-  if (row.estimasi_jam && row.estimasi_jam !== '' && isNaN(Number(row.estimasi_jam))) {
-    errors.push(`Baris ${no}: estimasi_jam harus berupa angka`);
+  // Cek estimasi_jam/estimasi_hari jika ada
+  const estimasiCol = row.estimasi_jam || row.estimasi_hari;
+  if (estimasiCol && estimasiCol !== '' && isNaN(Number(estimasiCol))) {
+    errors.push(`Baris ${no}: estimasi harus berupa angka`);
   }
 
   // Cek hpp jika ada
@@ -125,6 +126,15 @@ async function prosesImport(filePath, mimeType, semuaKategori, semuaLayanan) {
       l => l.nama.toLowerCase() === String(row.nama).toLowerCase()
     );
 
+    // Konversi estimasi: jika CSV pakai 'estimasi_jam', convert ke hari
+    let estimasiHari = 2; // default
+    if (row.estimasi_jam) {
+      const estimasiJam = Number(row.estimasi_jam);
+      estimasiHari = Math.ceil(estimasiJam / 24);
+    } else if (row.estimasi_hari) {
+      estimasiHari = Number(row.estimasi_hari);
+    }
+
     // Siapkan data layanan
     const dataLayanan = {
       nama: String(row.nama).trim(),
@@ -132,7 +142,7 @@ async function prosesImport(filePath, mimeType, semuaKategori, semuaLayanan) {
       kategori_nama: kategori.nama,
       harga: Number(row.harga),
       satuan: String(row.satuan).toLowerCase(),
-      estimasi_jam: row.estimasi_jam ? Number(row.estimasi_jam) : 48,
+      estimasi_hari: estimasiHari,
       deskripsi: row.deskripsi || row.keterangan || '',
       hpp: row.hpp ? Number(row.hpp) : 0,
       margin_persen: row.margin_persen ? Number(row.margin_persen) : 0,
