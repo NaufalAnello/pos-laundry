@@ -111,9 +111,10 @@
     .level-Bronze   { background: #fef9ee; color: #92400e; }
 
     /* ── Searchable Service Select ── */
+    /* SATU input field dengan ikon search (kiri), chevron/clear (kanan) */
     .svc-search-wrap { position: relative; }
     .svc-search-input {
-      width: 100%; padding: 9px 12px 9px 36px;
+      width: 100%; padding: 9px 32px 9px 36px;
       border: 1.5px solid var(--gray-3); border-radius: 7px;
       font-size: 14px; background: var(--gray-1);
       color: var(--gray-9); outline: none;
@@ -129,6 +130,12 @@
       transform: translateY(-50%); font-size: 16px;
       color: var(--gray-5); pointer-events: none;
     }
+    .svc-chevron {
+      position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%); font-size: 10px;
+      color: var(--gray-5); pointer-events: none;
+    }
+    .svc-search-input.filled ~ .svc-chevron { display: none; }
     .svc-clear-btn {
       position: absolute; right: 8px; top: 50%;
       transform: translateY(-50%); width: 20px; height: 20px;
@@ -855,6 +862,7 @@ function addItemRow(defaults = {}) {
     <div class="svc-search-wrap">
       <span class="svc-search-icon">🔍</span>
       <input type="text" class="svc-search-input" placeholder="Cari layanan..." autocomplete="off" value="${defaultNama}" />
+      <span class="svc-chevron">▼</span>
       <button class="svc-clear-btn" title="Hapus pilihan">✕</button>
       <div class="svc-dropdown hidden"></div>
     </div>

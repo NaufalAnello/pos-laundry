@@ -12,31 +12,36 @@ const db = new Database(dbPath);
 
 console.log('🔧 Memperbaiki data estimasi_hari...\n');
 
-// 1 hari (express/kilat/instant)
+// 1 hari (24 jam) - Express/Kilat/Instant
 const layanan1Hari = [
-  'Setrika Saja',
-  'Cuci Express Plus',
-  'Express Cuci Kering',
-  'Express Cuci + Setrika'
+  'Cuci', 'Cuci Lipat Prima',
+  'Cuci Setrika Prima', 'Setrika Prima', 'Topi',
+  'Baju Putih Ekspress', 'Cuci Lipat Instan',
+  'Cuci Lipat Kilat', 'Cuci Setrika Instan',
+  'Cuci Setrika Kilat', 'Setrika Instan', 'Setrika Kilat',
+  'Baju Bayi Kilat', 'Hanger Dan Plastik',
+  // Layanan existing di DB
+  'Setrika Saja', 'Cuci Express Plus',
+  'Express Cuci Kering', 'Express Cuci + Setrika'
 ];
 
-// 2 hari (reguler)
+// 2 hari (48 jam) - Reguler
 const layanan2Hari = [
-  'Cuci Kering',
-  'Cuci Basah',
-  'Cuci Sepatu',
-  'Premium Wash',
-  'Setrika Premium'
+  'Cuci Kering',  // <-- dipindah ke sini
+  'Cuci Lipat Reguler', 'Cuci Setrika Reguler',
+  'Setrika Reguler', 'Putih Kiloan',
+  // Layanan existing di DB
+  'Cuci Basah', 'Cuci Sepatu',
+  'Premium Wash', 'Setrika Premium'
 ];
 
-// 3 hari (heavy items / spesial)
+// 3 hari (72 jam) - Heavy items / Spesial
+// Semua yang tidak masuk kategori 1 hari atau 2 hari
 const layanan3Hari = [
-  'Cuci + Setrika',
-  'Cuci Selimut',
-  'Cuci Gordyn',
-  'Cuci Tas',
-  'Cuci Jas / Blazer',
-  'Dry Clean'
+  // Layanan existing di DB
+  'Cuci + Setrika', 'Cuci Selimut',
+  'Cuci Gordyn', 'Cuci Tas',
+  'Cuci Jas / Blazer', 'Dry Clean'
 ];
 
 try {
@@ -68,10 +73,23 @@ try {
     const placeholders = layanan3Hari.map(() => '?').join(',');
     const stmt = db.prepare(`UPDATE layanan SET estimasi_hari = 3 WHERE nama IN (${placeholders})`);
     const result = stmt.run(...layanan3Hari);
-    console.log(`✅ Update 3 hari: ${result.changes} layanan`);
+    console.log(`✅ Update 3 hari (explicit): ${result.changes} layanan`);
     totalUpdated += result.changes;
   }
 
+  // Update sisanya yang belum ter-update ke 3 hari (default untuk layanan berat)
+  const allUpdated = [...layanan1Hari, ...layanan2Hari];
+  if (allUpdated.length > 0) {
+    const placeholders = allUpdated.map(() => '?').join(',');
+    const stmt = db.prepare(`
+      UPDATE layanan SET estimasi_hari = 3
+      WHERE nama NOT IN (${placeholders})
+      AND estimasi_hari = 2
+    `);
+    const result = stmt.run(...allUpdated);
+    console.log(`✅ Update 3 hari (sisanya): ${result.changes} layanan`);
+    totalUpdated += result.changes;
+  }
 
   // Commit transaction
   db.prepare('COMMIT').run();
