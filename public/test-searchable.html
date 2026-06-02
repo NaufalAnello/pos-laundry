@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Searchable Dropdown</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 40px; background: #f5f5f5; }
+    .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    h1 { font-size: 20px; margin-bottom: 20px; }
+
+    .svc-search-wrap { position: relative; }
+    .svc-search-input {
+      width: 100%; padding: 9px 12px 9px 36px;
+      border: 1.5px solid #e2e8f0; border-radius: 7px;
+      font-size: 14px; background: #f8fafc;
+      color: #111827; outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .svc-search-input:focus {
+      border-color: #2563eb; background: #fff;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    }
+    .svc-search-input.filled { background: #fff; font-weight: 600; }
+    .svc-search-icon {
+      position: absolute; left: 12px; top: 50%;
+      transform: translateY(-50%); font-size: 16px;
+      color: #64748b; pointer-events: none;
+    }
+    .svc-clear-btn {
+      position: absolute; right: 8px; top: 50%;
+      transform: translateY(-50%); width: 20px; height: 20px;
+      background: #e2e8f0; border: none; border-radius: 50%;
+      color: #374151; font-size: 12px; cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .svc-clear-btn:hover { background: #64748b; color: #fff; }
+    .svc-search-input.filled ~ .svc-clear-btn { display: flex; }
+
+    .svc-dropdown {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: #fff; border: 1.5px solid #e2e8f0;
+      border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      z-index: 100; max-height: 300px; overflow-y: auto;
+    }
+    .svc-dropdown.hidden { display: none; }
+
+    .svc-category {
+      padding: 8px 14px 4px; font-size: 11px; font-weight: 700;
+      color: #64748b; text-transform: uppercase; letter-spacing: .4px;
+      background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+    }
+    .svc-item {
+      padding: 10px 14px; cursor: pointer;
+      border-bottom: 1px solid #e2e8f0;
+      transition: background .1s;
+    }
+    .svc-item:last-child { border-bottom: none; }
+    .svc-item:hover { background: #eff6ff; }
+    .svc-item-name {
+      font-weight: 600; font-size: 13px; color: #111827;
+      margin-bottom: 3px;
+    }
+    .svc-item-price {
+      font-size: 12px; color: #64748b;
+    }
+    .svc-item-price strong { color: #1d4ed8; }
+    .svc-empty {
+      padding: 20px; text-align: center; color: #64748b;
+      font-size: 13px;
+    }
+    .highlight { background: #fef08a; font-weight: 700; }
+
+    .result {
+      margin-top: 20px; padding: 12px; background: #f0fdf4;
+      border: 1px solid #bbf7d0; border-radius: 8px;
+    }
+    .result strong { color: #16a34a; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Test Searchable Dropdown Layanan</h1>
+    <p style="margin-bottom: 20px; color: #64748b; font-size: 13px;">
+      Ketik untuk mencari layanan. Klik item untuk memilih.
+    </p>
+
+    <div class="svc-search-wrap">
+      <span class="svc-search-icon">🔍</span>
+      <input type="text" class="svc-search-input" id="search" placeholder="Cari layanan..." autocomplete="off" />
+      <button class="svc-clear-btn" id="clear" title="Hapus pilihan">✕</button>
+      <div class="svc-dropdown hidden" id="dropdown"></div>
+    </div>
+
+    <div class="result" id="result" style="display: none;">
+      <strong>Layanan dipilih:</strong>
+      <div id="result-text"></div>
+    </div>
+  </div>
+
+  <script>
+    // Mock data layanan
+    const layananList = [
+      { id: 1, nama: 'Cuci Kering', harga: 8000, satuan: 'kg', kategori_nama: 'Kiloan' },
+      { id: 2, nama: 'Cuci + Setrika', harga: 12000, satuan: 'kg', kategori_nama: 'Kiloan' },
+      { id: 3, nama: 'Setrika Saja', harga: 6000, satuan: 'kg', kategori_nama: 'Setrika' },
+      { id: 4, nama: 'Express Cuci Kering', harga: 15000, satuan: 'kg', kategori_nama: 'Express' },
+      { id: 5, nama: 'Cuci Selimut', harga: 25000, satuan: 'item', kategori_nama: 'Spesial' },
+      { id: 6, nama: 'Cuci Sepatu', harga: 20000, satuan: 'pasang', kategori_nama: 'Spesial' },
+    ];
+
+    const searchInput = document.getElementById('search');
+    const dropdown = document.getElementById('dropdown');
+    const clearBtn = document.getElementById('clear');
+    const resultDiv = document.getElementById('result');
+    const resultText = document.getElementById('result-text');
+
+    let selectedLayanan = null;
+    let searchTimer = null;
+
+    function fmtRp(n) { return Number(n || 0).toLocaleString('id-ID'); }
+    function escapeRegex(str) { return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      const q = searchInput.value.trim().toLowerCase();
+
+      if (!q) {
+        selectedLayanan = null;
+        searchInput.classList.remove('filled');
+        dropdown.classList.add('hidden');
+        resultDiv.style.display = 'none';
+        return;
+      }
+
+      searchTimer = setTimeout(() => {
+        const filtered = layananList.filter(l =>
+          l.nama.toLowerCase().includes(q)
+        );
+        renderServiceDropdown(filtered, q);
+      }, 200);
+    });
+
+    searchInput.addEventListener('focus', () => {
+      if (!selectedLayanan && searchInput.value.trim()) {
+        const q = searchInput.value.trim().toLowerCase();
+        const filtered = layananList.filter(l => l.nama.toLowerCase().includes(q));
+        renderServiceDropdown(filtered, q);
+      } else if (!selectedLayanan) {
+        renderServiceDropdown(layananList, '');
+      }
+    });
+
+    searchInput.addEventListener('blur', () => {
+      setTimeout(() => dropdown.classList.add('hidden'), 200);
+    });
+
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      selectedLayanan = null;
+      searchInput.classList.remove('filled');
+      dropdown.classList.add('hidden');
+      resultDiv.style.display = 'none';
+      searchInput.focus();
+    });
+
+    function renderServiceDropdown(services, query) {
+      if (services.length === 0) {
+        dropdown.innerHTML = '<div class="svc-empty">Layanan tidak ditemukan</div>';
+        dropdown.classList.remove('hidden');
+        return;
+      }
+
+      // Group by category
+      const grouped = {};
+      services.forEach(l => {
+        const cat = l.kategori_nama || 'Lainnya';
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(l);
+      });
+
+      let html = '';
+      Object.entries(grouped).forEach(([cat, items]) => {
+        html += `<div class="svc-category">${cat}</div>`;
+        items.forEach(l => {
+          const highlightedName = query
+            ? l.nama.replace(new RegExp(`(${escapeRegex(query)})`, 'gi'), '<span class="highlight">$1</span>')
+            : l.nama;
+          html += `
+            <div class="svc-item" data-id="${l.id}">
+              <div class="svc-item-name">${highlightedName}</div>
+              <div class="svc-item-price"><strong>Rp ${fmtRp(l.harga)}</strong> / ${l.satuan}</div>
+            </div>
+          `;
+        });
+      });
+
+      dropdown.innerHTML = html;
+      dropdown.classList.remove('hidden');
+
+      // Attach click handlers
+      dropdown.querySelectorAll('.svc-item[data-id]').forEach(el => {
+        el.addEventListener('click', () => {
+          const found = services.find(l => l.id == el.dataset.id);
+          if (found) selectService(found);
+        });
+      });
+    }
+
+    function selectService(layanan) {
+      selectedLayanan = layanan;
+      searchInput.value = layanan.nama;
+      searchInput.classList.add('filled');
+      dropdown.classList.add('hidden');
+
+      resultDiv.style.display = 'block';
+      resultText.innerHTML = `
+        <div style="margin-top: 8px;">
+          <div><strong>${layanan.nama}</strong></div>
+          <div style="color: #64748b; font-size: 12px; margin-top: 4px;">
+            Harga: Rp ${fmtRp(layanan.harga)} / ${layanan.satuan}
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
