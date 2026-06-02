@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Tombol Pelanggan</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 40px; }
+    .btn { padding:8px 16px; border-radius:8px; border:1px solid transparent; font-size:13px;
+           font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+    .btn-outline { background:#fff; border-color:#e2e8f0; color:#374151; }
+    .btn-blue { background:#2563eb; color:#fff; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; }
+    .page-title { font-size:20px; font-weight:800; }
+  </style>
+</head>
+<body>
+  <h1>Test Tombol Import/Export Pelanggan</h1>
+
+  <div class="page-header">
+    <div class="page-title">Pelanggan</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-outline" onclick="alert('Import clicked!')">
+        📥 Import
+      </button>
+      <button class="btn btn-outline" onclick="alert('Export Excel clicked!')">
+        📊 Export Excel
+      </button>
+      <button class="btn btn-outline" onclick="alert('Export CSV clicked!')">
+        📄 Export CSV
+      </button>
+      <button class="btn btn-blue" onclick="alert('Tambah clicked!')">+ Tambah Pelanggan</button>
+    </div>
+  </div>
+
+  <p>Jika tombol-tombol di atas terlihat, berarti kode HTML sudah benar.</p>
+  <p>Masalah kemungkinan ada di browser cache atau server belum restart.</p>
+
+  <h2>Cara Fix:</h2>
+  <ol>
+    <li><strong>Hard Refresh Browser:</strong> Ctrl + Shift + R (Windows/Linux) atau Cmd + Shift + R (Mac)</li>
+    <li><strong>Clear Browser Cache:</strong> Ctrl + Shift + Delete</li>
+    <li><strong>Restart Server:</strong> <code>pm2 restart pos-laundry</code></li>
+    <li><strong>Cek di Incognito Mode</strong></li>
+  </ol>
+
+  <h2>Verifikasi di Browser:</h2>
+  <ol>
+    <li>Buka halaman pelanggan: <a href="/pages/pelanggan.html">http://localhost:3001/pages/pelanggan.html</a></li>
+    <li>Tekan F12 untuk buka DevTools</li>
+    <li>Klik tab "Elements"</li>
+    <li>Cari elemen dengan class "page-header"</li>
+    <li>Lihat apakah ada 4 tombol di dalamnya</li>
+  </ol>
+
+  <h2>Check via Console:</h2>
+  <pre>
+// Di browser console, jalankan:
+document.querySelectorAll('.page-header button').length
+// Harus return: 4
+
+document.querySelector('.page-header').innerHTML
+// Harus menampilkan 4 button tags
+  </pre>
+</body>
+</html>
