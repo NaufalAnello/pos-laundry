@@ -42,6 +42,29 @@ exports.up = async function(knex) {
         END
     WHERE total_dibayar = 0
   `);
+
+  // Populate riwayat_bayar untuk transaksi existing yang sudah punya bayar
+  const existingTransaksi = await knex('transaksi')
+    .where('bayar', '>', 0)
+    .select('id', 'bayar', 'total_bayar', 'metode_bayar', 'created_at', 'user_id');
+
+  for (const t of existingTransaksi) {
+    const jenis = t.bayar >= t.total_bayar ? 'pelunasan' : 'dp_awal';
+    const keterangan = jenis === 'pelunasan'
+      ? `Pembayaran Lunas (${t.metode_bayar || 'tunai'})`
+      : `DP Awal (${t.metode_bayar || 'tunai'})`;
+
+    await knex('riwayat_bayar').insert({
+      transaksi_id: t.id,
+      jenis,
+      nominal: t.bayar,
+      metode: t.metode_bayar || 'tunai',
+      kelebihan_ke_deposit: 0,
+      created_by: t.user_id,
+      keterangan,
+      created_at: t.created_at
+    });
+  }
 };
 
 exports.down = async function(knex) {
