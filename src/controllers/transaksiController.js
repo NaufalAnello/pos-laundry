@@ -187,10 +187,15 @@ exports.store = async (req, res) => {
       : new Date();
 
     // Hitung estimasi selesai dari estimasi_hari layanan terbesar (min 1 hari)
+    // Gunakan setDate() untuk perhitungan yang benar (bukan getTime + ms)
     const maxHari = Math.max(...estimasiList, 1);
-    const tanggalSelesai = value.tanggal_selesai
-      ? new Date(value.tanggal_selesai)
-      : new Date(waktuMasuk.getTime() + maxHari * 86400000);
+    let tanggalSelesai;
+    if (value.tanggal_selesai) {
+      tanggalSelesai = new Date(value.tanggal_selesai);
+    } else {
+      tanggalSelesai = new Date(waktuMasuk);
+      tanggalSelesai.setDate(tanggalSelesai.getDate() + maxHari);
+    }
 
     const nomor = await transaksiModel.generateNomor();
     const lunas = bayarFinal >= totalBayar && totalBayar > 0;
