@@ -728,6 +728,7 @@ let acTimer     = null;
   document.getElementById('tanggalSelesai').value = tomorrow.toISOString().slice(0, 10);
 
   addItemRow(); // baris item pertama langsung
+  updateEstimasiSelesai(); // hitung estimasi awal
 })();
 
 // ════════════════════════════════════════════════════════
@@ -786,6 +787,10 @@ setInterval(() => {
     inputWaktuEl.max = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
   }
 }, 60000);
+
+// Update estimasi saat waktu transaksi berubah
+toggleWaktuEl.addEventListener('change', updateEstimasiSelesai);
+inputWaktuEl.addEventListener('change', updateEstimasiSelesai);
 
 // Fungsi untuk mendapatkan waktu transaksi yang dipilih
 function getWaktuTransaksi() {
@@ -1092,6 +1097,7 @@ function addItemRow(defaults = {}) {
 
     updateItemCount();
     calcTotal();
+    updateEstimasiSelesai(); // update estimasi setiap kali item berubah
   }
 
   inpJumlah.addEventListener('input', updateRow);
@@ -1105,6 +1111,7 @@ function addItemRow(defaults = {}) {
     }
     updateItemCount();
     calcTotal();
+    updateEstimasiSelesai(); // update estimasi saat item dihapus
   });
 
   container.appendChild(row);
@@ -1313,6 +1320,52 @@ document.getElementById('bayarInput').addEventListener('input', (e) => {
 document.getElementById('antarJemput').addEventListener('change', (e) => {
   document.getElementById('alamatSection').style.display = e.target.checked ? 'block' : 'none';
 });
+
+// ════════════════════════════════════════════════════════
+// UPDATE ESTIMASI SELESAI
+// ════════════════════════════════════════════════════════
+function updateEstimasiSelesai() {
+  // Ambil estimasi_hari terbesar dari semua item yang valid
+  const validItems = state.items.filter(i => i.layanan_id && i.jumlah > 0);
+
+  if (validItems.length === 0) {
+    // Jika tidak ada item, set default besok
+    const tomorrow = new Date(Date.now() + 86400000);
+    document.getElementById('tanggalSelesai').value = tomorrow.toISOString().slice(0, 10);
+    return;
+  }
+
+  // Cari estimasi_hari terbesar
+  let maxEstimasiHari = 0;
+  validItems.forEach(item => {
+    const layanan = layananList.find(l => l.id === item.layanan_id);
+    if (layanan && layanan.estimasi_hari) {
+      const hari = parseInt(layanan.estimasi_hari) || 0;
+      if (hari > maxEstimasiHari) maxEstimasiHari = hari;
+    }
+  });
+
+  // Jika tidak ada estimasi_hari yang valid, default 1 hari
+  if (maxEstimasiHari === 0) maxEstimasiHari = 1;
+
+  // Tentukan waktu mulai
+  let waktuMulai;
+  const isToggleOn = toggleWaktuEl.checked;
+
+  if (isToggleOn && inputWaktuEl.value) {
+    // Jika toggle ON dan ada waktu dipilih, pakai waktu tersebut
+    waktuMulai = new Date(inputWaktuEl.value);
+  } else {
+    // Jika toggle OFF, pakai waktu sekarang
+    waktuMulai = new Date();
+  }
+
+  // Hitung estimasi selesai = waktu mulai + estimasi_hari
+  const estimasiSelesai = new Date(waktuMulai.getTime() + (maxEstimasiHari * 86400000));
+
+  // Set ke input tanggal selesai (format: YYYY-MM-DD)
+  document.getElementById('tanggalSelesai').value = estimasiSelesai.toISOString().slice(0, 10);
+}
 
 // ════════════════════════════════════════════════════════
 // CALCULATE TOTAL
