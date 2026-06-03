@@ -464,6 +464,10 @@
           <div id="btnBatal" style="margin-top:8px;display:none">
             <button class="btn btn-red btn-block" onclick="batalOrder()">❌ Batalkan Order</button>
           </div>
+
+          <div id="btnHapus" style="margin-top:8px;display:none">
+            <button class="btn btn-block" onclick="openModalHapus()" style="background:var(--gray-7);color:#fff;">🗑️ Hapus Order Permanen</button>
+          </div>
         </div>
       </div>
     </div>
@@ -471,6 +475,46 @@
 </div>
 
 <div id="toast"></div>
+
+<!-- Modal Hapus Order -->
+<div id="modalHapus" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1001;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:12px;max-width:450px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+    <div style="padding:20px 24px;border-bottom:1px solid var(--gray-3);">
+      <h3 style="font-size:18px;font-weight:800;margin:0;color:var(--red);">⚠️ Hapus Order Permanen</h3>
+    </div>
+    <div style="padding:24px;">
+      <div style="background:var(--red-lt);padding:14px 16px;border-radius:8px;margin-bottom:20px;border:1.5px solid var(--red);">
+        <div style="font-size:14px;color:var(--red);font-weight:700;margin-bottom:6px;">Peringatan!</div>
+        <div style="font-size:13px;color:var(--red);line-height:1.6;">
+          Data yang dihapus <strong>tidak bisa dikembalikan</strong>.<br>
+          Semua data terkait (detail item, pembayaran, riwayat) akan dihapus permanen.
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-size:13px;color:var(--gray-7);margin-bottom:4px;">Order yang akan dihapus:</div>
+        <div style="font-size:16px;font-weight:800;color:var(--gray-9);" id="hapusNomorOrder">—</div>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--gray-5);text-transform:uppercase;margin-bottom:6px;">
+          Ketik nomor order untuk konfirmasi:
+        </label>
+        <input type="text" id="hapusKonfirmasiInput" placeholder="LDR-YYYYMMDD-NNN" oninput="validateHapusInput()" style="width:100%;padding:12px 14px;border:1.5px solid var(--gray-3);border-radius:8px;font-size:14px;font-weight:700;font-family:monospace;background:var(--gray-1);color:var(--gray-9);outline:none;transition:all .15s;">
+        <div id="hapusInputHint" style="font-size:11px;color:var(--gray-5);margin-top:4px;display:none;"></div>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button onclick="closeModalHapus()" style="flex:1;padding:12px;border:1px solid var(--gray-3);border-radius:8px;background:#fff;color:var(--gray-7);font-size:14px;font-weight:700;cursor:pointer;">
+          Batal
+        </button>
+        <button onclick="submitHapusOrder()" id="btnSubmitHapus" disabled style="flex:1;padding:12px;border:none;border-radius:8px;background:var(--gray-3);color:var(--gray-5);font-size:14px;font-weight:700;cursor:not-allowed;">
+          Hapus Permanen
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Modal Lunasi -->
 <div id="modalLunasi" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px;">
@@ -569,6 +613,7 @@ const fmtDateTime = s => s ? new Date(s).toLocaleString('id-ID', { day:'2-digit'
 
 let orderData = null;
 let orderId = null;
+let currentUser = null;
 
 function showToast(msg, dur = 2500) {
   const el = document.getElementById('toast');
@@ -796,6 +841,11 @@ function renderActions() {
   // Batal button
   if (['pending', 'proses'].includes(o.status)) {
     document.getElementById('btnBatal').style.display = 'block';
+  }
+
+  // Hapus button - hanya untuk admin
+  if (currentUser && currentUser.role === 'admin') {
+    document.getElementById('btnHapus').style.display = 'block';
   }
 }
 
@@ -1059,6 +1109,95 @@ function batalOrder() {
     showToast('Koneksi gagal');
   });
 }
+
+// Modal Hapus Order
+function openModalHapus() {
+  document.getElementById('hapusNomorOrder').textContent = orderData.nomor_transaksi;
+  document.getElementById('hapusKonfirmasiInput').value = '';
+  document.getElementById('btnSubmitHapus').disabled = true;
+  document.getElementById('btnSubmitHapus').style.background = 'var(--gray-3)';
+  document.getElementById('btnSubmitHapus').style.color = 'var(--gray-5)';
+  document.getElementById('btnSubmitHapus').style.cursor = 'not-allowed';
+  document.getElementById('modalHapus').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModalHapus() {
+  document.getElementById('modalHapus').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+function validateHapusInput() {
+  const input = document.getElementById('hapusKonfirmasiInput').value.trim();
+  const nomorOrder = orderData.nomor_transaksi;
+  const btn = document.getElementById('btnSubmitHapus');
+  const hint = document.getElementById('hapusInputHint');
+
+  if (input === nomorOrder) {
+    btn.disabled = false;
+    btn.style.background = 'var(--red)';
+    btn.style.color = '#fff';
+    btn.style.cursor = 'pointer';
+    hint.style.display = 'none';
+  } else {
+    btn.disabled = true;
+    btn.style.background = 'var(--gray-3)';
+    btn.style.color = 'var(--gray-5)';
+    btn.style.cursor = 'not-allowed';
+    if (input.length > 0) {
+      hint.style.display = 'block';
+      hint.textContent = 'Nomor order tidak sesuai';
+      hint.style.color = 'var(--red)';
+    } else {
+      hint.style.display = 'none';
+    }
+  }
+}
+
+async function submitHapusOrder() {
+  const btn = document.getElementById('btnSubmitHapus');
+  if (btn.disabled) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Menghapus...';
+
+  try {
+    const r = await fetch(`/api/v1/transaksi/${orderId}`, {
+      method: 'DELETE'
+    });
+
+    const d = await r.json();
+
+    if (!r.ok) {
+      showToast('Gagal: ' + (d.error || 'Akses ditolak'));
+      btn.disabled = false;
+      btn.textContent = 'Hapus Permanen';
+      return;
+    }
+
+    showToast('✓ Order berhasil dihapus permanen');
+    closeModalHapus();
+    setTimeout(() => {
+      window.location.href = '/order';
+    }, 1000);
+  } catch (err) {
+    console.error(err);
+    showToast('Koneksi gagal');
+    btn.disabled = false;
+    btn.textContent = 'Hapus Permanen';
+  }
+}
+
+// Load user info
+(async () => {
+  try {
+    const r = await fetch('/api/v1/auth/me');
+    const d = await r.json();
+    if (d.user) currentUser = d.user;
+  } catch (err) {
+    console.error('Failed to load user:', err);
+  }
+})();
 
 loadDetail();
 </script>

@@ -4,6 +4,7 @@ const ctrl     = require('../controllers/transaksiController');
 const struk    = require('../controllers/strukController');
 const wa       = require('../controllers/waController');
 const printer  = require('../controllers/printerController');
+const { requireAdmin } = require('../middleware/auth');
 
 router.get('/',               ctrl.index);
 router.post('/',              ctrl.store);
@@ -12,6 +13,7 @@ router.get('/:id',            ctrl.show);
 router.put('/:id',            ctrl.update);
 router.put('/:id/status',     ctrl.updateStatus);
 router.put('/:id/lunasi',     ctrl.lunasi);
+router.delete('/:id',         requireAdmin, ctrl.destroy);
 
 // Struk
 router.get('/:id/struk',      struk.show);

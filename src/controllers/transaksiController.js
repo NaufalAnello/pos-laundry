@@ -535,3 +535,46 @@ exports.lunasi = async (req, res) => {
     res.status(500).json({ error: 'Gagal memproses pelunasan' });
   }
 };
+
+// ── DELETE /api/v1/transaksi/:id ─────────────────────────────────────────────
+// Hard delete order - hanya untuk admin
+exports.destroy = async (req, res) => {
+  const db = require('../database/connection');
+
+  try {
+    const transaksi = await transaksiModel.findById(req.params.id);
+    if (!transaksi) return res.status(404).json({ error: 'Transaksi tidak ditemukan' });
+
+    const nomorOrder = transaksi.nomor_transaksi;
+
+    // Hapus semua data terkait dalam satu transaction
+    await db.transaction(async (trx) => {
+      // Hapus riwayat bayar
+      await trx('riwayat_bayar').where('transaksi_id', req.params.id).del();
+
+      // Hapus detail transaksi
+      await trx('detail_transaksi').where('transaksi_id', req.params.id).del();
+
+      // Hapus wa_log terkait
+      await trx('wa_log').where('transaksi_id', req.params.id).del();
+
+      // Hapus kas terkait
+      await trx('kas').where('transaksi_id', req.params.id).del();
+
+      // Hapus mutasi deposit terkait (jika ada)
+      await trx('mutasi_deposit').where('transaksi_id', req.params.id).del();
+
+      // Hapus transaksi utama
+      await trx('transaksi').where('id', req.params.id).del();
+    });
+
+    res.json({
+      success: true,
+      message: `Order ${nomorOrder} berhasil dihapus permanen`,
+      nomor_order: nomorOrder
+    });
+  } catch (err) {
+    console.error('[transaksi:destroy]', err);
+    res.status(500).json({ error: 'Gagal menghapus order' });
+  }
+};
