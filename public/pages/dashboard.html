@@ -98,7 +98,9 @@
     .antrian-item {
       border: 1px solid var(--gray-3); border-radius: 8px; padding: 12px 14px;
       margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px;
+      cursor: pointer; transition: background .15s;
     }
+    .antrian-item:hover { background: var(--gray-1); }
     .antrian-item:last-child { margin-bottom: 0; }
     .antrian-row1 { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .antrian-nomor { font-weight: 700; font-size: 13px; }
@@ -335,6 +337,14 @@ async function logout() {
   location.href = '/login';
 }
 
+function navigateToDetail(id, event) {
+  // Jangan navigasi jika klik pada elemen interaktif
+  if (event.target.closest('button, a, .wa-menu-wrap')) {
+    return;
+  }
+  window.location.href = `/order/detail?id=${id}`;
+}
+
 async function updateStatus(id, status, btn) {
   btn.disabled = true;
   try {
@@ -390,7 +400,7 @@ function renderAntrian(list) {
     const btnClass   = t.status === 'pending' ? 'btn-blue' : 'btn-green';
     const hasPhone   = t.pelanggan_telepon;
 
-    return `<div class="antrian-item">
+    return `<div class="antrian-item" onclick="navigateToDetail(${t.id}, event)">
       <div class="antrian-row1">
         <div>
           <div class="antrian-nomor">${t.nomor_transaksi}</div>

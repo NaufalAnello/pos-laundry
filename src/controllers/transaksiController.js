@@ -70,6 +70,18 @@ exports.show = async (req, res) => {
   }
 };
 
+// ── GET /api/v1/transaksi/:id/detail ─────────────────────────────────────────
+exports.detail = async (req, res) => {
+  try {
+    const t = await transaksiModel.findDetailById(req.params.id);
+    if (!t) return res.status(404).json({ error: 'Transaksi tidak ditemukan' });
+    res.json({ data: t });
+  } catch (err) {
+    console.error('[transaksi:detail]', err);
+    res.status(500).json({ error: 'Gagal mengambil detail transaksi' });
+  }
+};
+
 // ── POST /api/v1/transaksi ───────────────────────────────────────────────────
 exports.store = async (req, res) => {
   const { error, value } = createSchema.validate(req.body, { abortEarly: false });

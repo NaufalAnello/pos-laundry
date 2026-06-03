@@ -111,4 +111,78 @@ const updateStatus = (id, status, extra = {}) => {
   return db('transaksi').where({ id }).update(patch);
 };
 
-module.exports = { generateNomor, findAll, countAll, findById, create, update, updateStatus };
+// ── Detail lengkap untuk halaman detail order ──────────────────────────────
+const findDetailById = async (id) => {
+  // Get transaksi dengan join pelanggan
+  const transaksi = await db('transaksi as t')
+    .leftJoin('pelanggan as p', 'p.id', 't.pelanggan_id')
+    .leftJoin('users as u',     'u.id', 't.user_id')
+    .leftJoin('paket_promo as pr', 'pr.id', 't.paket_promo_id')
+    .where('t.id', id)
+    .first(
+      't.*',
+      'u.nama as kasir_nama',
+      'pr.nama as promo_nama'
+    );
+
+  if (!transaksi) return null;
+
+  // Get detail items
+  transaksi.items = await db('detail_transaksi as d')
+    .leftJoin('layanan as l', 'l.id', 'd.layanan_id')
+    .where('d.transaksi_id', id)
+    .select('d.*', 'l.satuan');
+
+  // Get pelanggan detail with level
+  if (transaksi.pelanggan_id) {
+    const pelanggan = await db('pelanggan')
+      .where('id', transaksi.pelanggan_id)
+      .first();
+
+    if (pelanggan) {
+      // Hitung level berdasarkan poin
+      let level = 'Bronze';
+      if (pelanggan.total_poin >= 1000) level = 'Gold';
+      else if (pelanggan.total_poin >= 500) level = 'Silver';
+
+      transaksi.pelanggan = {
+        ...pelanggan,
+        level
+      };
+    }
+  }
+
+  // Get riwayat bayar (simulasi, nanti bisa diganti dengan tabel riwayat_bayar)
+  transaksi.riwayat_bayar = [];
+  if (transaksi.bayar > 0) {
+    // Jika ada pembayaran, buat riwayat pembayaran awal
+    const keterangan = transaksi.bayar >= transaksi.total_bayar ? 'Pembayaran Lunas' : 'DP Awal';
+    transaksi.riwayat_bayar.push({
+      jumlah: transaksi.bayar,
+      metode_bayar: transaksi.metode_bayar,
+      keterangan,
+      created_at: transaksi.created_at
+    });
+  }
+
+  // Get poin order
+  transaksi.poin_order = {
+    didapat: 0,
+    sebelum: 0,
+    sesudah: 0
+  };
+
+  if (transaksi.pelanggan) {
+    // Hitung poin yang didapat dari order ini (asumsi 1% dari total)
+    const poinDidapat = Math.floor(transaksi.total_bayar * 0.01);
+    transaksi.poin_order = {
+      didapat: poinDidapat,
+      sebelum: transaksi.pelanggan.total_poin - poinDidapat,
+      sesudah: transaksi.pelanggan.total_poin
+    };
+  }
+
+  return transaksi;
+};
+
+module.exports = { generateNomor, findAll, countAll, findById, findDetailById, create, update, updateStatus };

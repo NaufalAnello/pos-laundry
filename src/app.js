@@ -134,6 +134,12 @@ app.get('/order', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/pages/orders.html'));
 });
 
+// Detail order
+app.get('/order/detail', (req, res) => {
+  if (!req.session?.userId) return res.redirect('/login');
+  res.sendFile(path.join(__dirname, '../public/pages/detail-order.html'));
+});
+
 // Layanan & Kategori
 app.get('/layanan', (req, res) => {
   if (!req.session?.userId) return res.redirect('/login');

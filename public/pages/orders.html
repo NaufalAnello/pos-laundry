@@ -105,7 +105,7 @@
       background: var(--gray-1); border-bottom: 1px solid var(--gray-3);
       white-space: nowrap;
     }
-    tbody tr { border-bottom: 1px solid var(--gray-3); transition: background .1s; }
+    tbody tr { border-bottom: 1px solid var(--gray-3); transition: background .1s; cursor: pointer; }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: var(--gray-1); }
     tbody td { padding: 10px 14px; vertical-align: middle; font-size: 13px; }
@@ -331,10 +331,10 @@ function renderTable(rows) {
 
     const hasPhone = t.pelanggan_telepon;
 
-    return `<tr id="row-${t.id}">
+    return `<tr id="row-${t.id}" onclick="navigateToDetail(${t.id}, event)">
       <td>
         <div class="td-nomor">
-          <a href="/api/v1/transaksi/${t.id}/struk" target="_blank">${t.nomor_transaksi}</a>
+          <a href="/order/detail?id=${t.id}" onclick="event.stopPropagation()">${t.nomor_transaksi}</a>
         </div>
         <div class="td-meta">${t.kasir_nama || '—'}</div>
       </td>
@@ -404,6 +404,14 @@ function renderPagination(total) {
     ${currentPage >= totalPages ? 'disabled' : ''}>›</button>`;
 
   btns.innerHTML = html;
+}
+
+function navigateToDetail(id, event) {
+  // Jangan navigasi jika klik pada elemen interaktif
+  if (event.target.closest('select, button, a, .wa-menu-wrap')) {
+    return;
+  }
+  window.location.href = `/order/detail?id=${id}`;
 }
 
 async function updateStatus(id, status, selectEl) {

@@ -7,6 +7,7 @@ const printer  = require('../controllers/printerController');
 
 router.get('/',               ctrl.index);
 router.post('/',              ctrl.store);
+router.get('/:id/detail',     ctrl.detail);
 router.get('/:id',            ctrl.show);
 router.put('/:id',            ctrl.update);
 router.put('/:id/status',     ctrl.updateStatus);
