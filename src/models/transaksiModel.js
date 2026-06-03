@@ -131,7 +131,11 @@ const findDetailById = async (id) => {
   transaksi.items = await db('detail_transaksi as d')
     .leftJoin('layanan as l', 'l.id', 'd.layanan_id')
     .where('d.transaksi_id', id)
-    .select('d.*', 'l.satuan');
+    .select(
+      'd.*',
+      'l.satuan',
+      db.raw('d.harga_satuan as harga') // Alias untuk kompatibilitas frontend
+    );
 
   // Get pelanggan detail with level
   if (transaksi.pelanggan_id) {

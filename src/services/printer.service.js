@@ -217,4 +217,110 @@ async function cetakTest() {
   await sendToPrinter(buf);
 }
 
-module.exports = { cekPrinter, cetakStruk, cetakTest };
+// Generate ESC/POS bytes untuk LABEL (hemat kertas, ringkas)
+function generateLabelEscPos(transaksi, pengaturan) {
+  const bytes = [];
+  const push   = (s)  => Buffer.from(String(s), 'utf8').forEach(b => bytes.push(b));
+  const nl     = ()   => bytes.push(0x0a);
+  const bold   = (on) => bytes.push(ESC, 0x45, on ? 1 : 0);
+  const center = ()   => bytes.push(ESC, 0x61, 0x01);
+  const left   = ()   => bytes.push(ESC, 0x61, 0x00);
+  const line   = ()   => { push('-'.repeat(LEBAR)); nl(); };
+
+  // Init printer
+  bytes.push(ESC, 0x40);
+
+  // Header mini
+  center();
+  bold(true);
+  push(pengaturan.nama_toko || 'LAUNDRY'); nl();
+  bold(false);
+  line();
+
+  // Info utama - nomor order (BESAR)
+  left();
+  bold(true);
+  push('ORDER:'); nl();
+  // Double height untuk nomor order agar mudah dibaca
+  bytes.push(ESC, 0x21, 0x30); // Double height + double width
+  push(transaksi.nomor_transaksi); nl();
+  bytes.push(ESC, 0x21, 0x00); // Reset size
+  bold(false);
+  nl();
+
+  // Nama pelanggan
+  push('Pelanggan:'); nl();
+  bold(true);
+  push(transaksi.pelanggan_nama || 'Non-member'); nl();
+  bold(false);
+  if (transaksi.pelanggan_telepon) { push('WA: ' + transaksi.pelanggan_telepon); nl(); }
+  nl();
+
+  // Estimasi selesai - PENTING!
+  if (transaksi.tanggal_selesai) {
+    push('Estimasi Selesai:'); nl();
+    bold(true);
+    push(new Date(transaksi.tanggal_selesai).toLocaleDateString('id-ID', {
+      timeZone: 'Asia/Makassar',
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })); nl();
+    bold(false);
+    nl();
+  }
+
+  // Ringkasan singkat layanan
+  const itemCount = (transaksi.items || []).length;
+  if (itemCount > 0) {
+    push('Layanan (' + itemCount + '):'); nl();
+    (transaksi.items || []).forEach(item => {
+      push('- ' + item.nama_layanan + ' (' + item.jumlah + ' ' + (item.satuan || '') + ')'); nl();
+    });
+    nl();
+  }
+
+  // Total bayar
+  bold(true);
+  push('TOTAL: Rp' + fmtRp(transaksi.total_bayar)); nl();
+  bold(false);
+
+  // Status bayar
+  const lunas = (transaksi.bayar || 0) >= transaksi.total_bayar;
+  if (!lunas) {
+    push('Status: ');
+    bold(true);
+    if ((transaksi.bayar || 0) > 0) {
+      push('DP Rp' + fmtRp(transaksi.bayar)); nl();
+      bold(false);
+      push('Sisa: Rp' + fmtRp(transaksi.total_bayar - transaksi.bayar));
+    } else {
+      push('BELUM BAYAR');
+    }
+    nl();
+    bold(false);
+  } else {
+    bold(true);
+    push('LUNAS'); nl();
+    bold(false);
+  }
+
+  line();
+  center();
+  push('Tunjukkan label saat ambil'); nl();
+
+  // Feed 3 baris untuk robekan manual (lebih hemat dari struk)
+  for (let i = 0; i < 3; i++) nl();
+
+  return Buffer.from(bytes);
+}
+
+async function cetakLabel(transaksi, pengaturan) {
+  const buf = generateLabelEscPos(transaksi, pengaturan);
+  await sendToPrinter(buf);
+}
+
+module.exports = { cekPrinter, cetakStruk, cetakTest, cetakLabel };

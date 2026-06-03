@@ -23,5 +23,6 @@ router.get('/:id/wa/notif',   wa.notif);
 
 // Print thermal
 router.post('/:id/print', printer.cetakTransaksi);
+router.post('/:id/label', printer.cetakLabel);
 
 module.exports = router;

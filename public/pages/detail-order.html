@@ -832,8 +832,21 @@ function cetakStruk() {
   window.open(`/api/v1/transaksi/${orderId}/struk`, '_blank');
 }
 
-function cetakLabel() {
-  showToast('Fitur cetak label belum tersedia');
+async function cetakLabel() {
+  try {
+    const r = await fetch(`/api/v1/transaksi/${orderId}/label`, {
+      method: 'POST'
+    });
+    const d = await r.json();
+    if (!r.ok) {
+      showToast('Gagal: ' + (d.error || 'Printer error'));
+      return;
+    }
+    showToast('✓ Label berhasil dicetak');
+  } catch (err) {
+    console.error(err);
+    showToast('Koneksi gagal');
+  }
 }
 
 let modalData = {
