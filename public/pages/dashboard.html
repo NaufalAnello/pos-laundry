@@ -250,6 +250,17 @@
           <div class="antrian-empty">Memuat...</div>
         </div>
       </div>
+
+      <!-- Selesai Hari Ini -->
+      <div class="card">
+        <div class="card-header">
+          <h2>✅ Selesai Hari Ini</h2>
+          <span id="selesaiCount" class="badge badge-selesai">—</span>
+        </div>
+        <div class="card-body" id="selesaiBody">
+          <div class="antrian-empty">Memuat...</div>
+        </div>
+      </div>
     </div>
 
     <!-- Right column -->
@@ -435,6 +446,48 @@ function renderAntrian(list) {
   }).join('');
 }
 
+function renderSelesai(list) {
+  const el = document.getElementById('selesaiBody');
+  document.getElementById('selesaiCount').textContent = list.length;
+  if (!list.length) {
+    el.innerHTML = '<div class="antrian-empty">Tidak ada order selesai hari ini</div>';
+    return;
+  }
+
+  el.innerHTML = list.map(t => {
+    const itemsText = t.items.length
+      ? t.items.map(i => `${i.jumlah} ${i.satuan} ${i.nama_layanan}`).join(', ')
+      : '—';
+    const lunas = (t.total_dibayar || t.bayar || 0) >= t.total_bayar;
+    const hasPhone = t.pelanggan_telepon;
+
+    return `<div class="antrian-item" onclick="navigateToDetail(${t.id}, event)">
+      <div class="antrian-row1">
+        <div>
+          <div class="antrian-nomor">${t.nomor_transaksi}</div>
+          <div class="antrian-pelanggan">${t.pelanggan_nama || 'Non-member'} · ${fmtTime(t.tanggal_masuk)}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="badge badge-selesai">Selesai</span>
+          ${!lunas ? `<span class="badge" style="background:var(--red-lt);color:var(--red)">Belum Lunas</span>`
+                   : `<span class="badge badge-lunas">Lunas</span>`}
+        </div>
+      </div>
+      <div class="antrian-row2">
+        <div class="antrian-items-text">${itemsText}</div>
+        <div style="font-size:12px;font-weight:700;">${fmtRp(t.total_bayar)}</div>
+      </div>
+      <div class="antrian-actions">
+        <button class="btn btn-sm btn-green" onclick="updateStatus(${t.id}, 'diambil', this)">✓ Diambil</button>
+        ${hasPhone ? `
+        <button class="btn btn-sm btn-wa" onclick="openWa(${t.id},'notif');event.stopPropagation();">📱 WA</button>
+        ` : ''}
+        <a href="/order/detail?id=${t.id}" class="btn btn-sm btn-outline" onclick="event.stopPropagation();">Detail</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 function renderTagihan(list) {
   const el = document.getElementById('tagihanBody');
   if (!list.length) { el.innerHTML = '<div class="empty-state">Semua tagihan sudah lunas</div>'; return; }
@@ -557,6 +610,7 @@ async function loadDashboard() {
 
     renderChart(d.bar_chart_7hari);
     renderAntrian(d.antrian_aktif);
+    renderSelesai(d.selesai_hari_ini || []);
 
     // Tagihan belum lunas detail — fetch from transaksi API
     const tagihanR = await fetch('/api/v1/transaksi?limit=10');
