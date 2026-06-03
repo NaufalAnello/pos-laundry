@@ -472,6 +472,96 @@
 
 <div id="toast"></div>
 
+<!-- Modal Lunasi -->
+<div id="modalLunasi" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:12px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="padding:20px 24px;border-bottom:1px solid var(--gray-3);display:flex;align-items:center;justify-content:space-between;">
+      <h3 style="font-size:18px;font-weight:800;margin:0;">💰 Lunasi Pembayaran</h3>
+      <button onclick="closeModalLunasi()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--gray-5);padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;">×</button>
+    </div>
+    <div style="padding:24px;">
+      <div style="background:var(--gray-1);padding:14px 16px;border-radius:8px;margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span style="color:var(--gray-5);">Order</span>
+          <span style="font-weight:700;" id="modalNomor">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span style="color:var(--gray-5);">Pelanggan</span>
+          <span style="font-weight:700;" id="modalPelanggan">—</span>
+        </div>
+        <div style="border-top:1px solid var(--gray-3);margin:10px 0;"></div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
+          <span style="color:var(--gray-5);">Total Order</span>
+          <span style="font-weight:700;" id="modalTotal">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px;">
+          <span style="color:var(--gray-5);">Sudah Dibayar</span>
+          <span style="font-weight:700;color:var(--green);" id="modalDibayar">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:16px;margin-top:8px;padding-top:8px;border-top:1px solid var(--gray-3);">
+          <span style="font-weight:700;">Sisa</span>
+          <span style="font-weight:800;color:var(--red);" id="modalSisa">—</span>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--gray-5);text-transform:uppercase;margin-bottom:8px;">Metode Bayar</label>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+          <button class="modal-metode-btn active" data-metode="tunai" onclick="setModalMetode('tunai')" style="padding:10px 6px;border:1.5px solid var(--blue);border-radius:8px;background:var(--blue-lt);color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;">
+            <div style="font-size:20px;">💵</div>
+            Tunai
+          </button>
+          <button class="modal-metode-btn" data-metode="transfer" onclick="setModalMetode('transfer')" style="padding:10px 6px;border:1.5px solid var(--gray-3);border-radius:8px;background:var(--gray-1);color:var(--gray-5);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;">
+            <div style="font-size:20px;">🏦</div>
+            Transfer
+          </button>
+          <button class="modal-metode-btn" data-metode="qris" onclick="setModalMetode('qris')" style="padding:10px 6px;border:1.5px solid var(--gray-3);border-radius:8px;background:var(--gray-1);color:var(--gray-5);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;">
+            <div style="font-size:20px;">📱</div>
+            QRIS
+          </button>
+          <button class="modal-metode-btn" data-metode="deposit" onclick="setModalMetode('deposit')" style="padding:10px 6px;border:1.5px solid var(--gray-3);border-radius:8px;background:var(--gray-1);color:var(--gray-5);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;">
+            <div style="font-size:20px;">💳</div>
+            Deposit
+          </button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--gray-5);text-transform:uppercase;margin-bottom:6px;">Nominal Diterima (Rp)</label>
+        <input type="number" id="modalNominalInput" min="0" step="1000" placeholder="0" oninput="updateModalPreview()" style="width:100%;padding:12px 14px;border:1.5px solid var(--gray-3);border-radius:8px;font-size:16px;font-weight:700;background:var(--gray-1);color:var(--gray-9);outline:none;transition:all .15s;">
+      </div>
+
+      <div id="modalPreview" style="display:none;background:var(--green-lt);border:1.5px solid #86efac;border-radius:8px;padding:12px 14px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;font-size:14px;color:var(--green);font-weight:700;">
+          <span>Kembalian</span>
+          <span id="modalKembalian">Rp 0</span>
+        </div>
+      </div>
+
+      <div id="modalKelebihanPanel" style="display:none;background:var(--blue-lt);border:1.5px solid #bfdbfe;border-radius:8px;padding:12px 14px;margin-bottom:16px;">
+        <div style="font-size:13px;color:var(--blue);font-weight:700;margin-bottom:10px;">Kelebihan bayar — kemana uang ini?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button id="modalBtnKembali" onclick="setModalKelebihan('kembali')" style="padding:10px 8px;border:1.5px solid var(--gray-3);border-radius:8px;background:var(--gray-1);color:var(--gray-5);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;">
+            💵 Kembalikan
+          </button>
+          <button id="modalBtnDeposit" onclick="setModalKelebihan('deposit')" class="active" style="padding:10px 8px;border:1.5px solid var(--blue);border-radius:8px;background:var(--blue-lt);color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;">
+            💳 Ke Deposit
+          </button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button onclick="closeModalLunasi()" style="flex:1;padding:12px;border:1px solid var(--gray-3);border-radius:8px;background:#fff;color:var(--gray-7);font-size:14px;font-weight:700;cursor:pointer;">
+          Batal
+        </button>
+        <button onclick="submitLunasi()" id="modalBtnLunasi" style="flex:1;padding:12px;border:none;border-radius:8px;background:var(--green);color:#fff;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 2px 4px rgba(22,163,74,0.2);">
+          💰 Simpan Pelunasan
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 const fmtDate = s => s ? new Date(s).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '—';
@@ -746,8 +836,169 @@ function cetakLabel() {
   showToast('Fitur cetak label belum tersedia');
 }
 
+let modalData = {
+  metode: 'tunai',
+  nominal: 0,
+  kelebihanMode: 'deposit'
+};
+
 function lunasi() {
-  showToast('Fitur pelunasan akan ditambahkan di bagian 2');
+  const o = orderData;
+  const total = o.total_bayar;
+  const dibayar = o.total_dibayar || o.bayar || 0;
+  const sisa = Math.max(0, total - dibayar);
+
+  // Isi data modal
+  document.getElementById('modalNomor').textContent = o.nomor_transaksi;
+  document.getElementById('modalPelanggan').textContent = o.pelanggan?.nama || 'Non-member';
+  document.getElementById('modalTotal').textContent = fmtRp(total);
+  document.getElementById('modalDibayar').textContent = fmtRp(dibayar);
+  document.getElementById('modalSisa').textContent = fmtRp(sisa);
+
+  // Reset form
+  modalData = { metode: 'tunai', nominal: 0, kelebihanMode: 'deposit' };
+  document.getElementById('modalNominalInput').value = '';
+  document.querySelectorAll('.modal-metode-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.modal-metode-btn[data-metode="tunai"]').classList.add('active');
+  document.getElementById('modalPreview').style.display = 'none';
+  document.getElementById('modalKelebihanPanel').style.display = 'none';
+
+  // Tampilkan modal
+  document.getElementById('modalLunasi').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModalLunasi() {
+  document.getElementById('modalLunasi').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+function setModalMetode(metode) {
+  modalData.metode = metode;
+  document.querySelectorAll('.modal-metode-btn').forEach(b => {
+    const isActive = b.dataset.metode === metode;
+    b.classList.toggle('active', isActive);
+    if (isActive) {
+      b.style.borderColor = 'var(--blue)';
+      b.style.background = 'var(--blue-lt)';
+      b.style.color = 'var(--blue)';
+    } else {
+      b.style.borderColor = 'var(--gray-3)';
+      b.style.background = 'var(--gray-1)';
+      b.style.color = 'var(--gray-5)';
+    }
+  });
+  updateModalPreview();
+}
+
+function updateModalPreview() {
+  const o = orderData;
+  const total = o.total_bayar;
+  const dibayar = o.total_dibayar || o.bayar || 0;
+  const sisa = Math.max(0, total - dibayar);
+
+  const nominal = parseFloat(document.getElementById('modalNominalInput').value) || 0;
+  modalData.nominal = nominal;
+
+  const kembalian = Math.max(0, nominal - sisa);
+
+  if (nominal > 0 && kembalian > 0) {
+    document.getElementById('modalPreview').style.display = 'block';
+    document.getElementById('modalKembalian').textContent = fmtRp(kembalian);
+
+    // Show kelebihan panel jika ada pelanggan
+    if (o.pelanggan && kembalian > 0) {
+      document.getElementById('modalKelebihanPanel').style.display = 'block';
+    } else {
+      document.getElementById('modalKelebihanPanel').style.display = 'none';
+    }
+  } else {
+    document.getElementById('modalPreview').style.display = 'none';
+    document.getElementById('modalKelebihanPanel').style.display = 'none';
+  }
+}
+
+function setModalKelebihan(mode) {
+  modalData.kelebihanMode = mode;
+  const btnKembali = document.getElementById('modalBtnKembali');
+  const btnDeposit = document.getElementById('modalBtnDeposit');
+
+  if (mode === 'kembali') {
+    btnKembali.classList.add('active');
+    btnKembali.style.borderColor = 'var(--green)';
+    btnKembali.style.background = 'var(--green-lt)';
+    btnKembali.style.color = 'var(--green)';
+
+    btnDeposit.classList.remove('active');
+    btnDeposit.style.borderColor = 'var(--gray-3)';
+    btnDeposit.style.background = 'var(--gray-1)';
+    btnDeposit.style.color = 'var(--gray-5)';
+  } else {
+    btnDeposit.classList.add('active');
+    btnDeposit.style.borderColor = 'var(--blue)';
+    btnDeposit.style.background = 'var(--blue-lt)';
+    btnDeposit.style.color = 'var(--blue)';
+
+    btnKembali.classList.remove('active');
+    btnKembali.style.borderColor = 'var(--gray-3)';
+    btnKembali.style.background = 'var(--gray-1)';
+    btnKembali.style.color = 'var(--gray-5)';
+  }
+}
+
+async function submitLunasi() {
+  const o = orderData;
+  const total = o.total_bayar;
+  const dibayar = o.total_dibayar || o.bayar || 0;
+  const sisa = Math.max(0, total - dibayar);
+
+  if (modalData.nominal <= 0) {
+    showToast('Masukkan nominal pembayaran');
+    return;
+  }
+
+  if (modalData.nominal < sisa) {
+    if (!confirm(`Nominal kurang dari sisa (${fmtRp(sisa)}). Lanjutkan sebagai pembayaran sebagian?`)) {
+      return;
+    }
+  }
+
+  const kembalian = Math.max(0, modalData.nominal - sisa);
+  const kelebihanKeDeposit = kembalian > 0 && o.pelanggan && modalData.kelebihanMode === 'deposit';
+
+  const btn = document.getElementById('modalBtnLunasi');
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan...';
+
+  try {
+    const r = await fetch(`/api/v1/transaksi/${orderId}/lunasi`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        metode_bayar: modalData.metode,
+        nominal_diterima: modalData.nominal,
+        kelebihan_ke_deposit: kelebihanKeDeposit
+      })
+    });
+
+    const d = await r.json();
+
+    if (!r.ok) {
+      showToast('Gagal: ' + d.error);
+      btn.disabled = false;
+      btn.textContent = '💰 Simpan Pelunasan';
+      return;
+    }
+
+    showToast('✓ Pembayaran berhasil dicatat');
+    closeModalLunasi();
+    setTimeout(() => location.reload(), 800);
+  } catch (err) {
+    console.error(err);
+    showToast('Koneksi gagal');
+    btn.disabled = false;
+    btn.textContent = '💰 Simpan Pelunasan';
+  }
 }
 
 async function openWa(type) {

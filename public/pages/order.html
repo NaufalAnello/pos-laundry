@@ -291,6 +291,39 @@
       border-color: var(--blue); background: var(--blue-lt); color: var(--blue);
     }
     .pay-method-icon { font-size: 20px; display: block; margin-bottom: 3px; }
+    .pay-method-btn-dp {
+      flex: 1; min-width: 80px; padding: 9px 8px;
+      border: 1.5px solid var(--gray-3); border-radius: 8px;
+      background: var(--gray-1); cursor: pointer;
+      text-align: center; font-size: 13px; font-weight: 600;
+      color: var(--gray-5); transition: all .15s;
+    }
+    .pay-method-btn-dp.active {
+      border-color: var(--yellow); background: var(--yellow-lt); color: var(--yellow);
+    }
+
+    /* ── Payment tabs ── */
+    .payment-tab-btn {
+      padding: 10px 8px;
+      border: 1.5px solid var(--gray-3); border-radius: 8px;
+      background: var(--gray-1); cursor: pointer;
+      text-align: center; font-size: 12px; font-weight: 700;
+      color: var(--gray-5); transition: all .15s;
+    }
+    .payment-tab-btn.active {
+      border-color: var(--blue); background: var(--blue); color: #fff;
+      box-shadow: 0 2px 4px rgba(37,99,235,0.2);
+    }
+    .payment-tab-btn:hover:not(.active) {
+      background: var(--gray-2); border-color: var(--gray-5);
+    }
+    .payment-tab-content {
+      animation: fadeIn 0.2s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
     /* ── Summary rows ── */
     .summary-row {
@@ -548,24 +581,41 @@
           <span>Total Bayar</span><span id="sumTotal">Rp 0</span>
         </div>
 
-        <!-- Metode bayar -->
-        <div class="field" style="margin-top:8px">
-          <label>Metode Bayar</label>
-          <div class="pay-methods">
-            <button class="pay-method-btn active" data-method="tunai">
-              <span class="pay-method-icon">💵</span>Tunai
+        <!-- Tab Pembayaran -->
+        <div class="field" style="margin-top:12px">
+          <label>Cara Pembayaran</label>
+          <div class="payment-tabs" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px;">
+            <button class="payment-tab-btn active" data-tab="bayar-sekarang">
+              Bayar Sekarang
             </button>
-            <button class="pay-method-btn" data-method="transfer">
-              <span class="pay-method-icon">🏦</span>Transfer
+            <button class="payment-tab-btn" data-tab="dp">
+              DP
             </button>
-            <button class="pay-method-btn" data-method="qris">
-              <span class="pay-method-icon">📱</span>QRIS
-            </button>
-            <button class="pay-method-btn" data-method="deposit">
-              <span class="pay-method-icon">💳</span>Deposit
+            <button class="payment-tab-btn" data-tab="bayar-nanti">
+              Bayar Nanti
             </button>
           </div>
         </div>
+
+        <!-- TAB: Bayar Sekarang -->
+        <div class="payment-tab-content" id="tab-bayar-sekarang">
+          <div class="field">
+            <label>Metode Bayar</label>
+            <div class="pay-methods">
+              <button class="pay-method-btn active" data-method="tunai">
+                <span class="pay-method-icon">💵</span>Tunai
+              </button>
+              <button class="pay-method-btn" data-method="transfer">
+                <span class="pay-method-icon">🏦</span>Transfer
+              </button>
+              <button class="pay-method-btn" data-method="qris">
+                <span class="pay-method-icon">📱</span>QRIS
+              </button>
+              <button class="pay-method-btn" data-method="deposit">
+                <span class="pay-method-icon">💳</span>Deposit
+              </button>
+            </div>
+          </div>
 
         <!-- Panel deposit saldo pelanggan -->
         <div id="depositPanel" style="display:none;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;padding:12px 14px;margin-top:4px;">
@@ -619,6 +669,58 @@
 
         <!-- Preview ringkasan pembayaran deposit (tunggal/kekurangan) -->
         <div id="depositPreviewBox" style="display:none;margin-top:6px;padding:10px 12px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;font-size:13px;"></div>
+        </div>
+
+        <!-- TAB: DP -->
+        <div class="payment-tab-content" id="tab-dp" style="display:none">
+          <div class="field">
+            <label>Metode DP</label>
+            <div class="pay-methods">
+              <button class="pay-method-btn-dp active" data-method-dp="tunai">
+                <span class="pay-method-icon">💵</span>Tunai
+              </button>
+              <button class="pay-method-btn-dp" data-method-dp="transfer">
+                <span class="pay-method-icon">🏦</span>Transfer
+              </button>
+              <button class="pay-method-btn-dp" data-method-dp="qris">
+                <span class="pay-method-icon">📱</span>QRIS
+              </button>
+              <button class="pay-method-btn-dp" data-method-dp="deposit">
+                <span class="pay-method-icon">💳</span>Deposit
+              </button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Nominal DP (Rp)</label>
+            <input type="number" id="dpInput" min="0" step="1000" value="0" placeholder="0" />
+          </div>
+
+          <div id="dpPreview" style="display:none;margin-top:8px;padding:10px 12px;background:var(--yellow-lt);border:1.5px solid #fcd34d;border-radius:8px;">
+            <div style="font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:6px;">📋 Preview DP</div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+              <span style="color:var(--gray-5)">Total</span>
+              <span id="dpPreviewTotal" style="font-weight:700;">Rp 0</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+              <span style="color:var(--gray-5)">DP</span>
+              <span id="dpPreviewDp" style="font-weight:700;color:var(--yellow)">Rp 0</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:14px;border-top:1px solid #fcd34d;padding-top:6px;margin-top:6px;">
+              <span style="font-weight:700;color:var(--gray-7)">Sisa (dilunasi saat ambil)</span>
+              <span id="dpPreviewSisa" style="font-weight:800;color:var(--red)">Rp 0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Bayar Nanti -->
+        <div class="payment-tab-content" id="tab-bayar-nanti" style="display:none">
+          <div style="padding:16px 12px;background:var(--gray-1);border:1.5px solid var(--gray-3);border-radius:8px;text-align:center;">
+            <div style="font-size:32px;margin-bottom:8px;">⏱️</div>
+            <div style="font-size:14px;font-weight:700;color:var(--gray-7);margin-bottom:4px;">Order tersimpan BELUM LUNAS</div>
+            <div style="font-size:12px;color:var(--gray-5);">Pembayaran dilakukan saat pelanggan mengambil cucian</div>
+          </div>
+        </div>
 
         <!-- Estimasi selesai -->
         <div class="field" style="margin-top:10px;">
@@ -671,8 +773,11 @@ const state = {
   promo:           null,
   poinDigunakan:   0,
   usePoin:         false,
+  paymentMode:     'bayar-sekarang', // 'bayar-sekarang' | 'dp' | 'bayar-nanti'
   metodeBayar:     'tunai',
   bayar:           0,
+  dpAmount:        0,
+  metodeDp:        'tunai',
   depositSaldo:    0,
   metodKekurangan: 'tunai',
   kelebihanMode:   'deposit', // 'tunai' | 'deposit'  — default: masuk deposit
@@ -1169,7 +1274,43 @@ document.getElementById('poinInput').addEventListener('input', (e) => {
 });
 
 // ════════════════════════════════════════════════════════
-// PAYMENT
+// PAYMENT TABS
+// ════════════════════════════════════════════════════════
+document.querySelectorAll('.payment-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+
+    // Switch active tab button
+    document.querySelectorAll('.payment-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Show/hide tab content
+    document.querySelectorAll('.payment-tab-content').forEach(c => c.style.display = 'none');
+    document.getElementById(`tab-${tab}`).style.display = 'block';
+
+    // Update state
+    state.paymentMode = tab;
+
+    // Reset payment values based on mode
+    if (tab === 'bayar-sekarang') {
+      // Default ke metode tunai
+      state.metodeBayar = 'tunai';
+      state.bayar = 0;
+      document.getElementById('bayarInput').value = 0;
+    } else if (tab === 'dp') {
+      state.dpAmount = 0;
+      state.metodeDp = 'tunai';
+      document.getElementById('dpInput').value = 0;
+    } else if (tab === 'bayar-nanti') {
+      state.bayar = 0;
+    }
+
+    updatePaymentPreview();
+  });
+});
+
+// ════════════════════════════════════════════════════════
+// PAYMENT METHODS
 // ════════════════════════════════════════════════════════
 document.querySelectorAll('.pay-method-btn[data-method]').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -1179,6 +1320,22 @@ document.querySelectorAll('.pay-method-btn[data-method]').forEach(btn => {
     updateDepositPanel();
     calcTotal();
   });
+});
+
+// Metode DP buttons
+document.querySelectorAll('.pay-method-btn-dp[data-method-dp]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pay-method-btn-dp[data-method-dp]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.metodeDp = btn.dataset.methodDp;
+    updateDpPreview();
+  });
+});
+
+// Input DP
+document.getElementById('dpInput').addEventListener('input', (e) => {
+  state.dpAmount = parseFloat(e.target.value) || 0;
+  updateDpPreview();
 });
 
 // Kekurangan metode buttons
@@ -1274,6 +1431,23 @@ function updateDepositPanel() {
       <div style="display:flex;justify-content:space-between;padding:4px 0 0;font-size:13px;font-weight:700;border-top:1px solid #bfdbfe;margin-top:4px;color:var(--green);">
         <span>Saldo Deposit Sesudah</span><span>Rp 0</span>
       </div>`;
+  }
+}
+
+// ── updateDpPreview: tampilkan preview DP dan sisa ──────────────────────────
+function updateDpPreview() {
+  const total = state._totalBayar || 0;
+  const dp = state.dpAmount || 0;
+  const sisa = Math.max(0, total - dp);
+
+  const preview = document.getElementById('dpPreview');
+  if (dp > 0 && total > 0) {
+    preview.style.display = 'block';
+    document.getElementById('dpPreviewTotal').textContent = `Rp ${fmtRp(total)}`;
+    document.getElementById('dpPreviewDp').textContent = `Rp ${fmtRp(dp)}`;
+    document.getElementById('dpPreviewSisa').textContent = `Rp ${fmtRp(sisa)}`;
+  } else {
+    preview.style.display = 'none';
   }
 }
 
@@ -1510,41 +1684,67 @@ async function submitOrder(kirimWa, cetakSetelah) {
   if (validItems.length === 0) { showToast('Tambahkan minimal 1 item', 'error'); return; }
 
   const total = state._totalBayar || 0;
+  const mode = state.paymentMode;
 
-  // Validasi deposit
-  if (state.metodeBayar === 'deposit' && !state.pelanggan) {
-    showToast('Pilih pelanggan untuk bayar dengan deposit', 'error'); return;
-  }
-  if (state.metodeBayar === 'deposit' && state.depositSaldo < total) {
-    // Harus isi kekurangan
-    const kekurangan = parseFloat(document.getElementById('kekuranganInput').value) || 0;
-    if (kekurangan <= 0) {
-      showToast('Masukkan nominal kekurangan yang akan dibayar', 'error'); return;
+  // Prepare body based on payment mode
+  let metode, bayar, isDp = false;
+
+  if (mode === 'bayar-sekarang') {
+    // Validasi deposit
+    if (state.metodeBayar === 'deposit' && !state.pelanggan) {
+      showToast('Pilih pelanggan untuk bayar dengan deposit', 'error'); return;
     }
+    if (state.metodeBayar === 'deposit' && state.depositSaldo < total) {
+      const kekurangan = parseFloat(document.getElementById('kekuranganInput').value) || 0;
+      if (kekurangan <= 0) {
+        showToast('Masukkan nominal kekurangan yang akan dibayar', 'error'); return;
+      }
+    }
+
+    metode = state.metodeBayar;
+    bayar = state.metodeBayar === 'deposit' ? 0 : state.bayar;
+  } else if (mode === 'dp') {
+    // Mode DP
+    if (state.dpAmount <= 0) {
+      showToast('Masukkan nominal DP', 'error'); return;
+    }
+    if (state.dpAmount >= total) {
+      showToast('DP tidak boleh sama atau lebih dari total. Gunakan "Bayar Sekarang" untuk lunas', 'error'); return;
+    }
+
+    metode = state.metodeDp;
+    bayar = state.dpAmount;
+    isDp = true;
+  } else {
+    // Mode Bayar Nanti
+    metode = 'tunai';
+    bayar = 0;
   }
 
-  const kelebihan = Math.max(0, state.bayar - total);
-  const isDepositMode = state.metodeBayar === 'deposit';
+  const kelebihan = Math.max(0, bayar - total);
+  const isDepositMode = metode === 'deposit';
 
   const body = {
     pelanggan_id:    state.pelanggan?.id   || null,
     paket_promo_id:  state.promo?.id       || null,
     poin_digunakan:  state.usePoin ? state.poinDigunakan : 0,
     items:           validItems.map(i => ({ layanan_id: i.layanan_id, jumlah: i.jumlah })),
-    metode_bayar:    state.metodeBayar,
-    bayar:           isDepositMode ? 0 : state.bayar,
+    payment_mode:    mode,
+    is_dp:           isDp,
+    metode_bayar:    metode,
+    bayar:           isDepositMode ? 0 : bayar,
     catatan:         document.getElementById('catatan').value.trim() || null,
     tanggal_selesai: document.getElementById('tanggalSelesai').value || null,
     antar_jemput:    document.getElementById('antarJemput').checked,
     alamat_jemput:   document.getElementById('alamatJemput').value.trim() || null,
     kirim_wa:        kirimWa && document.getElementById('kirimWa').checked,
     kelebihan_ke_deposit:
-      !isDepositMode && kelebihan > 0 && !!state.pelanggan && state.kelebihanMode === 'deposit',
-    waktu_transaksi: getWaktuTransaksi()  // null = pakai waktu server saat ini
+      mode === 'bayar-sekarang' && !isDepositMode && kelebihan > 0 && !!state.pelanggan && state.kelebihanMode === 'deposit',
+    waktu_transaksi: getWaktuTransaksi()
   };
 
-  // Deposit kekurangan: saldo tidak cukup, bayar sebagian pakai tunai/transfer/qris
-  if (isDepositMode && state.depositSaldo < total) {
+  // Deposit kekurangan
+  if (mode === 'bayar-sekarang' && isDepositMode && state.depositSaldo < total) {
     body.metode_kekurangan = state.metodKekurangan;
     body.bayar_kekurangan  = parseFloat(document.getElementById('kekuranganInput').value) || 0;
   }

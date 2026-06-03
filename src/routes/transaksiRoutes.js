@@ -11,6 +11,7 @@ router.get('/:id/detail',     ctrl.detail);
 router.get('/:id',            ctrl.show);
 router.put('/:id',            ctrl.update);
 router.put('/:id/status',     ctrl.updateStatus);
+router.put('/:id/lunasi',     ctrl.lunasi);
 
 // Struk
 router.get('/:id/struk',      struk.show);

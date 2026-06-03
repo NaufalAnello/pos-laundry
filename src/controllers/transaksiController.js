@@ -5,6 +5,7 @@ const paketPromoModel = require('../models/paketPromoModel');
 const pelangganModel  = require('../models/pelangganModel');
 const svc             = require('../services/transaksiService');
 const depositModel    = require('../models/deposit.model');
+const riwayatBayarModel = require('../models/riwayatBayarModel');
 
 // ── Validation schemas ───────────────────────────────────────────────────────
 const itemSchema = Joi.object({
@@ -18,6 +19,8 @@ const createSchema = Joi.object({
   paket_promo_id:  Joi.number().integer().positive().allow(null),
   items:           Joi.array().items(itemSchema).min(1).required(),
   poin_digunakan:  Joi.number().integer().min(0).default(0),
+  payment_mode:    Joi.string().valid('bayar-sekarang', 'dp', 'bayar-nanti').default('bayar-sekarang'),
+  is_dp:           Joi.boolean().default(false),
   metode_bayar:    Joi.string().valid('tunai', 'transfer', 'qris', 'deposit').default('tunai'),
   bayar:           Joi.number().min(0).default(0),
   metode_kekurangan: Joi.string().valid('tunai', 'transfer', 'qris').allow(null),
@@ -225,6 +228,8 @@ exports.store = async (req, res) => {
       poin_digunakan:  value.poin_digunakan,
       total_bayar:     totalBayar,
       bayar:           bayarFinal,
+      total_dibayar:   bayarFinal,
+      tanggal_lunas:   lunas ? new Date() : null,
       kembalian,
       metode_bayar:    metodeBayar,
       catatan:         value.catatan        || null,
@@ -236,6 +241,25 @@ exports.store = async (req, res) => {
 
     const transaksiId = await transaksiModel.create(transaksiData, resolvedItems);
     const created = await transaksiModel.findById(transaksiId);
+
+    // ── Catat riwayat pembayaran jika ada bayar awal ──────────────────────────
+    if (bayarFinal > 0) {
+      const jenis = value.is_dp || (bayarFinal < totalBayar) ? 'dp_awal' : 'pelunasan';
+      const keterangan = jenis === 'dp_awal'
+        ? `DP Awal (${metodeBayar})`
+        : `Pembayaran Lunas (${metodeBayar})`;
+
+      await riwayatBayarModel.create({
+        transaksi_id: transaksiId,
+        jenis,
+        nominal: bayarFinal,
+        metode: metodeBayar,
+        kelebihan_ke_deposit: value.kelebihan_ke_deposit && kembalian > 0 ? kembalian : 0,
+        created_by: req.session.user.id,
+        keterangan,
+        created_at: waktuMasuk
+      });
+    }
 
     // ── Side effects ────────────────────────────────────────────────────────
     if (pelanggan) {
@@ -367,5 +391,147 @@ exports.updateStatus = async (req, res) => {
   } catch (err) {
     console.error('[transaksi:updateStatus]', err);
     res.status(500).json({ error: 'Gagal update status' });
+  }
+};
+
+// ── PUT /api/v1/transaksi/:id/lunasi ─────────────────────────────────────────
+const lunasiSchema = Joi.object({
+  metode_bayar: Joi.string().valid('tunai', 'transfer', 'qris', 'deposit').required(),
+  nominal_diterima: Joi.number().min(0).required(),
+  kelebihan_ke_deposit: Joi.boolean().default(false)
+});
+
+exports.lunasi = async (req, res) => {
+  const { error, value } = lunasiSchema.validate(req.body);
+  if (error) return res.status(400).json({ error: error.details[0].message });
+
+  try {
+    const t = await transaksiModel.findById(req.params.id);
+    if (!t) return res.status(404).json({ error: 'Transaksi tidak ditemukan' });
+
+    if (t.status === 'dibatalkan') {
+      return res.status(400).json({ error: 'Transaksi sudah dibatalkan' });
+    }
+
+    const total = Number(t.total_bayar);
+    const dibayar = Number(t.total_dibayar || t.bayar || 0);
+    const sisa = Math.max(0, total - dibayar);
+
+    if (sisa === 0) {
+      return res.status(400).json({ error: 'Transaksi sudah lunas' });
+    }
+
+    if (value.nominal_diterima < sisa) {
+      // Pembayaran sebagian (cicilan)
+      const nominalBaru = dibayar + value.nominal_diterima;
+      await transaksiModel.update(req.params.id, {
+        bayar: nominalBaru,
+        total_dibayar: nominalBaru
+      });
+
+      // Catat riwayat bayar
+      await riwayatBayarModel.create({
+        transaksi_id: req.params.id,
+        jenis: 'dp_tambahan',
+        nominal: value.nominal_diterima,
+        metode: value.metode_bayar,
+        kelebihan_ke_deposit: 0,
+        created_by: req.session.user.id,
+        keterangan: `Cicilan (${value.metode_bayar})`
+      });
+
+      const fresh = await transaksiModel.findById(req.params.id);
+      return res.json({
+        message: 'Pembayaran cicilan berhasil dicatat',
+        data: fresh,
+        lunas: false,
+        sisa_bayar: total - nominalBaru
+      });
+    }
+
+    // Pembayaran lunas atau lebih
+    const kembalian = Math.max(0, value.nominal_diterima - sisa);
+    let kelebihanKeDeposit = 0;
+    let saldoDepositBaru = null;
+
+    // Handle deposit payment
+    if (value.metode_bayar === 'deposit') {
+      const pelanggan = await pelangganModel.findById(t.pelanggan_id);
+      if (!pelanggan) {
+        return res.status(400).json({ error: 'Pelanggan tidak ditemukan' });
+      }
+
+      const saldoRow = await depositModel.getSaldo(pelanggan.id);
+      const saldo = Number(saldoRow.saldo);
+
+      if (saldo < sisa) {
+        return res.status(400).json({
+          error: `Saldo deposit tidak cukup. Saldo: Rp ${saldo.toLocaleString('id-ID')}, Sisa bayar: Rp ${sisa.toLocaleString('id-ID')}`
+        });
+      }
+
+      // Potong deposit
+      const depositInfo = await depositModel.bayar({
+        pelangganId: pelanggan.id,
+        nominal: sisa,
+        transaksiId: req.params.id,
+        createdBy: req.session.user.id
+      });
+
+      saldoDepositBaru = depositInfo.saldoSesudah;
+    }
+
+    // Handle kelebihan ke deposit
+    if (kembalian > 0 && value.kelebihan_ke_deposit && t.pelanggan_id) {
+      kelebihanKeDeposit = kembalian;
+      await depositModel.tambahKelebihan({
+        pelangganId: t.pelanggan_id,
+        nominal: kembalian,
+        transaksiId: req.params.id,
+        createdBy: req.session.user.id
+      });
+
+      const saldoRow = await depositModel.getSaldo(t.pelanggan_id);
+      saldoDepositBaru = Number(saldoRow.saldo);
+    }
+
+    // Update transaksi jadi lunas
+    await transaksiModel.update(req.params.id, {
+      bayar: total,
+      total_dibayar: total,
+      tanggal_lunas: new Date(),
+      kembalian: kembalian > 0 && !value.kelebihan_ke_deposit ? kembalian : 0
+    });
+
+    // Catat riwayat bayar
+    await riwayatBayarModel.create({
+      transaksi_id: req.params.id,
+      jenis: 'pelunasan',
+      nominal: sisa,
+      metode: value.metode_bayar,
+      kelebihan_ke_deposit: kelebihanKeDeposit,
+      created_by: req.session.user.id,
+      keterangan: `Pelunasan (${value.metode_bayar})`
+    });
+
+    // Buat kas pemasukan
+    const fresh = await transaksiModel.findById(req.params.id);
+    await svc.buatEntriKas({ ...fresh, user_id: req.session.user.id });
+
+    // Award poin jika belum
+    const settings = await svc.getPoinSettings();
+    await svc.awardPoinJikaLunas(fresh, settings.perNominal);
+
+    res.json({
+      message: 'Pembayaran berhasil, order lunas',
+      data: fresh,
+      lunas: true,
+      kembalian: kembalian > 0 && !value.kelebihan_ke_deposit ? kembalian : 0,
+      kelebihan_ke_deposit: kelebihanKeDeposit,
+      saldo_deposit_baru: saldoDepositBaru
+    });
+  } catch (err) {
+    console.error('[transaksi:lunasi]', err);
+    res.status(500).json({ error: 'Gagal memproses pelunasan' });
   }
 };

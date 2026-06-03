@@ -152,18 +152,26 @@ const findDetailById = async (id) => {
     }
   }
 
-  // Get riwayat bayar (simulasi, nanti bisa diganti dengan tabel riwayat_bayar)
-  transaksi.riwayat_bayar = [];
-  if (transaksi.bayar > 0) {
-    // Jika ada pembayaran, buat riwayat pembayaran awal
-    const keterangan = transaksi.bayar >= transaksi.total_bayar ? 'Pembayaran Lunas' : 'DP Awal';
-    transaksi.riwayat_bayar.push({
-      jumlah: transaksi.bayar,
-      metode_bayar: transaksi.metode_bayar,
-      keterangan,
-      created_at: transaksi.created_at
-    });
-  }
+  // Get riwayat bayar dari database
+  transaksi.riwayat_bayar = await db('riwayat_bayar as r')
+    .leftJoin('users as u', 'u.id', 'r.created_by')
+    .where('r.transaksi_id', id)
+    .orderBy('r.created_at', 'asc')
+    .select(
+      'r.*',
+      'u.nama as created_by_nama'
+    );
+
+  // Format untuk kompatibilitas dengan frontend
+  transaksi.riwayat_bayar = transaksi.riwayat_bayar.map(r => ({
+    jumlah: r.nominal,
+    metode_bayar: r.metode,
+    keterangan: r.keterangan,
+    created_at: r.created_at,
+    created_by_nama: r.created_by_nama,
+    jenis: r.jenis,
+    kelebihan_ke_deposit: r.kelebihan_ke_deposit
+  }));
 
   // Get poin order
   transaksi.poin_order = {
