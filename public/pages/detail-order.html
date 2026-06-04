@@ -708,6 +708,8 @@
 </div>
 
 <script>
+console.log('[detail-order] script loaded');
+
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 const fmtDate = s => s ? new Date(s).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '—';
 const fmtDateTime = s => s ? new Date(s).toLocaleString('id-ID', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
@@ -715,6 +717,15 @@ const fmtDateTime = s => s ? new Date(s).toLocaleString('id-ID', { day:'2-digit'
 let orderData = null;
 let orderId = null;
 let currentUser = null;
+
+// Hitung status pembayaran dari data order. Satu sumber kebenaran biar
+// renderDetail + renderActions tidak divergen.
+function hitungStatusBayar(o) {
+  const dibayar = Number(o?.total_dibayar ?? o?.bayar ?? 0) || 0;
+  const tagihan = Number(o?.total_bayar ?? o?.total_harga ?? 0) || 0;
+  const lunas   = tagihan > 0 && dibayar >= tagihan;
+  return { dibayar, tagihan, lunas, dp: !lunas && dibayar > 0 };
+}
 
 function showToast(msg, dur = 2500) {
   const el = document.getElementById('toast');
@@ -734,6 +745,7 @@ document.addEventListener('click', e => {
 });
 
 async function loadDetail() {
+  console.log('[detail-order] loadDetail invoked');
   const params = new URLSearchParams(location.search);
   orderId = params.get('id');
   if (!orderId) {
@@ -752,39 +764,37 @@ async function loadDetail() {
     }
     const d = await r.json();
     orderData = d.data;
-    renderDetail();
+    console.log('[detail-order] data loaded, status =', orderData?.status);
+
+    try {
+      renderDetail();
+    } catch (e) {
+      console.error('[detail-order] renderDetail error:', e);
+      showToast('Gagal menampilkan detail: ' + e.message);
+      // Walau renderDetail gagal di tengah jalan, tetap coba render tombol
+      // aksi (terutama Lunasi) supaya kasir tidak buntu.
+      try { renderActions(); } catch (e2) { console.error(e2); }
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('contentState').style.display = 'grid';
+    }
   } catch (err) {
-    console.error(err);
+    console.error('[detail-order] fetch error:', err);
     showToast('Gagal memuat data');
     setTimeout(() => history.back(), 1500);
   }
 }
 
 function renderDetail() {
+  console.log('[detail-order] renderDetail invoked');
   const o = orderData;
-
-  // Debug: log data mentah dari API
-  console.log('=== DEBUG renderDetail ===');
-  console.log('Full orderData:', JSON.stringify(o, null, 2));
-  console.log('status:', o.status);
-  console.log('bayar:', o.bayar, 'type:', typeof o.bayar);
-  console.log('total_bayar:', o.total_bayar, 'type:', typeof o.total_bayar);
+  if (!o) throw new Error('orderData kosong');
 
   // Header
   document.getElementById('headerNomor').textContent = o.nomor_transaksi;
   document.getElementById('headerStatus').textContent = o.status;
   document.getElementById('headerStatus').className = `badge badge-${o.status}`;
 
-  // Robust check: cek berbagai kemungkinan nama field untuk bayar dan total
-  const bayarDibayar = Number(o.bayar || o.total_dibayar || 0);
-  const totalTagihan = Number(o.total_bayar || o.total_harga || 0);
-  const lunas = bayarDibayar > 0 && bayarDibayar >= totalTagihan;
-
-  // Cek juga field status_bayar jika ada
-  const sudahLunas = lunas || o.status_bayar === 'lunas';
-
-  console.log('Computed lunas in renderDetail:', lunas, '(bayarDibayar:', bayarDibayar, '>= totalTagihan:', totalTagihan, ')');
-  console.log('sudahLunas:', sudahLunas);
+  const { dibayar: bayarDibayar, tagihan: totalTagihan, lunas: sudahLunas } = hitungStatusBayar(o);
 
   const statusBayar = sudahLunas ? 'LUNAS' : (bayarDibayar > 0 ? 'DP' : 'BELUM LUNAS');
   const classBayar = sudahLunas ? 'badge-lunas' : (bayarDibayar > 0 ? 'badge-dp' : 'badge-belum');
@@ -956,27 +966,13 @@ function renderDetail() {
 }
 
 function renderActions() {
+  console.log('[detail-order] renderActions invoked');
   const o = orderData;
+  if (!o) return;
 
-  // Robust check: cek berbagai kemungkinan nama field untuk bayar dan total
-  const bayarDibayar = Number(o.bayar || o.total_dibayar || 0);
-  const totalTagihan = Number(o.total_bayar || o.total_harga || 0);
-  const lunas = bayarDibayar > 0 && bayarDibayar >= totalTagihan;
-
-  // Cek juga field status_bayar jika ada
-  const sudahLunas = lunas || o.status_bayar === 'lunas';
-
-  // Debug logging
-  console.log('=== DEBUG renderActions ===');
-  console.log('status:', o.status);
-  console.log('o.bayar:', o.bayar, 'o.total_dibayar:', o.total_dibayar);
-  console.log('bayarDibayar:', bayarDibayar);
-  console.log('o.total_bayar:', o.total_bayar, 'o.total_harga:', o.total_harga);
-  console.log('totalTagihan:', totalTagihan);
-  console.log('o.status_bayar:', o.status_bayar);
-  console.log('lunas (computed):', lunas);
-  console.log('sudahLunas (final):', sudahLunas);
-  console.log('should show lunasi:', !sudahLunas && o.status !== 'dibatalkan');
+  const { lunas: sudahLunas } = hitungStatusBayar(o);
+  const showLunasi = !sudahLunas && o.status !== 'dibatalkan';
+  console.log('[detail-order] status =', o.status, '| sudahLunas =', sudahLunas, '| showLunasi =', showLunasi);
 
   // Update status dropdown
   if (['pending', 'proses'].includes(o.status)) {
@@ -991,13 +987,8 @@ function renderActions() {
     document.getElementById('aksiUpdateStatus').style.display = 'block';
   }
 
-  // Lunasi button - tampilkan untuk semua status kecuali dibatalkan, selama belum lunas
-  if (!sudahLunas && o.status !== 'dibatalkan') {
-    console.log('✅ Setting btnLunasi to block');
-    document.getElementById('btnLunasi').style.display = 'block';
-  } else {
-    console.log('❌ NOT showing btnLunasi. Reason:', sudahLunas ? 'already lunas' : 'status is dibatalkan');
-  }
+  // Lunasi button — tampil untuk semua status kecuali dibatalkan, selama belum lunas
+  document.getElementById('btnLunasi').style.display = showLunasi ? 'block' : 'none';
 
   // WA buttons
   if (o.pelanggan?.telepon) {
@@ -1657,7 +1648,17 @@ async function deleteItemAPI(itemId) {
   }
 })();
 
-loadDetail();
+// Kick off detail load. Pakai DOMContentLoaded sebagai jaring pengaman kalau
+// document.readyState belum 'interactive'/'complete' saat script ini di-parse.
+function bootstrapDetail() {
+  console.log('[detail-order] bootstrap, readyState =', document.readyState);
+  loadDetail();
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootstrapDetail);
+} else {
+  bootstrapDetail();
+}
 </script>
 <script src="/js/nav.js"></script>
 </body>
