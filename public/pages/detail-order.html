@@ -775,10 +775,13 @@ function renderDetail() {
   document.getElementById('headerStatus').textContent = o.status;
   document.getElementById('headerStatus').className = `badge badge-${o.status}`;
 
-  const lunas = o.bayar >= o.total_bayar;
-  console.log('Computed lunas in renderDetail:', lunas);
-  const statusBayar = lunas ? 'LUNAS' : (o.bayar > 0 ? 'DP' : 'BELUM LUNAS');
-  const classBayar = lunas ? 'badge-lunas' : (o.bayar > 0 ? 'badge-dp' : 'badge-belum');
+  // Pastikan bayar dan total_bayar adalah number untuk perbandingan yang benar
+  const bayar = Number(o.bayar) || 0;
+  const totalBayar = Number(o.total_bayar) || 0;
+  const lunas = bayar >= totalBayar;
+  console.log('Computed lunas in renderDetail:', lunas, '(bayar:', bayar, '>= totalBayar:', totalBayar, ')');
+  const statusBayar = lunas ? 'LUNAS' : (bayar > 0 ? 'DP' : 'BELUM LUNAS');
+  const classBayar = lunas ? 'badge-lunas' : (bayar > 0 ? 'badge-dp' : 'badge-belum');
   document.getElementById('headerBayar').textContent = statusBayar;
   document.getElementById('headerBayar').className = `badge ${classBayar}`;
   document.getElementById('headerTanggal').textContent = fmtDate(o.tanggal_masuk);
@@ -913,9 +916,9 @@ function renderDetail() {
   document.getElementById('pembayaranStatus').className = `badge ${classBayar}`;
   document.getElementById('pembayaranMetode').textContent = o.metode_bayar || '—';
 
-  if (!lunas && o.bayar > 0) {
-    document.getElementById('dpAmount').textContent = fmtRp(o.bayar);
-    document.getElementById('dpSisa').textContent = fmtRp(o.total_bayar - o.bayar);
+  if (!lunas && bayar > 0) {
+    document.getElementById('dpAmount').textContent = fmtRp(bayar);
+    document.getElementById('dpSisa').textContent = fmtRp(totalBayar - bayar);
     document.getElementById('pembayaranDp').style.display = 'block';
   }
 
@@ -948,13 +951,18 @@ function renderDetail() {
 
 function renderActions() {
   const o = orderData;
-  const lunas = o.bayar >= o.total_bayar;
+  // Pastikan bayar dan total_bayar adalah number untuk perbandingan yang benar
+  const bayar = Number(o.bayar) || 0;
+  const totalBayar = Number(o.total_bayar) || 0;
+  const lunas = bayar >= totalBayar;
 
   // Debug logging
   console.log('=== DEBUG renderActions ===');
   console.log('status:', o.status);
-  console.log('bayar:', o.bayar);
-  console.log('total_bayar:', o.total_bayar);
+  console.log('bayar (raw):', o.bayar, 'type:', typeof o.bayar);
+  console.log('bayar (number):', bayar);
+  console.log('total_bayar (raw):', o.total_bayar, 'type:', typeof o.total_bayar);
+  console.log('total_bayar (number):', totalBayar);
   console.log('lunas:', lunas);
   console.log('should show lunasi:', !lunas && o.status !== 'dibatalkan');
 
