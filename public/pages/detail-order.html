@@ -879,15 +879,10 @@ function renderDetail() {
 
   // Waktu
   document.getElementById('waktuMasuk').textContent = fmtDateTime(o.tanggal_masuk);
-  document.getElementById('waktuEstimasi').textContent = fmtDate(o.estimasi_selesai);
+  document.getElementById('waktuEstimasi').textContent = fmtDate(o.tanggal_selesai);
 
-  if (o.tanggal_selesai) {
-    document.getElementById('waktuSelesai').textContent = fmtDateTime(o.tanggal_selesai);
-    document.getElementById('waktuSelesaiItem').style.display = 'block';
-  }
-
-  if (o.tanggal_diambil) {
-    document.getElementById('waktuDiambil').textContent = fmtDateTime(o.tanggal_diambil);
+  if (o.tanggal_ambil) {
+    document.getElementById('waktuDiambil').textContent = fmtDateTime(o.tanggal_ambil);
     document.getElementById('waktuDiambilItem').style.display = 'block';
   }
 

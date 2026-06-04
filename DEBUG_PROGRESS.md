@@ -1,5 +1,33 @@
 # Debug Progress POS Laundry
 
+## SESI 2 — 2026-06-04 (struktur area BARU 1-14, fokus: Detail Order & Pembayaran)
+### Status sesi 2: SELESAI — 5 bug ditemukan & diperbaiki (3 KRITIS), diverifikasi live
+Lihat **BUG_REPORT.md** untuk detail lengkap.
+- [x] AREA 1 — Server & startup: boot bersih, migration up-to-date, tabel terverifikasi, tanpa unhandled rejection
+- [x] AREA 2 — Autentikasi & session: login OK, /api/* tanpa cookie=401, session SQLite store
+- [x] AREA 3 — Order baru: create/nomor/total/diskon/DP/deposit/kelebihan/estimasi LULUS
+- [x] AREA 4 — Detail order: FIX estimasi "—" & tanggal diambil (Bug #5)
+- [x] AREA 5 — Pembayaran: lunasi/DP/deposit/kelebihan/riwayat_bayar/kas LULUS
+- [x] AREA 6 — Print thermal: endpoint print/label ada, backend (bukan window.print), tanpa cut()
+- [x] AREA 7 — WhatsApp Business: default business → api.whatsapp.com
+- [x] AREA 8 — Deposit: topup/potong/mutasi LULUS; FIX batalkan topup (Bug #3 KRITIS)
+- [x] AREA 9 — Poin: floor(total/10000), hanya saat lunas, riwayat tercatat
+- [x] AREA 10 — Import/Export: layanan & pelanggan, deteksi duplikat benar
+- [x] AREA 11 — Fitur tambahan: FIX edit/hapus item & biaya (Bug #1/#2/#4 KRITIS), backdate, hapus order admin
+- [x] AREA 12 — Responsif & UI: fondasi solid (sesi 1), tidak diubah
+- [x] AREA 13 — Laporan & kas: angka akurat, kas otomatis, export CSV
+- [x] AREA 14 — Keamanan: bcrypt cost 12, Joi, DELETE admin-only
+
+### Bug diperbaiki sesi 2:
+1. KRITIS `transaksiController.js` — deadlock pool (getPoinSettings global db dlm trx) → edit/hapus ITEM gagal
+2. KRITIS `biayaTambahanController.js` — deadlock pool sama → biaya tambahan gagal
+3. KRITIS `deposit.model.js` — batalkanTopup kas insert kolom salah (nominal/created_by/jenis/tanggal) → selalu gagal
+4. TINGGI `transaksiController.js` — recalc tulis kolom `estimasi_selesai` (tak ada) + biaya tambahan hilang dari total
+5. SEDANG `detail-order.html` — estimasi baca `estimasi_selesai` (→ "—"), waktu diambil baca `tanggal_diambil` (kolom: `tanggal_ambil`)
+
+---
+
+## SESI 1 (arsip)
 ## Status: SELESAI
 ## Terakhir diupdate: 2026-06-01 (sesi 1) — SEMUA 13 AREA TUNTAS
 

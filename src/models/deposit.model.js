@@ -198,15 +198,18 @@ const batalkanTopup = async ({ mutasiId, createdBy }) => {
     });
 
     // 8. Catat ke kas sebagai pengeluaran
+    // Kolom kas: jenis ('masuk'/'keluar'), jumlah (bukan nominal), user_id (bukan created_by),
+    // tanggal disimpan string 'YYYY-MM-DD' (dipakai filter laporan/kas berbasis string).
     await trx('kas').insert({
       transaksi_id: null,
-      jenis:        'pengeluaran',
+      jenis:        'keluar',
       kategori:     'deposit_refund',
-      nominal:      nominalTopup,
+      jumlah:       nominalTopup,
       keterangan:   `Refund topup deposit #${mutasiId}`,
-      tanggal:      Date.now(),
-      created_by:   createdBy || null,
-      created_at:   new Date()
+      tanggal:      new Date().toISOString().slice(0, 10),
+      user_id:      createdBy || null,
+      created_at:   new Date(),
+      updated_at:   new Date()
     });
 
     return { saldoBaru };

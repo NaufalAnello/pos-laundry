@@ -741,20 +741,28 @@ async function recalculateOrderTotal(trx, transaksiId) {
     .where('transaksi_id', transaksiId)
     .select('*');
 
-  // Hitung total harga
-  const totalHarga = items.reduce((sum, it) => sum + it.subtotal, 0);
+  // Hitung total harga item
+  const totalItem = items.reduce((sum, it) => sum + it.subtotal, 0);
+
+  // Sertakan biaya tambahan yang sudah ada agar tidak hilang saat item diubah
+  const biayaList = await trx('biaya_tambahan').where('transaksi_id', transaksiId);
+  const totalBiaya = biayaList.reduce((sum, b) => sum + Number(b.nominal), 0);
+
+  const totalHarga = totalItem + totalBiaya;
 
   // Ambil transaksi untuk ambil diskon & poin
   const transaksi = await trx('transaksi').where('id', transaksiId).first();
 
-  // Recalculate total_bayar (dengan diskon & poin yang sudah ada)
-  const settings = await svc.getPoinSettings();
+  // Recalculate total_bayar (dengan diskon & poin yang sudah ada).
+  // Pakai `trx` untuk getPoinSettings — jangan global db (hindari deadlock pool).
+  const settings = await svc.getPoinSettings(trx);
   const { totalBayar } = svc.hitungTotal(
     items,
     transaksi.paket_promo_id ? { diskon_nominal: transaksi.diskon } : null,
     transaksi.poin_digunakan || 0,
     settings.nilaiPerPoin
   );
+  const totalBayarFinal = totalBayar + totalBiaya;
 
   // Update estimasi_selesai berdasarkan layanan dengan estimasi terbesar
   const estimasiList = [];
@@ -769,13 +777,13 @@ async function recalculateOrderTotal(trx, transaksiId) {
   const estimasiSelesai = new Date(tanggalMasuk);
   estimasiSelesai.setDate(estimasiSelesai.getDate() + maxEstimasi);
 
-  // Update transaksi
+  // Update transaksi (kolom tanggal estimasi selesai = tanggal_selesai)
   await trx('transaksi')
     .where('id', transaksiId)
     .update({
-      total_harga:      totalHarga,
-      total_bayar:      totalBayar,
-      estimasi_selesai: estimasiSelesai,
-      updated_at:       new Date()
+      total_harga:     totalHarga,
+      total_bayar:     totalBayarFinal,
+      tanggal_selesai: estimasiSelesai,
+      updated_at:      new Date()
     });
 }

@@ -1,8 +1,11 @@
 const db = require('../database/connection');
 
 // ── Ambil settings poin dari DB ─────────────────────────────────────────────
-const getPoinSettings = async () => {
-  const rows = await db('pengaturan')
+// Terima koneksi opsional (trx) agar bisa dipanggil DI DALAM transaction tanpa
+// memicu deadlock pool (better-sqlite3 pool tidak bisa beri koneksi ke-2 saat
+// satu trx sedang aktif).
+const getPoinSettings = async (conn = db) => {
+  const rows = await conn('pengaturan')
     .whereIn('kunci', ['poin_per_nominal', 'nilai_tukar_poin', 'min_poin_redeem']);
   const s = Object.fromEntries(rows.map(r => [r.kunci, parseInt(r.nilai) || 0]));
   return {

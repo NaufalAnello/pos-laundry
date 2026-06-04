@@ -28,7 +28,8 @@ async function recalculateTransaksiWithBiaya(trx, transaksiId) {
 
   // Recalculate total_bayar (dengan diskon & poin yang ada)
   const svc = require('../services/transaksiService');
-  const settings = await svc.getPoinSettings();
+  // Pakai `trx` — jangan global db (hindari deadlock pool saat dalam transaction)
+  const settings = await svc.getPoinSettings(trx);
   const { totalBayar } = svc.hitungTotal(
     items,
     transaksi.paket_promo_id ? { diskon_nominal: transaksi.diskon } : null,
