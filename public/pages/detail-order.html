@@ -775,13 +775,19 @@ function renderDetail() {
   document.getElementById('headerStatus').textContent = o.status;
   document.getElementById('headerStatus').className = `badge badge-${o.status}`;
 
-  // Pastikan bayar dan total_bayar adalah number untuk perbandingan yang benar
-  const bayar = Number(o.bayar) || 0;
-  const totalBayar = Number(o.total_bayar) || 0;
-  const lunas = bayar >= totalBayar;
-  console.log('Computed lunas in renderDetail:', lunas, '(bayar:', bayar, '>= totalBayar:', totalBayar, ')');
-  const statusBayar = lunas ? 'LUNAS' : (bayar > 0 ? 'DP' : 'BELUM LUNAS');
-  const classBayar = lunas ? 'badge-lunas' : (bayar > 0 ? 'badge-dp' : 'badge-belum');
+  // Robust check: cek berbagai kemungkinan nama field untuk bayar dan total
+  const bayarDibayar = Number(o.bayar || o.total_dibayar || 0);
+  const totalTagihan = Number(o.total_bayar || o.total_harga || 0);
+  const lunas = bayarDibayar > 0 && bayarDibayar >= totalTagihan;
+
+  // Cek juga field status_bayar jika ada
+  const sudahLunas = lunas || o.status_bayar === 'lunas';
+
+  console.log('Computed lunas in renderDetail:', lunas, '(bayarDibayar:', bayarDibayar, '>= totalTagihan:', totalTagihan, ')');
+  console.log('sudahLunas:', sudahLunas);
+
+  const statusBayar = sudahLunas ? 'LUNAS' : (bayarDibayar > 0 ? 'DP' : 'BELUM LUNAS');
+  const classBayar = sudahLunas ? 'badge-lunas' : (bayarDibayar > 0 ? 'badge-dp' : 'badge-belum');
   document.getElementById('headerBayar').textContent = statusBayar;
   document.getElementById('headerBayar').className = `badge ${classBayar}`;
   document.getElementById('headerTanggal').textContent = fmtDate(o.tanggal_masuk);
@@ -916,9 +922,9 @@ function renderDetail() {
   document.getElementById('pembayaranStatus').className = `badge ${classBayar}`;
   document.getElementById('pembayaranMetode').textContent = o.metode_bayar || '—';
 
-  if (!lunas && bayar > 0) {
-    document.getElementById('dpAmount').textContent = fmtRp(bayar);
-    document.getElementById('dpSisa').textContent = fmtRp(totalBayar - bayar);
+  if (!sudahLunas && bayarDibayar > 0) {
+    document.getElementById('dpAmount').textContent = fmtRp(bayarDibayar);
+    document.getElementById('dpSisa').textContent = fmtRp(totalTagihan - bayarDibayar);
     document.getElementById('pembayaranDp').style.display = 'block';
   }
 
@@ -951,20 +957,26 @@ function renderDetail() {
 
 function renderActions() {
   const o = orderData;
-  // Pastikan bayar dan total_bayar adalah number untuk perbandingan yang benar
-  const bayar = Number(o.bayar) || 0;
-  const totalBayar = Number(o.total_bayar) || 0;
-  const lunas = bayar >= totalBayar;
+
+  // Robust check: cek berbagai kemungkinan nama field untuk bayar dan total
+  const bayarDibayar = Number(o.bayar || o.total_dibayar || 0);
+  const totalTagihan = Number(o.total_bayar || o.total_harga || 0);
+  const lunas = bayarDibayar > 0 && bayarDibayar >= totalTagihan;
+
+  // Cek juga field status_bayar jika ada
+  const sudahLunas = lunas || o.status_bayar === 'lunas';
 
   // Debug logging
   console.log('=== DEBUG renderActions ===');
   console.log('status:', o.status);
-  console.log('bayar (raw):', o.bayar, 'type:', typeof o.bayar);
-  console.log('bayar (number):', bayar);
-  console.log('total_bayar (raw):', o.total_bayar, 'type:', typeof o.total_bayar);
-  console.log('total_bayar (number):', totalBayar);
-  console.log('lunas:', lunas);
-  console.log('should show lunasi:', !lunas && o.status !== 'dibatalkan');
+  console.log('o.bayar:', o.bayar, 'o.total_dibayar:', o.total_dibayar);
+  console.log('bayarDibayar:', bayarDibayar);
+  console.log('o.total_bayar:', o.total_bayar, 'o.total_harga:', o.total_harga);
+  console.log('totalTagihan:', totalTagihan);
+  console.log('o.status_bayar:', o.status_bayar);
+  console.log('lunas (computed):', lunas);
+  console.log('sudahLunas (final):', sudahLunas);
+  console.log('should show lunasi:', !sudahLunas && o.status !== 'dibatalkan');
 
   // Update status dropdown
   if (['pending', 'proses'].includes(o.status)) {
@@ -980,11 +992,11 @@ function renderActions() {
   }
 
   // Lunasi button - tampilkan untuk semua status kecuali dibatalkan, selama belum lunas
-  if (!lunas && o.status !== 'dibatalkan') {
-    console.log('Setting btnLunasi to block');
+  if (!sudahLunas && o.status !== 'dibatalkan') {
+    console.log('✅ Setting btnLunasi to block');
     document.getElementById('btnLunasi').style.display = 'block';
   } else {
-    console.log('NOT showing btnLunasi. Reason:', lunas ? 'already lunas' : 'status is dibatalkan');
+    console.log('❌ NOT showing btnLunasi. Reason:', sudahLunas ? 'already lunas' : 'status is dibatalkan');
   }
 
   // WA buttons
