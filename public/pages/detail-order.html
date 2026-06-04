@@ -955,7 +955,7 @@ function renderActions() {
     document.getElementById('aksiUpdateStatus').style.display = 'block';
   }
 
-  // Lunasi button
+  // Lunasi button - tampilkan jika belum lunas DAN status bukan dibatalkan/diambil
   if (!lunas && !['dibatalkan', 'diambil'].includes(o.status)) {
     document.getElementById('btnLunasi').style.display = 'block';
   }

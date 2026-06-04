@@ -409,8 +409,10 @@ exports.lunasi = async (req, res) => {
     const t = await transaksiModel.findById(req.params.id);
     if (!t) return res.status(404).json({ error: 'Transaksi tidak ditemukan' });
 
-    if (t.status === 'dibatalkan') {
-      return res.status(400).json({ error: 'Transaksi sudah dibatalkan' });
+    // Validasi status: hanya pending, proses, dan selesai yang bisa dilunasi
+    const statusDiizinkan = ['pending', 'proses', 'selesai'];
+    if (!statusDiizinkan.includes(t.status)) {
+      return res.status(400).json({ error: 'Order sudah diambil atau dibatalkan' });
     }
 
     const total = Number(t.total_bayar);
