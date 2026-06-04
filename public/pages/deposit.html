@@ -181,10 +181,72 @@
     #toast.show { transform:translateY(0); opacity:1; }
     #toast.success { background:var(--green); }
     #toast.error   { background:var(--red); }
+
+    /* ── Modal ── */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:998;
+                     display:none; align-items:center; justify-content:center; padding:20px; }
+    .modal-overlay.show { display:flex; }
+    .modal { background:#fff; border-radius:12px; box-shadow:0 12px 40px rgba(0,0,0,.3);
+             max-width:480px; width:100%; padding:0; overflow:hidden; }
+    .modal-header { background:var(--red); color:#fff; padding:18px 24px;
+                    display:flex; align-items:center; gap:12px; }
+    .modal-header-icon { font-size:28px; }
+    .modal-header-text h3 { font-size:17px; font-weight:800; margin:0; }
+    .modal-header-text p { font-size:13px; margin:4px 0 0; opacity:.9; }
+    .modal-body { padding:24px; }
+    .modal-info { background:var(--gray-1); border-left:3px solid var(--blue);
+                  padding:14px 16px; border-radius:6px; margin-bottom:20px; }
+    .modal-info-row { display:flex; justify-content:space-between; margin-bottom:8px;
+                      font-size:13px; }
+    .modal-info-row:last-child { margin-bottom:0; }
+    .modal-info-label { color:var(--gray-5); font-weight:600; }
+    .modal-info-value { font-weight:700; }
+    .modal-warning { background:var(--red-lt); border:1px solid var(--red);
+                     color:var(--red); padding:12px 14px; border-radius:8px;
+                     font-size:13px; font-weight:600; margin-bottom:20px;
+                     display:flex; align-items:center; gap:8px; }
+    .modal-footer { display:flex; gap:10px; justify-content:flex-end; }
   </style>
 </head>
 <body>
 <div id="toast"></div>
+
+<!-- Modal Batalkan Topup -->
+<div class="modal-overlay" id="modalBatalkanTopup">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-header-icon">⚠️</span>
+      <div class="modal-header-text">
+        <h3>Batalkan Topup Deposit</h3>
+        <p>Saldo deposit akan dikurangi</p>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-info">
+        <div class="modal-info-row">
+          <span class="modal-info-label">Pelanggan</span>
+          <span class="modal-info-value" id="mbtPelanggan">—</span>
+        </div>
+        <div class="modal-info-row">
+          <span class="modal-info-label">Nominal</span>
+          <span class="modal-info-value" id="mbtNominal" style="color:var(--red)">Rp 0</span>
+        </div>
+        <div class="modal-info-row">
+          <span class="modal-info-label">Tanggal</span>
+          <span class="modal-info-value" id="mbtTanggal">—</span>
+        </div>
+      </div>
+      <div class="modal-warning">
+        <span>⚠️</span>
+        <span>Saldo deposit akan dikurangi <strong id="mbtNominalWarning">Rp 0</strong></span>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModalBatalkanTopup()">Batal</button>
+        <button class="btn" id="btnConfirmBatalkan" style="background:var(--red);color:#fff;">Ya, Batalkan Topup</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <header>
   <span class="logo">🧺 POS Laundry</span>
@@ -342,9 +404,10 @@
               <th>Saldo Sebelum</th>
               <th>Saldo Sesudah</th>
               <th>Keterangan</th>
+              <th>Aksi</th>
             </tr>
           </thead>
-          <tbody id="tblMutasi"><tr class="empty-row"><td colspan="7">Memuat data...</td></tr></tbody>
+          <tbody id="tblMutasi"><tr class="empty-row"><td colspan="8">Memuat data...</td></tr></tbody>
         </table>
       </div>
       <div class="pagination" id="pgMutasi"></div>
@@ -590,26 +653,38 @@ async function loadMutasi(page = 1) {
   const r = await api('/api/v1/deposit/mutasi/semua?' + params.toString());
   const tbody = document.getElementById('tblMutasi');
   if (!r?.data) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Gagal memuat data</td></tr>'; return;
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Gagal memuat data</td></tr>'; return;
   }
   if (r.data.length === 0) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Tidak ada data</td></tr>';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Tidak ada data</td></tr>';
     document.getElementById('pgMutasi').innerHTML = ''; return;
   }
-  tbody.innerHTML = r.data.map(m => `
+  tbody.innerHTML = r.data.map(m => {
+    const isDibatalkan = m.is_dibatalkan === 1 || m.is_dibatalkan === true;
+    const jenisBadgeHtml = isDibatalkan
+      ? jenisBadge(m.jenis) + ' <span class="badge" style="background:var(--gray-3);color:var(--gray-7);">Dibatalkan</span>'
+      : jenisBadge(m.jenis);
+
+    const aksiHtml = (m.jenis === 'topup' && !isDibatalkan)
+      ? `<button class="btn btn-sm" style="background:var(--gray-7);color:#fff;" onclick="openModalBatalkanTopup(${m.id}, ${m.pelanggan_id}, '${escH(m.pelanggan_nama)}', ${m.nominal}, '${fmtDate(m.created_at)}')">Batalkan</button>`
+      : '<span style="color:var(--gray-5);font-size:11px">—</span>';
+
+    return `
     <tr>
       <td style="white-space:nowrap">${fmtDate(m.created_at)}</td>
       <td>
         <strong>${escH(m.pelanggan_nama || '—')}</strong><br/>
         <span style="font-size:11px;color:var(--gray-5)">${escH(m.pelanggan_telepon || '')}</span>
       </td>
-      <td>${jenisBadge(m.jenis)}</td>
+      <td>${jenisBadgeHtml}</td>
       <td style="font-weight:600">Rp ${fmtRp(m.nominal)}</td>
       <td>Rp ${fmtRp(m.saldo_sebelum)}</td>
       <td style="font-weight:700">Rp ${fmtRp(m.saldo_sesudah)}</td>
       <td style="color:var(--gray-5)">${escH(m.keterangan || '')}${m.nomor_transaksi ? ' <span style="color:var(--blue)">' + escH(m.nomor_transaksi) + '</span>' : ''}</td>
+      <td>${aksiHtml}</td>
     </tr>
-  `).join('');
+    `;
+  }).join('');
   buildPagination('pgMutasi', page, r.meta.total, 30, 'loadMutasi');
 }
 
@@ -623,6 +698,50 @@ document.getElementById('btnExportCsv').addEventListener('click', () => {
   if (start) p.set('start', start);
   if (end)   p.set('end', end);
   window.location = '/api/v1/deposit/mutasi/export?' + p.toString();
+});
+
+// ─── Modal Batalkan Topup ────────────────────────────────────────────────────
+let currentMutasiData = null;
+
+function openModalBatalkanTopup(mutasiId, pelangganId, pelangganNama, nominal, tanggal) {
+  currentMutasiData = { mutasiId, pelangganId, pelangganNama, nominal };
+  document.getElementById('mbtPelanggan').textContent = pelangganNama;
+  document.getElementById('mbtNominal').textContent = 'Rp ' + fmtRp(nominal);
+  document.getElementById('mbtNominalWarning').textContent = 'Rp ' + fmtRp(nominal);
+  document.getElementById('mbtTanggal').textContent = tanggal;
+  document.getElementById('modalBatalkanTopup').classList.add('show');
+}
+
+function closeModalBatalkanTopup() {
+  document.getElementById('modalBatalkanTopup').classList.remove('show');
+  currentMutasiData = null;
+}
+
+document.getElementById('btnConfirmBatalkan').addEventListener('click', async () => {
+  if (!currentMutasiData) return;
+
+  const btn = document.getElementById('btnConfirmBatalkan');
+  btn.disabled = true;
+  btn.textContent = 'Memproses...';
+
+  const r = await api(`/api/v1/deposit/${currentMutasiData.pelangganId}/batalkan-topup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mutasi_id: currentMutasiData.mutasiId })
+  });
+
+  btn.disabled = false;
+  btn.textContent = 'Ya, Batalkan Topup';
+
+  if (r?.success) {
+    toast(`✓ Topup berhasil dibatalkan. Saldo baru: Rp ${fmtRp(r.saldo)}`, 'success');
+    closeModalBatalkanTopup();
+    loadMutasi(st.mutasiPage);
+    loadRingkasan();
+    loadSaldo(1);
+  } else {
+    toast(r?.error || 'Gagal membatalkan topup', 'error');
+  }
 });
 
 // ─── Escape HTML ─────────────────────────────────────────────────────────────

@@ -217,4 +217,32 @@ router.get('/mutasi/export', async (req, res) => {
   }
 });
 
+// ── POST /api/v1/deposit/:pelangganId/batalkan-topup ─────────────────────────
+router.post('/:pelangganId/batalkan-topup', async (req, res) => {
+  const { error, value } = Joi.object({
+    mutasi_id: Joi.number().integer().positive().required()
+  }).validate(req.body);
+
+  if (error) return res.status(400).json({ error: error.details[0].message });
+
+  try {
+    const pel = await pelangganModel.findById(req.params.pelangganId);
+    if (!pel) return res.status(404).json({ error: 'Pelanggan tidak ditemukan' });
+
+    const { saldoBaru } = await depositModel.batalkanTopup({
+      mutasiId:  value.mutasi_id,
+      createdBy: req.session?.user?.id
+    });
+
+    res.json({
+      success: true,
+      message: 'Topup berhasil dibatalkan',
+      saldo: saldoBaru
+    });
+  } catch (err) {
+    console.error('[deposit:batalkan-topup]', err);
+    res.status(400).json({ error: err.message || 'Gagal membatalkan topup' });
+  }
+});
+
 module.exports = router;

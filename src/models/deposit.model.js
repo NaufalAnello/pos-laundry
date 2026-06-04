@@ -136,6 +136,83 @@ const getMutasi = (pelangganId, { limit = 20, offset = 0 } = {}) =>
 const countMutasi = (pelangganId) =>
   db('mutasi_deposit').where({ pelanggan_id: pelangganId }).count('id as total').first();
 
+// ── Batalkan topup (refund) ─────────────────────────────────────────────────
+const batalkanTopup = async ({ mutasiId, createdBy }) => {
+  return db.transaction(async (trx) => {
+    // 1. Ambil data mutasi topup yang akan dibatalkan
+    const mutasi = await trx('mutasi_deposit')
+      .where({ id: mutasiId, jenis: 'topup', is_dibatalkan: false })
+      .first();
+
+    if (!mutasi) {
+      throw new Error('Mutasi topup tidak ditemukan atau sudah dibatalkan');
+    }
+
+    // 2. Validasi batas waktu (maksimal 7 hari)
+    const maxDays = 7;
+    const mutasiDate = new Date(mutasi.created_at);
+    const now = new Date();
+    const diffDays = Math.floor((now - mutasiDate) / (1000 * 60 * 60 * 24));
+
+    if (diffDays > maxDays) {
+      throw new Error(`Tidak bisa dibatalkan — topup sudah lebih dari ${maxDays} hari`);
+    }
+
+    // 3. Ambil saldo saat ini
+    const row = await trx('deposit_pelanggan')
+      .where({ pelanggan_id: mutasi.pelanggan_id })
+      .first();
+
+    const saldoSekarang = Number(row?.saldo || 0);
+    const nominalTopup = Number(mutasi.nominal);
+
+    // 4. Validasi saldo mencukupi
+    if (saldoSekarang < nominalTopup) {
+      throw new Error(`Tidak bisa dibatalkan — saldo deposit sudah digunakan. Saldo saat ini: Rp ${saldoSekarang.toLocaleString('id-ID')}`);
+    }
+
+    const saldoBaru = saldoSekarang - nominalTopup;
+
+    // 5. Update saldo deposit
+    await trx('deposit_pelanggan')
+      .where({ pelanggan_id: mutasi.pelanggan_id })
+      .update({ saldo: saldoBaru, updated_at: new Date() });
+
+    // 6. Tandai mutasi topup asli sebagai dibatalkan
+    await trx('mutasi_deposit')
+      .where({ id: mutasiId })
+      .update({ is_dibatalkan: true });
+
+    // 7. Catat mutasi refund
+    await trx('mutasi_deposit').insert({
+      pelanggan_id:  mutasi.pelanggan_id,
+      transaksi_id:  null,
+      jenis:         'refund',
+      nominal:       -nominalTopup, // negatif
+      saldo_sebelum: saldoSekarang,
+      saldo_sesudah: saldoBaru,
+      keterangan:    `Pembatalan topup #${mutasiId}`,
+      metode_bayar:  null,
+      created_by:    createdBy || null,
+      created_at:    new Date()
+    });
+
+    // 8. Catat ke kas sebagai pengeluaran
+    await trx('kas').insert({
+      transaksi_id: null,
+      jenis:        'pengeluaran',
+      kategori:     'deposit_refund',
+      nominal:      nominalTopup,
+      keterangan:   `Refund topup deposit #${mutasiId}`,
+      tanggal:      Date.now(),
+      created_by:   createdBy || null,
+      created_at:   new Date()
+    });
+
+    return { saldoBaru };
+  });
+};
+
 // ── Ringkasan semua deposit ─────────────────────────────────────────────────
 const getRingkasan = async () => {
   const threshold = await db('pengaturan')
@@ -156,4 +233,4 @@ const getRingkasan = async () => {
   };
 };
 
-module.exports = { getSaldo, topup, bayar, tambahKelebihan, getMutasi, countMutasi, getRingkasan };
+module.exports = { getSaldo, topup, bayar, tambahKelebihan, getMutasi, countMutasi, getRingkasan, batalkanTopup };
