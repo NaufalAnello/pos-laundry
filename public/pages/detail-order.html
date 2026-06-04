@@ -763,12 +763,20 @@ async function loadDetail() {
 function renderDetail() {
   const o = orderData;
 
+  // Debug: log data mentah dari API
+  console.log('=== DEBUG renderDetail ===');
+  console.log('Full orderData:', JSON.stringify(o, null, 2));
+  console.log('status:', o.status);
+  console.log('bayar:', o.bayar, 'type:', typeof o.bayar);
+  console.log('total_bayar:', o.total_bayar, 'type:', typeof o.total_bayar);
+
   // Header
   document.getElementById('headerNomor').textContent = o.nomor_transaksi;
   document.getElementById('headerStatus').textContent = o.status;
   document.getElementById('headerStatus').className = `badge badge-${o.status}`;
 
   const lunas = o.bayar >= o.total_bayar;
+  console.log('Computed lunas in renderDetail:', lunas);
   const statusBayar = lunas ? 'LUNAS' : (o.bayar > 0 ? 'DP' : 'BELUM LUNAS');
   const classBayar = lunas ? 'badge-lunas' : (o.bayar > 0 ? 'badge-dp' : 'badge-belum');
   document.getElementById('headerBayar').textContent = statusBayar;
@@ -942,6 +950,14 @@ function renderActions() {
   const o = orderData;
   const lunas = o.bayar >= o.total_bayar;
 
+  // Debug logging
+  console.log('=== DEBUG renderActions ===');
+  console.log('status:', o.status);
+  console.log('bayar:', o.bayar);
+  console.log('total_bayar:', o.total_bayar);
+  console.log('lunas:', lunas);
+  console.log('should show lunasi:', !lunas && o.status !== 'dibatalkan');
+
   // Update status dropdown
   if (['pending', 'proses'].includes(o.status)) {
     const select = document.getElementById('selectStatus');
@@ -957,7 +973,10 @@ function renderActions() {
 
   // Lunasi button - tampilkan untuk semua status kecuali dibatalkan, selama belum lunas
   if (!lunas && o.status !== 'dibatalkan') {
+    console.log('Setting btnLunasi to block');
     document.getElementById('btnLunasi').style.display = 'block';
+  } else {
+    console.log('NOT showing btnLunasi. Reason:', lunas ? 'already lunas' : 'status is dibatalkan');
   }
 
   // WA buttons
