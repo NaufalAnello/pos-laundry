@@ -144,16 +144,6 @@ exports.update = async (req, res) => {
 };
 
 // ── DELETE /api/v1/transaksi/:id/biaya-tambahan/:biaya_id ────────────────────
-const index = async (req, res) => {
-  try {
-    const biaya = await db('biaya_tambahan')
-      .where('transaksi_id', req.params.id)
-      .orderBy('created_at', 'asc');
-    res.json({ success: true, data: biaya });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
 exports.destroy = async (req, res) => {
   try {
     const transaksi = await transaksiModel.findById(req.params.id);
@@ -188,15 +178,3 @@ exports.destroy = async (req, res) => {
 };
 
 
-const index = async (req, res) => {
-  try {
-    const biaya = await db('biaya_tambahan')
-      .where('transaksi_id', req.params.id)
-      .orderBy('created_at', 'asc');
-    res.json({ success: true, data: biaya });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-module.exports = { index, store, update, destroy };
