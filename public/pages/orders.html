@@ -358,6 +358,11 @@ function renderTable(rows) {
       <td style="white-space:nowrap;font-size:12px;">${fmtDate(t.tanggal_selesai)}</td>
       <td>
         <div class="td-actions">
+          ${!lunas && t.status !== 'dibatalkan' ? `
+          <a href="/order/detail?id=${t.id}"
+             class="btn btn-sm btn-green" title="Lunasi pembayaran"
+             onclick="event.stopPropagation()">💰 Lunasi</a>
+          ` : ''}
           <a href="/api/v1/transaksi/${t.id}/struk" target="_blank"
              class="btn btn-sm btn-outline" title="Cetak struk">Struk</a>
           ${hasPhone ? `
