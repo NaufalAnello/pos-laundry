@@ -1,5 +1,5 @@
 exports.up = function (knex) {
-  return knex.schema.createTable('wa_log', function (table) {
+  return knex.schema.createTableIfNotExists('wa_log', function (table) {
     table.increments('id').primary();
     table.string('telepon', 20).notNullable();
     table.text('pesan').notNullable();

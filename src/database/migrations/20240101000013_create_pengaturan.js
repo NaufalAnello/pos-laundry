@@ -1,5 +1,5 @@
 exports.up = function (knex) {
-  return knex.schema.createTable('pengaturan', function (table) {
+  return knex.schema.createTableIfNotExists('pengaturan', function (table) {
     table.increments('id').primary();
     table.string('kunci', 100).unique().notNullable();
     table.text('nilai');

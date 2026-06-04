@@ -1,5 +1,5 @@
 exports.up = function (knex) {
-  return knex.schema.createTable('poin_pelanggan', function (table) {
+  return knex.schema.createTableIfNotExists('poin_pelanggan', function (table) {
     table.increments('id').primary();
     table.integer('pelanggan_id').unsigned().notNullable()
       .references('id').inTable('pelanggan').onDelete('CASCADE');

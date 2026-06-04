@@ -1,5 +1,5 @@
 exports.up = function (knex) {
-  return knex.schema.createTable('kas', function (table) {
+  return knex.schema.createTableIfNotExists('kas', function (table) {
     table.increments('id').primary();
     table.date('tanggal').notNullable();
     table.string('jenis', 10).notNullable(); // masuk, keluar

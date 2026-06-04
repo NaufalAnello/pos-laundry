@@ -1,5 +1,5 @@
 exports.up = function (knex) {
-  return knex.schema.createTable('transaksi', function (table) {
+  return knex.schema.createTableIfNotExists('transaksi', function (table) {
     table.increments('id').primary();
     table.string('nomor_transaksi', 50).unique().notNullable();
     table.integer('pelanggan_id').unsigned()

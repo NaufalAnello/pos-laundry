@@ -1,5 +1,5 @@
 exports.up = async function(knex) {
-  await knex.schema.createTable('biaya_tambahan', (table) => {
+  await knex.schema.createTableIfNotExists('biaya_tambahan', (table) => {
     table.increments('id').primary();
     table.integer('transaksi_id').notNullable()
       .references('id').inTable('transaksi').onDelete('CASCADE');

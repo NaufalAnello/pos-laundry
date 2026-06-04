@@ -1,5 +1,5 @@
 exports.up = function (knex) {
-  return knex.schema.createTable('paket_promo', function (table) {
+  return knex.schema.createTableIfNotExists('paket_promo', function (table) {
     table.increments('id').primary();
     table.string('nama', 100).notNullable();
     table.text('deskripsi');

@@ -1,5 +1,5 @@
 exports.up = async function (knex) {
-  await knex.schema.createTable('deposit_pelanggan', function (table) {
+  await knex.schema.createTableIfNotExists('deposit_pelanggan', function (table) {
     table.increments('id').primary();
     table.integer('pelanggan_id').unsigned()
       .references('id').inTable('pelanggan').notNullable();
@@ -8,7 +8,7 @@ exports.up = async function (knex) {
     table.unique(['pelanggan_id']);
   });
 
-  await knex.schema.createTable('mutasi_deposit', function (table) {
+  await knex.schema.createTableIfNotExists('mutasi_deposit', function (table) {
     table.increments('id').primary();
     table.integer('pelanggan_id').unsigned()
       .references('id').inTable('pelanggan').notNullable();

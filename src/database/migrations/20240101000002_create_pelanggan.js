@@ -1,5 +1,5 @@
 exports.up = function (knex) {
-  return knex.schema.createTable('pelanggan', function (table) {
+  return knex.schema.createTableIfNotExists('pelanggan', function (table) {
     table.increments('id').primary();
     table.string('nama', 100).notNullable();
     table.string('telepon', 20);

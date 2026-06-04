@@ -1,6 +1,6 @@
 exports.up = async function(knex) {
   // Buat tabel riwayat_bayar
-  await knex.schema.createTable('riwayat_bayar', (table) => {
+  await knex.schema.createTableIfNotExists('riwayat_bayar', (table) => {
     table.increments('id').primary();
     table.integer('transaksi_id')
       .unsigned()
