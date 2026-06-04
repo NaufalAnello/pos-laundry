@@ -185,8 +185,14 @@ const findDetailById = async (id) => {
   };
 
   if (transaksi.pelanggan) {
-    // Hitung poin yang didapat dari order ini (asumsi 1% dari total)
-    const poinDidapat = Math.floor(transaksi.total_bayar * 0.01);
+    // Ambil pengaturan poin_per_nominal dari database
+    const settingRow = await db('pengaturan')
+      .where('kunci', 'poin_per_nominal')
+      .first();
+    const poinPerNominal = parseInt(settingRow?.nilai) || 10000;
+
+    // Hitung poin yang didapat: setiap poin_per_nominal rupiah = 1 poin
+    const poinDidapat = Math.floor(transaksi.total_bayar / poinPerNominal);
     transaksi.poin_order = {
       didapat: poinDidapat,
       sebelum: transaksi.pelanggan.total_poin - poinDidapat,
