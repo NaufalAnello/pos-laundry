@@ -578,3 +578,204 @@ exports.destroy = async (req, res) => {
     res.status(500).json({ error: 'Gagal menghapus order' });
   }
 };
+
+// ── POST /api/v1/transaksi/:id/item ──────────────────────────────────────────
+// Tambah item baru ke order yang masih aktif (pending/proses)
+exports.addItem = async (req, res) => {
+  const db = require('../database/connection');
+  const schema = Joi.object({
+    layanan_id: Joi.number().integer().positive().required(),
+    jumlah:     Joi.number().positive().required(),
+    catatan:    Joi.string().allow('', null)
+  });
+
+  const { error, value } = schema.validate(req.body);
+  if (error) return res.status(400).json({ error: error.details.map(d => d.message).join(', ') });
+
+  try {
+    const transaksi = await transaksiModel.findById(req.params.id);
+    if (!transaksi) return res.status(404).json({ error: 'Transaksi tidak ditemukan' });
+
+    // Validasi status harus pending atau proses
+    if (!['pending', 'proses'].includes(transaksi.status)) {
+      return res.status(400).json({
+        error: 'Hanya order dengan status pending atau proses yang bisa diedit'
+      });
+    }
+
+    // Cek layanan
+    const layanan = await layananModel.findById(value.layanan_id);
+    if (!layanan) return res.status(400).json({ error: 'Layanan tidak ditemukan' });
+
+    await db.transaction(async (trx) => {
+      // Tambah item baru
+      await trx('detail_transaksi').insert({
+        transaksi_id: req.params.id,
+        layanan_id:   layanan.id,
+        nama_layanan: layanan.nama,
+        jumlah:       value.jumlah,
+        satuan:       layanan.satuan,
+        harga_satuan: layanan.harga,
+        subtotal:     layanan.harga * value.jumlah,
+        catatan:      value.catatan || null,
+        created_at:   new Date()
+      });
+
+      // Recalculate total
+      await recalculateOrderTotal(trx, req.params.id);
+    });
+
+    // Return data lengkap
+    const updated = await transaksiModel.findDetailById(req.params.id);
+    res.json({ message: 'Item berhasil ditambahkan', data: updated });
+  } catch (err) {
+    console.error('[transaksi:addItem]', err);
+    res.status(500).json({ error: 'Gagal menambah item' });
+  }
+};
+
+// ── PUT /api/v1/transaksi/:id/item/:item_id ──────────────────────────────────
+// Edit item yang sudah ada (jumlah atau catatan)
+exports.updateItem = async (req, res) => {
+  const db = require('../database/connection');
+  const schema = Joi.object({
+    jumlah:  Joi.number().positive().required(),
+    catatan: Joi.string().allow('', null)
+  });
+
+  const { error, value } = schema.validate(req.body);
+  if (error) return res.status(400).json({ error: error.details.map(d => d.message).join(', ') });
+
+  try {
+    const transaksi = await transaksiModel.findById(req.params.id);
+    if (!transaksi) return res.status(404).json({ error: 'Transaksi tidak ditemukan' });
+
+    if (!['pending', 'proses'].includes(transaksi.status)) {
+      return res.status(400).json({
+        error: 'Hanya order dengan status pending atau proses yang bisa diedit'
+      });
+    }
+
+    // Cek item ada
+    const item = await db('detail_transaksi')
+      .where({ id: req.params.item_id, transaksi_id: req.params.id })
+      .first();
+    if (!item) return res.status(404).json({ error: 'Item tidak ditemukan' });
+
+    await db.transaction(async (trx) => {
+      // Update item
+      const newSubtotal = item.harga_satuan * value.jumlah;
+      await trx('detail_transaksi')
+        .where('id', req.params.item_id)
+        .update({
+          jumlah:   value.jumlah,
+          subtotal: newSubtotal,
+          catatan:  value.catatan || null
+        });
+
+      // Recalculate total
+      await recalculateOrderTotal(trx, req.params.id);
+    });
+
+    const updated = await transaksiModel.findDetailById(req.params.id);
+    res.json({ message: 'Item berhasil diupdate', data: updated });
+  } catch (err) {
+    console.error('[transaksi:updateItem]', err);
+    res.status(500).json({ error: 'Gagal mengupdate item' });
+  }
+};
+
+// ── DELETE /api/v1/transaksi/:id/item/:item_id ───────────────────────────────
+// Hapus item dari order (minimal harus ada 1 item)
+exports.deleteItem = async (req, res) => {
+  const db = require('../database/connection');
+
+  try {
+    const transaksi = await transaksiModel.findById(req.params.id);
+    if (!transaksi) return res.status(404).json({ error: 'Transaksi tidak ditemukan' });
+
+    if (!['pending', 'proses'].includes(transaksi.status)) {
+      return res.status(400).json({
+        error: 'Hanya order dengan status pending atau proses yang bisa diedit'
+      });
+    }
+
+    // Cek jumlah item
+    const itemCount = await db('detail_transaksi')
+      .where('transaksi_id', req.params.id)
+      .count('* as total')
+      .first();
+
+    if (itemCount.total <= 1) {
+      return res.status(400).json({
+        error: 'Tidak bisa hapus item terakhir. Minimal harus ada 1 item di order.'
+      });
+    }
+
+    // Cek item ada
+    const item = await db('detail_transaksi')
+      .where({ id: req.params.item_id, transaksi_id: req.params.id })
+      .first();
+    if (!item) return res.status(404).json({ error: 'Item tidak ditemukan' });
+
+    await db.transaction(async (trx) => {
+      // Hapus item
+      await trx('detail_transaksi').where('id', req.params.item_id).del();
+
+      // Recalculate total
+      await recalculateOrderTotal(trx, req.params.id);
+    });
+
+    const updated = await transaksiModel.findDetailById(req.params.id);
+    res.json({ message: 'Item berhasil dihapus', data: updated });
+  } catch (err) {
+    console.error('[transaksi:deleteItem]', err);
+    res.status(500).json({ error: 'Gagal menghapus item' });
+  }
+};
+
+// ── Helper: Recalculate order total setelah perubahan item ───────────────────
+async function recalculateOrderTotal(trx, transaksiId) {
+  // Ambil semua item
+  const items = await trx('detail_transaksi')
+    .where('transaksi_id', transaksiId)
+    .select('*');
+
+  // Hitung total harga
+  const totalHarga = items.reduce((sum, it) => sum + it.subtotal, 0);
+
+  // Ambil transaksi untuk ambil diskon & poin
+  const transaksi = await trx('transaksi').where('id', transaksiId).first();
+
+  // Recalculate total_bayar (dengan diskon & poin yang sudah ada)
+  const settings = await svc.getPoinSettings();
+  const { totalBayar } = svc.hitungTotal(
+    items,
+    transaksi.paket_promo_id ? { diskon_nominal: transaksi.diskon } : null,
+    transaksi.poin_digunakan || 0,
+    settings.nilaiPerPoin
+  );
+
+  // Update estimasi_selesai berdasarkan layanan dengan estimasi terbesar
+  const estimasiList = [];
+  for (const it of items) {
+    if (it.layanan_id) {
+      const layanan = await trx('layanan').where('id', it.layanan_id).first();
+      if (layanan) estimasiList.push(Number(layanan.estimasi_hari) || 2);
+    }
+  }
+  const maxEstimasi = estimasiList.length > 0 ? Math.max(...estimasiList) : 2;
+  const tanggalMasuk = new Date(transaksi.tanggal_masuk);
+  const estimasiSelesai = new Date(tanggalMasuk);
+  estimasiSelesai.setDate(estimasiSelesai.getDate() + maxEstimasi);
+
+  // Update transaksi
+  await trx('transaksi')
+    .where('id', transaksiId)
+    .update({
+      total_harga:      totalHarga,
+      total_bayar:      totalBayar,
+      estimasi_selesai: estimasiSelesai,
+      updated_at:       new Date()
+    });
+}

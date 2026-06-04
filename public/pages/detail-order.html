@@ -300,12 +300,57 @@
                 <th class="text-right">Jumlah</th>
                 <th class="text-right">Harga Satuan</th>
                 <th class="text-right">Subtotal</th>
+                <th id="itemsActionsHeader" style="width:80px;display:none"></th>
               </tr>
             </thead>
             <tbody id="itemsBody">
-              <tr><td colspan="4" class="empty-state">Memuat...</td></tr>
+              <tr><td colspan="5" class="empty-state">Memuat...</td></tr>
             </tbody>
           </table>
+
+          <!-- Form Tambah Item (inline) -->
+          <div id="formTambahItem" style="display:none;margin-top:16px;padding:16px;background:var(--gray-1);border-radius:8px;border:1.5px dashed var(--gray-3);">
+            <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--gray-7);">➕ Tambah Item Baru</div>
+
+            <div style="display:grid;gap:12px;">
+              <div>
+                <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--gray-6);">Layanan</label>
+                <select id="inputLayanan" style="width:100%;padding:8px;border:1px solid var(--gray-3);border-radius:6px;font-size:13px;">
+                  <option value="">Pilih Layanan...</option>
+                </select>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div>
+                  <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--gray-6);">Jumlah</label>
+                  <input type="number" id="inputJumlah" min="0.1" step="0.1" placeholder="0" style="width:100%;padding:8px;border:1px solid var(--gray-3);border-radius:6px;font-size:13px;">
+                </div>
+                <div>
+                  <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--gray-6);">Satuan</label>
+                  <input type="text" id="inputSatuan" readonly style="width:100%;padding:8px;border:1px solid var(--gray-3);border-radius:6px;font-size:13px;background:var(--gray-1);color:var(--gray-5);">
+                </div>
+              </div>
+
+              <div>
+                <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--gray-6);">Catatan (opsional)</label>
+                <input type="text" id="inputCatatan" placeholder="Contoh: warna merah" style="width:100%;padding:8px;border:1px solid var(--gray-3);border-radius:6px;font-size:13px;">
+              </div>
+
+              <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button onclick="closeTambahItem()" style="padding:8px 16px;border:1px solid var(--gray-3);border-radius:6px;background:#fff;color:var(--gray-7);font-size:13px;font-weight:600;cursor:pointer;">
+                  Batal
+                </button>
+                <button onclick="submitTambahItem()" style="padding:8px 16px;border:none;border-radius:6px;background:var(--blue);color:#fff;font-size:13px;font-weight:600;cursor:pointer;">
+                  Tambah ke Order
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tombol Tambah Item -->
+          <button id="btnShowTambahItem" onclick="showTambahItem()" style="display:none;margin-top:12px;width:100%;padding:10px;border:1.5px dashed var(--blue);border-radius:8px;background:var(--blue-lt);color:var(--blue);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;">
+            + Tambah Item
+          </button>
         </div>
       </div>
 
@@ -713,8 +758,28 @@ function renderDetail() {
   }
 
   // Items
+  const canEdit = ['pending', 'proses'].includes(o.status);
+
+  // Show/hide actions column header
+  document.getElementById('itemsActionsHeader').style.display = canEdit ? '' : 'none';
+
   const itemsHtml = o.items.map(item => {
     const catatan = item.catatan ? `<div class="item-catatan">Catatan: ${item.catatan}</div>` : '';
+    const actions = canEdit ? `
+      <td style="text-align:right">
+        <button onclick="editItem(${item.id}, ${item.jumlah}, '${(item.catatan || '').replace(/'/g, "\\'")}')"
+                style="padding:6px 8px;border:none;background:var(--blue-lt);color:var(--blue);border-radius:4px;cursor:pointer;margin-right:4px;font-size:12px;"
+                title="Edit item">
+          ✏️
+        </button>
+        <button onclick="deleteItem(${item.id}, '${item.nama_layanan}')"
+                style="padding:6px 8px;border:none;background:var(--red-lt);color:var(--red);border-radius:4px;cursor:pointer;font-size:12px;"
+                title="Hapus item">
+          🗑️
+        </button>
+      </td>
+    ` : '';
+
     return `<tr>
       <td>
         <div class="text-bold">${item.nama_layanan}</div>
@@ -723,6 +788,7 @@ function renderDetail() {
       <td class="text-right">${item.jumlah} ${item.satuan}</td>
       <td class="text-right">${fmtRp(item.harga)}</td>
       <td class="text-right text-bold">${fmtRp(item.subtotal)}</td>
+      ${actions}
     </tr>`;
   }).join('');
   document.getElementById('itemsBody').innerHTML = itemsHtml;
@@ -846,6 +912,11 @@ function renderActions() {
   // Hapus button - hanya untuk admin
   if (currentUser && currentUser.role === 'admin') {
     document.getElementById('btnHapus').style.display = 'block';
+  }
+
+  // Tambah Item button - hanya untuk pending/proses
+  if (['pending', 'proses'].includes(o.status)) {
+    document.getElementById('btnShowTambahItem').style.display = 'block';
   }
 }
 
@@ -1185,6 +1256,150 @@ async function submitHapusOrder() {
     showToast('Koneksi gagal');
     btn.disabled = false;
     btn.textContent = 'Hapus Permanen';
+  }
+}
+
+// ── Item Management ──────────────────────────────────────────────────────────
+let layananList = [];
+
+// Load layanan untuk dropdown
+async function loadLayanan() {
+  try {
+    const r = await fetch('/api/v1/layanan?page=1&limit=999');
+    const d = await r.json();
+    if (d.data) {
+      layananList = d.data;
+      const select = document.getElementById('inputLayanan');
+      select.innerHTML = '<option value="">Pilih Layanan...</option>' +
+        layananList.map(l => `<option value="${l.id}" data-satuan="${l.satuan}">${l.nama} - ${fmtRp(l.harga)}/${l.satuan}</option>`).join('');
+    }
+  } catch (err) {
+    console.error('Failed to load layanan:', err);
+  }
+}
+
+function showTambahItem() {
+  if (layananList.length === 0) loadLayanan();
+  document.getElementById('formTambahItem').style.display = 'block';
+  document.getElementById('btnShowTambahItem').style.display = 'none';
+  document.getElementById('inputLayanan').value = '';
+  document.getElementById('inputJumlah').value = '';
+  document.getElementById('inputSatuan').value = '';
+  document.getElementById('inputCatatan').value = '';
+}
+
+function closeTambahItem() {
+  document.getElementById('formTambahItem').style.display = 'none';
+  document.getElementById('btnShowTambahItem').style.display = 'block';
+}
+
+// Update satuan saat pilih layanan
+document.addEventListener('DOMContentLoaded', () => {
+  const selectLayanan = document.getElementById('inputLayanan');
+  if (selectLayanan) {
+    selectLayanan.addEventListener('change', (e) => {
+      const opt = e.target.selectedOptions[0];
+      const satuan = opt ? opt.getAttribute('data-satuan') : '';
+      document.getElementById('inputSatuan').value = satuan || '';
+    });
+  }
+});
+
+async function submitTambahItem() {
+  const layananId = document.getElementById('inputLayanan').value;
+  const jumlah = parseFloat(document.getElementById('inputJumlah').value);
+  const catatan = document.getElementById('inputCatatan').value.trim();
+
+  if (!layananId) {
+    showToast('Pilih layanan terlebih dahulu');
+    return;
+  }
+  if (!jumlah || jumlah <= 0) {
+    showToast('Jumlah harus lebih dari 0');
+    return;
+  }
+
+  try {
+    const r = await fetch(`/api/v1/transaksi/${orderId}/item`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ layanan_id: parseInt(layananId), jumlah, catatan: catatan || null })
+    });
+    const d = await r.json();
+    if (!r.ok) {
+      showToast('Gagal: ' + d.error);
+      return;
+    }
+    showToast('Item berhasil ditambahkan');
+    closeTambahItem();
+    // Refresh data
+    orderData = d.data;
+    renderDetail();
+  } catch (err) {
+    console.error(err);
+    showToast('Koneksi gagal');
+  }
+}
+
+function editItem(itemId, currentJumlah, currentCatatan) {
+  const newJumlah = prompt('Jumlah baru:', currentJumlah);
+  if (newJumlah === null) return; // Cancel
+
+  const jumlah = parseFloat(newJumlah);
+  if (!jumlah || jumlah <= 0) {
+    showToast('Jumlah harus lebih dari 0');
+    return;
+  }
+
+  const newCatatan = prompt('Catatan (opsional):', currentCatatan || '');
+  if (newCatatan === null) return; // Cancel
+
+  updateItemAPI(itemId, jumlah, newCatatan.trim() || null);
+}
+
+async function updateItemAPI(itemId, jumlah, catatan) {
+  try {
+    const r = await fetch(`/api/v1/transaksi/${orderId}/item/${itemId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jumlah, catatan })
+    });
+    const d = await r.json();
+    if (!r.ok) {
+      showToast('Gagal: ' + d.error);
+      return;
+    }
+    showToast('Item berhasil diupdate');
+    orderData = d.data;
+    renderDetail();
+  } catch (err) {
+    console.error(err);
+    showToast('Koneksi gagal');
+  }
+}
+
+function deleteItem(itemId, namaLayanan) {
+  if (!confirm(`Hapus item "${namaLayanan}" dari order?`)) return;
+
+  deleteItemAPI(itemId);
+}
+
+async function deleteItemAPI(itemId) {
+  try {
+    const r = await fetch(`/api/v1/transaksi/${orderId}/item/${itemId}`, {
+      method: 'DELETE'
+    });
+    const d = await r.json();
+    if (!r.ok) {
+      showToast('Gagal: ' + d.error);
+      return;
+    }
+    showToast('Item berhasil dihapus');
+    orderData = d.data;
+    renderDetail();
+  } catch (err) {
+    console.error(err);
+    showToast('Koneksi gagal');
   }
 }
 

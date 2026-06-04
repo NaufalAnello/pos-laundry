@@ -15,6 +15,11 @@ router.put('/:id/status',     ctrl.updateStatus);
 router.put('/:id/lunasi',     ctrl.lunasi);
 router.delete('/:id',         requireAdmin, ctrl.destroy);
 
+// Item management (tambah/edit/hapus item layanan)
+router.post('/:id/item',          ctrl.addItem);
+router.put('/:id/item/:item_id',  ctrl.updateItem);
+router.delete('/:id/item/:item_id', ctrl.deleteItem);
+
 // Struk
 router.get('/:id/struk',      struk.show);
 
