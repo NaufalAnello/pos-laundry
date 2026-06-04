@@ -137,6 +137,11 @@ app.get('/order', (req, res) => {
 // Detail order
 app.get('/order/detail', (req, res) => {
   if (!req.session?.userId) return res.redirect('/login');
+  // Hindari browser nyajiin HTML lama dari cache — sering bikin perubahan JS
+  // (mis. tombol Lunasi) kelihatan tidak muncul padahal kode-nya sudah benar.
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
   res.sendFile(path.join(__dirname, '../public/pages/detail-order.html'));
 });
 

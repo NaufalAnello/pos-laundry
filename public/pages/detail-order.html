@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
   <link rel="stylesheet" href="/css/layout.css"/>
   <title>Detail Pesanan — POS Laundry</title>
   <style>
@@ -788,6 +791,10 @@ function renderDetail() {
   console.log('[detail-order] renderDetail invoked');
   const o = orderData;
   if (!o) throw new Error('orderData kosong');
+
+  // Render tombol aksi DULU. Kalau ada exception di tengah rendering item /
+  // ringkasan / dst, tombol Lunasi tetap muncul — kasir tidak buntu.
+  try { renderActions(); } catch (e) { console.error('[detail-order] early renderActions error:', e); }
 
   // Header
   document.getElementById('headerNomor').textContent = o.nomor_transaksi;
