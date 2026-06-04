@@ -26,11 +26,20 @@ exports.up = async function(knex) {
     table.index('created_at');
   });
 
-  // Tambah kolom ke tabel transaksi
-  await knex.schema.table('transaksi', (table) => {
-    table.timestamp('tanggal_lunas').nullable();
-    table.decimal('total_dibayar', 12, 2).defaultTo(0);
-  });
+  // Tambah kolom ke tabel transaksi (cek dulu sebelum ALTER TABLE)
+  const hasTanggalLunas = await knex.schema.hasColumn('transaksi', 'tanggal_lunas');
+  if (!hasTanggalLunas) {
+    await knex.schema.alterTable('transaksi', (table) => {
+      table.timestamp('tanggal_lunas').nullable();
+    });
+  }
+
+  const hasTotalDibayar = await knex.schema.hasColumn('transaksi', 'total_dibayar');
+  if (!hasTotalDibayar) {
+    await knex.schema.alterTable('transaksi', (table) => {
+      table.decimal('total_dibayar', 12, 2).defaultTo(0);
+    });
+  }
 
   // Migrasi data existing: set total_dibayar = bayar untuk data lama
   await knex.raw(`
