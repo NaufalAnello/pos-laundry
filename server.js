@@ -15,6 +15,8 @@ const PORT = process.env.PORT || 3000;
 async function runMigrations() {
   try {
     console.log('🔄 Menjalankan database migrations...');
+    console.log(`   Database: ${process.env.DB_PATH || './data/laundry.db'}`);
+
     const [batch, migrations] = await db.migrate.latest();
 
     if (migrations.length === 0) {
@@ -23,8 +25,34 @@ async function runMigrations() {
       console.log(`✓ Berhasil menjalankan ${migrations.length} migration(s):`);
       migrations.forEach(m => console.log(`  - ${m}`));
     }
+
+    // Verifikasi tabel critical
+    const hasBiayaTambahan = await db.schema.hasTable('biaya_tambahan');
+    const hasRiwayatBayar = await db.schema.hasTable('riwayat_bayar');
+
+    console.log('✓ Verifikasi tabel:');
+    console.log(`  - biaya_tambahan: ${hasBiayaTambahan ? '✓' : '✗ MISSING'}`);
+    console.log(`  - riwayat_bayar: ${hasRiwayatBayar ? '✓' : '✗ MISSING'}`);
+
+    if (!hasBiayaTambahan || !hasRiwayatBayar) {
+      console.error('⚠️  PERINGATAN: Beberapa tabel tidak ditemukan!');
+      console.error('   Mencoba force re-run migration...');
+
+      // Force rollback dan re-run migration terakhir
+      try {
+        await db.migrate.rollback();
+        const [newBatch, newMigrations] = await db.migrate.latest();
+        console.log(`✓ Force re-run berhasil: ${newMigrations.length} migration(s)`);
+      } catch (retryErr) {
+        console.error('❌ Force re-run gagal:', retryErr.message);
+        console.error('   Solusi: Jalankan manual "npm run migrate" atau hapus data/laundry.db');
+      }
+    } else {
+      console.log('✓ Database migration selesai');
+    }
   } catch (err) {
     console.error('❌ Gagal menjalankan migrations:', err.message);
+    console.error('   Stack:', err.stack);
     console.error('   Server tetap berjalan, tapi beberapa fitur mungkin error.');
     // Tidak exit process, biar server tetap jalan untuk debugging
   }

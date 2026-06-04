@@ -10,7 +10,8 @@
     "migrate:rollback": "knex migrate:rollback",
     "migrate:fresh": "knex migrate:rollback --all && knex migrate:latest",
     "seed": "knex seed:run",
-    "setup": "knex migrate:latest && knex seed:run"
+    "setup": "knex migrate:latest && knex seed:run",
+    "check-db": "node scripts/check-db.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

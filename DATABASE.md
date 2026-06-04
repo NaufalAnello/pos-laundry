@@ -65,10 +65,52 @@ npx knex migrate:make nama_migration
 
 **Penyebab**: Migration belum dijalankan atau gagal.
 
+**Diagnosis**:
+```bash
+# Cek status database & migration
+npm run check-db
+
+# Output akan menunjukkan:
+# - Path database yang digunakan
+# - Migration yang sudah/belum dijalankan
+# - Tabel yang ada/hilang
+```
+
 **Solusi**:
-1. Restart server (auto-migration akan jalan)
-2. Atau jalankan manual: `npm run migrate`
-3. Cek log server untuk error detail
+
+**Opsi 1: Auto-fix (Restart server)**
+```bash
+# Server otomatis jalankan migration saat startup
+npm start
+
+# Lihat log:
+# ✓ Database migration selesai
+# ✓ biaya_tambahan: ✓
+# ✓ riwayat_bayar: ✓
+```
+
+**Opsi 2: Manual Migration**
+```bash
+# Jalankan migration manual
+npm run migrate
+
+# Cek hasil
+npm run check-db
+```
+
+**Opsi 3: Fresh Install (Hapus database)**
+```bash
+# HATI-HATI: Akan hapus semua data!
+rm data/laundry.db
+npm run setup  # migrate + seed
+```
+
+**Opsi 4: Force Re-run**
+```bash
+# Rollback & re-run migration terakhir
+npm run migrate:rollback
+npm run migrate
+```
 
 ### Migration Failed
 
