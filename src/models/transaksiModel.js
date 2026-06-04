@@ -200,6 +200,19 @@ const findDetailById = async (id) => {
     };
   }
 
+  // Get biaya tambahan
+  transaksi.biaya_tambahan = await db('biaya_tambahan as bt')
+    .leftJoin('users as u', 'u.id', 'bt.created_by')
+    .where('bt.transaksi_id', id)
+    .orderBy('bt.id', 'asc')
+    .select(
+      'bt.id',
+      'bt.keterangan',
+      'bt.nominal',
+      'bt.created_at',
+      'u.nama as created_by_nama'
+    );
+
   return transaksi;
 };
 

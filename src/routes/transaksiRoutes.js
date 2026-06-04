@@ -4,6 +4,7 @@ const ctrl     = require('../controllers/transaksiController');
 const struk    = require('../controllers/strukController');
 const wa       = require('../controllers/waController');
 const printer  = require('../controllers/printerController');
+const biayaTambahan = require('../controllers/biayaTambahanController');
 const { requireAdmin } = require('../middleware/auth');
 
 router.get('/',               ctrl.index);
@@ -19,6 +20,12 @@ router.delete('/:id',         requireAdmin, ctrl.destroy);
 router.post('/:id/item',          ctrl.addItem);
 router.put('/:id/item/:item_id',  ctrl.updateItem);
 router.delete('/:id/item/:item_id', ctrl.deleteItem);
+
+// Biaya tambahan management
+router.get('/:id/biaya-tambahan',    biayaTambahan.index);
+router.post('/:id/biaya-tambahan',   biayaTambahan.store);
+router.put('/:id/biaya-tambahan/:biaya_id',  biayaTambahan.update);
+router.delete('/:id/biaya-tambahan/:biaya_id', biayaTambahan.destroy);
 
 // Struk
 router.get('/:id/struk',      struk.show);

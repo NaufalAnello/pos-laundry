@@ -354,6 +354,23 @@
         </div>
       </div>
 
+      <!-- Biaya Tambahan -->
+      <div class="card">
+        <div class="card-header">
+          <h2>🧾 Biaya Tambahan</h2>
+        </div>
+        <div class="card-body">
+          <div id="biayaTambahanList">
+            <div style="font-size:13px;color:var(--gray-5);text-align:center;padding:16px;">Tidak ada biaya tambahan</div>
+          </div>
+
+          <!-- Tombol Tambah Biaya -->
+          <button id="btnShowTambahBiaya" onclick="showModalBiaya()" style="display:none;margin-top:12px;width:100%;padding:10px;border:1.5px dashed var(--green);border-radius:8px;background:var(--green-lt);color:var(--green);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;">
+            + Tambah Biaya
+          </button>
+        </div>
+      </div>
+
       <!-- Ringkasan Harga -->
       <div class="card">
         <div class="card-header">
@@ -376,6 +393,10 @@
             <div class="ringkasan-row" id="ringkasanAntarRow" style="display:none">
               <span class="ringkasan-label">Biaya Antar Jemput</span>
               <span class="ringkasan-value" style="color:var(--green)" id="ringkasanAntar">—</span>
+            </div>
+            <div class="ringkasan-row" id="ringkasanBiayaTambahanRow" style="display:none">
+              <span class="ringkasan-label">Biaya Tambahan</span>
+              <span class="ringkasan-value" style="color:var(--green)" id="ringkasanBiayaTambahan">—</span>
             </div>
             <div class="ringkasan-row total">
               <span class="ringkasan-label">Total</span>
@@ -651,6 +672,41 @@
   </div>
 </div>
 
+<!-- Modal Biaya Tambahan -->
+<div id="modalBiaya" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:12px;max-width:450px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="padding:20px 24px;border-bottom:1px solid var(--gray-3);display:flex;align-items:center;justify-content:space-between;">
+      <h3 style="font-size:18px;font-weight:800;margin:0;" id="modalBiayaTitle">🧾 Tambah Biaya</h3>
+      <button onclick="closeModalBiaya()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--gray-5);padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;">×</button>
+    </div>
+    <div style="padding:24px;">
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--gray-5);text-transform:uppercase;margin-bottom:6px;">
+          Nama Biaya
+        </label>
+        <input type="text" id="modalBiayaKeterangan" placeholder="Contoh: Biaya noda parah" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-3);border-radius:8px;font-size:14px;outline:none;transition:all .15s;">
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--gray-5);text-transform:uppercase;margin-bottom:6px;">
+          Jumlah Biaya
+        </label>
+        <input type="number" id="modalBiayaNominal" placeholder="0" min="0" step="1000" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-3);border-radius:8px;font-size:14px;outline:none;transition:all .15s;">
+        <div style="font-size:11px;color:var(--gray-5);margin-top:4px;">Format: angka tanpa Rp atau titik</div>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button onclick="closeModalBiaya()" style="flex:1;padding:12px;border:1px solid var(--gray-3);border-radius:8px;background:#fff;color:var(--gray-7);font-size:14px;font-weight:700;cursor:pointer;">
+          Batal
+        </button>
+        <button onclick="submitModalBiaya()" id="modalBtnBiaya" style="flex:1;padding:12px;border:none;border-radius:8px;background:var(--green);color:#fff;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 2px 4px rgba(22,163,74,0.2);">
+          💰 Simpan
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 const fmtDate = s => s ? new Date(s).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '—';
@@ -812,6 +868,13 @@ function renderDetail() {
     document.getElementById('ringkasanAntarRow').style.display = 'flex';
   }
 
+  // Biaya Tambahan
+  if (o.biaya_tambahan && o.biaya_tambahan.length > 0) {
+    const totalBiaya = o.biaya_tambahan.reduce((sum, b) => sum + Number(b.nominal), 0);
+    document.getElementById('ringkasanBiayaTambahan').textContent = '+ ' + fmtRp(totalBiaya);
+    document.getElementById('ringkasanBiayaTambahanRow').style.display = 'flex';
+  }
+
   document.getElementById('ringkasanTotal').textContent = fmtRp(o.total_bayar);
 
   // Waktu
@@ -827,6 +890,9 @@ function renderDetail() {
     document.getElementById('waktuDiambil').textContent = fmtDateTime(o.tanggal_diambil);
     document.getElementById('waktuDiambilItem').style.display = 'block';
   }
+
+  // Biaya Tambahan List
+  renderBiayaTambahan();
 
   // Catatan
   let catatanParts = [];
@@ -917,6 +983,149 @@ function renderActions() {
   // Tambah Item button - hanya untuk pending/proses
   if (['pending', 'proses'].includes(o.status)) {
     document.getElementById('btnShowTambahItem').style.display = 'block';
+  }
+
+  // Tambah Biaya button - hanya untuk pending/proses
+  if (['pending', 'proses'].includes(o.status)) {
+    document.getElementById('btnShowTambahBiaya').style.display = 'block';
+  }
+}
+
+// ── Biaya Tambahan ────────────────────────────────────────────────────────────
+function renderBiayaTambahan() {
+  const o = orderData;
+  const canEdit = ['pending', 'proses'].includes(o.status);
+
+  if (!o.biaya_tambahan || o.biaya_tambahan.length === 0) {
+    document.getElementById('biayaTambahanList').innerHTML = `
+      <div style="font-size:13px;color:var(--gray-5);text-align:center;padding:16px;">
+        Tidak ada biaya tambahan
+      </div>
+    `;
+    return;
+  }
+
+  const html = o.biaya_tambahan.map(b => {
+    const actions = canEdit ? `
+      <div style="display:flex;gap:4px;">
+        <button onclick="editBiaya(${b.id}, '${b.keterangan.replace(/'/g, "\\'")}', ${b.nominal})"
+                style="padding:6px 8px;border:none;background:var(--blue-lt);color:var(--blue);border-radius:4px;cursor:pointer;font-size:12px;"
+                title="Edit biaya">
+          ✏️
+        </button>
+        <button onclick="deleteBiaya(${b.id}, '${b.keterangan.replace(/'/g, "\\'")}')"
+                style="padding:6px 8px;border:none;background:var(--red-lt);color:var(--red);border-radius:4px;cursor:pointer;font-size:12px;"
+                title="Hapus biaya">
+          🗑️
+        </button>
+      </div>
+    ` : '';
+
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--gray-1);border-radius:8px;margin-bottom:8px;">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--gray-9);">${b.keterangan}</div>
+          <div style="font-size:11px;color:var(--gray-5);margin-top:2px;">${fmtDateTime(b.created_at)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="font-size:14px;font-weight:700;color:var(--green);">${fmtRp(b.nominal)}</div>
+          ${actions}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('biayaTambahanList').innerHTML = html;
+}
+
+let modalBiayaMode = 'add';
+let modalBiayaId = null;
+
+function showModalBiaya(mode = 'add', id = null, keterangan = '', nominal = 0) {
+  modalBiayaMode = mode;
+  modalBiayaId = id;
+
+  document.getElementById('modalBiayaTitle').textContent = mode === 'add' ? '🧾 Tambah Biaya' : '✏️ Edit Biaya';
+  document.getElementById('modalBiayaKeterangan').value = keterangan;
+  document.getElementById('modalBiayaNominal').value = nominal;
+  document.getElementById('modalBtnBiaya').textContent = mode === 'add' ? '💰 Simpan' : '✏️ Update';
+
+  document.getElementById('modalBiaya').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModalBiaya() {
+  document.getElementById('modalBiaya').style.display = 'none';
+  document.body.style.overflow = 'auto';
+  modalBiayaMode = 'add';
+  modalBiayaId = null;
+}
+
+async function submitModalBiaya() {
+  const keterangan = document.getElementById('modalBiayaKeterangan').value.trim();
+  const nominal = parseFloat(document.getElementById('modalBiayaNominal').value);
+
+  if (!keterangan) {
+    showToast('Nama biaya tidak boleh kosong');
+    return;
+  }
+  if (!nominal || nominal <= 0) {
+    showToast('Jumlah biaya harus lebih dari 0');
+    return;
+  }
+
+  try {
+    const url = modalBiayaMode === 'add'
+      ? `/api/v1/transaksi/${orderId}/biaya-tambahan`
+      : `/api/v1/transaksi/${orderId}/biaya-tambahan/${modalBiayaId}`;
+
+    const r = await fetch(url, {
+      method: modalBiayaMode === 'add' ? 'POST' : 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keterangan, nominal })
+    });
+    const d = await r.json();
+    if (!r.ok) {
+      showToast('Gagal: ' + d.error);
+      return;
+    }
+
+    showToast(modalBiayaMode === 'add' ? 'Biaya berhasil ditambahkan' : 'Biaya berhasil diupdate');
+    closeModalBiaya();
+    orderData = d.data;
+    renderDetail();
+  } catch (err) {
+    console.error(err);
+    showToast('Koneksi gagal');
+  }
+}
+
+function editBiaya(id, keterangan, nominal) {
+  showModalBiaya('edit', id, keterangan, nominal);
+}
+
+function deleteBiaya(id, keterangan) {
+  if (!confirm(`Hapus biaya "${keterangan}"?`)) return;
+
+  deleteBiayaAPI(id);
+}
+
+async function deleteBiayaAPI(id) {
+  try {
+    const r = await fetch(`/api/v1/transaksi/${orderId}/biaya-tambahan/${id}`, {
+      method: 'DELETE'
+    });
+    const d = await r.json();
+    if (!r.ok) {
+      showToast('Gagal: ' + d.error);
+      return;
+    }
+    showToast('Biaya berhasil dihapus');
+    orderData = d.data;
+    renderDetail();
+  } catch (err) {
+    console.error(err);
+    showToast('Koneksi gagal');
   }
 }
 
