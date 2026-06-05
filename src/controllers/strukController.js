@@ -234,7 +234,7 @@ ${t.pelanggan_nama ? `
   </thead>
   <tbody>
     ${itemsRows}
-    ${biayaTambahanRows ? `<tr><td colspan="4"><hr class="divider"/></td></tr>${biayaTambahanRows}` : ''}
+    ${(t.biaya_tambahan && t.biaya_tambahan.length > 0) ? `<tr><td colspan="4"><hr class="divider"/></td></tr>${biayaTambahanRows}` : ''}
   </tbody>
 </table>
 
