@@ -550,6 +550,9 @@ exports.destroy = async (req, res) => {
 
     // Hapus semua data terkait dalam satu transaction
     await db.transaction(async (trx) => {
+      // Hapus biaya tambahan
+      await trx('biaya_tambahan').where('transaksi_id', req.params.id).del();
+
       // Hapus riwayat bayar
       await trx('riwayat_bayar').where('transaksi_id', req.params.id).del();
 
@@ -564,6 +567,9 @@ exports.destroy = async (req, res) => {
 
       // Hapus mutasi deposit terkait (jika ada)
       await trx('mutasi_deposit').where('transaksi_id', req.params.id).del();
+
+      // Hapus riwayat poin terkait
+      await trx('riwayat_poin').where('transaksi_id', req.params.id).del();
 
       // Hapus transaksi utama
       await trx('transaksi').where('id', req.params.id).del();
