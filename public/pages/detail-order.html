@@ -378,6 +378,11 @@
       <div class="card">
         <div class="card-header">
           <h2>💰 Ringkasan Harga</h2>
+          <button class="action-icon" id="btnEditDiskon" style="display:none" title="Edit Diskon">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
+            </svg>
+          </button>
         </div>
         <div class="card-body">
           <div class="ringkasan">
@@ -386,7 +391,7 @@
               <span class="ringkasan-value" id="ringkasanSubtotal">—</span>
             </div>
             <div class="ringkasan-row" id="ringkasanDiskonRow" style="display:none">
-              <span class="ringkasan-label">Diskon</span>
+              <span class="ringkasan-label" id="ringkasanDiskonLabel">Diskon</span>
               <span class="ringkasan-value" style="color:var(--red)" id="ringkasanDiskon">—</span>
             </div>
             <div class="ringkasan-row" id="ringkasanPoinRow" style="display:none">
@@ -710,6 +715,59 @@
   </div>
 </div>
 
+<!-- Modal Diskon -->
+<div id="modalDiskon" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:12px;max-width:450px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="padding:20px 24px;border-bottom:1px solid var(--gray-3);display:flex;align-items:center;justify-content:space-between;">
+      <h3 style="font-size:18px;font-weight:800;margin:0;">🏷️ Edit Diskon</h3>
+      <button onclick="closeModalDiskon()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--gray-5);padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;">×</button>
+    </div>
+    <div style="padding:24px;">
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--gray-5);text-transform:uppercase;margin-bottom:8px;">Tipe Diskon</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button class="modal-diskon-type-btn active" data-type="nominal" onclick="setModalDiskonType('nominal')" style="padding:10px 8px;border:1.5px solid var(--green);border-radius:8px;background:#f0fdf4;color:var(--green);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;">
+            💵 Nominal (Rp)
+          </button>
+          <button class="modal-diskon-type-btn" data-type="persen" onclick="setModalDiskonType('persen')" style="padding:10px 8px;border:1.5px solid var(--gray-3);border-radius:8px;background:var(--gray-1);color:var(--gray-5);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;">
+            📊 Persen (%)
+          </button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--gray-5);text-transform:uppercase;margin-bottom:6px;" id="modalDiskonLabel">Nilai Diskon (Rp)</label>
+        <input type="number" id="modalDiskonNilai" min="0" step="1000" placeholder="0" oninput="updateModalDiskonPreview()" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-3);border-radius:8px;font-size:14px;outline:none;transition:all .15s;">
+      </div>
+
+      <div id="modalDiskonPreview" style="background:var(--gray-1);border:1.5px solid var(--gray-3);border-radius:8px;padding:12px 14px;margin-bottom:16px;">
+        <div style="font-size:12px;color:var(--gray-5);margin-bottom:8px;">Preview:</div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+          <span>Subtotal</span><span style="font-weight:700;" id="modalDiskonSubtotal">—</span>
+        </div>
+        <div id="modalDiskonPreviewRow" style="display:none;flex;justify-content:space-between;font-size:13px;margin-bottom:4px;color:var(--green);">
+          <span id="modalDiskonPreviewLabel">Diskon</span><span style="font-weight:700;" id="modalDiskonPreviewValue">- Rp 0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;margin-top:8px;padding-top:8px;border-top:1px solid var(--gray-3);">
+          <span style="font-weight:700;">Total</span><span style="font-weight:800;" id="modalDiskonTotal">—</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button onclick="hapusDiskon()" style="flex:1;padding:12px;border:1px solid var(--red);border-radius:8px;background:#fff;color:var(--red);font-size:14px;font-weight:700;cursor:pointer;">
+          🗑️ Hapus
+        </button>
+        <button onclick="closeModalDiskon()" style="padding:12px 16px;border:1px solid var(--gray-3);border-radius:8px;background:#fff;color:var(--gray-7);font-size:14px;font-weight:700;cursor:pointer;">
+          Batal
+        </button>
+        <button onclick="submitDiskon()" style="flex:1;padding:12px;border:none;border-radius:8px;background:var(--green);color:#fff;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 2px 4px rgba(22,163,74,0.2);">
+          💾 Simpan
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 console.log('[detail-order] script loaded');
 
@@ -888,8 +946,21 @@ function renderDetail() {
   document.getElementById('ringkasanSubtotal').textContent = fmtRp(subtotal);
 
   if (o.diskon > 0) {
+    const diskonLabel = (o.diskon_tipe === 'persen' && o.diskon_persen > 0)
+      ? `Diskon (${o.diskon_persen}%)`
+      : 'Diskon';
+    document.getElementById('ringkasanDiskonLabel').textContent = diskonLabel;
     document.getElementById('ringkasanDiskon').textContent = '- ' + fmtRp(o.diskon);
     document.getElementById('ringkasanDiskonRow').style.display = 'flex';
+  }
+
+  // Show edit diskon button if order is pending or proses
+  const btnEditDiskon = document.getElementById('btnEditDiskon');
+  if (['pending', 'proses'].includes(o.status)) {
+    btnEditDiskon.style.display = 'inline-flex';
+    btnEditDiskon.onclick = showModalDiskon;
+  } else {
+    btnEditDiskon.style.display = 'none';
   }
 
   if (o.poin_digunakan > 0) {
@@ -1153,6 +1224,164 @@ async function deleteBiayaAPI(id) {
       return;
     }
     showToast('Biaya berhasil dihapus');
+    orderData = d.data;
+    renderDetail();
+  } catch (err) {
+    console.error(err);
+    showToast('Koneksi gagal');
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// DISKON MODAL
+// ════════════════════════════════════════════════════════
+let modalDiskonType = 'nominal';
+
+function showModalDiskon() {
+  const o = orderData;
+  if (!o) return;
+
+  // Set initial values
+  modalDiskonType = o.diskon_tipe || 'nominal';
+  const nilai = modalDiskonType === 'persen' ? (o.diskon_persen || 0) : (o.diskon || 0);
+
+  document.getElementById('modalDiskonNilai').value = nilai;
+
+  // Set active button
+  document.querySelectorAll('.modal-diskon-type-btn').forEach(btn => {
+    if (btn.dataset.type === modalDiskonType) {
+      btn.style.borderColor = 'var(--green)';
+      btn.style.background = '#f0fdf4';
+      btn.style.color = 'var(--green)';
+      btn.classList.add('active');
+    } else {
+      btn.style.borderColor = 'var(--gray-3)';
+      btn.style.background = 'var(--gray-1)';
+      btn.style.color = 'var(--gray-5)';
+      btn.classList.remove('active');
+    }
+  });
+
+  updateModalDiskonLabel();
+  updateModalDiskonPreview();
+
+  document.getElementById('modalDiskon').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModalDiskon() {
+  document.getElementById('modalDiskon').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+function setModalDiskonType(type) {
+  modalDiskonType = type;
+
+  // Update button styles
+  document.querySelectorAll('.modal-diskon-type-btn').forEach(btn => {
+    if (btn.dataset.type === type) {
+      btn.style.borderColor = 'var(--green)';
+      btn.style.background = '#f0fdf4';
+      btn.style.color = 'var(--green)';
+    } else {
+      btn.style.borderColor = 'var(--gray-3)';
+      btn.style.background = 'var(--gray-1)';
+      btn.style.color = 'var(--gray-5)';
+    }
+  });
+
+  updateModalDiskonLabel();
+  updateModalDiskonPreview();
+}
+
+function updateModalDiskonLabel() {
+  const label = document.getElementById('modalDiskonLabel');
+  const input = document.getElementById('modalDiskonNilai');
+  if (modalDiskonType === 'nominal') {
+    label.textContent = 'Nilai Diskon (Rp)';
+    input.step = '1000';
+  } else {
+    label.textContent = 'Nilai Diskon (%)';
+    input.step = '1';
+  }
+}
+
+function updateModalDiskonPreview() {
+  const o = orderData;
+  if (!o) return;
+
+  const subtotal = o.items.reduce((sum, i) => sum + Number(i.subtotal), 0);
+  const nilaiDiskon = parseFloat(document.getElementById('modalDiskonNilai').value) || 0;
+
+  let diskonRp = 0;
+  if (nilaiDiskon > 0) {
+    if (modalDiskonType === 'nominal') {
+      diskonRp = nilaiDiskon;
+    } else {
+      diskonRp = Math.round(subtotal * nilaiDiskon / 100);
+    }
+  }
+
+  const nilaiPoin = (o.poin_digunakan || 0) * 100;
+  const totalBiaya = (o.biaya_tambahan || []).reduce((sum, b) => sum + Number(b.nominal), 0);
+  const total = Math.max(0, subtotal + totalBiaya - diskonRp - nilaiPoin);
+
+  document.getElementById('modalDiskonSubtotal').textContent = fmtRp(subtotal);
+  document.getElementById('modalDiskonTotal').textContent = fmtRp(total);
+
+  const previewRow = document.getElementById('modalDiskonPreviewRow');
+  if (diskonRp > 0) {
+    const label = modalDiskonType === 'persen' ? `Diskon (${nilaiDiskon}%)` : 'Diskon';
+    document.getElementById('modalDiskonPreviewLabel').textContent = label;
+    document.getElementById('modalDiskonPreviewValue').textContent = '- ' + fmtRp(diskonRp);
+    previewRow.style.display = 'flex';
+  } else {
+    previewRow.style.display = 'none';
+  }
+}
+
+async function submitDiskon() {
+  const nilai = parseFloat(document.getElementById('modalDiskonNilai').value) || 0;
+
+  try {
+    const r = await fetch(`/api/v1/transaksi/${orderId}/diskon`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tipe: modalDiskonType, nilai })
+    });
+    const d = await r.json();
+    if (!r.ok) {
+      showToast('Gagal: ' + d.error);
+      return;
+    }
+
+    showToast('Diskon berhasil diperbarui');
+    closeModalDiskon();
+    orderData = d.data;
+    renderDetail();
+  } catch (err) {
+    console.error(err);
+    showToast('Koneksi gagal');
+  }
+}
+
+async function hapusDiskon() {
+  if (!confirm('Hapus diskon?')) return;
+
+  try {
+    const r = await fetch(`/api/v1/transaksi/${orderId}/diskon`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tipe: 'nominal', nilai: 0 })
+    });
+    const d = await r.json();
+    if (!r.ok) {
+      showToast('Gagal: ' + d.error);
+      return;
+    }
+
+    showToast('Diskon berhasil dihapus');
+    closeModalDiskon();
     orderData = d.data;
     renderDetail();
   } catch (err) {

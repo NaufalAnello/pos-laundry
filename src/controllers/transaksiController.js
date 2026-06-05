@@ -19,6 +19,8 @@ const createSchema = Joi.object({
   paket_promo_id:  Joi.number().integer().positive().allow(null),
   items:           Joi.array().items(itemSchema).min(1).required(),
   poin_digunakan:  Joi.number().integer().min(0).default(0),
+  diskon_tipe:     Joi.string().valid('nominal', 'persen').default('nominal'),
+  diskon_nilai:    Joi.number().min(0).default(0),
   payment_mode:    Joi.string().valid('bayar-sekarang', 'dp', 'bayar-nanti').default('bayar-sekarang'),
   is_dp:           Joi.boolean().default(false),
   metode_bayar:    Joi.string().valid('tunai', 'transfer', 'qris', 'deposit').default('tunai'),
@@ -144,9 +146,12 @@ exports.store = async (req, res) => {
       value.poin_digunakan = 0; // non-member tidak bisa pakai poin
     }
 
-    // Hitung harga
-    const { totalHarga, diskon, totalBayar } = svc.hitungTotal(
-      resolvedItems, promo, value.poin_digunakan, settings.nilaiPerPoin
+    // Hitung harga (dengan diskon manual jika ada)
+    const diskonManual = value.diskon_nilai > 0
+      ? { tipe: value.diskon_tipe, nilai: value.diskon_nilai }
+      : null;
+    const { totalHarga, diskon, totalBayar, diskonTipe, diskonPersen } = svc.hitungTotal(
+      resolvedItems, promo, value.poin_digunakan, settings.nilaiPerPoin, diskonManual
     );
 
     // ── Deposit payment logic ───────────────────────────────────────────────
@@ -225,6 +230,8 @@ exports.store = async (req, res) => {
       status:          'pending',
       total_harga:     totalHarga,
       diskon,
+      diskon_tipe:     diskonTipe,
+      diskon_persen:   diskonPersen,
       poin_digunakan:  value.poin_digunakan,
       total_bayar:     totalBayar,
       bayar:           bayarFinal,
@@ -794,3 +801,59 @@ async function recalculateOrderTotal(trx, transaksiId) {
       updated_at:      new Date()
     });
 }
+
+// ── PUT /api/v1/transaksi/:id/diskon ─────────────────────────────────────────
+exports.updateDiskon = async (req, res) => {
+  const schema = Joi.object({
+    tipe: Joi.string().valid('nominal', 'persen').required(),
+    nilai: Joi.number().min(0).required()
+  });
+
+  const { error, value } = schema.validate(req.body);
+  if (error) return res.status(400).json({ error: error.details.map(d => d.message).join(', ') });
+
+  try {
+    const transaksi = await transaksiModel.findById(req.params.id);
+    if (!transaksi) return res.status(404).json({ error: 'Transaksi tidak ditemukan' });
+    if (transaksi.status === 'diambil' || transaksi.status === 'dibatalkan') {
+      return res.status(400).json({ error: `Transaksi sudah ${transaksi.status}, tidak dapat diubah` });
+    }
+
+    // Hitung total item
+    const totalItem = transaksi.items.reduce((sum, it) => sum + it.subtotal, 0);
+
+    // Hitung biaya tambahan
+    const totalBiayaTambahan = transaksi.biaya_tambahan?.reduce((sum, b) => sum + Number(b.nominal), 0) || 0;
+
+    // Subtotal sebelum diskon
+    const subtotal = totalItem + totalBiayaTambahan;
+
+    // Hitung diskon
+    let diskon = 0;
+    let diskonPersen = 0;
+    if (value.tipe === 'nominal') {
+      diskon = value.nilai;
+    } else if (value.tipe === 'persen') {
+      diskon = Math.round(subtotal * value.nilai / 100);
+      diskonPersen = value.nilai;
+    }
+
+    // Total bayar setelah diskon dan poin
+    const nilaiPoin = (transaksi.poin_digunakan || 0) * 100;
+    const totalBayar = Math.max(0, subtotal - diskon - nilaiPoin);
+
+    // Update transaksi
+    await transaksiModel.update(req.params.id, {
+      diskon,
+      diskon_tipe: value.tipe,
+      diskon_persen: diskonPersen,
+      total_bayar: totalBayar
+    });
+
+    const fresh = await transaksiModel.findById(req.params.id);
+    res.json({ message: 'Diskon berhasil diperbarui', data: fresh });
+  } catch (err) {
+    console.error('[transaksi:updateDiskon]', err);
+    res.status(500).json({ error: 'Gagal memperbarui diskon' });
+  }
+};

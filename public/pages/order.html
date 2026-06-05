@@ -317,6 +317,18 @@
     .payment-tab-btn:hover:not(.active) {
       background: var(--gray-2); border-color: var(--gray-5);
     }
+
+    /* ── Diskon type button ── */
+    .diskon-type-btn {
+      padding: 10px 8px;
+      border: 1.5px solid var(--gray-3); border-radius: 8px;
+      background: var(--gray-1); cursor: pointer;
+      text-align: center; font-size: 13px; font-weight: 600;
+      color: var(--gray-5); transition: all .15s;
+    }
+    .diskon-type-btn.active {
+      border-color: var(--green); background: #f0fdf4; color: var(--green);
+    }
     .payment-tab-content {
       animation: fadeIn 0.2s ease-in;
     }
@@ -564,6 +576,29 @@
       </div>
     </div>
 
+    <!-- Diskon -->
+    <div class="card">
+      <div class="card-header"><h2>🏷️ Diskon</h2></div>
+      <div class="card-body">
+        <div class="field">
+          <label>Tipe Diskon</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+            <button class="diskon-type-btn active" data-type="nominal">
+              💵 Nominal (Rp)
+            </button>
+            <button class="diskon-type-btn" data-type="persen">
+              📊 Persen (%)
+            </button>
+          </div>
+        </div>
+        <div class="field">
+          <label id="diskonLabel">Nilai Diskon (Rp)</label>
+          <input type="number" id="diskonInput" min="0" step="1000" value="0" placeholder="0" />
+          <div id="diskonPreview" style="font-size:12px;color:var(--green);margin-top:6px;font-weight:600;"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Ringkasan Harga -->
     <div class="card">
       <div class="card-header"><h2>💰 Ringkasan</h2></div>
@@ -571,8 +606,11 @@
         <div class="summary-row">
           <span>Subtotal</span><span class="summary-val" id="sumSubtotal">Rp 0</span>
         </div>
-        <div class="summary-row discount" id="sumDiskonRow" style="display:none">
-          <span>Diskon Promo</span><span class="summary-val" id="sumDiskon">- Rp 0</span>
+        <div class="summary-row discount" id="sumDiskonPromoRow" style="display:none">
+          <span>Diskon Promo</span><span class="summary-val" id="sumDiskonPromo">- Rp 0</span>
+        </div>
+        <div class="summary-row discount" id="sumDiskonManualRow" style="display:none">
+          <span id="sumDiskonManualLabel">Diskon</span><span class="summary-val" id="sumDiskonManual">- Rp 0</span>
         </div>
         <div class="summary-row discount" id="sumPoinRow" style="display:none">
           <span>Diskon Poin</span><span class="summary-val" id="sumPoinDiskon">- Rp 0</span>
@@ -773,6 +811,8 @@ const state = {
   promo:           null,
   poinDigunakan:   0,
   usePoin:         false,
+  diskonTipe:      'nominal', // 'nominal' | 'persen'
+  diskonNilai:     0,
   paymentMode:     'bayar-sekarang', // 'bayar-sekarang' | 'dp' | 'bayar-nanti'
   metodeBayar:     'tunai',
   bayar:           0,
@@ -1274,6 +1314,60 @@ document.getElementById('poinInput').addEventListener('input', (e) => {
 });
 
 // ════════════════════════════════════════════════════════
+// DISKON
+// ════════════════════════════════════════════════════════
+document.querySelectorAll('.diskon-type-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.diskon-type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.diskonTipe = btn.dataset.type;
+
+    const label = document.getElementById('diskonLabel');
+    const input = document.getElementById('diskonInput');
+    if (state.diskonTipe === 'nominal') {
+      label.textContent = 'Nilai Diskon (Rp)';
+      input.step = '1000';
+      input.placeholder = '0';
+    } else {
+      label.textContent = 'Nilai Diskon (%)';
+      input.step = '1';
+      input.placeholder = '0';
+    }
+
+    // Recalc with new type
+    const val = parseFloat(input.value) || 0;
+    state.diskonNilai = val;
+    updateDiskonPreview();
+    calcTotal();
+  });
+});
+
+document.getElementById('diskonInput').addEventListener('input', (e) => {
+  const val = parseFloat(e.target.value) || 0;
+  state.diskonNilai = val;
+  updateDiskonPreview();
+  calcTotal();
+});
+
+function updateDiskonPreview() {
+  const preview = document.getElementById('diskonPreview');
+  if (state.diskonNilai <= 0) {
+    preview.textContent = '';
+    return;
+  }
+
+  const totalHarga = state.items.reduce((s, i) => s + i.subtotal, 0);
+  let diskonRp = 0;
+  if (state.diskonTipe === 'nominal') {
+    diskonRp = state.diskonNilai;
+    preview.textContent = `✓ Diskon: Rp ${fmtRp(diskonRp)}`;
+  } else {
+    diskonRp = Math.round(totalHarga * state.diskonNilai / 100);
+    preview.textContent = `✓ Diskon ${state.diskonNilai}% = Rp ${fmtRp(diskonRp)}`;
+  }
+}
+
+// ════════════════════════════════════════════════════════
 // PAYMENT TABS
 // ════════════════════════════════════════════════════════
 document.querySelectorAll('.payment-tab-btn').forEach(btn => {
@@ -1542,25 +1636,56 @@ function updateEstimasiSelesai() {
 // ════════════════════════════════════════════════════════
 function calcTotal() {
   const totalHarga = state.items.reduce((s, i) => s + i.subtotal, 0);
-  let diskon = 0;
+
+  // Diskon promo
+  let diskonPromo = 0;
   if (state.promo) {
     if (state.promo.diskon_persen > 0) {
-      diskon = Math.round(totalHarga * state.promo.diskon_persen / 100);
+      diskonPromo = Math.round(totalHarga * state.promo.diskon_persen / 100);
     } else {
-      diskon = state.promo.diskon_nominal || 0;
+      diskonPromo = state.promo.diskon_nominal || 0;
     }
-    if (state.promo.min_pembelian > 0 && totalHarga < state.promo.min_pembelian) diskon = 0;
+    if (state.promo.min_pembelian > 0 && totalHarga < state.promo.min_pembelian) diskonPromo = 0;
   }
+
+  // Diskon manual (prioritas lebih tinggi dari promo)
+  let diskonManual = 0;
+  if (state.diskonNilai > 0) {
+    if (state.diskonTipe === 'nominal') {
+      diskonManual = state.diskonNilai;
+    } else if (state.diskonTipe === 'persen') {
+      diskonManual = Math.round(totalHarga * state.diskonNilai / 100);
+    }
+  }
+
+  // Jika ada diskon manual, abaikan diskon promo
+  const diskon = diskonManual > 0 ? diskonManual : diskonPromo;
   const diskonPoin = state.poinDigunakan * state.settings.nilaiPerPoin;
   const total      = Math.max(0, totalHarga - diskon - diskonPoin);
 
   document.getElementById('sumSubtotal').textContent = 'Rp ' + fmtRp(totalHarga);
 
-  const diskonRow = document.getElementById('sumDiskonRow');
-  if (diskon > 0) {
-    diskonRow.style.display = '';
-    document.getElementById('sumDiskon').textContent = '- Rp ' + fmtRp(diskon);
-  } else { diskonRow.style.display = 'none'; }
+  // Tampilkan diskon promo
+  const diskonPromoRow = document.getElementById('sumDiskonPromoRow');
+  if (diskonPromo > 0 && diskonManual === 0) {
+    diskonPromoRow.style.display = '';
+    document.getElementById('sumDiskonPromo').textContent = '- Rp ' + fmtRp(diskonPromo);
+  } else {
+    diskonPromoRow.style.display = 'none';
+  }
+
+  // Tampilkan diskon manual
+  const diskonManualRow = document.getElementById('sumDiskonManualRow');
+  if (diskonManual > 0) {
+    diskonManualRow.style.display = '';
+    const label = state.diskonTipe === 'persen'
+      ? `Diskon (${state.diskonNilai}%)`
+      : 'Diskon';
+    document.getElementById('sumDiskonManualLabel').textContent = label;
+    document.getElementById('sumDiskonManual').textContent = '- Rp ' + fmtRp(diskonManual);
+  } else {
+    diskonManualRow.style.display = 'none';
+  }
 
   const poinRow = document.getElementById('sumPoinRow');
   if (diskonPoin > 0) {
@@ -1728,6 +1853,8 @@ async function submitOrder(kirimWa, cetakSetelah) {
     pelanggan_id:    state.pelanggan?.id   || null,
     paket_promo_id:  state.promo?.id       || null,
     poin_digunakan:  state.usePoin ? state.poinDigunakan : 0,
+    diskon_tipe:     state.diskonTipe,
+    diskon_nilai:    state.diskonNilai,
     items:           validItems.map(i => ({ layanan_id: i.layanan_id, jumlah: i.jumlah })),
     payment_mode:    mode,
     is_dp:           isDp,

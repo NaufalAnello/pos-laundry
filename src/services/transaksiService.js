@@ -15,26 +15,42 @@ const getPoinSettings = async (conn = db) => {
   };
 };
 
-// ── Hitung total dari items + promo + poin ──────────────────────────────────
-const hitungTotal = (items, promo, poinDigunakan, nilaiPerPoin) => {
+// ── Hitung total dari items + promo + poin + diskon manual ──────────────────
+const hitungTotal = (items, promo, poinDigunakan, nilaiPerPoin, diskonManual = null) => {
   const totalHarga = items.reduce((sum, it) => sum + it.subtotal, 0);
 
   let diskon = 0;
-  if (promo) {
+  let diskonPersen = 0;
+  let diskonTipe = 'nominal';
+
+  // Prioritas: diskon manual > diskon promo
+  if (diskonManual) {
+    diskonTipe = diskonManual.tipe || 'nominal';
+    if (diskonManual.tipe === 'nominal') {
+      diskon = diskonManual.nilai || 0;
+    } else if (diskonManual.tipe === 'persen') {
+      diskonPersen = diskonManual.nilai || 0;
+      diskon = Math.round(totalHarga * diskonPersen / 100);
+    }
+  } else if (promo) {
     if (promo.diskon_persen > 0) {
       diskon = Math.round(totalHarga * promo.diskon_persen / 100);
+      diskonPersen = promo.diskon_persen;
+      diskonTipe = 'persen';
     } else if (promo.diskon_nominal > 0) {
       diskon = promo.diskon_nominal;
+      diskonTipe = 'nominal';
     }
     if (promo.min_pembelian > 0 && totalHarga < promo.min_pembelian) {
       diskon = 0; // promo tidak berlaku
+      diskonPersen = 0;
     }
   }
 
   const diskonPoin = (poinDigunakan || 0) * nilaiPerPoin;
   const totalBayar = Math.max(0, totalHarga - diskon - diskonPoin);
 
-  return { totalHarga, diskon, diskonPoin, totalBayar };
+  return { totalHarga, diskon, diskonPoin, totalBayar, diskonTipe, diskonPersen };
 };
 
 // ── Tambah/kurang poin pelanggan ────────────────────────────────────────────

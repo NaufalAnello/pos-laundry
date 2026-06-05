@@ -27,6 +27,9 @@ router.post('/:id/biaya-tambahan',   biayaTambahan.store);
 router.put('/:id/biaya-tambahan/:biaya_id',  biayaTambahan.update);
 router.delete('/:id/biaya-tambahan/:biaya_id', biayaTambahan.destroy);
 
+// Diskon management
+router.put('/:id/diskon',            ctrl.updateDiskon);
+
 // Struk
 router.get('/:id/struk',      struk.show);
 

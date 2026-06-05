@@ -246,7 +246,7 @@ ${t.pelanggan_nama ? `
     <td class="amt">Rp ${fmtRp(t.total_harga)}</td>
   </tr>
   ${adaDiskon ? `<tr>
-    <td class="lbl">Diskon${t.promo_nama ? ' (' + escHtml(t.promo_nama) + ')' : ''}</td>
+    <td class="lbl">Diskon${t.promo_nama ? ' (' + escHtml(t.promo_nama) + ')' : (t.diskon_tipe === 'persen' && t.diskon_persen > 0) ? ` (${t.diskon_persen}%)` : ''}</td>
     <td class="amt">- Rp ${fmtRp(t.diskon)}</td>
   </tr>` : ''}
   ${adaPoin ? `<tr>
