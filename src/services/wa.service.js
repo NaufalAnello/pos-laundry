@@ -47,6 +47,13 @@ const buildItemLines = (items = []) =>
     `${i + 1}. ${it.nama_layanan} – ${it.jumlah} ${it.satuan || ''} × Rp ${fmtRp(it.harga_satuan)} = *Rp ${fmtRp(it.subtotal)}*`
   ).join('\n');
 
+// ── Build teks biaya tambahan per baris ──────────────────────────────────────
+const buildBiayaTambahanLines = (biayaTambahan = []) => {
+  if (!biayaTambahan || biayaTambahan.length === 0) return '';
+  const lines = biayaTambahan.map(b => `- ${b.keterangan}: Rp${fmtRp(b.nominal)}`).join('\n');
+  return `\n\n💰 *Biaya Tambahan:*\n${lines}`;
+};
+
 // ── Ambil poin yang didapat dari transaksi ───────────────────────────────────
 const getPoinEarned = async (transaksiId) => {
   const row = await db('riwayat_poin')
@@ -66,7 +73,7 @@ const buildNota = async (transaksi, mode = 'regular') => {
     nomor:           transaksi.nomor_transaksi,
     tanggal_masuk:   fmtDate(transaksi.tanggal_masuk),
     tanggal_selesai: fmtDate(transaksi.tanggal_selesai),
-    items:           buildItemLines(transaksi.items),
+    items:           buildItemLines(transaksi.items) + buildBiayaTambahanLines(transaksi.biaya_tambahan),
     subtotal:        fmtRp(transaksi.total_harga),
     diskon:          fmtRp(transaksi.diskon),
     total:           fmtRp(transaksi.total_bayar),

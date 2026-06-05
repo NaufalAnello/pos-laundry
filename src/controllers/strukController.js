@@ -41,6 +41,12 @@ exports.show = async (req, res) => {
         <td class="num">Rp&nbsp;${fmtRp(it.subtotal)}</td>
       </tr>`).join('');
 
+    const biayaTambahanRows = (t.biaya_tambahan || []).map((bt) => `
+      <tr class="item-row">
+        <td colspan="3">+ ${escHtml(bt.keterangan)}</td>
+        <td class="num">Rp&nbsp;${fmtRp(bt.nominal)}</td>
+      </tr>`).join('');
+
     const adaDiskon   = (t.diskon || 0) > 0;
     const adaPoin     = (t.poin_digunakan || 0) > 0;
     const adaWa       = t.kirim_wa;
@@ -228,6 +234,7 @@ ${t.pelanggan_nama ? `
   </thead>
   <tbody>
     ${itemsRows}
+    ${biayaTambahanRows ? `<tr><td colspan="4"><hr class="divider"/></td></tr>${biayaTambahanRows}` : ''}
   </tbody>
 </table>
 

@@ -82,6 +82,11 @@ const findById = async (id) => {
     .where('d.transaksi_id', id)
     .select('d.*', 'l.satuan as layanan_satuan');
 
+  // Get biaya tambahan
+  transaksi.biaya_tambahan = await db('biaya_tambahan')
+    .where('transaksi_id', id)
+    .select('id', 'keterangan', 'nominal');
+
   return transaksi;
 };
 

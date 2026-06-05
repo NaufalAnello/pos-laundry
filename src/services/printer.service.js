@@ -53,6 +53,16 @@ function generateEscPos(transaksi, pengaturan, poinEarned = 0) {
     lr(qty, 'Rp' + fmtRp(item.subtotal));
     if (item.catatan) { push('  *' + item.catatan); nl(); }
   });
+
+  // Biaya Tambahan
+  if (transaksi.biaya_tambahan && transaksi.biaya_tambahan.length > 0) {
+    line();
+    push('Biaya Tambahan:'); nl();
+    (transaksi.biaya_tambahan || []).forEach(bt => {
+      lr(' ' + String(bt.keterangan).substring(0, LEBAR - 10), 'Rp' + fmtRp(bt.nominal));
+    });
+  }
+
   line();
 
   // Total
@@ -279,6 +289,16 @@ function generateLabelEscPos(transaksi, pengaturan) {
     push('Layanan (' + itemCount + '):'); nl();
     (transaksi.items || []).forEach(item => {
       push('- ' + item.nama_layanan + ' (' + item.jumlah + ' ' + (item.satuan || '') + ')'); nl();
+    });
+    nl();
+  }
+
+  // Biaya Tambahan (format hemat)
+  if (transaksi.biaya_tambahan && transaksi.biaya_tambahan.length > 0) {
+    (transaksi.biaya_tambahan || []).forEach(bt => {
+      const namaShort = String(bt.keterangan).substring(0, 20);
+      const sp = Math.max(1, LEBAR - namaShort.length - 1 - ('Rp' + fmtRp(bt.nominal)).length);
+      push('+' + namaShort + ' '.repeat(sp) + 'Rp' + fmtRp(bt.nominal)); nl();
     });
     nl();
   }
