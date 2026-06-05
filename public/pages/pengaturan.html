@@ -874,7 +874,8 @@ async function loadMarginSummary() {
     }
     const tableRows = withHpp.map(l => {
       const hpp = Number(l.hpp);
-      const mar = hpp > 0 ? ((l.harga - hpp) / hpp * 100).toFixed(0) : 0;
+      // Rumus margin: (harga - hpp) / harga × 100
+      const mar = hpp > 0 ? ((l.harga - hpp) / l.harga * 100).toFixed(0) : 0;
       const untung = l.harga - hpp;
       const mc = mar >= 30 ? 'var(--green)' : mar >= 20 ? 'var(--yellow)' : 'var(--red)';
       return `<tr>
