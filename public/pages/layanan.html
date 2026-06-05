@@ -710,10 +710,13 @@ function updateMarginPreview() {
   if (isAuto) {
     const hpp    = parseFloat(document.getElementById('layHppAuto').value) || 0;
     const margin = parseFloat(document.getElementById('layMarginAuto').value) || 0;
-    if (hpp > 0) {
-      const marNominal = hpp * margin / 100;
-      const harga      = Math.ceil(hpp * (1 + margin / 100) / 100) * 100;
+    if (hpp > 0 && margin > 0 && margin < 100) {
+      // Rumus margin: margin = (harga - hpp) / harga
+      // Maka: harga = hpp / (1 - margin/100)
+      const hargaSebelumBulatkan = hpp / (1 - margin / 100);
+      const harga      = Math.ceil(hargaSebelumBulatkan / 100) * 100;
       const untung     = harga - hpp;
+      const marNominal = untung;
       document.getElementById('pvHpp').textContent         = 'Rp ' + fmtRp(hpp);
       document.getElementById('pvMarginNominal').textContent = '+ Rp ' + fmtRp(Math.round(marNominal));
       document.getElementById('pvHargaJual').textContent   = 'Rp ' + fmtRp(harga);
@@ -725,7 +728,8 @@ function updateMarginPreview() {
     const harga = parseFloat(document.getElementById('layHarga').value) || 0;
     const prev  = document.getElementById('marginPreviewManual');
     if (hpp > 0 && harga > 0) {
-      const margin = ((harga - hpp) / hpp * 100).toFixed(1);
+      // Rumus margin: (harga - hpp) / harga × 100
+      const margin = ((harga - hpp) / harga * 100).toFixed(1);
       const untung = harga - hpp;
       prev.innerHTML = `HPP: Rp ${fmtRp(hpp)} · Margin: ${margin}% · Untung: <strong>Rp ${fmtRp(untung)}/unit</strong>`;
       prev.classList.add('show');
@@ -770,7 +774,7 @@ async function saveLayanan() {
   const marginPersen = parseFloat(isAuto ? document.getElementById('layMarginAuto').value : document.getElementById('layMarginManual').value) || 0;
   const satuan       = isAuto ? document.getElementById('laySatuanAuto').value : document.getElementById('laySatuan').value;
   const harga        = isAuto
-    ? Math.ceil(hpp * (1 + marginPersen / 100) / 100) * 100
+    ? Math.ceil(hpp / (1 - marginPersen / 100) / 100) * 100
     : parseFloat(document.getElementById('layHarga').value) || 0;
 
   const body = {
@@ -896,7 +900,8 @@ function renderAkordion(data) {
     const layananRows = (k.layanan || []).map(l => {
       const hpp    = Number(l.hpp || 0);
       const untung = hpp > 0 ? l.harga - hpp : null;
-      const mar    = hpp > 0 ? ((l.harga - hpp) / hpp * 100).toFixed(0) : null;
+      // Rumus margin: (harga - hpp) / harga × 100
+      const mar    = hpp > 0 ? ((l.harga - hpp) / l.harga * 100).toFixed(0) : null;
       const marginInfo = hpp > 0
         ? `<div class="margin-info">HPP Rp${fmtRp(hpp)} · <span class="isi">Margin ${mar}% · Untung Rp${fmtRp(untung)}/unit</span></div>`
         : `<div class="margin-info"><a href="#" onclick="openLayananModal(${JSON.stringify(l).replace(/"/g,'&quot;')});return false">+ Isi HPP untuk lihat margin</a></div>`;
