@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="/css/layout.css"/>
+  <link rel="stylesheet" href="/css/responsive.css"/>
   <title>Kelola Order — POS Laundry</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -163,6 +164,70 @@
       text-decoration: none;
     }
     .wa-menu a:hover { background: var(--gray-2); }
+
+    /* ══ MOBILE: table → card list ══ */
+    @media (max-width: 767px) {
+      .filter-bar { padding: 12px; }
+      .filter-bar .filter-group { width: 100%; }
+      .filter-bar .filter-actions {
+        width: 100%; margin-left: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+      .filter-bar .filter-actions a.btn-blue { grid-column: 1 / -1; }
+      .table-wrap { overflow-x: visible; }
+      table { min-width: 0 !important; width: 100%; display: block; }
+      thead { display: none; }
+      tbody { display: block; }
+      tbody tr {
+        display: block;
+        background: #fff;
+        border: 1px solid var(--gray-3);
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0,0,0,.05);
+      }
+      tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 0;
+        border-bottom: 1px dashed var(--gray-3);
+        text-align: right;
+        font-size: 13px;
+      }
+      tbody td:last-child { border-bottom: none; }
+      tbody td::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+        color: var(--gray-5);
+        text-align: left;
+        flex-shrink: 0;
+      }
+      tbody td.td-actions-cell {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        padding-top: 10px;
+      }
+      tbody td.td-actions-cell::before { width: 100%; }
+      .td-actions { flex-wrap: wrap; justify-content: flex-end; gap: 6px; width: 100%; }
+      .td-actions .btn { min-height: 36px; padding: 6px 10px; font-size: 12px; }
+      .status-select { width: auto; max-width: 100%; min-height: 36px; }
+      .pagination {
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+      }
+      .page-btns { justify-content: center; flex-wrap: wrap; }
+      .page-btn { min-height: 36px; }
+    }
   </style>
 </head>
 <body>
@@ -332,31 +397,33 @@ function renderTable(rows) {
     const hasPhone = t.pelanggan_telepon;
 
     return `<tr id="row-${t.id}" onclick="navigateToDetail(${t.id}, event)">
-      <td>
+      <td data-label="No. Order">
         <div class="td-nomor">
           <a href="/order/detail?id=${t.id}" onclick="event.stopPropagation()">${t.nomor_transaksi}</a>
         </div>
         <div class="td-meta">${t.kasir_nama || '—'}</div>
       </td>
-      <td>
+      <td data-label="Pelanggan">
         <div>${t.pelanggan_nama || '<span style="color:var(--gray-5)">Non-member</span>'}</div>
         ${t.pelanggan_telepon ? `<div class="td-meta">${t.pelanggan_telepon}</div>` : ''}
       </td>
-      <td>
+      <td data-label="Layanan">
         <div style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;"
              title="${t.layanan_ringkas || ''}">
           ${t.layanan_ringkas || '—'}
         </div>
       </td>
-      <td style="font-weight:700;white-space:nowrap;">${fmtRp(t.total_bayar)}</td>
-      <td>
-        <span class="badge ${lunas ? 'badge-lunas' : 'badge-belum'}">${lunas ? 'Lunas' : 'Belum'}</span>
-        ${!lunas ? `<div class="td-meta" style="margin-top:3px;">Sisa ${fmtRp(t.total_bayar - t.bayar)}</div>` : ''}
+      <td data-label="Total" style="font-weight:700;white-space:nowrap;">${fmtRp(t.total_bayar)}</td>
+      <td data-label="Bayar">
+        <div>
+          <span class="badge ${lunas ? 'badge-lunas' : 'badge-belum'}">${lunas ? 'Lunas' : 'Belum'}</span>
+          ${!lunas ? `<div class="td-meta" style="margin-top:3px;">Sisa ${fmtRp(t.total_bayar - t.bayar)}</div>` : ''}
+        </div>
       </td>
-      <td>${selectHtml}</td>
-      <td style="white-space:nowrap;font-size:12px;">${fmtDate(t.tanggal_masuk)}</td>
-      <td style="white-space:nowrap;font-size:12px;">${fmtDate(t.tanggal_selesai)}</td>
-      <td>
+      <td data-label="Status">${selectHtml}</td>
+      <td data-label="Tgl Masuk" style="white-space:nowrap;font-size:12px;">${fmtDate(t.tanggal_masuk)}</td>
+      <td data-label="Est. Selesai" style="white-space:nowrap;font-size:12px;">${fmtDate(t.tanggal_selesai)}</td>
+      <td data-label="Aksi" class="td-actions-cell">
         <div class="td-actions">
           ${!lunas && t.status !== 'dibatalkan' ? `
           <a href="/order/detail?id=${t.id}"

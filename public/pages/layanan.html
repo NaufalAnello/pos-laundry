@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="/css/layout.css"/>
+  <link rel="stylesheet" href="/css/responsive.css"/>
   <title>Layanan — POS Laundry</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.33.0/dist/tabler-icons.min.css"/>
   <style>
@@ -221,6 +222,76 @@
     .result-card.red    { background:var(--red-lt); }
     .result-num { font-size:28px; font-weight:800; margin-bottom:4px; }
     .result-label { font-size:12px; font-weight:600; color:var(--gray-7); }
+
+    /* ══ MOBILE: layanan jadi card list ══ */
+    @media (max-width: 767px) {
+      .page-header {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 10px;
+      }
+      .page-header > div:last-child {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+      .page-header .btn { min-height: 44px; font-size: 13px; }
+      .page-header .btn-blue { grid-column: 1 / -1; }
+
+      .cat-header { padding: 12px 14px; gap: 10px; }
+      .cat-icon { width: 36px; height: 36px; font-size: 18px; }
+      .cat-actions { gap: 4px; }
+      .cat-actions .btn { padding: 8px; min-width: 38px; }
+      .cat-actions .btn-sm { font-size: 11px; }
+
+      .layanan-toolbar { padding: 8px 12px; }
+      .layanan-table { display: block; }
+      .layanan-table thead { display: none; }
+      .layanan-table tbody, .layanan-table tr { display: block; }
+      .layanan-table tbody tr {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--gray-3) !important;
+      }
+      .layanan-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 0 !important;
+        border: none !important;
+        text-align: right;
+      }
+      .layanan-table td::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--gray-5);
+        text-align: left;
+      }
+      .layanan-table td:first-child {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        border-bottom: 1px dashed var(--gray-3) !important;
+        padding-bottom: 8px !important;
+        margin-bottom: 4px;
+      }
+      .layanan-table td:first-child::before { display: none; }
+      .harga-inp { width: 90px; min-height: 36px; }
+      .td-actions { flex-wrap: wrap; justify-content: flex-end; }
+
+      /* Modal mobile = full screen sheet */
+      .modal-bg { padding: 0; align-items: flex-end; }
+      .modal {
+        max-width: 100% !important;
+        max-height: 92vh;
+        border-radius: 16px 16px 0 0 !important;
+        width: 100%;
+      }
+      .form-row { grid-template-columns: 1fr; }
+      .icon-picker { grid-template-columns: repeat(6, 1fr) !important; }
+    }
   </style>
 </head>
 <body>
@@ -908,11 +979,11 @@ function renderAkordion(data) {
 
       return `
       <tr>
-        <td><span style="font-weight:600">${l.nama}</span>
+        <td data-label="Layanan"><span style="font-weight:600">${l.nama}</span>
             ${!l.aktif ? '<span class="badge badge-nonaktif" style="margin-left:6px">Nonaktif</span>' : ''}
             ${marginInfo}
         </td>
-        <td>
+        <td data-label="Harga">
           <span id="harga-disp-${l.id}" class="harga-display" onclick="showHargaInput(${l.id})"
                 title="Klik untuk edit harga">Rp ${fmtRp(l.harga)}</span>
           <div class="harga-input-wrap" id="harga-wrap-${l.id}">
@@ -922,16 +993,16 @@ function renderAkordion(data) {
             <button class="btn btn-sm btn-blue" onmousedown="event.preventDefault(); saveHarga(${l.id}, document.querySelector('#harga-wrap-${l.id} input'))">✓</button>
           </div>
         </td>
-        <td>${l.satuan}</td>
-        <td>${l.estimasi_hari} hr</td>
-        <td>
+        <td data-label="Satuan">${l.satuan}</td>
+        <td data-label="Estimasi">${l.estimasi_hari} hr</td>
+        <td data-label="Aktif">
           <label class="toggle">
             <input type="checkbox" ${l.aktif ? 'checked' : ''}
               onchange="toggleLayanan(${l.id}, ${!!l.aktif}, this)"/>
             <span class="slider"></span>
           </label>
         </td>
-        <td>
+        <td data-label="Aksi">
           <div class="td-actions">
             <button class="btn btn-sm btn-outline" onclick='openLayananModal(${JSON.stringify(l)})'>
               <i class="ti ti-pencil"></i>

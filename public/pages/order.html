@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="/css/layout.css"/>
+  <link rel="stylesheet" href="/css/responsive.css"/>
   <title>Order Baru — POS Laundry</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -42,8 +43,42 @@
       margin: 0 auto;
       align-items: start;
     }
-    @media (max-width: 900px) {
-      .layout { grid-template-columns: 1fr; }
+    @media (max-width: 1023px) {
+      .layout { grid-template-columns: 1fr; padding: 14px; }
+    }
+    @media (max-width: 767px) {
+      .layout { padding: 10px; gap: 10px; }
+      /* Header desktop disembunyikan; topbar mobile dari nav.js dipakai */
+      body > header { display: none !important; }
+      /* Tombol simpan jadi sticky di bagian bawah, tepat di atas bottom nav */
+      .panel-right .actions {
+        position: fixed;
+        left: 0; right: 0;
+        bottom: var(--bn-h);
+        background: #fff;
+        border-top: 1px solid var(--gray-3);
+        padding: 10px 12px;
+        z-index: 25;
+        box-shadow: 0 -4px 14px rgba(0,0,0,.08);
+        gap: 6px;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .panel-right .actions .btn {
+        flex: 1 1 100%;
+        padding: 12px;
+        font-size: 14px;
+      }
+      .panel-right .actions .printer-status-bar {
+        order: 999;
+        flex: 1 1 100%;
+        margin: 0;
+      }
+      /* Kasih ruang ekstra di bawah supaya konten tidak ketutup tombol sticky */
+      .panel-right { padding-bottom: 180px; }
+      .pay-method-btn, .pay-method-btn-dp, .payment-tab-btn { min-height: 44px; }
+      .btn-add-item { min-height: 44px; padding: 10px 14px; }
+      .btn-remove { min-width: 44px; min-height: 44px; width: 44px; height: 44px; }
     }
 
     /* ── Card ── */

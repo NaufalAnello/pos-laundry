@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="/css/layout.css"/>
+  <link rel="stylesheet" href="/css/responsive.css"/>
   <title>Buku Kas — POS Laundry</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -52,7 +53,7 @@
 
     /* ── Stat cards ── */
     .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
-    @media(max-width:700px) { .stats-grid { grid-template-columns:1fr; } }
+    @media(max-width:767px) { .stats-grid { grid-template-columns:repeat(2,1fr); gap:10px; } .stats-grid > :nth-child(3){ grid-column:1 / -1 } }
     .stat-card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3);
                  box-shadow:var(--shadow); padding:18px 20px; display:flex; align-items:flex-start; gap:14px; }
     .stat-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center;
@@ -141,6 +142,25 @@
              background:#111; color:#fff; padding:10px 20px; border-radius:99px;
              font-size:13px; font-weight:600; z-index:9999; opacity:0; pointer-events:none; transition:opacity .25s; }
     #toast.show { opacity:1; }
+
+    /* ══ MOBILE kas ══ */
+    @media (max-width: 767px) {
+      .page { padding: 12px 10px 80px; }
+      body > header { display: none !important; }
+      .page-header { flex-direction: column; align-items: stretch; gap: 10px; }
+      .page-header .btn { width: 100%; min-height: 44px; }
+      .stat-card { padding: 12px; gap: 10px; }
+      .stat-icon { width: 36px; height: 36px; font-size: 18px; }
+      .stat-value { font-size: 16px; }
+      .stat-label { font-size: 10px; }
+      .filter-bar { padding: 12px; flex-direction: column; }
+      .filter-group { width: 100%; }
+      .tabs { gap: 0; overflow-x: auto; }
+      .tab-btn { flex: 1 0 auto; min-height: 44px; white-space: nowrap; }
+      .kas-item { flex-wrap: wrap; padding: 12px; }
+      .kas-info { flex: 1 1 100%; }
+      .kas-jml { font-size: 15px; }
+    }
   </style>
 </head>
 <body>

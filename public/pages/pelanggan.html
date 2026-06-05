@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="/css/layout.css"/>
+  <link rel="stylesheet" href="/css/responsive.css"/>
   <title>Pelanggan — POS Laundry</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -163,6 +164,80 @@
     .aksi-btn { padding:4px 10px; border:none; background:#fff; cursor:pointer; font-size:11px;
                 font-weight:600; color:var(--gray-5); transition:all .15s; }
     .aksi-btn.active { background:var(--blue); color:#fff; }
+
+    /* ══ MOBILE: pelanggan jadi card list ══ */
+    @media (max-width: 767px) {
+      .page-header > div:last-child {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+      }
+      .page-header .btn { min-height: 44px; }
+      .page-header .btn-blue { grid-column: 1 / -1; }
+
+      table { display: block; }
+      thead { display: none; }
+      tbody { display: block; }
+      tbody tr {
+        display: block;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--gray-3) !important;
+      }
+      tbody tr:hover { background: #fff; }
+      tbody tr.empty-row { padding: 30px 14px; text-align: center; }
+      td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 0 !important;
+        border: none !important;
+        text-align: right;
+      }
+      td::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--gray-5);
+        text-align: left;
+        flex-shrink: 0;
+      }
+      td:first-child {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        border-bottom: 1px dashed var(--gray-3) !important;
+        padding-bottom: 8px !important;
+        margin-bottom: 4px;
+      }
+      td:first-child::before { display: none; }
+
+      /* Detail panel mobile = bottom sheet */
+      .panel {
+        width: 100%;
+        max-width: 100%;
+        top: auto;
+        bottom: 0;
+        height: 92vh;
+        border-radius: 16px 16px 0 0;
+        transform: translateY(100%);
+      }
+      .panel.open { transform: none; }
+      .info-grid { grid-template-columns: 1fr; }
+
+      /* Modal form mobile = bottom sheet */
+      .modal-bg { padding: 0; align-items: flex-end; }
+      .modal {
+        max-width: 100% !important;
+        border-radius: 16px 16px 0 0 !important;
+        max-height: 92vh;
+        overflow-y: auto;
+      }
+      .pagination { flex-direction: column; align-items: stretch; gap: 8px; }
+      .pag-btns { justify-content: center; }
+      .pag-btn { min-height: 36px; min-width: 36px; }
+    }
   </style>
 </head>
 <body>
@@ -468,16 +543,16 @@ function renderTable(rows, meta) {
 
   tb.innerHTML = rows.map(p => `
     <tr onclick="openPanel(${p.id})">
-      <td>
+      <td data-label="Pelanggan">
         <div style="font-weight:700">${esc(p.nama)}</div>
         ${p.email ? `<div style="font-size:11px;color:var(--gray-5)">${esc(p.email)}</div>` : ''}
       </td>
-      <td>${p.telepon ? `<a href="https://wa.me/${esc(p.telepon)}" target="_blank" onclick="event.stopPropagation()" style="color:var(--green);text-decoration:none">📱 ${esc(p.telepon)}</a>` : '<span style="color:var(--gray-5)">–</span>'}</td>
-      <td><span class="badge" style="background:${LEVEL_BG[p.level?.label]||'#f1f5f9'};color:${LEVEL_COLOR[p.level?.label]||'#374151'}">${p.level?.label||'–'}</span></td>
-      <td style="text-align:center">${p.jumlah_transaksi}</td>
-      <td style="font-weight:600">${rupiah(p.total_belanja)}</td>
-      <td style="color:var(--gray-5)">${fmtDate(p.created_at)}</td>
-      <td onclick="event.stopPropagation()">
+      <td data-label="Nomor WA">${p.telepon ? `<a href="https://wa.me/${esc(p.telepon)}" target="_blank" onclick="event.stopPropagation()" style="color:var(--green);text-decoration:none">📱 ${esc(p.telepon)}</a>` : '<span style="color:var(--gray-5)">–</span>'}</td>
+      <td data-label="Level"><span class="badge" style="background:${LEVEL_BG[p.level?.label]||'#f1f5f9'};color:${LEVEL_COLOR[p.level?.label]||'#374151'}">${p.level?.label||'–'}</span></td>
+      <td data-label="Transaksi" style="text-align:center">${p.jumlah_transaksi}</td>
+      <td data-label="Total Belanja" style="font-weight:600">${rupiah(p.total_belanja)}</td>
+      <td data-label="Bergabung" style="color:var(--gray-5)">${fmtDate(p.created_at)}</td>
+      <td data-label="Aksi" onclick="event.stopPropagation()">
         <button class="btn btn-outline btn-sm" onclick="openPanel(${p.id})">Detail</button>
       </td>
     </tr>

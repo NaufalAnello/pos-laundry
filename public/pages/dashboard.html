@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="/css/layout.css"/>
+  <link rel="stylesheet" href="/css/responsive.css"/>
   <title>Dashboard — POS Laundry</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <style>
@@ -49,8 +50,8 @@
 
     /* ── Stat cards ── */
     .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
-    @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 1023px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 767px)  { .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
     .stat-card {
       background: #fff; border-radius: var(--radius); border: 1px solid var(--gray-3);
       box-shadow: var(--shadow); padding: 18px 20px;
@@ -76,6 +77,18 @@
     /* ── Main grid ── */
     .main-grid { display: grid; grid-template-columns: 1fr 380px; gap: 16px; }
     @media (max-width: 1100px) { .main-grid { grid-template-columns: 1fr; } }
+
+    /* ── Mobile-specific tweaks ── */
+    @media (max-width: 767px) {
+      .chart-wrap { height: 200px; }
+      .antrian-item { padding: 10px 12px; }
+      .antrian-row1 { flex-wrap: wrap; gap: 4px; }
+      .antrian-actions { width: 100%; }
+      .antrian-actions .btn { flex: 1 1 auto; }
+      .tagihan-item { flex-wrap: wrap; }
+      .stat-body { min-width: 0; flex: 1; }
+      .stat-value { word-break: break-word; }
+    }
 
     /* ── Card ── */
     .card {

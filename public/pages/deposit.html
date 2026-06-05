@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="/css/layout.css"/>
+  <link rel="stylesheet" href="/css/responsive.css"/>
   <title>Deposit Pelanggan — POS Laundry</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,7 +40,7 @@
 
     /* ── Summary cards ── */
     .summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
-    @media(max-width:700px){ .summary-grid{grid-template-columns:1fr} }
+    @media(max-width:767px){ .summary-grid{grid-template-columns:repeat(2,1fr); gap:10px} .summary-grid > :nth-child(3){ grid-column:1 / -1 } }
     .sum-card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3);
                 box-shadow:var(--shadow); padding:18px 20px; display:flex; align-items:flex-start; gap:14px; }
     .sum-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center;
@@ -206,6 +207,80 @@
                      font-size:13px; font-weight:600; margin-bottom:20px;
                      display:flex; align-items:center; gap:8px; }
     .modal-footer { display:flex; gap:10px; justify-content:flex-end; }
+
+    /* ══ MOBILE deposit ══ */
+    @media (max-width: 767px) {
+      .page { padding: 12px 10px 80px; }
+      body > header { display: none !important; }
+      .page-header { flex-direction: column; align-items: stretch; gap: 8px; }
+
+      .page-tabs {
+        overflow-x: auto;
+        margin: 0 -10px 16px;
+        padding: 0 10px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .page-tab {
+        flex: 1 0 auto;
+        padding: 12px 14px;
+        font-size: 13px;
+        white-space: nowrap;
+        min-height: 44px;
+      }
+
+      .sum-card { padding: 12px; gap: 10px; }
+      .sum-icon { width: 36px; height: 36px; font-size: 18px; }
+      .sum-value { font-size: 16px; }
+      .sum-label { font-size: 10px; }
+
+      .topup-card { padding: 14px; max-width: 100%; }
+
+      .filter-bar { gap: 8px; }
+      .search-input, select.filter-sel { width: 100%; min-height: 44px; }
+
+      /* Tabel → card list */
+      .table-wrap { overflow-x: visible; }
+      table { min-width: 0 !important; width: 100%; display: block; }
+      thead { display: none; }
+      tbody { display: block; }
+      tbody tr {
+        display: block;
+        padding: 12px 14px;
+        background: #fff;
+      }
+      tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 0;
+        border: none;
+        text-align: right;
+      }
+      tbody td::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--gray-5);
+        text-align: left;
+      }
+      .empty-row td { display: block; text-align: center !important; padding: 30px !important; }
+      .empty-row td::before { display: none; }
+
+      .pay-btn { min-height: 44px; }
+
+      /* Modal bottom sheet */
+      .modal-overlay { padding: 0; align-items: flex-end; }
+      .modal {
+        max-width: 100% !important;
+        max-height: 92vh;
+        border-radius: 16px 16px 0 0;
+        overflow-y: auto;
+      }
+      .modal-footer { flex-direction: column; }
+      .modal-footer .btn { width: 100%; min-height: 44px; }
+    }
   </style>
 </head>
 <body>
@@ -505,15 +580,15 @@ async function loadSaldo(page = 1) {
   }
   tbody.innerHTML = r.data.map(p => `
     <tr>
-      <td><strong>${escH(p.nama)}</strong></td>
-      <td>${escH(p.telepon || '—')}</td>
-      <td>${saldoBadge(p.saldo)}</td>
-      <td>
+      <td data-label="Pelanggan"><strong>${escH(p.nama)}</strong></td>
+      <td data-label="Telepon">${escH(p.telepon || '—')}</td>
+      <td data-label="Saldo">${saldoBadge(p.saldo)}</td>
+      <td data-label="Status">
         ${Number(p.saldo) === 0 ? '<span style="color:var(--gray-5);font-size:12px">Belum ada deposit</span>'
           : Number(p.saldo) < st.threshold ? '<span style="color:var(--red);font-size:12px">⚠ Saldo tipis</span>'
           : '<span style="color:var(--green);font-size:12px">✓ Aman</span>'}
       </td>
-      <td>
+      <td data-label="Aksi">
         <button class="btn btn-blue btn-sm" onclick="quickTopup(${p.id}, '${escH(p.nama)}', ${p.saldo})">Top-up</button>
       </td>
     </tr>
@@ -671,17 +746,17 @@ async function loadMutasi(page = 1) {
 
     return `
     <tr>
-      <td style="white-space:nowrap">${fmtDate(m.created_at)}</td>
-      <td>
+      <td data-label="Tanggal" style="white-space:nowrap">${fmtDate(m.created_at)}</td>
+      <td data-label="Pelanggan">
         <strong>${escH(m.pelanggan_nama || '—')}</strong><br/>
         <span style="font-size:11px;color:var(--gray-5)">${escH(m.pelanggan_telepon || '')}</span>
       </td>
-      <td>${jenisBadgeHtml}</td>
-      <td style="font-weight:600">Rp ${fmtRp(m.nominal)}</td>
-      <td>Rp ${fmtRp(m.saldo_sebelum)}</td>
-      <td style="font-weight:700">Rp ${fmtRp(m.saldo_sesudah)}</td>
-      <td style="color:var(--gray-5)">${escH(m.keterangan || '')}${m.nomor_transaksi ? ' <span style="color:var(--blue)">' + escH(m.nomor_transaksi) + '</span>' : ''}</td>
-      <td>${aksiHtml}</td>
+      <td data-label="Jenis">${jenisBadgeHtml}</td>
+      <td data-label="Nominal" style="font-weight:600">Rp ${fmtRp(m.nominal)}</td>
+      <td data-label="Saldo Sebelum">Rp ${fmtRp(m.saldo_sebelum)}</td>
+      <td data-label="Saldo Sesudah" style="font-weight:700">Rp ${fmtRp(m.saldo_sesudah)}</td>
+      <td data-label="Keterangan" style="color:var(--gray-5)">${escH(m.keterangan || '')}${m.nomor_transaksi ? ' <span style="color:var(--blue)">' + escH(m.nomor_transaksi) + '</span>' : ''}</td>
+      <td data-label="Aksi">${aksiHtml}</td>
     </tr>
     `;
   }).join('');

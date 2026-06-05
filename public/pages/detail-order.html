@@ -7,6 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
   <link rel="stylesheet" href="/css/layout.css"/>
+  <link rel="stylesheet" href="/css/responsive.css"/>
   <title>Detail Pesanan — POS Laundry</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -60,9 +61,46 @@
       gap: 16px;
       align-items: start;
     }
-    @media (max-width: 768px) {
+    @media (max-width: 1023px) {
       .layout { grid-template-columns: 1fr; }
       .col-right { order: 2; }
+    }
+    @media (max-width: 767px) {
+      .page { padding: 12px 10px 80px; }
+      body > header { display: none !important; }
+      .pelanggan-wrap { gap: 10px; }
+      .avatar { width: 44px; height: 44px; font-size: 18px; }
+      .pelanggan-nama { font-size: 16px; }
+      .pelanggan-stats { grid-template-columns: 1fr 1fr; }
+      .items-table { display: block; }
+      .items-table thead { display: none; }
+      .items-table tbody, .items-table tr { display: block; }
+      .items-table tbody tr {
+        border: 1px solid var(--gray-3);
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+      }
+      .items-table tbody td {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 4px 0;
+        border: none;
+        text-align: right;
+        font-size: 13px;
+      }
+      .items-table tbody td::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--gray-5);
+        text-align: left;
+      }
+      .actions-grid { grid-template-columns: 1fr 1fr !important; }
+      .actions-grid .btn,
+      .actions-grid button { min-height: 44px; font-size: 13px; }
     }
 
     /* ── Card ── */
@@ -914,7 +952,7 @@ function renderDetail() {
   const itemsHtml = o.items.map(item => {
     const catatan = item.catatan ? `<div class="item-catatan">Catatan: ${item.catatan}</div>` : '';
     const actions = canEdit ? `
-      <td style="text-align:right">
+      <td data-label="Aksi" style="text-align:right">
         <button onclick="editItem(${item.id}, ${item.jumlah}, '${(item.catatan || '').replace(/'/g, "\\'")}')"
                 style="padding:6px 8px;border:none;background:var(--blue-lt);color:var(--blue);border-radius:4px;cursor:pointer;margin-right:4px;font-size:12px;"
                 title="Edit item">
@@ -929,13 +967,13 @@ function renderDetail() {
     ` : '';
 
     return `<tr>
-      <td>
+      <td data-label="Layanan">
         <div class="text-bold">${item.nama_layanan}</div>
         ${catatan}
       </td>
-      <td class="text-right">${item.jumlah} ${item.satuan}</td>
-      <td class="text-right">${fmtRp(item.harga)}</td>
-      <td class="text-right text-bold">${fmtRp(item.subtotal)}</td>
+      <td data-label="Qty" class="text-right">${item.jumlah} ${item.satuan}</td>
+      <td data-label="Harga" class="text-right">${fmtRp(item.harga)}</td>
+      <td data-label="Subtotal" class="text-right text-bold">${fmtRp(item.subtotal)}</td>
       ${actions}
     </tr>`;
   }).join('');

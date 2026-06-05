@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="/css/layout.css"/>
+  <link rel="stylesheet" href="/css/responsive.css"/>
   <title>Pusat WhatsApp — POS Laundry</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -188,6 +189,37 @@
              font-size:13px; font-weight:600; z-index:99; transition:transform .3s; white-space:nowrap; }
     .toast.show { transform:translateX(-50%) translateY(0); }
     .toast.err  { background:var(--red); }
+
+    /* ══ MOBILE wa-center ══ */
+    @media (max-width: 767px) {
+      .page { padding: 12px 10px 80px; }
+      body > header { display: none !important; }
+      .page-header { flex-direction: column; align-items: stretch; gap: 10px; }
+      .tagihan-wrap { overflow-x: visible; }
+      .tagihan-wrap table { display: block; }
+      .tagihan-wrap thead { display: none; }
+      .tagihan-wrap tbody, .tagihan-wrap tr { display: block; }
+      .tagihan-wrap tbody tr {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--gray-3);
+      }
+      .tagihan-wrap td {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 6px 0;
+        border: none;
+        text-align: right;
+      }
+      .tagihan-wrap td::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--gray-5);
+      }
+      .bc-layout { grid-template-columns: 1fr !important; }
+    }
   </style>
 </head>
 <body>
@@ -443,13 +475,13 @@ async function loadTagihan() {
     }
     tb.innerHTML = data.map(r => `
       <tr>
-        <td><a href="/api/v1/transaksi/${r.id}/struk" target="_blank" style="color:var(--blue);font-weight:600">${esc(r.nomor_transaksi)}</a></td>
-        <td style="font-weight:600">${esc(r.pelanggan_nama)}</td>
-        <td><a href="https://wa.me/${esc(r.pelanggan_telepon)}" target="_blank" style="color:var(--wa)">📱 ${esc(r.pelanggan_telepon)}</a></td>
-        <td><span class="badge badge-${r.status}">${r.status}</span></td>
-        <td>${rupiah(r.total_bayar)}</td>
-        <td style="color:var(--red);font-weight:700">${rupiah(r.sisa_tagihan)}</td>
-        <td>
+        <td data-label="No. Order"><a href="/api/v1/transaksi/${r.id}/struk" target="_blank" style="color:var(--blue);font-weight:600">${esc(r.nomor_transaksi)}</a></td>
+        <td data-label="Pelanggan" style="font-weight:600">${esc(r.pelanggan_nama)}</td>
+        <td data-label="Nomor WA"><a href="https://wa.me/${esc(r.pelanggan_telepon)}" target="_blank" style="color:var(--wa)">📱 ${esc(r.pelanggan_telepon)}</a></td>
+        <td data-label="Status"><span class="badge badge-${r.status}">${r.status}</span></td>
+        <td data-label="Total">${rupiah(r.total_bayar)}</td>
+        <td data-label="Sisa" style="color:var(--red);font-weight:700">${rupiah(r.sisa_tagihan)}</td>
+        <td data-label="Aksi">
           <button class="btn btn-wa btn-sm" onclick="kirimTagihanWA(${r.id})">📱 Tagih</button>
         </td>
       </tr>

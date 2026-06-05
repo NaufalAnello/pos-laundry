@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="/css/layout.css"/>
+  <link rel="stylesheet" href="/css/responsive.css"/>
   <title>Laporan — POS Laundry</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
@@ -63,7 +64,9 @@
 
     /* ── Stat cards ── */
     .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
-    @media(max-width:700px) { .stats-grid { grid-template-columns:1fr 1fr; } }
+    @media(max-width:1023px) { .stats-grid { grid-template-columns:repeat(3,1fr); } }
+    @media(max-width:767px)  { .stats-grid { grid-template-columns:1fr 1fr; gap:10px; } }
+    @media(max-width:480px)  { .stats-grid { grid-template-columns:1fr 1fr; } }
     .stat-card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3);
                  box-shadow:var(--shadow); padding:18px 20px; }
     .stat-label { font-size:11px; font-weight:700; color:var(--gray-5); text-transform:uppercase; letter-spacing:.4px; margin-bottom:6px; }
@@ -82,7 +85,7 @@
 
     /* grid 2-col */
     .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
-    @media(max-width:700px) { .grid-2 { grid-template-columns:1fr; } }
+    @media(max-width:1023px) { .grid-2 { grid-template-columns:1fr; } }
 
     /* table */
     table { width:100%; border-collapse:collapse; }
@@ -123,6 +126,34 @@
              font-size:13px; font-weight:600; z-index:99; transition:transform .3s; white-space:nowrap; }
     .toast.show { transform:translateX(-50%) translateY(0); }
     .toast.err  { background:var(--red); }
+
+    /* ══ MOBILE laporan ══ */
+    @media (max-width: 767px) {
+      .page { padding: 12px 10px 80px; }
+      body > header { display: none !important; }
+      .page-header { flex-direction: column; align-items: stretch; gap: 10px; }
+      .page-header .btn { width: 100%; min-height: 44px; }
+
+      .filter-bar {
+        padding: 12px;
+        align-items: stretch;
+        flex-direction: column;
+      }
+      .filter-bar > * { width: 100%; }
+      .filter-bar input[type=date] { min-height: 44px; width: 100%; }
+      .preset-btns { width: 100%; }
+      .preset-btn { min-height: 36px; flex: 1 0 calc(33% - 4px); }
+      .sep { display: none; }
+
+      .stat-card { padding: 12px; }
+      .stat-val { font-size: 18px; }
+      .stat-label { font-size: 10px; }
+
+      .chart-wrap { height: 200px; }
+
+      /* Tables scroll horizontal di HP - tetap pakai pendekatan scroll utk laporan */
+      #profitBody table, #distribusiBody table { min-width: 480px; }
+    }
   </style>
 </head>
 <body>
