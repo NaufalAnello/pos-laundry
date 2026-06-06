@@ -88,6 +88,8 @@
       .tagihan-item { flex-wrap: wrap; }
       .stat-body { min-width: 0; flex: 1; }
       .stat-value { word-break: break-word; }
+      .tabs-wrap { padding: 0 12px; overflow-x: auto; }
+      .tab-btn { padding: 8px 12px; font-size: 12px; white-space: nowrap; }
     }
 
     /* ── Card ── */
@@ -174,6 +176,26 @@
     .stok-min   { font-size: 11px; color: var(--gray-5); }
 
     .empty-state { text-align: center; color: var(--gray-5); padding: 20px; font-size: 13px; }
+
+    /* ── Tabs ── */
+    .tabs-wrap { border-bottom: 1px solid var(--gray-3); display: flex; gap: 4px; padding: 0 18px; }
+    .tab-btn {
+      padding: 10px 16px; border: none; background: none; cursor: pointer;
+      font-size: 13px; font-weight: 600; color: var(--gray-5);
+      border-bottom: 2px solid transparent; transition: all .15s;
+      position: relative; display: flex; align-items: center; gap: 6px;
+    }
+    .tab-btn:hover { color: var(--gray-7); }
+    .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .tab-content { display: none; padding: 16px 18px; }
+    .tab-content.active { display: block; }
+    .tab-badge {
+      background: var(--gray-3); color: var(--gray-7);
+      padding: 2px 7px; border-radius: 99px; font-size: 11px; font-weight: 700;
+    }
+    .tab-btn.active .tab-badge { background: var(--blue-lt); color: var(--blue); }
+    .tab-badge.red { background: var(--red); color: #fff; }
+    .badge-terlambat { background: var(--red-lt); color: var(--red); font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 700; }
 
     /* ── Toast ── */
     #toast {
@@ -264,13 +286,22 @@
         </div>
       </div>
 
-      <!-- Selesai Hari Ini -->
+      <!-- Tabs: Selesai Hari Ini & Lewat Waktu -->
       <div class="card">
-        <div class="card-header">
-          <h2>✅ Selesai Hari Ini</h2>
-          <span id="selesaiCount" class="badge badge-selesai">—</span>
+        <div class="tabs-wrap">
+          <button class="tab-btn active" onclick="switchTab('selesai')">
+            Selesai Hari Ini
+            <span class="tab-badge" id="selesaiTabBadge">—</span>
+          </button>
+          <button class="tab-btn" onclick="switchTab('lewat')">
+            Lewat Waktu
+            <span class="tab-badge red" id="lewatTabBadge">—</span>
+          </button>
         </div>
-        <div class="card-body" id="selesaiBody">
+        <div class="tab-content active" id="tabSelesai">
+          <div class="antrian-empty">Memuat...</div>
+        </div>
+        <div class="tab-content" id="tabLewat">
           <div class="antrian-empty">Memuat...</div>
         </div>
       </div>
@@ -384,6 +415,47 @@ async function updateStatus(id, status, btn) {
   finally { btn.disabled = false; }
 }
 
+async function tandaiSelesai(id, btn, tabAsal) {
+  btn.disabled = true;
+  try {
+    const r = await fetch(`/api/v1/transaksi/${id}/status`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'selesai' })
+    });
+    const d = await r.json();
+    if (!r.ok) { showToast('Gagal: ' + d.error); return; }
+    showToast('Order ditandai selesai');
+    // Hapus baris dari DOM tanpa reload
+    btn.closest('.antrian-item').remove();
+    // Update badge count
+    const badgeId = tabAsal === 'selesai' ? 'selesaiTabBadge' : 'lewatTabBadge';
+    const badge = document.getElementById(badgeId);
+    const currentCount = parseInt(badge.textContent) || 0;
+    badge.textContent = Math.max(0, currentCount - 1);
+    // Check jika kosong, tampilkan empty state
+    const tabId = tabAsal === 'selesai' ? 'tabSelesai' : 'tabLewat';
+    const tabEl = document.getElementById(tabId);
+    if (!tabEl.querySelector('.antrian-item')) {
+      const msg = tabAsal === 'selesai' ? 'Tidak ada order selesai hari ini' : 'Tidak ada order lewat waktu';
+      tabEl.innerHTML = `<div class="antrian-empty">${msg}</div>`;
+    }
+  } catch { showToast('Koneksi gagal'); }
+  finally { btn.disabled = false; }
+}
+
+function switchTab(tab) {
+  // Update tab buttons
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.closest('.tab-btn').classList.add('active');
+  // Update tab content
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  if (tab === 'selesai') {
+    document.getElementById('tabSelesai').classList.add('active');
+  } else {
+    document.getElementById('tabLewat').classList.add('active');
+  }
+}
+
 async function openWa(id, type) {
   try {
     const r = await fetch(`/api/v1/transaksi/${id}/wa/${type}`);
@@ -460,8 +532,8 @@ function renderAntrian(list) {
 }
 
 function renderSelesai(list) {
-  const el = document.getElementById('selesaiBody');
-  document.getElementById('selesaiCount').textContent = list.length;
+  const el = document.getElementById('tabSelesai');
+  document.getElementById('selesaiTabBadge').textContent = list.length;
   if (!list.length) {
     el.innerHTML = '<div class="antrian-empty">Tidak ada order selesai hari ini</div>';
     return;
@@ -481,20 +553,87 @@ function renderSelesai(list) {
           <div class="antrian-pelanggan">${t.pelanggan_nama || 'Non-member'} · ${fmtTime(t.tanggal_masuk)}</div>
         </div>
         <div style="display:flex;gap:6px;align-items:center;">
-          <span class="badge badge-selesai">Selesai</span>
-          ${!lunas ? `<span class="badge" style="background:var(--red-lt);color:var(--red)">Belum Lunas</span>`
-                   : `<span class="badge badge-lunas">Lunas</span>`}
+          <span class="badge badge-${t.status}">${t.status}</span>
+          ${!lunas ? `<span class="badge" style="background:var(--red-lt);color:var(--red)">Belum Lunas</span>` : ''}
         </div>
       </div>
       <div class="antrian-row2">
         <div class="antrian-items-text">${itemsText}</div>
         <div style="font-size:12px;font-weight:700;">${fmtRp(t.total_bayar)}</div>
       </div>
+      <div style="font-size:12px;color:var(--gray-5);margin-top:4px;">
+        Est. Selesai: ${fmtDate(t.tanggal_selesai)}
+      </div>
       <div class="antrian-actions">
-        <button class="btn btn-sm btn-green" onclick="updateStatus(${t.id}, 'diambil', this)">✓ Diambil</button>
+        <button class="btn btn-sm btn-green" onclick="tandaiSelesai(${t.id}, this, 'selesai');event.stopPropagation();">✓ Selesai</button>
         ${hasPhone ? `
-        <button class="btn btn-sm btn-wa" onclick="openWa(${t.id},'notif');event.stopPropagation();">📱 WA</button>
-        ` : ''}
+        <div class="wa-menu-wrap">
+          <button class="btn btn-sm btn-wa" onclick="toggleWaMenu(this)">WA ▾</button>
+          <div class="wa-menu">
+            <a href="#" onclick="openWa(${t.id},'nota');return false;">Kirim Nota</a>
+            <a href="#" onclick="openWa(${t.id},'tagihan');return false;">Tagihan</a>
+            <a href="#" onclick="openWa(${t.id},'notif');return false;">Notif Selesai</a>
+          </div>
+        </div>` : ''}
+        <a href="/order/detail?id=${t.id}" class="btn btn-sm btn-outline" onclick="event.stopPropagation();">Detail</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderLewatWaktu(list) {
+  const el = document.getElementById('tabLewat');
+  document.getElementById('lewatTabBadge').textContent = list.length;
+  if (!list.length) {
+    el.innerHTML = '<div class="antrian-empty">Tidak ada order lewat waktu</div>';
+    return;
+  }
+
+  el.innerHTML = list.map(t => {
+    const itemsText = t.items.length
+      ? t.items.map(i => `${i.jumlah} ${i.satuan} ${i.nama_layanan}`).join(', ')
+      : '—';
+    const lunas = (t.total_dibayar || t.bayar || 0) >= t.total_bayar;
+    const hasPhone = t.pelanggan_telepon;
+
+    // Hitung berapa hari terlambat
+    const estimasi = new Date(t.tanggal_selesai);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    estimasi.setHours(0, 0, 0, 0);
+    const diffTime = today - estimasi;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    return `<div class="antrian-item" onclick="navigateToDetail(${t.id}, event)">
+      <div class="antrian-row1">
+        <div>
+          <div class="antrian-nomor">${t.nomor_transaksi}</div>
+          <div class="antrian-pelanggan">${t.pelanggan_nama || 'Non-member'} · ${fmtTime(t.tanggal_masuk)}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="badge badge-${t.status}">${t.status}</span>
+          ${!lunas ? `<span class="badge" style="background:var(--red-lt);color:var(--red)">Belum Lunas</span>` : ''}
+        </div>
+      </div>
+      <div class="antrian-row2">
+        <div class="antrian-items-text">${itemsText}</div>
+        <div style="font-size:12px;font-weight:700;">${fmtRp(t.total_bayar)}</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:4px;">
+        <span style="font-size:12px;color:var(--gray-5);">Est. Selesai: ${fmtDate(t.tanggal_selesai)}</span>
+        <span class="badge-terlambat">Terlambat ${diffDays} hari</span>
+      </div>
+      <div class="antrian-actions">
+        <button class="btn btn-sm btn-green" onclick="tandaiSelesai(${t.id}, this, 'lewat');event.stopPropagation();">✓ Selesai</button>
+        ${hasPhone ? `
+        <div class="wa-menu-wrap">
+          <button class="btn btn-sm btn-wa" onclick="toggleWaMenu(this)">WA ▾</button>
+          <div class="wa-menu">
+            <a href="#" onclick="openWa(${t.id},'nota');return false;">Kirim Nota</a>
+            <a href="#" onclick="openWa(${t.id},'tagihan');return false;">Tagihan</a>
+            <a href="#" onclick="openWa(${t.id},'notif');return false;">Notif Selesai</a>
+          </div>
+        </div>` : ''}
         <a href="/order/detail?id=${t.id}" class="btn btn-sm btn-outline" onclick="event.stopPropagation();">Detail</a>
       </div>
     </div>`;
@@ -624,6 +763,7 @@ async function loadDashboard() {
     renderChart(d.bar_chart_7hari);
     renderAntrian(d.antrian_aktif);
     renderSelesai(d.selesai_hari_ini || []);
+    renderLewatWaktu(d.lewat_waktu || []);
 
     // Tagihan belum lunas detail — fetch from transaksi API
     const tagihanR = await fetch('/api/v1/transaksi?limit=10');
@@ -696,8 +836,8 @@ fetch('/api/v1/auth/me').then(r => r.json()).then(d => {
 
 loadDashboard();
 
-// Auto-refresh setiap 60 detik
-setInterval(loadDashboard, 60000);
+// Auto-refresh setiap 5 menit
+setInterval(loadDashboard, 300000);
 </script>
 <script src="/js/nav.js"></script>
 </body>

@@ -11,6 +11,7 @@ exports.index = async (req, res) => {
       tagihanBelumLunas,
       antrianAktif,
       selesaiHariIni,
+      lewatWaktu,
       chart7Hari,
       promoAktif,
       stokHampirHabis,
@@ -60,18 +61,29 @@ exports.index = async (req, res) => {
           'u.nama as kasir_nama'
         ),
 
-      // selesai_hari_ini — order yang tanggal_selesai hari ini ATAU status=selesai dan updated_at hari ini
+      // selesai_hari_ini — order yang estimasi = hari ini DAN masih pending/proses
       db('transaksi as t')
         .leftJoin('pelanggan as p', 'p.id', 't.pelanggan_id')
         .leftJoin('users as u', 'u.id', 't.user_id')
-        .where(function() {
-          this.whereRaw("date(t.tanggal_selesai/1000,'unixepoch') = ?", [today])
-            .orWhere(function() {
-              this.where('t.status', 'selesai')
-                .whereRaw("date(t.updated_at/1000,'unixepoch') = ?", [today]);
-            });
-        })
-        .orderBy('t.updated_at', 'desc')
+        .whereRaw("date(t.tanggal_selesai/1000,'unixepoch') = ?", [today])
+        .whereIn('t.status', ['pending', 'proses'])
+        .orderBy('t.tanggal_selesai', 'asc')
+        .limit(50)
+        .select(
+          't.id', 't.nomor_transaksi', 't.status',
+          't.total_bayar', 't.bayar', 't.total_dibayar',
+          't.tanggal_masuk', 't.tanggal_selesai', 't.updated_at',
+          'p.nama as pelanggan_nama', 'p.telepon as pelanggan_telepon',
+          'u.nama as kasir_nama'
+        ),
+
+      // lewat_waktu — order yang estimasi < hari ini DAN masih pending/proses
+      db('transaksi as t')
+        .leftJoin('pelanggan as p', 'p.id', 't.pelanggan_id')
+        .leftJoin('users as u', 'u.id', 't.user_id')
+        .whereRaw("date(t.tanggal_selesai/1000,'unixepoch') < ?", [today])
+        .whereIn('t.status', ['pending', 'proses'])
+        .orderBy('t.tanggal_selesai', 'asc')
         .limit(50)
         .select(
           't.id', 't.nomor_transaksi', 't.status',
@@ -136,8 +148,8 @@ exports.index = async (req, res) => {
       })()
     ]);
 
-    // Attach items untuk antrian aktif dan selesai hari ini
-    const allIds = [...antrianAktif.map(r => r.id), ...selesaiHariIni.map(r => r.id)];
+    // Attach items untuk antrian aktif, selesai hari ini, dan lewat waktu
+    const allIds = [...antrianAktif.map(r => r.id), ...selesaiHariIni.map(r => r.id), ...lewatWaktu.map(r => r.id)];
     let itemsByTrx = {};
     if (allIds.length) {
       const rows = await db('detail_transaksi')
@@ -159,6 +171,11 @@ exports.index = async (req, res) => {
       items: itemsByTrx[r.id] || []
     }));
 
+    const lewat = lewatWaktu.map(r => ({
+      ...r,
+      items: itemsByTrx[r.id] || []
+    }));
+
     res.json({
       order_hari_ini:      Number(orderHariIni?.total  ?? 0),
       omset_hari_ini:      Number(omsetHariIni?.total  ?? 0),
@@ -166,6 +183,7 @@ exports.index = async (req, res) => {
       tagihan_belum_lunas: Number(tagihanBelumLunas?.total ?? 0),
       antrian_aktif:       antrian,
       selesai_hari_ini:    selesai,
+      lewat_waktu:         lewat,
       bar_chart_7hari:     chart7Hari,
       promo_aktif_hari_ini: promoAktif,
       stok_hampir_habis:   stokHampirHabis,
