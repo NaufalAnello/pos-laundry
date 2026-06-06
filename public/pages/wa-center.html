@@ -107,16 +107,34 @@
     .btn-ghost:hover { background:var(--gray-2); border-radius:6px; }
 
     /* ── Table ── */
-    table { width:100%; border-collapse:collapse; }
+    table { width:100%; border-collapse:collapse; table-layout:fixed; }
     thead { background:var(--gray-1); }
-    th { padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:var(--gray-5);
-         text-transform:uppercase; letter-spacing:.4px; border-bottom:1px solid var(--gray-3); }
-    td { padding:10px 12px; border-bottom:1px solid var(--gray-3); font-size:13px; vertical-align:middle; }
+    th { padding:8px 10px; text-align:left; font-size:11px; font-weight:700; color:var(--gray-5);
+         text-transform:uppercase; letter-spacing:.4px; border-bottom:1px solid var(--gray-3);
+         overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    td { padding:8px 10px; border-bottom:1px solid var(--gray-3); font-size:13px; vertical-align:middle;
+         overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     tr:last-child td { border-bottom:none; }
-    .empty-row td { text-align:center; padding:32px; color:var(--gray-5); }
+    .empty-row td { text-align:center; padding:32px; color:var(--gray-5); white-space:normal; }
 
     /* Tagihan table: horizontal scroll on small screens */
     .tagihan-wrap { overflow-x:auto; }
+
+    /* Fixed column widths for tagihan table */
+    .tagihan-wrap table th:nth-child(1),
+    .tagihan-wrap table td:nth-child(1) { width:160px; }  /* No. Order */
+    .tagihan-wrap table th:nth-child(2),
+    .tagihan-wrap table td:nth-child(2) { width:120px; }  /* Pelanggan */
+    .tagihan-wrap table th:nth-child(3),
+    .tagihan-wrap table td:nth-child(3) { width:140px; }  /* Nomor WA */
+    .tagihan-wrap table th:nth-child(4),
+    .tagihan-wrap table td:nth-child(4) { width:80px; }   /* Status */
+    .tagihan-wrap table th:nth-child(5),
+    .tagihan-wrap table td:nth-child(5) { width:90px; }   /* Total */
+    .tagihan-wrap table th:nth-child(6),
+    .tagihan-wrap table td:nth-child(6) { width:90px; }   /* Sisa */
+    .tagihan-wrap table th:nth-child(7),
+    .tagihan-wrap table td:nth-child(7) { width:80px; }   /* Aksi */
 
     .badge { display:inline-flex; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; }
     .badge-pending  { background:#fef9c3; color:#92400e; }
@@ -190,13 +208,27 @@
     .toast.show { transform:translateX(-50%) translateY(0); }
     .toast.err  { background:var(--red); }
 
+    /* Tablet: sembunyikan kolom TOTAL */
+    @media (max-width: 767px) and (min-width: 480px) {
+      .tagihan-wrap table th:nth-child(5),
+      .tagihan-wrap table td:nth-child(5) { display: none; }
+    }
+
+    /* Mobile kecil: sembunyikan kolom NOMOR WA dan TOTAL */
+    @media (max-width: 479px) {
+      .tagihan-wrap table th:nth-child(3),
+      .tagihan-wrap table td:nth-child(3),
+      .tagihan-wrap table th:nth-child(5),
+      .tagihan-wrap table td:nth-child(5) { display: none; }
+    }
+
     /* ══ MOBILE wa-center ══ */
     @media (max-width: 767px) {
       .page { padding: 12px 10px 80px; }
       body > header { display: none !important; }
       .page-header { flex-direction: column; align-items: stretch; gap: 10px; }
       .tagihan-wrap { overflow-x: visible; }
-      .tagihan-wrap table { display: block; }
+      .tagihan-wrap table { display: block; table-layout: auto; }
       .tagihan-wrap thead { display: none; }
       .tagihan-wrap tbody, .tagihan-wrap tr { display: block; }
       .tagihan-wrap tbody tr {
@@ -210,6 +242,9 @@
         padding: 6px 0;
         border: none;
         text-align: right;
+        overflow: visible;
+        white-space: normal;
+        width: auto !important;
       }
       .tagihan-wrap td::before {
         content: attr(data-label);
