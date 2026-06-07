@@ -12,13 +12,22 @@ html, body { max-width: 100vw; overflow-x: hidden; }
 .page, .container { max-width: 100%; }
 
 /* ── Modal/popup default — mobile = bottom sheet ─────────────
-   Selector ini menjaring nama-nama umum yang dipakai di project. */
+   Selector ini menjaring nama-nama umum yang dipakai di project.
+
+   PENTING: JANGAN masukkan .modal-content / .modal-body ke selector
+   position:fixed di bawah. Pola modal di project ini adalah:
+     .modal-bg / .modal-overlay  -> backdrop (position:fixed; inset:0)
+     .modal                      -> konten (in-flow di dalam flex backdrop)
+     .modal-body                 -> isi konten (TIDAK boleh fixed)
+   Kalau .modal-body dipaksa position:fixed, ia lepas dari .modal (yang
+   memegang background putih) -> jadi transparan -> konten halaman terlihat
+   di belakang modal saat di HP. Lihat memory project-modal-responsive-gotcha. */
 @media (max-width: 767px) {
   .modal-overlay, .overlay,
   .modal,
   .popup-overlay { padding: 0 !important; }
 
-  .modal-content, .modal-body, .popup, .popup-content,
+  .popup, .popup-content,
   .modal-dialog, .modal-card, .dialog {
     width: 100% !important;
     max-width: 100% !important;
