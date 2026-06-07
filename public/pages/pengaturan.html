@@ -177,6 +177,7 @@
     <button class="tab" onclick="switchTab('wa',this)">📱 WhatsApp</button>
     <button class="tab" onclick="switchTab('printer',this)">🖨️ Printer</button>
     <button class="tab" onclick="switchTab('margin',this)">📊 Margin & HPP</button>
+    <button class="tab" onclick="switchTab('ai',this)">🤖 AI Assistant</button>
     <button class="tab" onclick="switchTab('user',this)">👤 Manajemen User</button>
     <button class="tab" onclick="switchTab('backup',this)">💾 Backup & Restore</button>
   </div>
@@ -423,6 +424,83 @@
     </div>
   </div>
 
+  <!-- ── TAB: AI Assistant ── -->
+  <div id="sec-ai" class="tab-section">
+    <div class="card">
+      <div class="card-head">🤖 AI Assistant dengan DeepSeek</div>
+      <div class="card-body">
+
+        <!-- Toggle AI -->
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="tl">Aktifkan AI Assistant</div>
+            <div class="td">Menggunakan DeepSeek API untuk chat dan analitik otomatis</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="aiEnabled"/>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- API Key -->
+        <div class="field" style="margin-top:12px">
+          <label>DeepSeek API Key</label>
+          <input id="deepseekApiKey" type="password" placeholder="sk-xxxxxxxxxxxx"/>
+          <small>Dapatkan API key di <a href="https://platform.deepseek.com" target="_blank" style="color:var(--blue)">platform.deepseek.com</a></small>
+        </div>
+
+        <!-- API URL (optional) -->
+        <div class="field">
+          <label>API URL (opsional)</label>
+          <input id="deepseekApiUrl" type="text" placeholder="https://api.deepseek.com/v1/chat/completions"/>
+          <small>Kosongkan untuk menggunakan default DeepSeek API</small>
+        </div>
+
+        <!-- Model -->
+        <div class="field">
+          <label>Model</label>
+          <select id="deepseekModel">
+            <option value="deepseek-chat">deepseek-chat (recommended)</option>
+            <option value="deepseek-reasoner">deepseek-reasoner</option>
+          </select>
+        </div>
+
+        <!-- Test Connection -->
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-outline" onclick="testAIConnection()" id="btnTestAI">
+            🔌 Test Koneksi
+          </button>
+          <span id="aiTestResult" style="font-size:12px"></span>
+        </div>
+
+        <!-- Save -->
+        <div class="save-bar">
+          <button class="btn btn-blue" onclick="saveAISettings()">💾 Simpan Pengaturan AI</button>
+          <span class="save-ok" id="aiOk" style="display:none">✓ Tersimpan</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="card" style="margin-top:12px">
+      <div class="card-head">ℹ️ Cara Menggunakan</div>
+      <div class="card-body" style="gap:8px">
+        <p style="font-size:13px;line-height:1.6">
+          <strong>1. AI Chat di Dashboard</strong><br/>
+          Klik tombol <strong>[🤖 Tanya AI]</strong> di dashboard untuk bertanya tentang data bisnis.
+        </p>
+        <p style="font-size:13px;line-height:1.6">
+          <strong>2. AI Insight (Analitik Otomatis)</strong><br/>
+          Akses menu <strong>[🤖 AI Insight]</strong> untuk melihat analisis tren dan rekomendasi bisnis otomatis.
+        </p>
+        <p style="font-size:13px;line-height:1.6;color:var(--gray-5)">
+          💡 Cache insight akan diperbarui setiap 1 jam untuk menghemat biaya API.
+        </p>
+      </div>
+    </div>
+  </div>
+
   <!-- ── TAB: User ── -->
   <div id="sec-user" class="tab-section">
     <div class="card">
@@ -608,6 +686,12 @@ async function loadSettings() {
     document.getElementById('marginPembulatan').value = data.margin_pembulatan || 'ratusan';
     document.getElementById('marginDefault').value    = data.margin_default_persen || '40';
     document.getElementById('marginTampilkan').checked = data.margin_tampilkan_info !== '0';
+
+    // AI settings
+    document.getElementById('aiEnabled').checked = data.ai_enabled === 1 || data.ai_enabled === '1';
+    document.getElementById('deepseekApiKey').value = data.deepseek_api_key || '';
+    document.getElementById('deepseekApiUrl').value = data.deepseek_api_url || '';
+    document.getElementById('deepseekModel').value = data.deepseek_model || 'deepseek-chat';
   } catch (e) { toast('Gagal memuat pengaturan: ' + e.message, true); }
 }
 
@@ -916,6 +1000,72 @@ async function loadMarginSummary() {
     </table>
     <div style="margin-top:8px;font-size:12px;color:var(--gray-5)">${rows.length - withHpp.length} layanan aktif belum ada HPP</div>`;
   } catch { el.innerHTML = '<div style="color:var(--red)">Gagal memuat data</div>'; }
+}
+
+// ── AI Settings ───────────────────────────────────────────────────────────────
+async function saveAISettings() {
+  try {
+    const enabled = document.getElementById('aiEnabled').checked;
+    const apiKey = document.getElementById('deepseekApiKey').value.trim();
+    const apiUrl = document.getElementById('deepseekApiUrl').value.trim();
+    const model = document.getElementById('deepseekModel').value;
+
+    if (enabled && !apiKey) {
+      return toast('DeepSeek API Key harus diisi jika AI diaktifkan', true);
+    }
+
+    await api('/api/v1/pengaturan', {
+      method: 'PUT',
+      body: JSON.stringify({
+        ai_enabled: enabled ? 1 : 0,
+        deepseek_api_key: apiKey,
+        deepseek_api_url: apiUrl || null,
+        deepseek_model: model
+      })
+    });
+
+    document.getElementById('aiOk').style.display = 'inline';
+    setTimeout(() => document.getElementById('aiOk').style.display = 'none', 3000);
+    toast('Pengaturan AI berhasil disimpan');
+  } catch (e) {
+    toast('Gagal menyimpan: ' + e.message, true);
+  }
+}
+
+async function testAIConnection() {
+  const btn = document.getElementById('btnTestAI');
+  const result = document.getElementById('aiTestResult');
+
+  try {
+    btn.disabled = true;
+    btn.textContent = '⏳ Testing...';
+    result.textContent = '';
+    result.style.color = '';
+
+    const apiKey = document.getElementById('deepseekApiKey').value.trim();
+    const apiUrl = document.getElementById('deepseekApiUrl').value.trim();
+    const model = document.getElementById('deepseekModel').value;
+
+    if (!apiKey) {
+      throw new Error('API Key harus diisi');
+    }
+
+    const res = await api('/api/v1/ai/test-connection', {
+      method: 'POST',
+      body: JSON.stringify({ apiKey, apiUrl, model })
+    });
+
+    result.textContent = '✓ ' + res.message;
+    result.style.color = 'var(--green)';
+    toast('Koneksi berhasil!');
+  } catch (e) {
+    result.textContent = '✗ ' + e.message;
+    result.style.color = 'var(--red)';
+    toast('Koneksi gagal: ' + e.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔌 Test Koneksi';
+  }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

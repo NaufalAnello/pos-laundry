@@ -48,6 +48,13 @@
     .page-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
     .page-sub { color: var(--gray-5); font-size: 13px; margin-bottom: 20px; }
 
+    .btn { padding: 9px 18px; border-radius: 8px; border: 1px solid transparent; font-size: 13px;
+           font-weight: 600; cursor: pointer; transition: opacity .15s; display: inline-flex;
+           align-items: center; gap: 6px; text-decoration: none; }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .4; cursor: default; }
+    .btn-blue { background: var(--blue); color: #fff; }
+
     /* ── Stat cards ── */
     .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
     @media (max-width: 1023px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -220,13 +227,89 @@
       text-decoration: none; transition: background .1s;
     }
     .wa-menu a:hover { background: var(--gray-2); }
+
+    /* ── AI Chat Panel ── */
+    #aiChatPanel {
+      position: fixed; right: -400px; top: 0; width: 400px; height: 100vh;
+      background: #fff; box-shadow: -4px 0 20px rgba(0,0,0,.15); z-index: 999;
+      transition: right .3s; display: flex; flex-direction: column;
+    }
+    #aiChatPanel.open { right: 0; }
+    .ai-chat-header {
+      padding: 16px; border-bottom: 1px solid var(--gray-3);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .ai-chat-header h3 { font-size: 16px; font-weight: 700; }
+    .ai-chat-header button {
+      background: none; border: none; font-size: 20px; cursor: pointer;
+      color: var(--gray-5); padding: 4px 8px; border-radius: 6px;
+    }
+    .ai-chat-header button:hover { background: var(--gray-2); }
+    .ai-chat-body {
+      flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px;
+    }
+    .ai-chat-msg {
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .ai-chat-msg.user { flex-direction: row-reverse; }
+    .ai-chat-msg .avatar {
+      width: 32px; height: 32px; border-radius: 50%; background: var(--gray-3);
+      display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+    }
+    .ai-chat-msg.user .avatar { background: var(--blue-lt); }
+    .ai-chat-msg .bubble {
+      background: var(--gray-1); padding: 10px 14px; border-radius: 12px;
+      font-size: 13px; line-height: 1.6; max-width: 75%;
+    }
+    .ai-chat-msg.user .bubble { background: var(--blue); color: #fff; }
+    .ai-chat-footer {
+      padding: 12px; border-top: 1px solid var(--gray-3);
+    }
+    .ai-quick-btns {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;
+    }
+    .ai-quick-btns button {
+      padding: 6px 12px; border-radius: 16px; border: 1px solid var(--gray-3);
+      background: #fff; font-size: 11px; cursor: pointer; color: var(--gray-7);
+      transition: background .15s;
+    }
+    .ai-quick-btns button:hover { background: var(--gray-2); }
+    .ai-input-wrap {
+      display: flex; gap: 8px; align-items: center;
+    }
+    .ai-input-wrap input {
+      flex: 1; padding: 9px 12px; border: 1px solid var(--gray-3);
+      border-radius: 20px; font-size: 13px; font-family: inherit;
+    }
+    .ai-input-wrap input:focus { outline: none; border-color: var(--blue); }
+    .ai-input-wrap button {
+      width: 36px; height: 36px; border-radius: 50%; border: none;
+      background: var(--blue); color: #fff; font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .ai-input-wrap button:disabled { opacity: .4; cursor: default; }
+    .ai-input-wrap button:hover:not(:disabled) { opacity: .85; }
+
+    @media (max-width: 767px) {
+      #aiChatPanel {
+        right: -100%;
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
 
 <div class="page">
-  <div class="page-title">Dashboard</div>
-  <div class="page-sub" id="pageDate">Memuat...</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px">
+    <div>
+      <div class="page-title">Dashboard</div>
+      <div class="page-sub" id="pageDate">Memuat...</div>
+    </div>
+    <button class="btn btn-blue" onclick="toggleAIChat()" id="btnAIChat">
+      🤖 Tanya AI
+    </button>
+  </div>
 
   <!-- Stat cards -->
   <div class="stats-grid">
@@ -366,6 +449,32 @@
 </div>
 
 <div id="toast"></div>
+
+<!-- AI Chat Panel -->
+<div id="aiChatPanel">
+  <div class="ai-chat-header">
+    <h3>🤖 AI Assistant</h3>
+    <button onclick="toggleAIChat()">✕</button>
+  </div>
+  <div class="ai-chat-body" id="aiChatBody">
+    <div style="text-align:center;color:var(--gray-5);font-size:12px;padding:20px">
+      Powered by DeepSeek<br/>
+      Tanya apa saja tentang bisnis Anda!
+    </div>
+  </div>
+  <div class="ai-chat-footer">
+    <div class="ai-quick-btns">
+      <button onclick="sendQuickQuestion('Ringkasan hari ini')">📊 Ringkasan hari ini</button>
+      <button onclick="sendQuickQuestion('Pendapatan minggu ini')">💰 Pendapatan minggu ini</button>
+      <button onclick="sendQuickQuestion('Order lewat waktu')">⚠️ Order lewat waktu</button>
+      <button onclick="sendQuickQuestion('Pelanggan paling aktif')">👥 Pelanggan aktif</button>
+    </div>
+    <div class="ai-input-wrap">
+      <input type="text" id="aiInput" placeholder="Ketik pertanyaan..." onkeypress="if(event.key==='Enter')sendAIMessage()"/>
+      <button onclick="sendAIMessage()" id="btnSendAI">➤</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
@@ -838,6 +947,90 @@ loadDashboard();
 
 // Auto-refresh setiap 5 menit
 setInterval(loadDashboard, 300000);
+
+// ── AI Chat ───────────────────────────────────────────────────────────────────
+let aiChatHistory = [];
+
+function toggleAIChat() {
+  const panel = document.getElementById('aiChatPanel');
+  panel.classList.toggle('open');
+}
+
+function addAIMessage(role, content) {
+  const chatBody = document.getElementById('aiChatBody');
+  const isUser = role === 'user';
+
+  const msgDiv = document.createElement('div');
+  msgDiv.className = `ai-chat-msg ${isUser ? 'user' : 'assistant'}`;
+  msgDiv.innerHTML = `
+    <div class="avatar">${isUser ? '👤' : '🤖'}</div>
+    <div class="bubble">${escapeHtml(content)}</div>
+  `;
+
+  // Hapus welcome message jika ada
+  const welcome = chatBody.querySelector('[style*="text-align:center"]');
+  if (welcome) welcome.remove();
+
+  chatBody.appendChild(msgDiv);
+  chatBody.scrollTop = chatBody.scrollHeight;
+
+  // Simpan ke history
+  aiChatHistory.push({ role, content });
+}
+
+async function sendAIMessage() {
+  const input = document.getElementById('aiInput');
+  const btnSend = document.getElementById('btnSendAI');
+  const pesan = input.value.trim();
+
+  if (!pesan) return;
+
+  try {
+    input.disabled = true;
+    btnSend.disabled = true;
+
+    // Tampilkan pesan user
+    addAIMessage('user', pesan);
+    input.value = '';
+
+    // Kirim ke API
+    const response = await fetch('/api/v1/ai/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ pesan, riwayat: aiChatHistory })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Gagal mengirim pesan');
+    }
+
+    // Tampilkan jawaban AI
+    addAIMessage('assistant', data.jawaban);
+  } catch (e) {
+    showToast('AI Error: ' + e.message);
+    // Hapus pesan user yang gagal dari history
+    aiChatHistory.pop();
+  } finally {
+    input.disabled = false;
+    btnSend.disabled = false;
+    input.focus();
+  }
+}
+
+function sendQuickQuestion(question) {
+  const input = document.getElementById('aiInput');
+  input.value = question;
+  sendAIMessage();
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML.replace(/\n/g, '<br>');
+}
 </script>
 <script src="/js/nav.js"></script>
 </body>

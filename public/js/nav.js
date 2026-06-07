@@ -53,6 +53,7 @@
       group: 'Master',
       items: [
         { href: '/layanan',    icon: '🧺', label: 'Layanan'    },
+        { href: '/ai-insight', icon: '🤖', label: 'AI Insight'  },
         { href: '/pengaturan', icon: '⚙️', label: 'Pengaturan' },
       ]
     }
@@ -73,6 +74,7 @@
     { href: '/poin',       icon: '⭐', label: 'Poin'       },
     { href: '/laporan',    icon: '📊', label: 'Laporan'    },
     { href: '/layanan',    icon: '🧺', label: 'Layanan'    },
+    { href: '/ai-insight', icon: '🤖', label: 'AI Insight'  },
     { href: '/pengaturan', icon: '⚙️', label: 'Pengaturan' },
   ];
 

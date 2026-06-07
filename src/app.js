@@ -22,6 +22,7 @@ const pengaturanRoutes  = require('./routes/pengaturanRoutes');
 const usersRoutes       = require('./routes/usersRoutes');
 const printerRoutes     = require('./routes/printerRoutes');
 const depositRoutes     = require('./routes/depositRoutes');
+const aiRoutes          = require('./routes/aiRoutes');
 
 const app = express();
 
@@ -107,6 +108,9 @@ app.use('/api/v1/printer', printerRoutes);
 
 // Deposit pelanggan
 app.use('/api/v1/deposit', depositRoutes);
+
+// AI Assistant
+app.use('/api/v1/ai', aiRoutes);
 
 // ── Web page routes ────────────────────────────────────────────────────────────
 
@@ -203,6 +207,12 @@ app.get('/pengaturan', (req, res) => {
 app.get('/deposit', (req, res) => {
   if (!req.session?.userId) return res.redirect('/login');
   res.sendFile(path.join(__dirname, '../public/pages/deposit.html'));
+});
+
+// AI Insight
+app.get('/ai-insight', (req, res) => {
+  if (!req.session?.userId) return res.redirect('/login');
+  res.sendFile(path.join(__dirname, '../public/pages/ai-insight.html'));
 });
 
 // Semua route web lain → redirect ke dashboard
