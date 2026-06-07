@@ -122,14 +122,16 @@
                             border-radius:8px; font-size:13px; resize:vertical; min-height:80px; }
     .wa-composer textarea:focus { outline:none; border-color:var(--blue); }
 
-    /* ── Modal form ── */
+    /* ── Modal form ──
+       Catatan: backdrop pakai position:fixed inset:0 supaya menutupi viewport.
+       Modal anak in-flow (position:relative) di dalam flex backdrop — INI penting,
+       jangan position:fixed pada .modal agar tidak bentrok dgn global responsive.css. */
     .modal-bg { position:fixed !important; inset:0 !important; background:rgba(0,0,0,.5) !important;
-                z-index:9999 !important; display:none; align-items:flex-end; justify-content:center;
-                overflow:hidden; }
+                z-index:9999 !important; display:none; align-items:center; justify-content:center;
+                padding:16px; overflow-y:auto; }
     .modal-bg.open { display:flex !important; }
-    .modal { position:fixed; bottom:0; left:0; right:0; z-index:10000; background:#fff;
-             border-radius:16px 16px 0 0; width:100%; max-width:100%; max-height:90vh;
-             overflow-y:auto; box-shadow:0 -4px 24px rgba(0,0,0,.18); }
+    .modal { position:relative; background:#fff; border-radius:12px; width:100%; max-width:460px;
+             max-height:90vh; overflow-y:auto; box-shadow:0 8px 32px rgba(0,0,0,.18); }
     .modal-head { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--gray-3); }
     .modal-head h3 { font-size:16px; font-weight:700; }
     .modal-body { padding:20px; display:flex; flex-direction:column; gap:14px; }
@@ -168,12 +170,7 @@
                 font-weight:600; color:var(--gray-5); transition:all .15s; }
     .aksi-btn.active { background:var(--blue); color:#fff; }
 
-    /* ── Tablet ke atas — modal di tengah ── */
-    @media (min-width: 768px) {
-      .modal-bg { align-items:center !important; }
-      .modal { position:relative; bottom:auto; left:auto; right:auto; width:480px;
-               max-width:480px; max-height:80vh; border-radius:12px; }
-    }
+    /* Desktop/tablet (≥768px) pakai base .modal di atas: modal di tengah, lebar 460px. */
 
     /* ══ MOBILE: pelanggan jadi card list ══ */
     @media (max-width: 767px) {
@@ -239,6 +236,30 @@
       .pagination { flex-direction: column; align-items: stretch; gap: 8px; }
       .pag-btns { justify-content: center; }
       .pag-btn { min-height: 36px; min-width: 36px; }
+
+      /* ── Modal form di HP = bottom sheet ── */
+      .modal-bg { align-items: flex-end; padding: 0 !important; }
+      .modal {
+        position: relative !important;          /* tetap in-flow di dalam flex backdrop */
+        top: auto !important; bottom: auto !important; left: auto !important; right: auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 90vh !important;
+        border-radius: 16px 16px 0 0 !important;
+      }
+      /* PENTING: netralkan aturan global responsive.css yang memaksa
+         .modal-body jadi position:fixed (membuat isi modal lepas & transparan,
+         sehingga konten halaman terlihat di belakang modal di HP). */
+      .modal-bg .modal-body {
+        position: static !important;
+        inset: auto !important;
+        top: auto !important; bottom: auto !important; left: auto !important; right: auto !important;
+        width: auto !important;
+        max-width: none !important;
+        max-height: none !important;
+        border-radius: 0 !important;
+        animation: none !important;
+      }
     }
   </style>
 </head>
@@ -686,6 +707,28 @@ function sendWA(phone) {
 }
 
 // ── Form Modal ────────────────────────────────────────────────────────────────
+// Body scroll lock yang aman: simpan posisi scroll, kunci body, lalu pulihkan.
+// (body{position:fixed} TANPA top akan melompat ke atas — itu sebabnya pakai savedScrollY.)
+let savedScrollY = 0;
+function lockBodyScroll() {
+  savedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+  document.body.style.position = 'fixed';
+  document.body.style.top   = `-${savedScrollY}px`;
+  document.body.style.left  = '0';
+  document.body.style.right = '0';
+  document.body.style.width = '100%';
+  document.body.style.overflow = 'hidden';
+}
+function unlockBodyScroll() {
+  document.body.style.position = '';
+  document.body.style.top   = '';
+  document.body.style.left  = '';
+  document.body.style.right = '';
+  document.body.style.width = '';
+  document.body.style.overflow = '';
+  window.scrollTo(0, savedScrollY);
+}
+
 function openAdd() {
   document.getElementById('editId').value = '';
   document.getElementById('modalTitle').textContent = 'Tambah Pelanggan';
@@ -695,10 +738,7 @@ function openAdd() {
   document.getElementById('fAlamat').value  = '';
   document.getElementById('formErr').textContent = '';
   document.getElementById('modalBg').classList.add('open');
-  // Lock body scroll untuk HP
-  document.body.style.overflow = 'hidden';
-  document.body.style.position = 'fixed';
-  document.body.style.width = '100%';
+  lockBodyScroll();
   setTimeout(() => document.getElementById('fNama').focus(), 100);
 }
 
@@ -720,19 +760,13 @@ async function editCurrent() {
     document.getElementById('fAlamat').value  = data.alamat || '';
     document.getElementById('formErr').textContent = '';
     document.getElementById('modalBg').classList.add('open');
-    // Lock body scroll untuk HP
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
+    lockBodyScroll();
   } catch (e) { toast(e.message, true); }
 }
 
 function closeModal() {
   document.getElementById('modalBg').classList.remove('open');
-  // Unlock body scroll
-  document.body.style.overflow = '';
-  document.body.style.position = '';
-  document.body.style.width = '';
+  unlockBodyScroll();
 }
 
 async function savePelanggan() {
