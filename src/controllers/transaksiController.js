@@ -778,7 +778,7 @@ async function recalculateOrderTotal(trx, transaksiId) {
   );
   const totalBayarFinal = totalBayar + totalBiaya;
 
-  // Update estimasi_selesai berdasarkan layanan dengan estimasi terbesar
+  // Hitung tanggal_selesai berdasarkan layanan dengan estimasi terbesar
   const estimasiList = [];
   for (const it of items) {
     if (it.layanan_id) {

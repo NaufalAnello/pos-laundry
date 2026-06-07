@@ -28,34 +28,36 @@ async function callDeepSeek(messages, apiKey, apiUrl, model) {
 // Helper untuk mengambil data konteks bisnis
 async function getBusinessContext() {
   const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-  const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  // Kolom tanggal di DB disimpan sebagai Unix epoch milidetik (integer), bukan ISO string
+  const todayStartMs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const weekStartMs = now.getTime() - 7 * 24 * 60 * 60 * 1000;
+  const monthStartMs = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  const nowMs = now.getTime();
 
   // Total order dan pendapatan hari ini
   const orderHariIni = db('transaksi')
-    .where('tanggal_masuk', '>=', todayStart)
+    .where('tanggal_masuk', '>=', todayStartMs)
     .select(
       db.raw('COUNT(*) as jumlah_order'),
-      db.raw('SUM(total_harga) as total_pendapatan')
+      db.raw('COALESCE(SUM(total_bayar), 0) as total_pendapatan')
     )
     .first();
 
   // Total order dan pendapatan minggu ini
   const orderMingguIni = db('transaksi')
-    .where('tanggal_masuk', '>=', weekStart)
+    .where('tanggal_masuk', '>=', weekStartMs)
     .select(
       db.raw('COUNT(*) as jumlah_order'),
-      db.raw('SUM(total_harga) as total_pendapatan')
+      db.raw('COALESCE(SUM(total_bayar), 0) as total_pendapatan')
     )
     .first();
 
   // Total order dan pendapatan bulan ini
   const orderBulanIni = db('transaksi')
-    .where('tanggal_masuk', '>=', monthStart)
+    .where('tanggal_masuk', '>=', monthStartMs)
     .select(
       db.raw('COUNT(*) as jumlah_order'),
-      db.raw('SUM(total_harga) as total_pendapatan')
+      db.raw('COALESCE(SUM(total_bayar), 0) as total_pendapatan')
     )
     .first();
 
@@ -67,7 +69,7 @@ async function getBusinessContext() {
 
   // Order lewat estimasi
   const orderLewatEstimasi = db('transaksi')
-    .where('estimasi_selesai', '<', now.toISOString())
+    .where('tanggal_selesai', '<', nowMs)
     .whereIn('status', ['pending', 'proses'])
     .count('* as total')
     .first();
@@ -76,12 +78,12 @@ async function getBusinessContext() {
   const layananTerlaris = db('detail_transaksi')
     .join('transaksi', 'detail_transaksi.transaksi_id', 'transaksi.id')
     .join('layanan', 'detail_transaksi.layanan_id', 'layanan.id')
-    .where('transaksi.tanggal_masuk', '>=', monthStart)
+    .where('transaksi.tanggal_masuk', '>=', monthStartMs)
     .groupBy('detail_transaksi.layanan_id')
     .select(
       'layanan.nama',
       db.raw('COUNT(*) as jumlah_order'),
-      db.raw('SUM(detail_transaksi.sub_total) as total_pendapatan')
+      db.raw('COALESCE(SUM(detail_transaksi.subtotal), 0) as total_pendapatan')
     )
     .orderBy('jumlah_order', 'desc')
     .limit(5);
@@ -89,28 +91,29 @@ async function getBusinessContext() {
   // 5 pelanggan paling aktif
   const pelangganAktif = db('transaksi')
     .join('pelanggan', 'transaksi.pelanggan_id', 'pelanggan.id')
-    .where('transaksi.tanggal_masuk', '>=', monthStart)
+    .where('transaksi.tanggal_masuk', '>=', monthStartMs)
     .groupBy('transaksi.pelanggan_id')
     .select(
       'pelanggan.nama',
-      'pelanggan.nomor_hp',
+      'pelanggan.telepon',
       db.raw('COUNT(*) as jumlah_order'),
-      db.raw('SUM(transaksi.total_harga) as total_belanja')
+      db.raw('COALESCE(SUM(transaksi.total_bayar), 0) as total_belanja')
     )
     .orderBy('jumlah_order', 'desc')
     .limit(5);
 
-  // Total piutang (belum lunas)
+  // Total piutang (transaksi yang masih ada sisa pembayaran, belum dibatalkan/diambil)
   const piutang = db('transaksi')
-    .where('status_pembayaran', 'belum_lunas')
+    .whereRaw('bayar < total_bayar')
+    .whereNotIn('status', ['dibatalkan', 'diambil'])
     .select(
       db.raw('COUNT(*) as jumlah_order'),
-      db.raw('SUM(total_harga - total_dibayar) as total_piutang')
+      db.raw('COALESCE(SUM(total_bayar - bayar), 0) as total_piutang')
     )
     .first();
 
   // Total deposit pelanggan
-  const totalDeposit = db('deposit')
+  const totalDeposit = db('deposit_pelanggan')
     .sum('saldo as total')
     .first();
 
@@ -139,26 +142,35 @@ async function getBusinessContext() {
 
   return {
     hari_ini: {
-      jumlah_order: hariIni.jumlah_order || 0,
-      total_pendapatan: hariIni.total_pendapatan || 0
+      jumlah_order: Number(hariIni?.jumlah_order || 0),
+      total_pendapatan: Number(hariIni?.total_pendapatan || 0)
     },
     minggu_ini: {
-      jumlah_order: mingguIni.jumlah_order || 0,
-      total_pendapatan: mingguIni.total_pendapatan || 0
+      jumlah_order: Number(mingguIni?.jumlah_order || 0),
+      total_pendapatan: Number(mingguIni?.total_pendapatan || 0)
     },
     bulan_ini: {
-      jumlah_order: bulanIni.jumlah_order || 0,
-      total_pendapatan: bulanIni.total_pendapatan || 0
+      jumlah_order: Number(bulanIni?.jumlah_order || 0),
+      total_pendapatan: Number(bulanIni?.total_pendapatan || 0)
     },
-    order_berjalan: berjalan.total || 0,
-    order_lewat_estimasi: lewatEstimasi.total || 0,
-    layanan_terlaris: terlaris,
-    pelanggan_aktif: aktif,
+    order_berjalan: Number(berjalan?.total || 0),
+    order_lewat_estimasi: Number(lewatEstimasi?.total || 0),
+    layanan_terlaris: (terlaris || []).map(l => ({
+      nama: l.nama,
+      jumlah_order: Number(l.jumlah_order || 0),
+      total_pendapatan: Number(l.total_pendapatan || 0)
+    })),
+    pelanggan_aktif: (aktif || []).map(p => ({
+      nama: p.nama,
+      telepon: p.telepon,
+      jumlah_order: Number(p.jumlah_order || 0),
+      total_belanja: Number(p.total_belanja || 0)
+    })),
     piutang: {
-      jumlah_order: hutang.jumlah_order || 0,
-      total_piutang: hutang.total_piutang || 0
+      jumlah_order: Number(hutang?.jumlah_order || 0),
+      total_piutang: Number(hutang?.total_piutang || 0)
     },
-    total_deposit: deposit.total || 0
+    total_deposit: Number(deposit?.total || 0)
   };
 }
 
@@ -214,7 +226,7 @@ Order Lewat Estimasi: ${context.order_lewat_estimasi}
 ${context.layanan_terlaris.map((l, i) => `${i + 1}. ${l.nama} - ${l.jumlah_order} order (Rp ${l.total_pendapatan.toLocaleString('id-ID')})`).join('\n')}
 
 5 Pelanggan Paling Aktif:
-${context.pelanggan_aktif.map((p, i) => `${i + 1}. ${p.nama} (${p.nomor_hp}) - ${p.jumlah_order} order (Rp ${p.total_belanja.toLocaleString('id-ID')})`).join('\n')}
+${context.pelanggan_aktif.map((p, i) => `${i + 1}. ${p.nama} (${p.telepon || '-'}) - ${p.jumlah_order} order (Rp ${p.total_belanja.toLocaleString('id-ID')})`).join('\n')}
 
 Piutang (Belum Lunas):
 - Jumlah order: ${context.piutang.jumlah_order}
@@ -276,27 +288,27 @@ exports.getInsight = async (req, res) => {
       }
     }
 
-    // Ambil data 30 hari terakhir
+    // Ambil data 30 hari terakhir (tanggal_masuk = unix epoch ms)
     const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const thirtyDaysAgoMs = now.getTime() - 30 * 24 * 60 * 60 * 1000;
 
     const transaksi30Hari = await db('transaksi')
-      .where('tanggal_masuk', '>=', thirtyDaysAgo)
+      .where('tanggal_masuk', '>=', thirtyDaysAgoMs)
       .select('*');
 
     const detail30Hari = await db('detail_transaksi')
       .join('transaksi', 'detail_transaksi.transaksi_id', 'transaksi.id')
       .join('layanan', 'detail_transaksi.layanan_id', 'layanan.id')
-      .where('transaksi.tanggal_masuk', '>=', thirtyDaysAgo)
+      .where('transaksi.tanggal_masuk', '>=', thirtyDaysAgoMs)
       .select('detail_transaksi.*', 'layanan.nama as layanan_nama', 'transaksi.tanggal_masuk');
 
     // Ambil data konteks bisnis terkini
     const context = await getBusinessContext();
 
-    // Analisis per hari dalam seminggu
+    // Analisis per hari dalam seminggu (tanggal_masuk = ms epoch)
     const orderPerHari = {};
     transaksi30Hari.forEach(t => {
-      const day = new Date(t.tanggal_masuk).toLocaleDateString('id-ID', { weekday: 'long' });
+      const day = new Date(Number(t.tanggal_masuk)).toLocaleDateString('id-ID', { weekday: 'long' });
       orderPerHari[day] = (orderPerHari[day] || 0) + 1;
     });
 
@@ -327,7 +339,7 @@ exports.getInsight = async (req, res) => {
 DATA:
 ${JSON.stringify({
   transaksi_30_hari: transaksi30Hari.length,
-  total_pendapatan_30_hari: transaksi30Hari.reduce((sum, t) => sum + t.total_harga, 0),
+  total_pendapatan_30_hari: transaksi30Hari.reduce((sum, t) => sum + Number(t.total_bayar || 0), 0),
   order_per_hari: orderPerHari,
   kondisi_hari_ini: context.hari_ini,
   order_lewat_estimasi: context.order_lewat_estimasi,
@@ -356,12 +368,21 @@ Jawab HANYA dengan JSON yang valid, tanpa penjelasan tambahan.`;
       throw new Error('AI response tidak dalam format JSON yang valid');
     }
 
-    // Simpan cache
-    await db('pengaturan')
-      .update({
-        ai_insight_cache: JSON.stringify(insight),
-        ai_insight_cache_time: new Date().toISOString()
-      });
+    // Simpan cache (pola kunci/nilai, konsisten dengan pembacaan di atas)
+    const cachePayload = [
+      { kunci: 'ai_insight_cache', nilai: JSON.stringify(insight) },
+      { kunci: 'ai_insight_cache_time', nilai: new Date().toISOString() }
+    ];
+    for (const { kunci, nilai } of cachePayload) {
+      const existing = await db('pengaturan').where({ kunci }).first();
+      if (existing) {
+        await db('pengaturan').where({ kunci }).update({ nilai, updated_at: new Date() });
+      } else {
+        await db('pengaturan').insert({
+          kunci, nilai, deskripsi: '', created_at: new Date(), updated_at: new Date()
+        });
+      }
+    }
 
     res.json(insight);
   } catch (error) {
