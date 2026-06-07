@@ -123,11 +123,13 @@
     .wa-composer textarea:focus { outline:none; border-color:var(--blue); }
 
     /* ── Modal form ── */
-    .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:9999; display:none;
-                align-items:flex-end; justify-content:center; overflow:hidden; }
-    .modal-bg.open { display:flex; }
-    .modal { background:#fff; border-radius:16px 16px 0 0; width:100%; max-width:100%;
-             max-height:90vh; overflow-y:auto; box-shadow:0 -4px 24px rgba(0,0,0,.18); }
+    .modal-bg { position:fixed !important; inset:0 !important; background:rgba(0,0,0,.5) !important;
+                z-index:9999 !important; display:none; align-items:flex-end; justify-content:center;
+                overflow:hidden; }
+    .modal-bg.open { display:flex !important; }
+    .modal { position:fixed; bottom:0; left:0; right:0; z-index:10000; background:#fff;
+             border-radius:16px 16px 0 0; width:100%; max-width:100%; max-height:90vh;
+             overflow-y:auto; box-shadow:0 -4px 24px rgba(0,0,0,.18); }
     .modal-head { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--gray-3); }
     .modal-head h3 { font-size:16px; font-weight:700; }
     .modal-body { padding:20px; display:flex; flex-direction:column; gap:14px; }
@@ -142,7 +144,7 @@
 
     .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
              background:#1e293b; color:#fff; padding:10px 20px; border-radius:8px;
-             font-size:13px; font-weight:600; z-index:99; transition:transform .3s; white-space:nowrap; }
+             font-size:13px; font-weight:600; z-index:10001; transition:transform .3s; white-space:nowrap; }
     .toast.show { transform:translateX(-50%) translateY(0); }
     .toast.err  { background:var(--red); }
 
@@ -168,8 +170,9 @@
 
     /* ── Tablet ke atas — modal di tengah ── */
     @media (min-width: 768px) {
-      .modal-bg { align-items:center; }
-      .modal { width:480px; max-width:480px; max-height:80vh; border-radius:12px; }
+      .modal-bg { align-items:center !important; }
+      .modal { position:relative; bottom:auto; left:auto; right:auto; width:480px;
+               max-width:480px; max-height:80vh; border-radius:12px; }
     }
 
     /* ══ MOBILE: pelanggan jadi card list ══ */
@@ -692,7 +695,10 @@ function openAdd() {
   document.getElementById('fAlamat').value  = '';
   document.getElementById('formErr').textContent = '';
   document.getElementById('modalBg').classList.add('open');
+  // Lock body scroll untuk HP
   document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
   setTimeout(() => document.getElementById('fNama').focus(), 100);
 }
 
@@ -714,13 +720,19 @@ async function editCurrent() {
     document.getElementById('fAlamat').value  = data.alamat || '';
     document.getElementById('formErr').textContent = '';
     document.getElementById('modalBg').classList.add('open');
+    // Lock body scroll untuk HP
     document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
   } catch (e) { toast(e.message, true); }
 }
 
 function closeModal() {
   document.getElementById('modalBg').classList.remove('open');
+  // Unlock body scroll
   document.body.style.overflow = '';
+  document.body.style.position = '';
+  document.body.style.width = '';
 }
 
 async function savePelanggan() {
