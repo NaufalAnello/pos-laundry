@@ -172,9 +172,10 @@ exports.chat = async (req, res) => {
     }
 
     // Cek apakah AI diaktifkan dan API key tersedia
-    const pengaturan = await db('pengaturan').first();
-    const aiEnabled = pengaturan?.ai_enabled === 1;
-    const apiKey = pengaturan?.deepseek_api_key || process.env.DEEPSEEK_API_KEY;
+    const pengaturanRows = await db('pengaturan').select('kunci', 'nilai');
+    const pengaturan = Object.fromEntries(pengaturanRows.map(r => [r.kunci, r.nilai]));
+    const aiEnabled = pengaturan.ai_enabled === 'true' || pengaturan.ai_enabled === '1' || pengaturan.ai_enabled === true;
+    const apiKey = pengaturan.deepseek_api_key || process.env.DEEPSEEK_API_KEY;
 
     if (!aiEnabled) {
       return res.status(400).json({ error: 'AI Assistant belum diaktifkan. Silakan aktifkan di halaman Pengaturan.' });
@@ -252,9 +253,10 @@ Total Saldo Deposit Pelanggan: Rp ${context.total_deposit.toLocaleString('id-ID'
 exports.getInsight = async (req, res) => {
   try {
     // Cek apakah AI diaktifkan dan API key tersedia
-    const pengaturan = await db('pengaturan').first();
-    const aiEnabled = pengaturan?.ai_enabled === 1;
-    const apiKey = pengaturan?.deepseek_api_key || process.env.DEEPSEEK_API_KEY;
+    const pengaturanRows = await db('pengaturan').select('kunci', 'nilai');
+    const pengaturan = Object.fromEntries(pengaturanRows.map(r => [r.kunci, r.nilai]));
+    const aiEnabled = pengaturan.ai_enabled === 'true' || pengaturan.ai_enabled === '1' || pengaturan.ai_enabled === true;
+    const apiKey = pengaturan.deepseek_api_key || process.env.DEEPSEEK_API_KEY;
 
     if (!aiEnabled) {
       return res.status(400).json({ error: 'AI Assistant belum diaktifkan. Silakan aktifkan di halaman Pengaturan.' });
@@ -265,8 +267,8 @@ exports.getInsight = async (req, res) => {
     }
 
     // Cek cache (1 jam)
-    const cachedInsight = pengaturan?.ai_insight_cache;
-    const cacheTime = pengaturan?.ai_insight_cache_time;
+    const cachedInsight = pengaturan.ai_insight_cache;
+    const cacheTime = pengaturan.ai_insight_cache_time;
     if (cachedInsight && cacheTime) {
       const cacheAge = Date.now() - new Date(cacheTime).getTime();
       if (cacheAge < 60 * 60 * 1000) { // 1 jam

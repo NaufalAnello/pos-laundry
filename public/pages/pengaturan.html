@@ -688,7 +688,7 @@ async function loadSettings() {
     document.getElementById('marginTampilkan').checked = data.margin_tampilkan_info !== '0';
 
     // AI settings
-    document.getElementById('aiEnabled').checked = data.ai_enabled === 1 || data.ai_enabled === '1';
+    document.getElementById('aiEnabled').checked = data.ai_enabled === 1 || data.ai_enabled === '1' || data.ai_enabled === 'true' || data.ai_enabled === true;
     document.getElementById('deepseekApiKey').value = data.deepseek_api_key || '';
     document.getElementById('deepseekApiUrl').value = data.deepseek_api_url || '';
     document.getElementById('deepseekModel').value = data.deepseek_model || 'deepseek-chat';

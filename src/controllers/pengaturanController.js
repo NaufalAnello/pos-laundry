@@ -18,18 +18,33 @@ exports.getAll = async (req, res) => {
 
 // ── PUT /api/v1/pengaturan ────────────────────────────────────────────────────
 exports.updateBulk = async (req, res) => {
-  const { error, value } = Joi.object({}).pattern(Joi.string(), Joi.string().allow('', null).max(5000))
-    .min(1).validate(req.body);
+  // Validasi: accept string, number, boolean, atau null
+  const { error, value } = Joi.object({})
+    .pattern(
+      Joi.string(),
+      Joi.alternatives().try(
+        Joi.string().max(5000),
+        Joi.number(),
+        Joi.boolean(),
+        Joi.allow('', null)
+      )
+    )
+    .min(1)
+    .validate(req.body);
+
   if (error) return res.status(400).json({ error: error.details[0].message });
 
   try {
     for (const [kunci, nilai] of Object.entries(value)) {
+      // Konversi semua nilai ke string untuk konsistensi database
+      let nilaiString = nilai === null || nilai === undefined ? '' : String(nilai);
+
       const existing = await db('pengaturan').where({ kunci }).first();
       if (existing) {
-        await db('pengaturan').where({ kunci }).update({ nilai: nilai ?? '', updated_at: new Date() });
+        await db('pengaturan').where({ kunci }).update({ nilai: nilaiString, updated_at: new Date() });
       } else {
         await db('pengaturan').insert({
-          kunci, nilai: nilai ?? '', deskripsi: '', created_at: new Date(), updated_at: new Date()
+          kunci, nilai: nilaiString, deskripsi: '', created_at: new Date(), updated_at: new Date()
         });
       }
     }
