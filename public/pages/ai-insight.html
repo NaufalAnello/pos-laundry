@@ -71,6 +71,43 @@
     .prediksi-box h4 { font-size:13px; font-weight:700; color:var(--purple); margin-bottom:8px; }
     .prediksi-box .value { font-size:18px; font-weight:800; color:var(--purple); }
 
+    /* Prediksi Sibuk — bar chart */
+    .chart-block { margin-bottom:22px; }
+    .chart-title { font-size:13px; font-weight:700; color:var(--gray-7); margin-bottom:10px; }
+    .bar-chart { display:flex; align-items:flex-end; gap:6px; height:140px; padding:8px 0 6px;
+                 border-bottom:1px solid var(--gray-3); position:relative; }
+    .bar-chart.jam { gap:2px; height:120px; }
+    .bar { flex:1; background:var(--blue-lt); border-radius:5px 5px 0 0; position:relative;
+           min-height:3px; transition:background .15s; cursor:default; }
+    .bar.peak { background:var(--purple); }
+    .bar:hover { background:var(--blue); }
+    .bar.peak:hover { background:var(--blue-dk); }
+    .bar-val { position:absolute; top:-18px; left:50%; transform:translateX(-50%); font-size:10px;
+               font-weight:700; color:var(--gray-7); white-space:nowrap; }
+    .bar-labels { display:flex; gap:6px; margin-top:6px; }
+    .bar-labels.jam { gap:2px; }
+    .bar-label { flex:1; text-align:center; font-size:10px; font-weight:600; color:var(--gray-5); }
+    .bar-label.peak { color:var(--purple); font-weight:800; }
+    @media(max-width:520px) {
+      .bar-chart { height:120px; }
+      .bar-val { font-size:9px; top:-16px; }
+      .bar-labels.jam .bar-label { font-size:8px; }
+    }
+
+    .ringkasan-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-bottom:14px; }
+    @media(max-width:520px) { .ringkasan-grid { grid-template-columns:1fr; } }
+    .ringkasan-card { background:var(--gray-1); padding:12px; border-radius:8px; border:1px solid var(--gray-3); }
+    .ringkasan-card h4 { font-size:12px; font-weight:700; color:var(--gray-5); margin-bottom:4px; display:flex; gap:6px; align-items:center; }
+    .ringkasan-card .value { font-size:15px; font-weight:800; color:var(--gray-9); }
+    .ringkasan-card .sub { font-size:11px; color:var(--gray-5); margin-top:2px; }
+    .ringkasan-card .tren-up { color:var(--green); }
+    .ringkasan-card .tren-down { color:var(--red); }
+
+    .ai-rekomendasi { background:var(--purple-lt); border:1px solid #ddd6fe; padding:14px;
+                      border-radius:8px; font-size:13px; line-height:1.7; color:var(--gray-9);
+                      white-space:pre-wrap; }
+    .ai-rekomendasi::before { content:'💡 '; }
+
     .loading { text-align:center; padding:40px; color:var(--gray-5); }
     .error { text-align:center; padding:40px; color:var(--red); }
 
@@ -141,6 +178,61 @@
       </div>
     </div>
 
+    <!-- Prediksi Hari & Jam Tersibuk -->
+    <div class="card" id="prediksiSibukCard">
+      <div class="card-head">📅 Prediksi Hari & Jam Tersibuk</div>
+      <div class="card-body">
+        <div id="prediksiSibukLoading" class="loading" style="padding:20px">
+          ⏳ Menganalisis pola 90 hari terakhir...
+        </div>
+        <div id="prediksiSibukError" style="display:none;color:var(--red);font-size:13px;padding:12px;background:var(--red-lt);border-radius:8px"></div>
+        <div id="prediksiSibukBody" style="display:none">
+          <!-- Ringkasan -->
+          <div class="ringkasan-grid">
+            <div class="ringkasan-card">
+              <h4>🔥 Hari Tersibuk</h4>
+              <div class="value" id="psHariNama">-</div>
+              <div class="sub" id="psHariRata">-</div>
+            </div>
+            <div class="ringkasan-card">
+              <h4>🕐 Jam Tersibuk</h4>
+              <div class="value" id="psJamLabel">-</div>
+              <div class="sub" id="psJamRata">-</div>
+            </div>
+            <div class="ringkasan-card">
+              <h4>📈 Tren 4 Minggu Terakhir</h4>
+              <div class="value" id="psTrenValue">-</div>
+              <div class="sub">vs 4 minggu sebelumnya</div>
+            </div>
+            <div class="ringkasan-card">
+              <h4>🧺 Layanan di Hari Sibuk</h4>
+              <div class="value" id="psLayananHariSibuk" style="font-size:13px;line-height:1.4">-</div>
+            </div>
+          </div>
+
+          <!-- Grafik per hari -->
+          <div class="chart-block">
+            <div class="chart-title">Rata-rata Order per Hari (Senin–Minggu)</div>
+            <div class="bar-chart" id="psBarHari"></div>
+            <div class="bar-labels" id="psLabelHari"></div>
+          </div>
+
+          <!-- Grafik per jam -->
+          <div class="chart-block">
+            <div class="chart-title">Rata-rata Order per Jam (00:00–23:00 WITA)</div>
+            <div class="bar-chart jam" id="psBarJam"></div>
+            <div class="bar-labels jam" id="psLabelJam"></div>
+          </div>
+
+          <!-- Rekomendasi AI -->
+          <div class="chart-block" style="margin-bottom:0">
+            <div class="chart-title">Rekomendasi AI</div>
+            <div class="ai-rekomendasi" id="psRekomendasi">-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Prediksi -->
     <div class="card">
       <div class="card-head">🔮 Prediksi</div>
@@ -170,7 +262,9 @@ let insightData = null;
     const d = await api('/api/v1/auth/me');
     document.getElementById('userName').textContent = d.user?.nama || '–';
   } catch {}
-  await loadInsight();
+  // Jalankan paralel: insight utama + prediksi sibuk
+  loadInsight();
+  loadPrediksiSibuk();
 })();
 
 async function api(url, opts = {}) {
@@ -259,10 +353,99 @@ async function refreshInsight() {
   try {
     await api('/api/v1/pengaturan', {
       method: 'PUT',
-      body: JSON.stringify({ ai_insight_cache_time: null })
+      body: JSON.stringify({
+        ai_insight_cache_time: null,
+        ai_prediksi_sibuk_cache_time: null
+      })
     });
   } catch {}
-  await loadInsight();
+  loadInsight();
+  loadPrediksiSibuk();
+}
+
+function escHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function loadPrediksiSibuk() {
+  const loadingEl = document.getElementById('prediksiSibukLoading');
+  const errorEl   = document.getElementById('prediksiSibukError');
+  const bodyEl    = document.getElementById('prediksiSibukBody');
+
+  loadingEl.style.display = 'block';
+  errorEl.style.display   = 'none';
+  bodyEl.style.display    = 'none';
+
+  try {
+    const d = await api('/api/v1/ai/prediksi-sibuk');
+
+    // Ringkasan
+    document.getElementById('psHariNama').textContent = d.ringkasan?.hari_tersibuk?.nama || '-';
+    document.getElementById('psHariRata').textContent =
+      `rata-rata ${d.ringkasan?.hari_tersibuk?.rata_rata ?? 0} order/hari`;
+
+    document.getElementById('psJamLabel').textContent = d.ringkasan?.jam_tersibuk?.label || '-';
+    document.getElementById('psJamRata').textContent =
+      `rata-rata ${d.ringkasan?.jam_tersibuk?.rata_rata ?? 0} order/jam`;
+
+    const tren = Number(d.ringkasan?.tren_persen ?? 0);
+    const trenEl = document.getElementById('psTrenValue');
+    const trenSign = tren > 0 ? '+' : '';
+    trenEl.textContent = `${trenSign}${tren}%`;
+    trenEl.className = 'value ' + (tren > 0 ? 'tren-up' : tren < 0 ? 'tren-down' : '');
+
+    const layananHari = d.ringkasan?.layanan_di_hari_sibuk || [];
+    document.getElementById('psLayananHariSibuk').innerHTML = layananHari.length
+      ? layananHari.map(l => `<div>• ${escHtml(l.nama)} <span style="color:var(--gray-5)">(${l.jumlah_order})</span></div>`).join('')
+      : '<span style="color:var(--gray-5)">Belum ada data</span>';
+
+    // Grafik per hari — urutkan Senin..Minggu (visual lebih natural)
+    const orderHari = [1, 2, 3, 4, 5, 6, 0]; // Sen Sel Rab Kam Jum Sab Min
+    const perHari = orderHari.map(idx => d.per_hari.find(h => h.hari === idx)).filter(Boolean);
+    renderBarChart('psBarHari', 'psLabelHari', perHari, p => p.nama.slice(0, 3));
+
+    // Grafik per jam
+    renderBarChart('psBarJam', 'psLabelJam', d.per_jam || [], p =>
+      (p.jam % 3 === 0 ? String(p.jam).padStart(2,'0') : '·'));
+
+    // Rekomendasi AI
+    document.getElementById('psRekomendasi').textContent = d.rekomendasi_ai || '-';
+
+    loadingEl.style.display = 'none';
+    bodyEl.style.display    = 'block';
+  } catch (e) {
+    console.error('Error prediksi sibuk:', e);
+    loadingEl.style.display = 'none';
+    errorEl.style.display   = 'block';
+    errorEl.textContent     = 'Gagal memuat prediksi: ' + e.message;
+  }
+}
+
+function renderBarChart(barId, labelId, items, labelFn) {
+  const barEl   = document.getElementById(barId);
+  const labelEl = document.getElementById(labelId);
+  if (!items || !items.length) {
+    barEl.innerHTML   = '';
+    labelEl.innerHTML = '';
+    return;
+  }
+  const max  = Math.max(...items.map(i => i.rata_rata), 0.001);
+  const peak = items.reduce((m, i) => i.rata_rata > m.rata_rata ? i : m, items[0]);
+
+  barEl.innerHTML = items.map(i => {
+    const h = Math.max(3, Math.round((i.rata_rata / max) * 100));
+    const isPeak = i.rata_rata === peak.rata_rata && i.rata_rata > 0;
+    const showVal = isPeak || items.length <= 7;
+    return `<div class="bar ${isPeak ? 'peak' : ''}" style="height:${h}%" title="${escHtml(labelFn(i))}: ${i.rata_rata}">
+      ${showVal && i.rata_rata > 0 ? `<span class="bar-val">${i.rata_rata}</span>` : ''}
+    </div>`;
+  }).join('');
+
+  labelEl.innerHTML = items.map(i => {
+    const isPeak = i.rata_rata === peak.rata_rata && i.rata_rata > 0;
+    return `<div class="bar-label ${isPeak ? 'peak' : ''}">${escHtml(labelFn(i))}</div>`;
+  }).join('');
 }
 </script>
 <script src="/js/nav.js"></script>

@@ -394,6 +394,224 @@ Jawab HANYA dengan JSON yang valid, tanpa penjelasan tambahan.`;
   }
 };
 
+// GET /api/v1/ai/prediksi-sibuk
+// Analisis pola hari & jam tersibuk dari order 90 hari terakhir (timezone WITA / UTC+8).
+exports.getPrediksiSibuk = async (req, res) => {
+  try {
+    // Cek AI enabled + API key
+    const pengaturanRows = await db('pengaturan').select('kunci', 'nilai');
+    const pengaturan = Object.fromEntries(pengaturanRows.map(r => [r.kunci, r.nilai]));
+    const aiEnabled = pengaturan.ai_enabled === 'true' || pengaturan.ai_enabled === '1' || pengaturan.ai_enabled === true;
+    const apiKey = pengaturan.deepseek_api_key || process.env.DEEPSEEK_API_KEY;
+
+    if (!aiEnabled) {
+      return res.status(400).json({ error: 'AI Assistant belum diaktifkan. Silakan aktifkan di halaman Pengaturan.' });
+    }
+    if (!apiKey) {
+      return res.status(400).json({ error: 'DeepSeek API Key belum dikonfigurasi. Silakan isi di halaman Pengaturan.' });
+    }
+
+    // Cache 1 jam
+    const cachedRaw = pengaturan.ai_prediksi_sibuk_cache;
+    const cacheTime = pengaturan.ai_prediksi_sibuk_cache_time;
+    if (cachedRaw && cacheTime) {
+      const cacheAge = Date.now() - new Date(cacheTime).getTime();
+      if (cacheAge < 60 * 60 * 1000) {
+        try { return res.json(JSON.parse(cachedRaw)); } catch {}
+      }
+    }
+
+    const now = Date.now();
+    const ninetyDaysAgoMs = now - 90 * 24 * 60 * 60 * 1000;
+    const fourWeeksAgoMs = now - 28 * 24 * 60 * 60 * 1000;
+    const eightWeeksAgoMs = now - 56 * 24 * 60 * 60 * 1000;
+
+    // WITA = UTC+8 (28800 detik). Konversi epoch ms -> detik + offset.
+    const tzExpr = "datetime(tanggal_masuk/1000 + 28800, 'unixepoch')";
+
+    // 1) Order per hari dalam seminggu (0=Minggu .. 6=Sabtu)
+    const perHariRows = await db('transaksi')
+      .where('tanggal_masuk', '>=', ninetyDaysAgoMs)
+      .whereNot('status', 'dibatalkan')
+      .select(
+        db.raw(`strftime('%w', ${tzExpr}) as hari`),
+        db.raw('COUNT(*) as total_order'),
+        db.raw(`COUNT(DISTINCT strftime('%Y-%m-%d', ${tzExpr})) as jumlah_minggu`)
+      )
+      .groupBy('hari')
+      .orderBy('hari');
+
+    // 2) Order per jam (00-23)
+    const perJamRows = await db('transaksi')
+      .where('tanggal_masuk', '>=', ninetyDaysAgoMs)
+      .whereNot('status', 'dibatalkan')
+      .select(
+        db.raw(`strftime('%H', ${tzExpr}) as jam`),
+        db.raw('COUNT(*) as total_order'),
+        db.raw(`COUNT(DISTINCT strftime('%Y-%m-%d', ${tzExpr})) as jumlah_hari`)
+      )
+      .groupBy('jam')
+      .orderBy('jam');
+
+    // 3) Tren 4 minggu terakhir vs 4 minggu sebelumnya
+    const [tren4Akhir, tren4Sebelumnya] = await Promise.all([
+      db('transaksi')
+        .where('tanggal_masuk', '>=', fourWeeksAgoMs)
+        .whereNot('status', 'dibatalkan')
+        .count('id as total')
+        .first(),
+      db('transaksi')
+        .where('tanggal_masuk', '>=', eightWeeksAgoMs)
+        .where('tanggal_masuk', '<', fourWeeksAgoMs)
+        .whereNot('status', 'dibatalkan')
+        .count('id as total')
+        .first()
+    ]);
+
+    // Susun per-hari lengkap (7 hari) dengan rata-rata
+    const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const perHariMap = Object.fromEntries(perHariRows.map(r => [Number(r.hari), r]));
+    const perHari = namaHari.map((nama, idx) => {
+      const row = perHariMap[idx];
+      const total = Number(row?.total_order || 0);
+      const minggu = Number(row?.jumlah_minggu || 0);
+      return {
+        hari: idx,
+        nama,
+        total_order: total,
+        rata_rata: minggu > 0 ? Number((total / minggu).toFixed(2)) : 0
+      };
+    });
+
+    // Susun per-jam lengkap (24 jam) dengan rata-rata
+    const perJamMap = Object.fromEntries(perJamRows.map(r => [Number(r.jam), r]));
+    const perJam = Array.from({ length: 24 }, (_, jam) => {
+      const row = perJamMap[jam];
+      const total = Number(row?.total_order || 0);
+      const hari = Number(row?.jumlah_hari || 0);
+      return {
+        jam,
+        label: String(jam).padStart(2, '0') + ':00',
+        total_order: total,
+        rata_rata: hari > 0 ? Number((total / hari).toFixed(2)) : 0
+      };
+    });
+
+    // Hari tersibuk
+    const hariTersibuk = perHari.reduce((max, cur) =>
+      cur.rata_rata > max.rata_rata ? cur : max, perHari[0]);
+
+    // Jam tersibuk — cari window 2 jam tertinggi
+    let jamTersibukStart = 0;
+    let jamTersibukMax = 0;
+    for (let i = 0; i < 23; i++) {
+      const sum = perJam[i].rata_rata + perJam[i + 1].rata_rata;
+      if (sum > jamTersibukMax) {
+        jamTersibukMax = sum;
+        jamTersibukStart = i;
+      }
+    }
+    const jamTersibukLabel = `${String(jamTersibukStart).padStart(2,'0')}:00-${String(jamTersibukStart+2).padStart(2,'0')}:00`;
+    const jamTersibukRata = Number((jamTersibukMax / 2).toFixed(2));
+
+    // Tren minggu ini vs rata-rata
+    const total4Akhir = Number(tren4Akhir?.total || 0);
+    const total4Sebelumnya = Number(tren4Sebelumnya?.total || 0);
+    const trenPersen = total4Sebelumnya > 0
+      ? Number((((total4Akhir - total4Sebelumnya) / total4Sebelumnya) * 100).toFixed(1))
+      : 0;
+
+    // Layanan terlaris di hari tersibuk (90 hari)
+    const layananHariSibuk = await db('detail_transaksi')
+      .join('transaksi', 'detail_transaksi.transaksi_id', 'transaksi.id')
+      .join('layanan', 'detail_transaksi.layanan_id', 'layanan.id')
+      .where('transaksi.tanggal_masuk', '>=', ninetyDaysAgoMs)
+      .whereNot('transaksi.status', 'dibatalkan')
+      .whereRaw(`strftime('%w', ${tzExpr.replace(/tanggal_masuk/g, 'transaksi.tanggal_masuk')}) = ?`, [String(hariTersibuk.hari)])
+      .groupBy('detail_transaksi.layanan_id')
+      .select(
+        'layanan.nama',
+        db.raw('COUNT(*) as jumlah_order')
+      )
+      .orderBy('jumlah_order', 'desc')
+      .limit(3);
+
+    // Generate rekomendasi via DeepSeek
+    const ringkasanData = {
+      hari_tersibuk: { nama: hariTersibuk.nama, rata_rata: hariTersibuk.rata_rata },
+      jam_tersibuk: { label: jamTersibukLabel, rata_rata: jamTersibukRata },
+      tren_persen: trenPersen,
+      layanan_di_hari_sibuk: layananHariSibuk.map(l => l.nama)
+    };
+
+    const prompt = `Berdasarkan analisis 90 hari order terakhir di Nala Laundry (Mempawah Hilir, Kalimantan Barat), berikan rekomendasi operasional singkat (maksimal 3 kalimat) dalam Bahasa Indonesia.
+
+Data:
+- Hari tersibuk: ${hariTersibuk.nama} (rata-rata ${hariTersibuk.rata_rata} order/hari)
+- Jam tersibuk: ${jamTersibukLabel} WITA (rata-rata ${jamTersibukRata} order/jam)
+- Tren 4 minggu terakhir vs 4 minggu sebelumnya: ${trenPersen >= 0 ? '+' : ''}${trenPersen}%
+- Layanan paling banyak di hari tersibuk: ${ringkasanData.layanan_di_hari_sibuk.join(', ') || '-'}
+
+Jawab dengan rekomendasi praktis (kapasitas, staffing, promo), tanpa pembukaan basa-basi.`;
+
+    let rekomendasi = '';
+    try {
+      rekomendasi = await callDeepSeek(
+        [
+          { role: 'system', content: 'Kamu adalah konsultan operasional bisnis laundry yang to the point.' },
+          { role: 'user', content: prompt }
+        ],
+        apiKey
+      );
+    } catch (e) {
+      console.error('[ai:prediksi-sibuk] gagal generate rekomendasi:', e.message);
+      rekomendasi = `Hari tersibuk: ${hariTersibuk.nama} (rata-rata ${hariTersibuk.rata_rata} order). Jam tersibuk: ${jamTersibukLabel}. Pertimbangkan menambah kapasitas di window ini.`;
+    }
+
+    const result = {
+      periode: { dari: new Date(ninetyDaysAgoMs).toISOString(), sampai: new Date(now).toISOString() },
+      per_hari: perHari,
+      per_jam: perJam,
+      ringkasan: {
+        hari_tersibuk: { nama: hariTersibuk.nama, rata_rata: hariTersibuk.rata_rata },
+        jam_tersibuk: { label: jamTersibukLabel, rata_rata: jamTersibukRata },
+        tren_persen: trenPersen,
+        total_4_minggu_terakhir: total4Akhir,
+        total_4_minggu_sebelumnya: total4Sebelumnya,
+        layanan_di_hari_sibuk: layananHariSibuk.map(l => ({
+          nama: l.nama,
+          jumlah_order: Number(l.jumlah_order || 0)
+        }))
+      },
+      rekomendasi_ai: rekomendasi
+    };
+
+    // Simpan cache (pola kunci/nilai)
+    const cachePayload = [
+      { kunci: 'ai_prediksi_sibuk_cache', nilai: JSON.stringify(result) },
+      { kunci: 'ai_prediksi_sibuk_cache_time', nilai: new Date().toISOString() }
+    ];
+    for (const { kunci, nilai } of cachePayload) {
+      const existing = await db('pengaturan').where({ kunci }).first();
+      if (existing) {
+        await db('pengaturan').where({ kunci }).update({ nilai, updated_at: new Date() });
+      } else {
+        await db('pengaturan').insert({
+          kunci, nilai, deskripsi: '', created_at: new Date(), updated_at: new Date()
+        });
+      }
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error AI prediksi-sibuk:', error);
+    res.status(500).json({
+      error: 'Gagal menghasilkan prediksi hari & jam tersibuk',
+      detail: error.message
+    });
+  }
+};
+
 // POST /api/v1/ai/test-connection
 exports.testConnection = async (req, res) => {
   try {
