@@ -123,10 +123,11 @@
     .wa-composer textarea:focus { outline:none; border-color:var(--blue); }
 
     /* ── Modal form ── */
-    .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:50; display:none;
-                align-items:center; justify-content:center; padding:16px; }
+    .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:9999; display:none;
+                align-items:flex-end; justify-content:center; overflow:hidden; }
     .modal-bg.open { display:flex; }
-    .modal { background:#fff; border-radius:12px; width:100%; max-width:460px; box-shadow:0 8px 32px rgba(0,0,0,.18); }
+    .modal { background:#fff; border-radius:16px 16px 0 0; width:100%; max-width:100%;
+             max-height:90vh; overflow-y:auto; box-shadow:0 -4px 24px rgba(0,0,0,.18); }
     .modal-head { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--gray-3); }
     .modal-head h3 { font-size:16px; font-weight:700; }
     .modal-body { padding:20px; display:flex; flex-direction:column; gap:14px; }
@@ -164,6 +165,12 @@
     .aksi-btn { padding:4px 10px; border:none; background:#fff; cursor:pointer; font-size:11px;
                 font-weight:600; color:var(--gray-5); transition:all .15s; }
     .aksi-btn.active { background:var(--blue); color:#fff; }
+
+    /* ── Tablet ke atas — modal di tengah ── */
+    @media (min-width: 768px) {
+      .modal-bg { align-items:center; }
+      .modal { width:480px; max-width:480px; max-height:80vh; border-radius:12px; }
+    }
 
     /* ══ MOBILE: pelanggan jadi card list ══ */
     @media (max-width: 767px) {
@@ -226,14 +233,6 @@
       .panel.open { transform: none; }
       .info-grid { grid-template-columns: 1fr; }
 
-      /* Modal form mobile = bottom sheet */
-      .modal-bg { padding: 0; align-items: flex-end; }
-      .modal {
-        max-width: 100% !important;
-        border-radius: 16px 16px 0 0 !important;
-        max-height: 92vh;
-        overflow-y: auto;
-      }
       .pagination { flex-direction: column; align-items: stretch; gap: 8px; }
       .pag-btns { justify-content: center; }
       .pag-btn { min-height: 36px; min-width: 36px; }
@@ -693,6 +692,7 @@ function openAdd() {
   document.getElementById('fAlamat').value  = '';
   document.getElementById('formErr').textContent = '';
   document.getElementById('modalBg').classList.add('open');
+  document.body.style.overflow = 'hidden';
   setTimeout(() => document.getElementById('fNama').focus(), 100);
 }
 
@@ -708,11 +708,13 @@ async function editCurrent() {
     document.getElementById('fAlamat').value  = data.alamat || '';
     document.getElementById('formErr').textContent = '';
     document.getElementById('modalBg').classList.add('open');
+    document.body.style.overflow = 'hidden';
   } catch (e) { toast(e.message, true); }
 }
 
 function closeModal() {
   document.getElementById('modalBg').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 async function savePelanggan() {
