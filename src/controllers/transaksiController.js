@@ -9,6 +9,7 @@ const riwayatBayarModel = require('../models/riwayatBayarModel');
 
 // ── Validation schemas ───────────────────────────────────────────────────────
 const rincianItemSchema = Joi.object({
+  master_item_id: Joi.number().integer().positive().allow(null).optional(),
   nama_item: Joi.string().required(),
   jumlah:    Joi.number().integer().positive().default(1),
   satuan:    Joi.string().default('pcs')
