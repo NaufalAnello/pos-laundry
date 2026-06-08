@@ -187,6 +187,7 @@
     <button class="tab" onclick="switchTab('wa',this)">📱 WhatsApp</button>
     <button class="tab" onclick="switchTab('printer',this)">🖨️ Printer</button>
     <button class="tab" onclick="switchTab('margin',this)">📊 Margin & HPP</button>
+    <button class="tab" onclick="switchTab('master-item',this)">📋 Master Item</button>
     <button class="tab" onclick="switchTab('ai',this)">🤖 AI Assistant</button>
     <button class="tab" onclick="switchTab('user',this)">👤 Manajemen User</button>
     <button class="tab" onclick="switchTab('backup',this)">💾 Backup & Restore</button>
@@ -434,6 +435,37 @@
     </div>
   </div>
 
+  <!-- ── TAB: Master Item ── -->
+  <div id="sec-master-item" class="tab-section">
+    <div class="card">
+      <div class="card-head" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>📋 Master Item Laundry</span>
+        <button class="btn btn-sm btn-blue" onclick="openMasterItemModal()">+ Tambah Item</button>
+      </div>
+      <div class="card-body" style="padding:0;">
+        <div id="masterItemTableContainer">
+          <table>
+            <thead>
+              <tr>
+                <th style="text-align:left;padding:10px 18px;">NAMA</th>
+                <th style="text-align:left;padding:10px 18px;">SATUAN</th>
+                <th style="text-align:center;padding:10px 18px;width:180px;">AKSI</th>
+              </tr>
+            </thead>
+            <tbody id="masterItemTableBody">
+              <tr>
+                <td colspan="3" style="text-align:center;padding:40px;color:var(--gray-5);">
+                  <div style="font-size:40px;margin-bottom:10px;">📦</div>
+                  Memuat data...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── TAB: AI Assistant ── -->
   <div id="sec-ai" class="tab-section">
     <div class="card">
@@ -613,6 +645,38 @@
   </div>
 </div>
 
+<!-- Master Item Modal -->
+<div class="modal-bg" id="masterItemModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="masterItemModalTitle">Tambah Master Item</h3>
+      <button class="btn-ghost" onclick="closeMasterItemModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="miEditId"/>
+      <div class="field">
+        <label>Nama Item *</label>
+        <input id="miNama" type="text" placeholder="Contoh: Baju, Celana, Handuk..." maxlength="100"/>
+      </div>
+      <div class="field">
+        <label>Satuan</label>
+        <select id="miSatuan">
+          <option value="pcs">pcs</option>
+          <option value="pasang">pasang</option>
+          <option value="set">set</option>
+          <option value="lembar">lembar</option>
+          <option value="buah">buah</option>
+        </select>
+      </div>
+      <div class="err-msg" id="miErr"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeMasterItemModal()">Batal</button>
+      <button class="btn btn-blue" id="miSaveBtn" onclick="saveMasterItem()">Simpan</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -650,9 +714,10 @@ function switchTab(id, btn) {
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
   btn.classList.add('active');
-  if (id === 'user')    loadUsers();
-  if (id === 'printer') cekPrinter();
-  if (id === 'margin')  loadMarginSummary();
+  if (id === 'user')        loadUsers();
+  if (id === 'printer')     cekPrinter();
+  if (id === 'margin')      loadMarginSummary();
+  if (id === 'master-item') loadMasterItems();
 }
 
 // ── Load settings ─────────────────────────────────────────────────────────────
@@ -1089,6 +1154,136 @@ async function testAIConnection() {
   } finally {
     btn.disabled = false;
     btn.textContent = '🔌 Test Koneksi';
+  }
+}
+
+// ── Master Item ───────────────────────────────────────────────────────────────
+let masterItems = [];
+
+async function loadMasterItems() {
+  try {
+    const res = await api('/api/v1/master-item');
+    masterItems = res.data || [];
+    renderMasterItemsTable();
+  } catch (err) {
+    console.error('[loadMasterItems]', err);
+    toast('Gagal memuat master item', true);
+  }
+}
+
+function renderMasterItemsTable() {
+  const tbody = document.getElementById('masterItemTableBody');
+
+  if (masterItems.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="3" style="text-align:center;padding:40px;color:var(--gray-5);">
+          <div style="font-size:40px;margin-bottom:10px;">📦</div>
+          Belum ada master item.<br/>
+          <button class="btn btn-sm btn-blue" onclick="openMasterItemModal()" style="margin-top:12px;">+ Tambah Item Pertama</button>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = masterItems.map(item => `
+    <tr>
+      <td style="padding:12px 18px;font-weight:600;">${esc(item.nama)}</td>
+      <td style="padding:12px 18px;color:var(--gray-5);">${esc(item.satuan)}</td>
+      <td style="padding:12px 18px;text-align:center;">
+        <button class="btn btn-sm btn-outline" onclick="editMasterItem(${item.id})">Edit</button>
+        <button class="btn btn-sm btn-red" onclick="deleteMasterItem(${item.id}, '${esc(item.nama)}')">Hapus</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openMasterItemModal(editId = null) {
+  const modal = document.getElementById('masterItemModal');
+  const title = document.getElementById('masterItemModalTitle');
+  const idInput = document.getElementById('miEditId');
+  const namaInput = document.getElementById('miNama');
+  const satuanSelect = document.getElementById('miSatuan');
+  const errDiv = document.getElementById('miErr');
+
+  errDiv.textContent = '';
+
+  if (editId) {
+    const item = masterItems.find(m => m.id === editId);
+    if (!item) return;
+
+    title.textContent = 'Edit Master Item';
+    idInput.value = item.id;
+    namaInput.value = item.nama;
+    satuanSelect.value = item.satuan;
+  } else {
+    title.textContent = 'Tambah Master Item';
+    idInput.value = '';
+    namaInput.value = '';
+    satuanSelect.value = 'pcs';
+  }
+
+  modal.classList.add('open');
+  namaInput.focus();
+}
+
+function closeMasterItemModal() {
+  document.getElementById('masterItemModal').classList.remove('open');
+}
+
+async function saveMasterItem() {
+  const idInput = document.getElementById('miEditId');
+  const namaInput = document.getElementById('miNama');
+  const satuanSelect = document.getElementById('miSatuan');
+  const errDiv = document.getElementById('miErr');
+  const saveBtn = document.getElementById('miSaveBtn');
+
+  const nama = namaInput.value.trim();
+  const satuan = satuanSelect.value;
+
+  errDiv.textContent = '';
+
+  if (!nama) {
+    errDiv.textContent = 'Nama item harus diisi';
+    return;
+  }
+
+  const isEdit = !!idInput.value;
+  const url = isEdit ? `/api/v1/master-item/${idInput.value}` : '/api/v1/master-item';
+  const method = isEdit ? 'PUT' : 'POST';
+
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Menyimpan...';
+
+  try {
+    await api(url, { method, body: JSON.stringify({ nama, satuan }) });
+    toast(isEdit ? 'Master item berhasil diperbarui' : 'Master item berhasil ditambahkan');
+    closeMasterItemModal();
+    loadMasterItems();
+  } catch (err) {
+    errDiv.textContent = err.message || 'Gagal menyimpan master item';
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Simpan';
+  }
+}
+
+function editMasterItem(id) {
+  openMasterItemModal(id);
+}
+
+async function deleteMasterItem(id, nama) {
+  if (!confirm(`Hapus master item "${nama}"?\n\nItem ini tidak akan muncul lagi di grid rincian order baru.`)) {
+    return;
+  }
+
+  try {
+    await api(`/api/v1/master-item/${id}`, { method: 'DELETE' });
+    toast('Master item berhasil dihapus');
+    loadMasterItems();
+  } catch (err) {
+    toast(err.message || 'Gagal menghapus master item', true);
   }
 }
 
