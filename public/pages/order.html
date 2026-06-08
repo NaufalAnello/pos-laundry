@@ -346,12 +346,156 @@
       width: 100%; transition: background .15s;
     }
     .btn-add-rincian:hover { background: #dbeafe; }
+
+    /* ── Master Item Grid ── */
+    .master-item-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .master-item-chip {
+      padding: 6px 10px;
+      background: #fff;
+      border: 1.5px solid var(--gray-3);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+    .master-item-chip:hover {
+      background: var(--blue-lt);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+    .master-item-chip.selected {
+      background: var(--blue-lt);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+    .master-item-chip .badge {
+      background: var(--blue);
+      color: #fff;
+      border-radius: 99px;
+      padding: 1px 5px;
+      font-size: 10px;
+      font-weight: 700;
+      min-width: 18px;
+      text-align: center;
+    }
+    .add-master-form {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 6px;
+      padding: 10px;
+      background: #fff;
+      border: 1.5px dashed var(--gray-3);
+      border-radius: 6px;
+      margin-top: 8px;
+    }
+    .add-master-form input,
+    .add-master-form select {
+      font-size: 12px;
+      padding: 6px 8px;
+    }
+    .add-master-form button {
+      padding: 6px 12px;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .add-master-form button:hover {
+      background: #15803d;
+    }
+    .selected-items-list {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--gray-3);
+    }
+    .selected-item-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      background: #fff;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+    .selected-item-row .name {
+      flex: 1;
+      font-weight: 600;
+    }
+    .selected-item-row .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .selected-item-row .qty-btn {
+      width: 24px;
+      height: 24px;
+      background: var(--blue-lt);
+      color: var(--blue);
+      border: 1px solid var(--blue);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s;
+    }
+    .selected-item-row .qty-btn:hover {
+      background: var(--blue);
+      color: #fff;
+    }
+    .selected-item-row .qty-value {
+      min-width: 30px;
+      text-align: center;
+      font-weight: 700;
+    }
+    .selected-item-row .btn-remove-selected {
+      width: 24px;
+      height: 24px;
+      background: #fee2e2;
+      color: var(--red);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s;
+    }
+    .selected-item-row .btn-remove-selected:hover {
+      background: #fecaca;
+    }
     @media (max-width: 768px) {
       .rincian-item {
         grid-template-columns: 1fr;
         gap: 6px;
       }
       .btn-toggle-rincian { width: 100%; justify-content: center; }
+      .master-item-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      }
+      .add-master-form {
+        grid-template-columns: 1fr;
+      }
     }
 
     /* ── Toggle switch ── */
@@ -928,6 +1072,7 @@ const state = {
 
 let layananList = [];
 let promoList   = [];
+let masterItemList = [];
 let acTimer     = null;
 
 // ════════════════════════════════════════════════════════
@@ -962,6 +1107,12 @@ let acTimer     = null;
       opt.textContent = `${p.nama} (diskon ${disc})`;
       sel.appendChild(opt);
     });
+  }
+
+  // Load master item
+  const mRes = await apiFetch('/api/v1/master-item');
+  if (mRes?.data) {
+    masterItemList = mRes.data;
   }
 
   // Default estimasi selesai = besok
@@ -1201,8 +1352,17 @@ function addItemRow(defaults = {}) {
     </button>
     <div class="rincian-panel">
       <div class="rincian-panel-header">📋 Rincian Item</div>
-      <div class="rincian-container"></div>
-      <button class="btn-add-rincian">+ Tambah Item</button>
+      <div class="master-item-grid"></div>
+      <div class="add-master-form">
+        <input type="text" class="new-item-name" placeholder="Item baru..." />
+        <select class="new-item-satuan">
+          <option value="pcs">pcs</option>
+          <option value="pasang">pasang</option>
+          <option value="set">set</option>
+        </select>
+        <button class="btn-save-master">+ Simpan</button>
+      </div>
+      <div class="selected-items-list"></div>
     </div>
   `;
 
@@ -1214,8 +1374,11 @@ function addItemRow(defaults = {}) {
   const spanSub     = wrapper.querySelector('.item-subtotal');
   const btnToggleRincian = wrapper.querySelector('.btn-toggle-rincian');
   const rincianPanel = wrapper.querySelector('.rincian-panel');
-  const rincianContainer = wrapper.querySelector('.rincian-container');
-  const btnAddRincian = wrapper.querySelector('.btn-add-rincian');
+  const masterItemGrid = wrapper.querySelector('.master-item-grid');
+  const selectedItemsList = wrapper.querySelector('.selected-items-list');
+  const newItemNameInput = wrapper.querySelector('.new-item-name');
+  const newItemSatuanSelect = wrapper.querySelector('.new-item-satuan');
+  const btnSaveMaster = wrapper.querySelector('.btn-save-master');
 
   let selectedLayanan = null;
   let searchTimer = null;
@@ -1242,7 +1405,8 @@ function addItemRow(defaults = {}) {
       btnToggleRincian.style.display = 'none';
       rincianPanel.classList.remove('show');
       rincianItems = [];
-      rincianContainer.innerHTML = '';
+      masterItemGrid.innerHTML = '';
+      selectedItemsList.innerHTML = '';
       updateRow();
       return;
     }
@@ -1278,7 +1442,8 @@ function addItemRow(defaults = {}) {
     btnToggleRincian.style.display = 'none';
     rincianPanel.classList.remove('show');
     rincianItems = [];
-    rincianContainer.innerHTML = '';
+    masterItemGrid.innerHTML = '';
+    selectedItemsList.innerHTML = '';
     searchInput.focus();
     updateRow();
   });
@@ -1366,63 +1531,130 @@ function addItemRow(defaults = {}) {
     updateEstimasiSelesai(); // update estimasi setiap kali item berubah
   }
 
-  // ── Rincian Item Functions ──
-  let rincianIdSeq = 0;
+  // ── Rincian Item Functions with Master Items ──
+  function renderMasterItemGrid() {
+    masterItemGrid.innerHTML = '';
+    masterItemList.forEach(item => {
+      const chip = document.createElement('div');
+      chip.className = 'master-item-chip';
+      chip.dataset.itemId = item.id;
 
-  function addRincianItem(defaults = {}) {
-    const rincianId = ++rincianIdSeq;
-    const rincianRow = document.createElement('div');
-    rincianRow.className = 'rincian-item';
-    rincianRow.dataset.rincianId = rincianId;
+      const selectedItem = rincianItems.find(r => r.master_item_id === item.id);
+      if (selectedItem) {
+        chip.classList.add('selected');
+      }
 
-    rincianRow.innerHTML = `
-      <input type="text" class="rincian-nama" placeholder="Nama item (baju, celana...)" value="${defaults.nama_item || ''}" />
-      <input type="number" class="rincian-jumlah" min="1" value="${defaults.jumlah || 1}" />
-      <select class="rincian-satuan">
-        <option value="pcs" ${defaults.satuan === 'pcs' ? 'selected' : ''}>pcs</option>
-        <option value="pasang" ${defaults.satuan === 'pasang' ? 'selected' : ''}>pasang</option>
-        <option value="set" ${defaults.satuan === 'set' ? 'selected' : ''}>set</option>
-      </select>
-      <button class="btn-remove-rincian" title="Hapus">✕</button>
-    `;
+      const count = selectedItem ? selectedItem.jumlah : 0;
+      chip.innerHTML = `
+        <span>${item.nama}</span>
+        ${count > 0 ? `<span class="badge">${count}</span>` : ''}
+      `;
 
-    const namaInput = rincianRow.querySelector('.rincian-nama');
-    const jumlahInput = rincianRow.querySelector('.rincian-jumlah');
-    const satuanSelect = rincianRow.querySelector('.rincian-satuan');
-    const btnRemove = rincianRow.querySelector('.btn-remove-rincian');
+      chip.addEventListener('click', () => {
+        if (selectedItem) {
+          // Jika sudah dipilih, increment jumlah
+          selectedItem.jumlah++;
+        } else {
+          // Tambah item baru
+          rincianItems.push({
+            master_item_id: item.id,
+            nama_item: item.nama,
+            jumlah: 1,
+            satuan: item.satuan
+          });
+        }
+        renderMasterItemGrid();
+        renderSelectedItemsList();
+        updateRow();
+      });
 
-    function updateRincian() {
-      const existing = rincianItems.find(r => r.id === rincianId);
-      const data = {
-        id: rincianId,
-        nama_item: namaInput.value.trim(),
-        jumlah: parseInt(jumlahInput.value) || 1,
-        satuan: satuanSelect.value
-      };
-
-      if (existing) Object.assign(existing, data);
-      else rincianItems.push(data);
-
-      updateRow(); // Update state item utama
-    }
-
-    namaInput.addEventListener('input', updateRincian);
-    jumlahInput.addEventListener('input', updateRincian);
-    satuanSelect.addEventListener('change', updateRincian);
-
-    btnRemove.addEventListener('click', () => {
-      rincianItems = rincianItems.filter(r => r.id !== rincianId);
-      rincianRow.remove();
-      updateRow();
+      masterItemGrid.appendChild(chip);
     });
-
-    rincianContainer.appendChild(rincianRow);
-
-    // Set default data jika ada
-    if (defaults.nama_item) {
-      updateRincian();
-    }
   }
+
+  function renderSelectedItemsList() {
+    selectedItemsList.innerHTML = '';
+    if (rincianItems.length === 0) return;
+
+    rincianItems.forEach((item, idx) => {
+      const row = document.createElement('div');
+      row.className = 'selected-item-row';
+      row.innerHTML = `
+        <span class="name">${item.nama_item}</span>
+        <div class="qty-controls">
+          <button class="qty-btn btn-dec">−</button>
+          <span class="qty-value">${item.jumlah}</span>
+          <button class="qty-btn btn-inc">+</button>
+          <span style="font-size:10px;color:var(--gray-5);margin-left:2px;">${item.satuan}</span>
+        </div>
+        <button class="btn-remove-selected">✕</button>
+      `;
+
+      row.querySelector('.btn-dec').addEventListener('click', () => {
+        if (item.jumlah > 1) {
+          item.jumlah--;
+          renderMasterItemGrid();
+          renderSelectedItemsList();
+          updateRow();
+        }
+      });
+
+      row.querySelector('.btn-inc').addEventListener('click', () => {
+        item.jumlah++;
+        renderMasterItemGrid();
+        renderSelectedItemsList();
+        updateRow();
+      });
+
+      row.querySelector('.btn-remove-selected').addEventListener('click', () => {
+        rincianItems.splice(idx, 1);
+        renderMasterItemGrid();
+        renderSelectedItemsList();
+        updateRow();
+      });
+
+      selectedItemsList.appendChild(row);
+    });
+  }
+
+  // Save new master item
+  btnSaveMaster.addEventListener('click', async () => {
+    const nama = newItemNameInput.value.trim();
+    const satuan = newItemSatuanSelect.value;
+
+    if (!nama) {
+      showToast('Masukkan nama item', 'error');
+      return;
+    }
+
+    setLoading(true);
+    const res = await fetch('/api/v1/master-item', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ nama, satuan })
+    });
+    setLoading(false);
+
+    const data = await res.json();
+    if (!res.ok) {
+      showToast(data.error || 'Gagal menyimpan item', 'error');
+      return;
+    }
+
+    // Reload master items
+    const mRes = await apiFetch('/api/v1/master-item');
+    if (mRes?.data) {
+      masterItemList = mRes.data;
+      renderMasterItemGrid();
+    }
+
+    // Clear input
+    newItemNameInput.value = '';
+    newItemSatuanSelect.value = 'pcs';
+
+    showToast('Item berhasil ditambahkan', 'success');
+  });
 
   // Toggle rincian panel
   btnToggleRincian.addEventListener('click', () => {
@@ -1431,11 +1663,12 @@ function addItemRow(defaults = {}) {
     btnToggleRincian.classList.toggle('active');
     const icon = btnToggleRincian.querySelector('.rincian-icon');
     icon.textContent = isShowing ? '▼' : '▲';
-  });
 
-  // Add rincian item button
-  btnAddRincian.addEventListener('click', () => {
-    addRincianItem();
+    // Render grid saat panel dibuka
+    if (!isShowing) {
+      renderMasterItemGrid();
+      renderSelectedItemsList();
+    }
   });
 
   inpJumlah.addEventListener('input', updateRow);

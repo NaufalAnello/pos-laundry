@@ -23,6 +23,7 @@ const usersRoutes       = require('./routes/usersRoutes');
 const printerRoutes     = require('./routes/printerRoutes');
 const depositRoutes     = require('./routes/depositRoutes');
 const aiRoutes          = require('./routes/aiRoutes');
+const masterItemRoutes  = require('./routes/masterItemRoutes');
 
 const app = express();
 
@@ -111,6 +112,9 @@ app.use('/api/v1/deposit', depositRoutes);
 
 // AI Assistant
 app.use('/api/v1/ai', aiRoutes);
+
+// Master Item
+app.use('/api/v1/master-item', masterItemRoutes);
 
 // ── Web page routes ────────────────────────────────────────────────────────────
 
