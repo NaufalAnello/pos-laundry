@@ -52,6 +52,13 @@ function generateEscPos(transaksi, pengaturan, poinEarned = 0) {
     const qty = '  ' + item.jumlah + ' ' + (item.satuan || '') + ' x Rp' + fmtRp(item.harga_satuan);
     lr(qty, 'Rp' + fmtRp(item.subtotal));
     if (item.catatan) { push('  *' + item.catatan); nl(); }
+
+    // Tampilkan rincian item jika ada
+    if (item.rincian && item.rincian.length > 0) {
+      item.rincian.forEach(r => {
+        push('    - ' + r.nama_item + ' ' + r.jumlah + ' ' + r.satuan); nl();
+      });
+    }
   });
 
   // Biaya Tambahan

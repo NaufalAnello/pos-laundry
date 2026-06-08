@@ -82,6 +82,14 @@ const findById = async (id) => {
     .where('d.transaksi_id', id)
     .select('d.*', 'l.satuan as layanan_satuan');
 
+  // Load rincian item untuk setiap detail transaksi
+  for (const item of transaksi.items) {
+    item.rincian = await db('detail_item_layanan')
+      .where('detail_transaksi_id', item.id)
+      .select('id', 'nama_item', 'jumlah', 'satuan')
+      .orderBy('id', 'asc');
+  }
+
   // Get biaya tambahan
   transaksi.biaya_tambahan = await db('biaya_tambahan')
     .where('transaksi_id', id)
@@ -95,9 +103,29 @@ const create = async (data, items) => {
   return db.transaction(async (trx) => {
     const [id] = await trx('transaksi').insert(data);
     if (items?.length) {
-      await trx('detail_transaksi').insert(
-        items.map(it => ({ ...it, transaksi_id: id }))
-      );
+      for (const item of items) {
+        const rincian = item.rincian || [];
+        // Hapus rincian dari item sebelum insert ke detail_transaksi
+        const { rincian: _, ...itemData } = item;
+
+        const [detailId] = await trx('detail_transaksi').insert({
+          ...itemData,
+          transaksi_id: id
+        });
+
+        // Simpan rincian item jika ada
+        if (rincian.length > 0) {
+          await trx('detail_item_layanan').insert(
+            rincian.map(r => ({
+              detail_transaksi_id: detailId,
+              nama_item: r.nama_item,
+              jumlah: r.jumlah || 1,
+              satuan: r.satuan || 'pcs',
+              created_at: new Date()
+            }))
+          );
+        }
+      }
     }
     return id;
   });
@@ -141,6 +169,14 @@ const findDetailById = async (id) => {
       'l.satuan',
       db.raw('d.harga_satuan as harga') // Alias untuk kompatibilitas frontend
     );
+
+  // Load rincian item untuk setiap detail transaksi
+  for (const item of transaksi.items) {
+    item.rincian = await db('detail_item_layanan')
+      .where('detail_transaksi_id', item.id)
+      .select('id', 'nama_item', 'jumlah', 'satuan')
+      .orderBy('id', 'asc');
+  }
 
   // Get pelanggan detail with level
   if (transaksi.pelanggan_id) {

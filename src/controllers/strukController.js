@@ -33,13 +33,28 @@ exports.show = async (req, res) => {
       ? '─'.repeat(30)
       : '─'.repeat(40);
 
-    const itemsRows = (t.items || []).map((it, i) => `
+    const itemsRows = (t.items || []).map((it, i) => {
+      let row = `
       <tr class="item-row">
         <td>${i + 1}. ${escHtml(it.nama_layanan)}</td>
         <td class="num">${it.jumlah}&nbsp;${escHtml(it.satuan || '')}</td>
         <td class="num">Rp&nbsp;${fmtRp(it.harga_satuan)}</td>
         <td class="num">Rp&nbsp;${fmtRp(it.subtotal)}</td>
+      </tr>`;
+
+      // Tambahkan rincian item jika ada
+      if (it.rincian && it.rincian.length > 0) {
+        const rincianRows = it.rincian.map(r => `
+      <tr class="rincian-row">
+        <td colspan="4" style="padding-left:16px;font-size:${isNarrow ? '8px' : '10px'};color:#555;">
+          - ${escHtml(r.nama_item)} ${r.jumlah} ${escHtml(r.satuan)}
+        </td>
       </tr>`).join('');
+        row += rincianRows;
+      }
+
+      return row;
+    }).join('');
 
     const biayaTambahanRows = (t.biaya_tambahan || []).map((bt) => `
       <tr class="item-row">

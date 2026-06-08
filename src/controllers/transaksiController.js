@@ -8,10 +8,17 @@ const depositModel    = require('../models/deposit.model');
 const riwayatBayarModel = require('../models/riwayatBayarModel');
 
 // ── Validation schemas ───────────────────────────────────────────────────────
+const rincianItemSchema = Joi.object({
+  nama_item: Joi.string().required(),
+  jumlah:    Joi.number().integer().positive().default(1),
+  satuan:    Joi.string().default('pcs')
+});
+
 const itemSchema = Joi.object({
   layanan_id: Joi.number().integer().positive().required(),
   jumlah:     Joi.number().positive().required(),
-  catatan:    Joi.string().allow('', null)
+  catatan:    Joi.string().allow('', null),
+  rincian:    Joi.array().items(rincianItemSchema).default([])
 });
 
 const createSchema = Joi.object({
@@ -118,7 +125,8 @@ exports.store = async (req, res) => {
         satuan:        layanan.satuan,
         harga_satuan:  layanan.harga,
         subtotal:      layanan.harga * it.jumlah,
-        catatan:       it.catatan || null
+        catatan:       it.catatan || null,
+        rincian:       it.rincian || [] // Simpan rincian untuk diproses nanti
       });
       estimasiList.push(Number(layanan.estimasi_hari) || 2);
     }

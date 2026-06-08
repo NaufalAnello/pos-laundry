@@ -288,6 +288,72 @@
     }
     .btn-add-item:hover { background: #dbeafe; }
 
+    /* ── Rincian Item Panel ── */
+    .item-wrapper {
+      border-bottom: 1px solid var(--gray-3);
+      padding: 8px 0;
+    }
+    .item-wrapper:last-child { border-bottom: none; }
+    .btn-toggle-rincian {
+      margin-top: 6px; padding: 5px 10px;
+      background: var(--gray-1); color: var(--blue);
+      border: 1px solid var(--gray-3); border-radius: 6px;
+      cursor: pointer; font-size: 11px; font-weight: 600;
+      transition: all .15s;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .btn-toggle-rincian:hover { background: var(--blue-lt); border-color: var(--blue); }
+    .btn-toggle-rincian.active { background: var(--blue-lt); border-color: var(--blue); }
+    .rincian-panel {
+      margin-top: 10px; padding: 12px;
+      background: var(--gray-1); border-radius: 8px;
+      border: 1.5px solid var(--gray-3);
+      display: none;
+    }
+    .rincian-panel.show { display: block; }
+    .rincian-panel-header {
+      font-size: 12px; font-weight: 700; color: var(--gray-7);
+      margin-bottom: 10px; padding-bottom: 6px;
+      border-bottom: 1px solid var(--gray-3);
+    }
+    .rincian-item {
+      display: grid;
+      grid-template-columns: 1fr 80px 80px 30px;
+      gap: 6px; align-items: center;
+      padding: 6px 0; border-bottom: 1px solid var(--gray-3);
+      font-size: 12px;
+    }
+    .rincian-item:last-child { border-bottom: none; }
+    .rincian-item input[type="text"],
+    .rincian-item input[type="number"] {
+      padding: 6px 8px; font-size: 12px;
+    }
+    .rincian-item select {
+      padding: 6px 8px; font-size: 12px;
+    }
+    .btn-remove-rincian {
+      width: 24px; height: 24px; border-radius: 5px;
+      background: #fee2e2; color: var(--red); border: none;
+      cursor: pointer; font-size: 14px; transition: background .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .btn-remove-rincian:hover { background: #fecaca; }
+    .btn-add-rincian {
+      margin-top: 8px; padding: 6px 12px;
+      background: var(--blue-lt); color: var(--blue);
+      border: 1.5px dashed var(--blue); border-radius: 6px;
+      cursor: pointer; font-size: 11px; font-weight: 600;
+      width: 100%; transition: background .15s;
+    }
+    .btn-add-rincian:hover { background: #dbeafe; }
+    @media (max-width: 768px) {
+      .rincian-item {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+      .btn-toggle-rincian { width: 100%; justify-content: center; }
+    }
+
     /* ── Toggle switch ── */
     .toggle-wrap {
       display: flex; align-items: center; justify-content: space-between;
@@ -1106,9 +1172,9 @@ function addItemRow(defaults = {}) {
   const empty = container.querySelector('.empty-items');
   if (empty) empty.remove();
 
-  const row = document.createElement('div');
-  row.className = 'item-row';
-  row.dataset.itemId = id;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'item-wrapper';
+  wrapper.dataset.itemId = id;
 
   // Default layanan jika ada
   let defaultNama = '';
@@ -1117,28 +1183,43 @@ function addItemRow(defaults = {}) {
     if (found) defaultNama = found.nama;
   }
 
-  row.innerHTML = `
-    <div class="svc-search-wrap">
-      <input type="text" class="svc-search-input" placeholder="Cari layanan..." autocomplete="off" value="${defaultNama}" />
-      <span class="svc-chevron">▼</span>
-      <button class="svc-clear-btn" title="Hapus pilihan">✕</button>
-      <div class="svc-dropdown hidden"></div>
+  wrapper.innerHTML = `
+    <div class="item-row">
+      <div class="svc-search-wrap">
+        <input type="text" class="svc-search-input" placeholder="Cari layanan..." autocomplete="off" value="${defaultNama}" />
+        <span class="svc-chevron">▼</span>
+        <button class="svc-clear-btn" title="Hapus pilihan">✕</button>
+        <div class="svc-dropdown hidden"></div>
+      </div>
+      <input type="number" class="item-jumlah" min="0.1" step="0.1" value="${defaults.jumlah || 1}" />
+      <input type="text" class="item-satuan" readonly value="${defaults.satuan || ''}" style="background:var(--gray-1);color:var(--gray-5)" />
+      <span class="item-subtotal">${defaults.subtotal ? 'Rp ' + fmtRp(defaults.subtotal) : 'Rp 0'}</span>
+      <button class="btn-remove" title="Hapus">✕</button>
     </div>
-    <input type="number" class="item-jumlah" min="0.1" step="0.1" value="${defaults.jumlah || 1}" />
-    <input type="text" class="item-satuan" readonly value="${defaults.satuan || ''}" style="background:var(--gray-1);color:var(--gray-5)" />
-    <span class="item-subtotal">${defaults.subtotal ? 'Rp ' + fmtRp(defaults.subtotal) : 'Rp 0'}</span>
-    <button class="btn-remove" title="Hapus">✕</button>
+    <button class="btn-toggle-rincian" style="display:none;">
+      <span class="rincian-icon">▼</span> Rincian Item
+    </button>
+    <div class="rincian-panel">
+      <div class="rincian-panel-header">📋 Rincian Item</div>
+      <div class="rincian-container"></div>
+      <button class="btn-add-rincian">+ Tambah Item</button>
+    </div>
   `;
 
-  const searchInput = row.querySelector('.svc-search-input');
-  const dropdown    = row.querySelector('.svc-dropdown');
-  const clearBtn    = row.querySelector('.svc-clear-btn');
-  const inpJumlah   = row.querySelector('.item-jumlah');
-  const inpSatuan   = row.querySelector('.item-satuan');
-  const spanSub     = row.querySelector('.item-subtotal');
+  const searchInput = wrapper.querySelector('.svc-search-input');
+  const dropdown    = wrapper.querySelector('.svc-dropdown');
+  const clearBtn    = wrapper.querySelector('.svc-clear-btn');
+  const inpJumlah   = wrapper.querySelector('.item-jumlah');
+  const inpSatuan   = wrapper.querySelector('.item-satuan');
+  const spanSub     = wrapper.querySelector('.item-subtotal');
+  const btnToggleRincian = wrapper.querySelector('.btn-toggle-rincian');
+  const rincianPanel = wrapper.querySelector('.rincian-panel');
+  const rincianContainer = wrapper.querySelector('.rincian-container');
+  const btnAddRincian = wrapper.querySelector('.btn-add-rincian');
 
   let selectedLayanan = null;
   let searchTimer = null;
+  let rincianItems = []; // Array untuk menyimpan rincian item
 
   // Jika ada default, set langsung
   if (defaults.layanan_id) {
@@ -1158,6 +1239,10 @@ function addItemRow(defaults = {}) {
       selectedLayanan = null;
       searchInput.classList.remove('filled');
       dropdown.classList.add('hidden');
+      btnToggleRincian.style.display = 'none';
+      rincianPanel.classList.remove('show');
+      rincianItems = [];
+      rincianContainer.innerHTML = '';
       updateRow();
       return;
     }
@@ -1190,6 +1275,10 @@ function addItemRow(defaults = {}) {
     selectedLayanan = null;
     searchInput.classList.remove('filled');
     dropdown.classList.add('hidden');
+    btnToggleRincian.style.display = 'none';
+    rincianPanel.classList.remove('show');
+    rincianItems = [];
+    rincianContainer.innerHTML = '';
     searchInput.focus();
     updateRow();
   });
@@ -1243,6 +1332,8 @@ function addItemRow(defaults = {}) {
     searchInput.value = layanan.nama;
     searchInput.classList.add('filled');
     dropdown.classList.add('hidden');
+    // Tampilkan tombol rincian saat layanan dipilih
+    btnToggleRincian.style.display = 'inline-flex';
     updateRow();
   }
 
@@ -1264,7 +1355,8 @@ function addItemRow(defaults = {}) {
       harga,
       satuan,
       jumlah,
-      subtotal: sub
+      subtotal: sub,
+      rincian: rincianItems // Tambahkan rincian items
     };
     if (existing) Object.assign(existing, data);
     else state.items.push(data);
@@ -1274,12 +1366,84 @@ function addItemRow(defaults = {}) {
     updateEstimasiSelesai(); // update estimasi setiap kali item berubah
   }
 
+  // ── Rincian Item Functions ──
+  let rincianIdSeq = 0;
+
+  function addRincianItem(defaults = {}) {
+    const rincianId = ++rincianIdSeq;
+    const rincianRow = document.createElement('div');
+    rincianRow.className = 'rincian-item';
+    rincianRow.dataset.rincianId = rincianId;
+
+    rincianRow.innerHTML = `
+      <input type="text" class="rincian-nama" placeholder="Nama item (baju, celana...)" value="${defaults.nama_item || ''}" />
+      <input type="number" class="rincian-jumlah" min="1" value="${defaults.jumlah || 1}" />
+      <select class="rincian-satuan">
+        <option value="pcs" ${defaults.satuan === 'pcs' ? 'selected' : ''}>pcs</option>
+        <option value="pasang" ${defaults.satuan === 'pasang' ? 'selected' : ''}>pasang</option>
+        <option value="set" ${defaults.satuan === 'set' ? 'selected' : ''}>set</option>
+      </select>
+      <button class="btn-remove-rincian" title="Hapus">✕</button>
+    `;
+
+    const namaInput = rincianRow.querySelector('.rincian-nama');
+    const jumlahInput = rincianRow.querySelector('.rincian-jumlah');
+    const satuanSelect = rincianRow.querySelector('.rincian-satuan');
+    const btnRemove = rincianRow.querySelector('.btn-remove-rincian');
+
+    function updateRincian() {
+      const existing = rincianItems.find(r => r.id === rincianId);
+      const data = {
+        id: rincianId,
+        nama_item: namaInput.value.trim(),
+        jumlah: parseInt(jumlahInput.value) || 1,
+        satuan: satuanSelect.value
+      };
+
+      if (existing) Object.assign(existing, data);
+      else rincianItems.push(data);
+
+      updateRow(); // Update state item utama
+    }
+
+    namaInput.addEventListener('input', updateRincian);
+    jumlahInput.addEventListener('input', updateRincian);
+    satuanSelect.addEventListener('change', updateRincian);
+
+    btnRemove.addEventListener('click', () => {
+      rincianItems = rincianItems.filter(r => r.id !== rincianId);
+      rincianRow.remove();
+      updateRow();
+    });
+
+    rincianContainer.appendChild(rincianRow);
+
+    // Set default data jika ada
+    if (defaults.nama_item) {
+      updateRincian();
+    }
+  }
+
+  // Toggle rincian panel
+  btnToggleRincian.addEventListener('click', () => {
+    const isShowing = rincianPanel.classList.contains('show');
+    rincianPanel.classList.toggle('show');
+    btnToggleRincian.classList.toggle('active');
+    const icon = btnToggleRincian.querySelector('.rincian-icon');
+    icon.textContent = isShowing ? '▼' : '▲';
+  });
+
+  // Add rincian item button
+  btnAddRincian.addEventListener('click', () => {
+    addRincianItem();
+  });
+
   inpJumlah.addEventListener('input', updateRow);
 
-  row.querySelector('.btn-remove').addEventListener('click', () => {
+  wrapper.querySelector('.btn-remove').addEventListener('click', () => {
     state.items = state.items.filter(i => i.id !== id);
-    row.remove();
-    if (!document.querySelector('.item-row')) {
+    wrapper.remove();
+    if (!document.querySelector('.item-wrapper')) {
       document.getElementById('itemsContainer').innerHTML =
         '<div class="empty-items">Belum ada item. Klik "+ Tambah Item" untuk mulai.</div>';
     }
@@ -1288,8 +1452,12 @@ function addItemRow(defaults = {}) {
     updateEstimasiSelesai(); // update estimasi saat item dihapus
   });
 
-  container.appendChild(row);
-  if (defaults.layanan_id) updateRow();
+  container.appendChild(wrapper);
+  if (defaults.layanan_id) {
+    updateRow();
+    // Jika ada default layanan, tampilkan tombol rincian
+    btnToggleRincian.style.display = 'inline-flex';
+  }
 }
 
 // Helper: escape regex special chars
@@ -1890,7 +2058,11 @@ async function submitOrder(kirimWa, cetakSetelah) {
     poin_digunakan:  state.usePoin ? state.poinDigunakan : 0,
     diskon_tipe:     state.diskonTipe,
     diskon_nilai:    state.diskonNilai,
-    items:           validItems.map(i => ({ layanan_id: i.layanan_id, jumlah: i.jumlah })),
+    items:           validItems.map(i => ({
+      layanan_id: i.layanan_id,
+      jumlah: i.jumlah,
+      rincian: (i.rincian || []).filter(r => r.nama_item && r.nama_item.trim())
+    })),
     payment_mode:    mode,
     is_dp:           isDp,
     metode_bayar:    metode,

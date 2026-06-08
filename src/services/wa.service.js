@@ -43,9 +43,19 @@ const render = (template, vars) =>
 
 // ── Build teks item per baris ────────────────────────────────────────────────
 const buildItemLines = (items = []) =>
-  items.map((it, i) =>
-    `${i + 1}. ${it.nama_layanan} – ${it.jumlah} ${it.satuan || ''} × Rp ${fmtRp(it.harga_satuan)} = *Rp ${fmtRp(it.subtotal)}*`
-  ).join('\n');
+  items.map((it, i) => {
+    let line = `${i + 1}. ${it.nama_layanan} – ${it.jumlah} ${it.satuan || ''} × Rp ${fmtRp(it.harga_satuan)} = *Rp ${fmtRp(it.subtotal)}*`;
+
+    // Tambahkan rincian item jika ada
+    if (it.rincian && it.rincian.length > 0) {
+      const rincianText = it.rincian
+        .map(r => `     - ${r.nama_item} ${r.jumlah} ${r.satuan}`)
+        .join('\n');
+      line += '\n' + rincianText;
+    }
+
+    return line;
+  }).join('\n');
 
 // ── Build teks biaya tambahan per baris ──────────────────────────────────────
 const buildBiayaTambahanLines = (biayaTambahan = []) => {
