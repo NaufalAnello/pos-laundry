@@ -172,6 +172,135 @@ exports.index = async (req, res) => {
   }
 };
 
+// ── GET /api/v1/laporan/layanan ───────────────────────────────────────────────
+exports.layanan = async (req, res) => {
+  try {
+    const { start, end } = getDateRange(req);
+    const kategoriId = req.query.kategori_id;
+
+    let query = db('detail_transaksi as dt')
+      .leftJoin('layanan as l', 'l.id', 'dt.layanan_id')
+      .leftJoin('kategori_layanan as k', 'k.id', 'l.kategori_id')
+      .leftJoin('transaksi as t', 't.id', 'dt.transaksi_id')
+      .whereRaw("date(t.tanggal_masuk/1000,'unixepoch') >= ?", [start])
+      .whereRaw("date(t.tanggal_masuk/1000,'unixepoch') <= ?", [end])
+      .whereNotIn('t.status', ['dibatalkan']);
+
+    if (kategoriId) {
+      query = query.where('l.kategori_id', kategoriId);
+    }
+
+    const rows = await query
+      .groupBy('l.id')
+      .orderByRaw('SUM(dt.subtotal) DESC')
+      .select(
+        'l.nama',
+        'k.nama as kategori',
+        'l.satuan',
+        db.raw('COUNT(DISTINCT dt.transaksi_id) as total_order'),
+        db.raw('SUM(dt.jumlah) as total_volume'),
+        db.raw('SUM(dt.subtotal) as total_omset')
+      );
+
+    // Hitung ringkasan
+    const totalLayanan = rows.length;
+    const layananTerlaku = rows.length > 0 ? rows.reduce((max, r) =>
+      Number(r.total_order) > Number(max.total_order) ? r : max
+    ) : null;
+    const layananOmsetTertinggi = rows.length > 0 ? rows.reduce((max, r) =>
+      Number(r.total_omset) > Number(max.total_omset) ? r : max
+    ) : null;
+
+    const totalVolumeKiloan = rows
+      .filter(r => r.satuan === 'kg')
+      .reduce((sum, r) => sum + Number(r.total_volume), 0);
+
+    res.json({
+      periode: { start, end },
+      layanan: rows.map(r => ({
+        nama: r.nama,
+        kategori: r.kategori,
+        satuan: r.satuan,
+        total_order: Number(r.total_order),
+        total_volume: Number(r.total_volume),
+        total_omset: Number(r.total_omset),
+        rata_per_order: Math.round(Number(r.total_omset) / Number(r.total_order))
+      })),
+      ringkasan: {
+        total_layanan: totalLayanan,
+        layanan_terlaku: layananTerlaku ? {
+          nama: layananTerlaku.nama,
+          total_order: Number(layananTerlaku.total_order)
+        } : null,
+        layanan_omset_tertinggi: layananOmsetTertinggi ? {
+          nama: layananOmsetTertinggi.nama,
+          total_omset: Number(layananOmsetTertinggi.total_omset)
+        } : null,
+        total_volume_kiloan: totalVolumeKiloan
+      }
+    });
+  } catch (err) {
+    console.error('[laporan:layanan]', err);
+    res.status(500).json({ error: 'Gagal mengambil laporan layanan' });
+  }
+};
+
+// ── GET /api/v1/laporan/layanan/export ────────────────────────────────────────
+exports.exportLayanan = async (req, res) => {
+  try {
+    const { start, end } = getDateRange(req);
+    const kategoriId = req.query.kategori_id;
+
+    let query = db('detail_transaksi as dt')
+      .leftJoin('layanan as l', 'l.id', 'dt.layanan_id')
+      .leftJoin('kategori_layanan as k', 'k.id', 'l.kategori_id')
+      .leftJoin('transaksi as t', 't.id', 'dt.transaksi_id')
+      .whereRaw("date(t.tanggal_masuk/1000,'unixepoch') >= ?", [start])
+      .whereRaw("date(t.tanggal_masuk/1000,'unixepoch') <= ?", [end])
+      .whereNotIn('t.status', ['dibatalkan']);
+
+    if (kategoriId) {
+      query = query.where('l.kategori_id', kategoriId);
+    }
+
+    const rows = await query
+      .groupBy('l.id')
+      .orderByRaw('SUM(dt.subtotal) DESC')
+      .select(
+        'l.nama',
+        'k.nama as kategori',
+        'l.satuan',
+        db.raw('COUNT(DISTINCT dt.transaksi_id) as total_order'),
+        db.raw('SUM(dt.jumlah) as total_volume'),
+        db.raw('SUM(dt.subtotal) as total_omset'),
+        db.raw('CAST(SUM(dt.subtotal) AS REAL) / COUNT(DISTINCT dt.transaksi_id) as rata_per_order')
+      );
+
+    const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const BOM = '﻿';
+    const header = [
+      'Nama Layanan', 'Kategori', 'Satuan', 'Total Order',
+      'Total Volume', 'Total Omset', 'Rata-rata/Order'
+    ];
+
+    const csv = BOM + [
+      header.map(escape).join(','),
+      ...rows.map(r => [
+        r.nama, r.kategori, r.satuan,
+        r.total_order, r.total_volume, r.total_omset,
+        Math.round(r.rata_per_order)
+      ].map(escape).join(','))
+    ].join('\r\n');
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="laporan-layanan-${start}-sd-${end}.csv"`);
+    res.send(csv);
+  } catch (err) {
+    console.error('[laporan:exportLayanan]', err);
+    res.status(500).json({ error: 'Gagal mengekspor laporan layanan' });
+  }
+};
+
 // ── GET /api/v1/laporan/export ────────────────────────────────────────────────
 exports.exportCsv = async (req, res) => {
   try {

@@ -121,6 +121,16 @@
     /* loading */
     .loading { display:flex; align-items:center; justify-content:center; height:120px; color:var(--gray-5); font-size:14px; }
 
+    /* tabs */
+    .tabs { display:flex; gap:4px; border-bottom:2px solid var(--gray-3); margin-bottom:20px; overflow-x:auto; }
+    .tab  { padding:10px 18px; border:none; background:none; font-size:14px; font-weight:600;
+            color:var(--gray-5); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px;
+            transition:all .15s; white-space:nowrap; }
+    .tab:hover { color:var(--gray-7); background:var(--gray-1); }
+    .tab.active { color:var(--blue); border-bottom-color:var(--blue); }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+
     .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
              background:#1e293b; color:#fff; padding:10px 20px; border-radius:8px;
              font-size:13px; font-weight:600; z-index:99; transition:transform .3s; white-space:nowrap; }
@@ -134,17 +144,21 @@
       .page-header { flex-direction: column; align-items: stretch; gap: 10px; }
       .page-header .btn { width: 100%; min-height: 44px; }
 
+      .tabs { gap: 6px; padding: 0 4px; }
+      .tab { padding: 8px 12px; font-size: 13px; }
+
       .filter-bar {
         padding: 12px;
         align-items: stretch;
         flex-direction: column;
       }
       .filter-bar > * { width: 100%; }
-      .filter-bar input[type=date] { min-height: 44px; width: 100%; }
+      .filter-bar input[type=date], .filter-bar select { min-height: 44px; width: 100%; }
       .preset-btns { width: 100%; }
       .preset-btn { min-height: 36px; flex: 1 0 calc(33% - 4px); }
       .sep { display: none; }
 
+      .stats-grid { grid-template-columns: 1fr 1fr !important; }
       .stat-card { padding: 12px; }
       .stat-val { font-size: 18px; }
       .stat-label { font-size: 10px; }
@@ -152,7 +166,7 @@
       .chart-wrap { height: 200px; }
 
       /* Tables scroll horizontal di HP - tetap pakai pendekatan scroll utk laporan */
-      #profitBody table, #distribusiBody table { min-width: 480px; }
+      #profitBody table, #distribusiBody table, #layananTableBody table { min-width: 480px; }
     }
   </style>
 </head>
@@ -161,15 +175,21 @@
 <div class="page">
   <div class="page-header">
     <div class="page-title">Laporan Bisnis</div>
-    <button class="btn btn-green" onclick="exportCsv()">⬇ Export CSV</button>
+    <button class="btn btn-green" id="exportBtn" onclick="exportCsv()">⬇ Export CSV</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('ringkasan')">📊 Ringkasan</button>
+    <button class="tab" onclick="switchTab('layanan')">📦 Laporan Layanan</button>
   </div>
 
   <!-- Filter -->
   <div class="filter-bar">
     <label>Periode:</label>
-    <input type="date" id="dateStart" onchange="load()"/>
+    <input type="date" id="dateStart" onchange="loadActiveTab()"/>
     <span class="sep">–</span>
-    <input type="date" id="dateEnd" onchange="load()"/>
+    <input type="date" id="dateEnd" onchange="loadActiveTab()"/>
     <div class="preset-btns">
       <button class="preset-btn" onclick="setPreset('today')">Hari Ini</button>
       <button class="preset-btn" onclick="setPreset('week')">7 Hari</button>
@@ -177,7 +197,16 @@
       <button class="preset-btn" onclick="setPreset('last3')">3 Bulan</button>
       <button class="preset-btn" onclick="setPreset('year')">Tahun Ini</button>
     </div>
+    <div id="filterKategori" style="display:none">
+      <label>Kategori:</label>
+      <select id="kategoriFilter" onchange="loadLayanan()" style="padding:7px 10px;border:1px solid var(--gray-3);border-radius:8px;font-size:13px">
+        <option value="">Semua Kategori</option>
+      </select>
+    </div>
   </div>
+
+  <!-- Tab Content: Ringkasan -->
+  <div id="tab-ringkasan" class="tab-content active">
 
   <!-- Stat cards -->
   <div class="stats-grid">
@@ -276,12 +305,67 @@
       <div class="loading">Memuat…</div>
     </div>
   </div>
+  </div><!-- /tab-ringkasan -->
+
+  <!-- Tab Content: Laporan Layanan -->
+  <div id="tab-layanan" class="tab-content">
+    <!-- Ringkasan -->
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+      <div class="stat-card">
+        <div class="stat-label">Total Layanan Berbeda</div>
+        <div class="stat-val" id="lTotalLayanan">–</div>
+        <div class="stat-sub">yang dipesan</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Layanan Paling Laku</div>
+        <div class="stat-val" id="lLayananTerlaku" style="font-size:16px">–</div>
+        <div class="stat-sub" id="lTerlakuSub">–</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Layanan Omset Tertinggi</div>
+        <div class="stat-val" id="lLayananOmset" style="font-size:16px">–</div>
+        <div class="stat-sub" id="lOmsetSub">–</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Volume Kiloan</div>
+        <div class="stat-val" id="lTotalKiloan">–</div>
+        <div class="stat-sub">dalam periode ini</div>
+      </div>
+    </div>
+
+    <!-- Grafik Top 10 -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-head">📊 Top 10 Layanan Berdasarkan Omset</div>
+      <div class="card-body">
+        <div class="chart-wrap">
+          <canvas id="layananChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabel Laporan Layanan -->
+    <div class="card">
+      <div class="card-head" style="display:flex;justify-content:space-between;align-items:center">
+        <span>📦 Detail Laporan Layanan</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm btn-outline" onclick="exportLayananCsv()">⬇ CSV</button>
+          <button class="btn btn-sm btn-green" onclick="exportLayananExcel()">⬇ Excel</button>
+        </div>
+      </div>
+      <div class="card-body" id="layananTableBody" style="overflow-x:auto">
+        <div class="loading">Memuat…</div>
+      </div>
+    </div>
+  </div><!-- /tab-layanan -->
+
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 let chart = null;
+let layananChart = null;
+let activeTab = 'ringkasan';
 const today = () => new Date().toISOString().slice(0, 10);
 const fmt   = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '–';
 const rupiah = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
@@ -292,6 +376,7 @@ const rupiah = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
     const d = await apiFetch('/api/v1/auth/me');
     document.getElementById('userName').textContent = d.user?.nama || '–';
   } catch {}
+  await loadKategoriFilter();
   setPreset('month');
 })();
 
@@ -305,6 +390,58 @@ async function apiFetch(url, opts = {}) {
 async function logout() {
   await fetch('/api/v1/auth/logout', { method:'POST', credentials:'include' });
   location.href = '/login';
+}
+
+// ── Tab Switching ─────────────────────────────────────────────────────────────
+function switchTab(tabName) {
+  activeTab = tabName;
+
+  // Update tab buttons
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+
+  // Update tab content
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tabName).classList.add('active');
+
+  // Update filter kategori visibility
+  document.getElementById('filterKategori').style.display = tabName === 'layanan' ? 'flex' : 'none';
+
+  // Update export button
+  const exportBtn = document.getElementById('exportBtn');
+  if (tabName === 'ringkasan') {
+    exportBtn.textContent = '⬇ Export CSV';
+    exportBtn.onclick = exportCsv;
+  } else {
+    exportBtn.style.display = 'none'; // Export di dalam tabel layanan
+  }
+
+  // Load data
+  loadActiveTab();
+}
+
+function loadActiveTab() {
+  if (activeTab === 'ringkasan') {
+    load();
+  } else if (activeTab === 'layanan') {
+    loadLayanan();
+  }
+}
+
+// ── Load Kategori Filter ──────────────────────────────────────────────────────
+async function loadKategoriFilter() {
+  try {
+    const data = await apiFetch('/api/v1/kategori-layanan');
+    const sel = document.getElementById('kategoriFilter');
+    data.forEach(k => {
+      const opt = document.createElement('option');
+      opt.value = k.id;
+      opt.textContent = k.nama;
+      sel.appendChild(opt);
+    });
+  } catch (e) {
+    console.error('Gagal load kategori', e);
+  }
 }
 
 // ── Preset dates ──────────────────────────────────────────────────────────────
@@ -323,7 +460,7 @@ function setPreset(key) {
 
   document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
-  load();
+  loadActiveTab();
 }
 
 // ── Load data ─────────────────────────────────────────────────────────────────
@@ -560,12 +697,155 @@ function renderProfitabilitas(distribusi) {
     <div style="margin-top:8px;font-size:11px;color:var(--gray-5)">* Estimasi berdasarkan HPP × volume transaksi pada periode ini</div>`;
 }
 
+// ── Load Laporan Layanan ──────────────────────────────────────────────────────
+async function loadLayanan() {
+  const start = document.getElementById('dateStart').value;
+  const end   = document.getElementById('dateEnd').value;
+  const kategoriId = document.getElementById('kategoriFilter').value;
+  if (!start || !end) return;
+
+  // set loading
+  ['lTotalLayanan','lLayananTerlaku','lLayananOmset','lTotalKiloan'].forEach(id => {
+    document.getElementById(id).textContent = '…';
+  });
+  document.getElementById('layananTableBody').innerHTML = '<div class="loading">Memuat…</div>';
+
+  try {
+    let url = `/api/v1/laporan/layanan?start=${start}&end=${end}`;
+    if (kategoriId) url += `&kategori_id=${kategoriId}`;
+
+    const data = await apiFetch(url);
+    renderLayanan(data);
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+function renderLayanan(d) {
+  const { layanan, ringkasan, periode } = d;
+
+  // Ringkasan
+  document.getElementById('lTotalLayanan').textContent = ringkasan.total_layanan;
+
+  if (ringkasan.layanan_terlaku) {
+    document.getElementById('lLayananTerlaku').textContent = ringkasan.layanan_terlaku.nama;
+    document.getElementById('lTerlakuSub').textContent = ringkasan.layanan_terlaku.total_order + ' order';
+  } else {
+    document.getElementById('lLayananTerlaku').textContent = '–';
+    document.getElementById('lTerlakuSub').textContent = 'Tidak ada data';
+  }
+
+  if (ringkasan.layanan_omset_tertinggi) {
+    document.getElementById('lLayananOmset').textContent = ringkasan.layanan_omset_tertinggi.nama;
+    document.getElementById('lOmsetSub').textContent = rupiah(ringkasan.layanan_omset_tertinggi.total_omset);
+  } else {
+    document.getElementById('lLayananOmset').textContent = '–';
+    document.getElementById('lOmsetSub').textContent = 'Tidak ada data';
+  }
+
+  document.getElementById('lTotalKiloan').textContent = ringkasan.total_volume_kiloan.toFixed(1) + ' kg';
+
+  // Chart Top 10
+  const top10 = layanan.slice(0, 10);
+  const labels = top10.map(r => r.nama.length > 20 ? r.nama.slice(0, 20) + '…' : r.nama);
+  const values = top10.map(r => r.total_omset);
+
+  if (layananChart) layananChart.destroy();
+  const ctx = document.getElementById('layananChart').getContext('2d');
+  layananChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Omset',
+        data: values,
+        backgroundColor: 'rgba(124,58,237,.7)',
+        borderRadius: 5,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => rupiah(ctx.parsed.x)
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color:'#f1f5f9' },
+          ticks: {
+            font:{size:11},
+            callback: v => v >= 1000000 ? (v/1000000).toFixed(1)+'jt' : v >= 1000 ? (v/1000).toFixed(0)+'rb' : v
+          }
+        },
+        y: { grid: { display:false }, ticks:{ font:{size:11} } }
+      }
+    }
+  });
+
+  // Tabel
+  const rows = layanan.map((r, i) => `
+    <tr>
+      <td style="color:var(--gray-5)">${i+1}</td>
+      <td style="font-weight:600">${esc(r.nama)}</td>
+      <td>${esc(r.kategori)}</td>
+      <td class="num-cell">${r.total_order}</td>
+      <td class="num-cell">${r.total_volume.toFixed(1)} ${r.satuan}</td>
+      <td class="num-cell">${rupiah(r.total_omset)}</td>
+      <td class="num-cell">${rupiah(r.rata_per_order)}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--gray-5);padding:20px">Tidak ada data</td></tr>';
+
+  document.getElementById('layananTableBody').innerHTML = `
+    <table style="min-width:720px">
+      <thead><tr>
+        <th>#</th>
+        <th>Nama Layanan</th>
+        <th>Kategori</th>
+        <th style="text-align:right">Total Order</th>
+        <th style="text-align:right">Total Volume</th>
+        <th style="text-align:right">Total Omset</th>
+        <th style="text-align:right">Rata-rata/Order</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
 // ── Export CSV ────────────────────────────────────────────────────────────────
 function exportCsv() {
   const start = document.getElementById('dateStart').value;
   const end   = document.getElementById('dateEnd').value;
   if (!start || !end) { toast('Pilih rentang tanggal terlebih dahulu', true); return; }
   window.location.href = `/api/v1/laporan/export?start=${start}&end=${end}`;
+}
+
+function exportLayananCsv() {
+  const start = document.getElementById('dateStart').value;
+  const end   = document.getElementById('dateEnd').value;
+  const kategoriId = document.getElementById('kategoriFilter').value;
+  if (!start || !end) { toast('Pilih rentang tanggal terlebih dahulu', true); return; }
+  let url = `/api/v1/laporan/layanan/export?start=${start}&end=${end}`;
+  if (kategoriId) url += `&kategori_id=${kategoriId}`;
+  window.location.href = url;
+}
+
+function exportLayananExcel() {
+  // Untuk Excel, kita bisa redirect ke endpoint yang sama dengan format=excel
+  // atau gunakan library JS untuk generate Excel client-side
+  // Untuk simplicity, kita gunakan CSV dengan ekstensi .xls (Excel bisa buka CSV)
+  const start = document.getElementById('dateStart').value;
+  const end   = document.getElementById('dateEnd').value;
+  const kategoriId = document.getElementById('kategoriFilter').value;
+  if (!start || !end) { toast('Pilih rentang tanggal terlebih dahulu', true); return; }
+  let url = `/api/v1/laporan/layanan/export?start=${start}&end=${end}`;
+  if (kategoriId) url += `&kategori_id=${kategoriId}`;
+  window.location.href = url;
+  toast('File CSV sedang diunduh (bisa dibuka dengan Excel)');
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
