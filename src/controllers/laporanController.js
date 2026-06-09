@@ -307,23 +307,35 @@ exports.pelanggan = async (req, res) => {
     const { start, end } = getDateRange(req);
     const search = req.query.search || '';
 
+    // Gunakan CASE untuk filter kondisi di dalam agregasi
     let query = db('pelanggan as p')
-      .leftJoin('transaksi as t', function() {
-        this.on('t.pelanggan_id', '=', 'p.id')
-          .andOnNotIn('t.status', ['dibatalkan'])
-          .andOnRaw("date(t.tanggal_masuk/1000,'unixepoch') >= ?", [start])
-          .andOnRaw("date(t.tanggal_masuk/1000,'unixepoch') <= ?", [end]);
-      })
+      .leftJoin('transaksi as t', 't.pelanggan_id', 'p.id')
       .groupBy('p.id')
       .select(
         'p.id',
         'p.nama',
         'p.telepon',
         'p.total_poin',
-        db.raw('COUNT(t.id) as total_order'),
-        db.raw('COALESCE(SUM(t.total_bayar), 0) as total_belanja'),
-        db.raw('COALESCE(AVG(t.total_bayar), 0) as rata_order'),
-        db.raw('MAX(t.tanggal_masuk) as terakhir_order')
+        db.raw(`COUNT(CASE
+          WHEN t.status != 'dibatalkan'
+            AND date(t.tanggal_masuk/1000,'unixepoch') >= ?
+            AND date(t.tanggal_masuk/1000,'unixepoch') <= ?
+          THEN t.id END) as total_order`, [start, end]),
+        db.raw(`COALESCE(SUM(CASE
+          WHEN t.status != 'dibatalkan'
+            AND date(t.tanggal_masuk/1000,'unixepoch') >= ?
+            AND date(t.tanggal_masuk/1000,'unixepoch') <= ?
+          THEN t.total_bayar END), 0) as total_belanja`, [start, end]),
+        db.raw(`COALESCE(AVG(CASE
+          WHEN t.status != 'dibatalkan'
+            AND date(t.tanggal_masuk/1000,'unixepoch') >= ?
+            AND date(t.tanggal_masuk/1000,'unixepoch') <= ?
+          THEN t.total_bayar END), 0) as rata_order`, [start, end]),
+        db.raw(`MAX(CASE
+          WHEN t.status != 'dibatalkan'
+            AND date(t.tanggal_masuk/1000,'unixepoch') >= ?
+            AND date(t.tanggal_masuk/1000,'unixepoch') <= ?
+          THEN t.tanggal_masuk END) as terakhir_order`, [start, end])
       );
 
     if (search) {
@@ -443,22 +455,34 @@ exports.exportPelanggan = async (req, res) => {
     const { start, end } = getDateRange(req);
     const search = req.query.search || '';
 
+    // Gunakan CASE untuk filter kondisi di dalam agregasi
     let query = db('pelanggan as p')
-      .leftJoin('transaksi as t', function() {
-        this.on('t.pelanggan_id', '=', 'p.id')
-          .andOnNotIn('t.status', ['dibatalkan'])
-          .andOnRaw("date(t.tanggal_masuk/1000,'unixepoch') >= ?", [start])
-          .andOnRaw("date(t.tanggal_masuk/1000,'unixepoch') <= ?", [end]);
-      })
+      .leftJoin('transaksi as t', 't.pelanggan_id', 'p.id')
       .groupBy('p.id')
       .select(
         'p.nama',
         'p.telepon',
         'p.total_poin',
-        db.raw('COUNT(t.id) as total_order'),
-        db.raw('COALESCE(SUM(t.total_bayar), 0) as total_belanja'),
-        db.raw('COALESCE(AVG(t.total_bayar), 0) as rata_order'),
-        db.raw('MAX(t.tanggal_masuk) as terakhir_order')
+        db.raw(`COUNT(CASE
+          WHEN t.status != 'dibatalkan'
+            AND date(t.tanggal_masuk/1000,'unixepoch') >= ?
+            AND date(t.tanggal_masuk/1000,'unixepoch') <= ?
+          THEN t.id END) as total_order`, [start, end]),
+        db.raw(`COALESCE(SUM(CASE
+          WHEN t.status != 'dibatalkan'
+            AND date(t.tanggal_masuk/1000,'unixepoch') >= ?
+            AND date(t.tanggal_masuk/1000,'unixepoch') <= ?
+          THEN t.total_bayar END), 0) as total_belanja`, [start, end]),
+        db.raw(`COALESCE(AVG(CASE
+          WHEN t.status != 'dibatalkan'
+            AND date(t.tanggal_masuk/1000,'unixepoch') >= ?
+            AND date(t.tanggal_masuk/1000,'unixepoch') <= ?
+          THEN t.total_bayar END), 0) as rata_order`, [start, end]),
+        db.raw(`MAX(CASE
+          WHEN t.status != 'dibatalkan'
+            AND date(t.tanggal_masuk/1000,'unixepoch') >= ?
+            AND date(t.tanggal_masuk/1000,'unixepoch') <= ?
+          THEN t.tanggal_masuk END) as terakhir_order`, [start, end])
       );
 
     if (search) {
