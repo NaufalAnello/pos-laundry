@@ -117,6 +117,13 @@
     .badge-selesai  { background:#dcfce7; color:#166534; }
     .badge-diambil  { background:#f0fdf4; color:#15803d; }
     .badge-batal    { background:#fee2e2; color:#991b1b; }
+    .badge-gold     { background:#fef3c7; color:#92400e; }
+    .badge-silver   { background:#e5e7eb; color:#374151; }
+    .badge-bronze   { background:#fed7aa; color:#9a3412; }
+
+    /* row clickable */
+    .row-clickable { cursor:pointer; transition:background .15s; }
+    .row-clickable:hover { background:var(--gray-1) !important; }
 
     /* loading */
     .loading { display:flex; align-items:center; justify-content:center; height:120px; color:var(--gray-5); font-size:14px; }
@@ -182,6 +189,7 @@
   <div class="tabs">
     <button class="tab active" onclick="switchTab('ringkasan')">📊 Ringkasan</button>
     <button class="tab" onclick="switchTab('layanan')">📦 Laporan Layanan</button>
+    <button class="tab" onclick="switchTab('pelanggan')">👥 Laporan Pelanggan</button>
   </div>
 
   <!-- Filter -->
@@ -202,6 +210,10 @@
       <select id="kategoriFilter" onchange="loadLayanan()" style="padding:7px 10px;border:1px solid var(--gray-3);border-radius:8px;font-size:13px">
         <option value="">Semua Kategori</option>
       </select>
+    </div>
+    <div id="filterPelanggan" style="display:none">
+      <label>Cari Pelanggan:</label>
+      <input type="text" id="pelangganSearch" placeholder="Nama pelanggan..." onkeyup="debounceLoadPelanggan()" style="padding:7px 10px;border:1px solid var(--gray-3);border-radius:8px;font-size:13px;width:200px">
     </div>
   </div>
 
@@ -358,6 +370,60 @@
     </div>
   </div><!-- /tab-layanan -->
 
+  <!-- Tab Content: Laporan Pelanggan -->
+  <div id="tab-pelanggan" class="tab-content">
+    <!-- Ringkasan -->
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+      <div class="stat-card">
+        <div class="stat-label">Pelanggan Aktif</div>
+        <div class="stat-val" id="pTotalAktif">–</div>
+        <div class="stat-sub">di periode ini</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pelanggan Tersetia</div>
+        <div class="stat-val" id="pTersetia" style="font-size:16px">–</div>
+        <div class="stat-sub" id="pTersetiaSub">–</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Top Spender</div>
+        <div class="stat-val" id="pTopSpender" style="font-size:16px">–</div>
+        <div class="stat-sub" id="pTopSpenderSub">–</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pelanggan Baru</div>
+        <div class="stat-val" id="pBaru">–</div>
+        <div class="stat-sub">terdaftar di periode ini</div>
+      </div>
+    </div>
+
+    <!-- Tabel Laporan Pelanggan -->
+    <div class="card">
+      <div class="card-head" style="display:flex;justify-content:space-between;align-items:center">
+        <span>👥 Ringkasan per Pelanggan</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm btn-outline" onclick="exportPelangganCsv()">⬇ CSV</button>
+          <button class="btn btn-sm btn-green" onclick="exportPelangganExcel()">⬇ Excel</button>
+        </div>
+      </div>
+      <div class="card-body" id="pelangganTableBody" style="overflow-x:auto">
+        <div class="loading">Memuat…</div>
+      </div>
+    </div>
+
+    <!-- Modal Detail Pelanggan -->
+    <div id="modalPelangganDetail" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:100;overflow-y:auto" onclick="if(event.target===this) closeDetailModal()">
+      <div style="max-width:800px;margin:40px auto;background:#fff;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.3)" onclick="event.stopPropagation()">
+        <div style="padding:20px 24px;border-bottom:1px solid var(--gray-3);display:flex;justify-content:space-between;align-items:center">
+          <h3 id="modalPelangganNama" style="font-size:18px;font-weight:700">–</h3>
+          <button onclick="closeDetailModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--gray-5)">&times;</button>
+        </div>
+        <div style="padding:20px 24px" id="modalPelangganBody">
+          <div class="loading">Memuat…</div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-pelanggan -->
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -404,16 +470,18 @@ function switchTab(tabName) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + tabName).classList.add('active');
 
-  // Update filter kategori visibility
+  // Update filter visibility
   document.getElementById('filterKategori').style.display = tabName === 'layanan' ? 'flex' : 'none';
+  document.getElementById('filterPelanggan').style.display = tabName === 'pelanggan' ? 'flex' : 'none';
 
   // Update export button
   const exportBtn = document.getElementById('exportBtn');
   if (tabName === 'ringkasan') {
     exportBtn.textContent = '⬇ Export CSV';
     exportBtn.onclick = exportCsv;
+    exportBtn.style.display = 'inline-flex';
   } else {
-    exportBtn.style.display = 'none'; // Export di dalam tabel layanan
+    exportBtn.style.display = 'none'; // Export di dalam tabel
   }
 
   // Load data
@@ -425,6 +493,8 @@ function loadActiveTab() {
     load();
   } else if (activeTab === 'layanan') {
     loadLayanan();
+  } else if (activeTab === 'pelanggan') {
+    loadPelanggan();
   }
 }
 
@@ -844,6 +914,181 @@ function exportLayananExcel() {
   if (!start || !end) { toast('Pilih rentang tanggal terlebih dahulu', true); return; }
   let url = `/api/v1/laporan/layanan/export?start=${start}&end=${end}`;
   if (kategoriId) url += `&kategori_id=${kategoriId}`;
+  window.location.href = url;
+  toast('File CSV sedang diunduh (bisa dibuka dengan Excel)');
+}
+
+// ── Load Laporan Pelanggan ────────────────────────────────────────────────────
+let debounceTimer = null;
+function debounceLoadPelanggan() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(loadPelanggan, 500);
+}
+
+async function loadPelanggan() {
+  const start = document.getElementById('dateStart').value;
+  const end   = document.getElementById('dateEnd').value;
+  const search = document.getElementById('pelangganSearch').value;
+  if (!start || !end) return;
+
+  // set loading
+  ['pTotalAktif','pTersetia','pTopSpender','pBaru'].forEach(id => {
+    document.getElementById(id).textContent = '…';
+  });
+  document.getElementById('pelangganTableBody').innerHTML = '<div class="loading">Memuat…</div>';
+
+  try {
+    let url = `/api/v1/laporan/pelanggan?start=${start}&end=${end}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+
+    const data = await apiFetch(url);
+    renderPelanggan(data);
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+function renderPelanggan(d) {
+  const { pelanggan, ringkasan, periode } = d;
+
+  // Ringkasan
+  document.getElementById('pTotalAktif').textContent = ringkasan.total_pelanggan_aktif;
+
+  if (ringkasan.pelanggan_tersetia) {
+    document.getElementById('pTersetia').textContent = ringkasan.pelanggan_tersetia.nama;
+    document.getElementById('pTersetiaSub').textContent = ringkasan.pelanggan_tersetia.total_order + ' order';
+  } else {
+    document.getElementById('pTersetia').textContent = '–';
+    document.getElementById('pTersetiaSub').textContent = 'Tidak ada data';
+  }
+
+  if (ringkasan.pelanggan_top_spender) {
+    document.getElementById('pTopSpender').textContent = ringkasan.pelanggan_top_spender.nama;
+    document.getElementById('pTopSpenderSub').textContent = rupiah(ringkasan.pelanggan_top_spender.total_belanja);
+  } else {
+    document.getElementById('pTopSpender').textContent = '–';
+    document.getElementById('pTopSpenderSub').textContent = 'Tidak ada data';
+  }
+
+  document.getElementById('pBaru').textContent = ringkasan.pelanggan_baru;
+
+  // Tabel
+  const rows = pelanggan.map((r, i) => {
+    const levelClass = r.level_poin === 'Gold' ? 'badge-gold' : r.level_poin === 'Silver' ? 'badge-silver' : 'badge-bronze';
+    const terakhir = r.terakhir_order ? fmt(new Date(r.terakhir_order)) : '–';
+    return `<tr class="row-clickable" onclick="showDetailPelanggan(${r.id}, '${esc(r.nama)}')">
+      <td style="color:var(--gray-5)">${i+1}</td>
+      <td style="font-weight:600">${esc(r.nama)}</td>
+      <td>${esc(r.telepon || '–')}</td>
+      <td class="num-cell">${r.total_order}</td>
+      <td class="num-cell">${rupiah(r.total_belanja)}</td>
+      <td class="num-cell">${rupiah(r.rata_order)}</td>
+      <td>${terakhir}</td>
+      <td><span class="badge ${levelClass}">${r.level_poin}</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--gray-5);padding:20px">Tidak ada data</td></tr>';
+
+  document.getElementById('pelangganTableBody').innerHTML = `
+    <table style="min-width:800px">
+      <thead><tr>
+        <th>#</th>
+        <th>Nama Pelanggan</th>
+        <th>Telepon</th>
+        <th style="text-align:right">Total Order</th>
+        <th style="text-align:right">Total Belanja</th>
+        <th style="text-align:right">Rata-rata/Order</th>
+        <th>Terakhir Order</th>
+        <th>Level Poin</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="margin-top:8px;font-size:11px;color:var(--gray-5)">* Klik baris untuk melihat detail riwayat order</div>`;
+}
+
+// ── Detail Pelanggan Modal ────────────────────────────────────────────────────
+async function showDetailPelanggan(id, nama) {
+  document.getElementById('modalPelangganNama').textContent = nama;
+  document.getElementById('modalPelangganDetail').style.display = 'block';
+  document.getElementById('modalPelangganBody').innerHTML = '<div class="loading">Memuat…</div>';
+
+  const start = document.getElementById('dateStart').value;
+  const end   = document.getElementById('dateEnd').value;
+
+  try {
+    const data = await apiFetch(`/api/v1/laporan/pelanggan/${id}/detail?start=${start}&end=${end}`);
+    renderDetailPelanggan(data);
+  } catch (e) {
+    document.getElementById('modalPelangganBody').innerHTML = `<div style="text-align:center;color:var(--red);padding:20px">${e.message}</div>`;
+  }
+}
+
+function renderDetailPelanggan(d) {
+  const { riwayat } = d;
+
+  if (!riwayat.length) {
+    document.getElementById('modalPelangganBody').innerHTML = `<div style="text-align:center;color:var(--gray-5);padding:20px">Tidak ada riwayat order di periode ini</div>`;
+    return;
+  }
+
+  const statusBadge = (status) => {
+    const map = { pending:'badge-pending', proses:'badge-proses', selesai:'badge-selesai', diambil:'badge-diambil', dibatalkan:'badge-batal' };
+    return `<span class="badge ${map[status] || ''}">${status}</span>`;
+  };
+
+  const rows = riwayat.map(r => {
+    const tanggal = new Date(r.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+    return `<tr>
+      <td style="font-weight:600;color:var(--blue)">${esc(r.nomor_transaksi)}</td>
+      <td>${tanggal}</td>
+      <td>${esc(r.layanan)}</td>
+      <td class="num-cell">${rupiah(r.total_bayar)}</td>
+      <td>${statusBadge(r.status)}</td>
+    </tr>`;
+  }).join('');
+
+  const totalBelanja = riwayat.reduce((sum, r) => sum + r.total_bayar, 0);
+
+  document.getElementById('modalPelangganBody').innerHTML = `
+    <div style="margin-bottom:16px;padding:12px;background:var(--blue-lt);border-radius:8px">
+      <div style="font-size:13px;color:var(--gray-5);margin-bottom:4px">Total Belanja di Periode Ini</div>
+      <div style="font-size:20px;font-weight:800;color:var(--blue)">${rupiah(totalBelanja)}</div>
+      <div style="font-size:12px;color:var(--gray-5);margin-top:2px">${riwayat.length} transaksi</div>
+    </div>
+    <div style="font-weight:700;margin-bottom:10px;font-size:14px">Riwayat Order:</div>
+    <table>
+      <thead><tr>
+        <th>No. Transaksi</th>
+        <th>Tanggal</th>
+        <th>Layanan</th>
+        <th style="text-align:right">Total Bayar</th>
+        <th>Status</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function closeDetailModal() {
+  document.getElementById('modalPelangganDetail').style.display = 'none';
+}
+
+// ── Export Pelanggan ──────────────────────────────────────────────────────────
+function exportPelangganCsv() {
+  const start = document.getElementById('dateStart').value;
+  const end   = document.getElementById('dateEnd').value;
+  const search = document.getElementById('pelangganSearch').value;
+  if (!start || !end) { toast('Pilih rentang tanggal terlebih dahulu', true); return; }
+  let url = `/api/v1/laporan/pelanggan/export?start=${start}&end=${end}`;
+  if (search) url += `&search=${encodeURIComponent(search)}`;
+  window.location.href = url;
+}
+
+function exportPelangganExcel() {
+  const start = document.getElementById('dateStart').value;
+  const end   = document.getElementById('dateEnd').value;
+  const search = document.getElementById('pelangganSearch').value;
+  if (!start || !end) { toast('Pilih rentang tanggal terlebih dahulu', true); return; }
+  let url = `/api/v1/laporan/pelanggan/export?start=${start}&end=${end}`;
+  if (search) url += `&search=${encodeURIComponent(search)}`;
   window.location.href = url;
   toast('File CSV sedang diunduh (bisa dibuka dengan Excel)');
 }

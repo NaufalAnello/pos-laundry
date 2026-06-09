@@ -301,6 +301,206 @@ exports.exportLayanan = async (req, res) => {
   }
 };
 
+// ── GET /api/v1/laporan/pelanggan ─────────────────────────────────────────────
+exports.pelanggan = async (req, res) => {
+  try {
+    const { start, end } = getDateRange(req);
+    const search = req.query.search || '';
+
+    let query = db('pelanggan as p')
+      .leftJoin('transaksi as t', function() {
+        this.on('t.pelanggan_id', '=', 'p.id')
+          .andOnNotIn('t.status', ['dibatalkan'])
+          .andOnRaw("date(t.tanggal_masuk/1000,'unixepoch') >= ?", [start])
+          .andOnRaw("date(t.tanggal_masuk/1000,'unixepoch') <= ?", [end]);
+      })
+      .groupBy('p.id')
+      .select(
+        'p.id',
+        'p.nama',
+        'p.telepon',
+        'p.total_poin',
+        db.raw('COUNT(t.id) as total_order'),
+        db.raw('COALESCE(SUM(t.total_bayar), 0) as total_belanja'),
+        db.raw('COALESCE(AVG(t.total_bayar), 0) as rata_order'),
+        db.raw('MAX(t.tanggal_masuk) as terakhir_order')
+      );
+
+    if (search) {
+      query = query.where('p.nama', 'like', `%${search}%`);
+    }
+
+    // Hanya pelanggan yang punya transaksi di periode ini
+    const rows = await query.having('total_order', '>', 0).orderBy('total_belanja', 'desc');
+
+    // Hitung pelanggan baru di periode ini
+    let pelangganBaruQuery = db('pelanggan')
+      .whereRaw("date(created_at/1000,'unixepoch') >= ?", [start])
+      .whereRaw("date(created_at/1000,'unixepoch') <= ?", [end])
+      .count('id as total')
+      .first();
+
+    if (search) {
+      pelangganBaruQuery = pelangganBaruQuery.where('nama', 'like', `%${search}%`);
+    }
+
+    const pelangganBaru = await pelangganBaruQuery;
+
+    // Ringkasan
+    const totalPelangganAktif = rows.length;
+    const pelangganTersetia = rows.length > 0 ? rows.reduce((max, r) =>
+      Number(r.total_order) > Number(max.total_order) ? r : max
+    ) : null;
+    const pelangganTopSpender = rows.length > 0 ? rows[0] : null;
+
+    // Helper untuk level poin
+    const getPoinLevel = (poin) => {
+      if (poin >= 1000) return 'Gold';
+      if (poin >= 500) return 'Silver';
+      return 'Bronze';
+    };
+
+    res.json({
+      periode: { start, end },
+      pelanggan: rows.map(r => ({
+        id: r.id,
+        nama: r.nama,
+        telepon: r.telepon,
+        total_order: Number(r.total_order),
+        total_belanja: Number(r.total_belanja),
+        rata_order: Math.round(Number(r.rata_order)),
+        terakhir_order: r.terakhir_order,
+        total_poin: Number(r.total_poin || 0),
+        level_poin: getPoinLevel(Number(r.total_poin || 0))
+      })),
+      ringkasan: {
+        total_pelanggan_aktif: totalPelangganAktif,
+        pelanggan_tersetia: pelangganTersetia ? {
+          nama: pelangganTersetia.nama,
+          total_order: Number(pelangganTersetia.total_order)
+        } : null,
+        pelanggan_top_spender: pelangganTopSpender ? {
+          nama: pelangganTopSpender.nama,
+          total_belanja: Number(pelangganTopSpender.total_belanja)
+        } : null,
+        pelanggan_baru: Number(pelangganBaru?.total ?? 0)
+      }
+    });
+  } catch (err) {
+    console.error('[laporan:pelanggan]', err);
+    res.status(500).json({ error: 'Gagal mengambil laporan pelanggan' });
+  }
+};
+
+// ── GET /api/v1/laporan/pelanggan/:id/detail ──────────────────────────────────
+exports.pelangganDetail = async (req, res) => {
+  try {
+    const { start, end } = getDateRange(req);
+    const pelangganId = req.params.id;
+
+    const rows = await db('transaksi as t')
+      .leftJoin('pelanggan as p', 'p.id', 't.pelanggan_id')
+      .where('t.pelanggan_id', pelangganId)
+      .whereRaw("date(t.tanggal_masuk/1000,'unixepoch') >= ?", [start])
+      .whereRaw("date(t.tanggal_masuk/1000,'unixepoch') <= ?", [end])
+      .orderBy('t.tanggal_masuk', 'desc')
+      .select(
+        't.id',
+        't.nomor_transaksi',
+        't.tanggal_masuk',
+        't.status',
+        't.total_harga',
+        't.total_bayar',
+        'p.nama as pelanggan_nama',
+        db.raw(`(SELECT GROUP_CONCAT(nama_layanan || ' (' || jumlah || ' ' ||
+                 CASE WHEN layanan_id IN (SELECT id FROM layanan WHERE satuan='kg') THEN 'kg' ELSE 'pcs' END
+                 || ')', ', ')
+                 FROM detail_transaksi WHERE transaksi_id = t.id) as layanan`)
+      );
+
+    res.json({
+      periode: { start, end },
+      pelanggan_id: pelangganId,
+      riwayat: rows.map(r => ({
+        id: r.id,
+        nomor_transaksi: r.nomor_transaksi,
+        tanggal: r.tanggal_masuk,
+        status: r.status,
+        layanan: r.layanan || '–',
+        total_harga: Number(r.total_harga),
+        total_bayar: Number(r.total_bayar)
+      }))
+    });
+  } catch (err) {
+    console.error('[laporan:pelangganDetail]', err);
+    res.status(500).json({ error: 'Gagal mengambil detail pelanggan' });
+  }
+};
+
+// ── GET /api/v1/laporan/pelanggan/export ──────────────────────────────────────
+exports.exportPelanggan = async (req, res) => {
+  try {
+    const { start, end } = getDateRange(req);
+    const search = req.query.search || '';
+
+    let query = db('pelanggan as p')
+      .leftJoin('transaksi as t', function() {
+        this.on('t.pelanggan_id', '=', 'p.id')
+          .andOnNotIn('t.status', ['dibatalkan'])
+          .andOnRaw("date(t.tanggal_masuk/1000,'unixepoch') >= ?", [start])
+          .andOnRaw("date(t.tanggal_masuk/1000,'unixepoch') <= ?", [end]);
+      })
+      .groupBy('p.id')
+      .select(
+        'p.nama',
+        'p.telepon',
+        'p.total_poin',
+        db.raw('COUNT(t.id) as total_order'),
+        db.raw('COALESCE(SUM(t.total_bayar), 0) as total_belanja'),
+        db.raw('COALESCE(AVG(t.total_bayar), 0) as rata_order'),
+        db.raw('MAX(t.tanggal_masuk) as terakhir_order')
+      );
+
+    if (search) {
+      query = query.where('p.nama', 'like', `%${search}%`);
+    }
+
+    const rows = await query.having('total_order', '>', 0).orderBy('total_belanja', 'desc');
+
+    const getPoinLevel = (poin) => {
+      if (poin >= 1000) return 'Gold';
+      if (poin >= 500) return 'Silver';
+      return 'Bronze';
+    };
+
+    const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const BOM = '﻿';
+    const header = [
+      'Nama Pelanggan', 'Telepon', 'Total Order', 'Total Belanja',
+      'Rata-rata/Order', 'Terakhir Order', 'Total Poin', 'Level Poin'
+    ];
+
+    const csv = BOM + [
+      header.map(escape).join(','),
+      ...rows.map(r => {
+        const terakhir = r.terakhir_order ? new Date(r.terakhir_order).toLocaleDateString('id-ID') : '–';
+        return [
+          r.nama, r.telepon, r.total_order, r.total_belanja,
+          Math.round(r.rata_order), terakhir, r.total_poin || 0,
+          getPoinLevel(r.total_poin || 0)
+        ].map(escape).join(',');
+      })
+    ].join('\r\n');
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="laporan-pelanggan-${start}-sd-${end}.csv"`);
+    res.send(csv);
+  } catch (err) {
+    console.error('[laporan:exportPelanggan]', err);
+    res.status(500).json({ error: 'Gagal mengekspor laporan pelanggan' });
+  }
+};
+
 // ── GET /api/v1/laporan/export ────────────────────────────────────────────────
 exports.exportCsv = async (req, res) => {
   try {
