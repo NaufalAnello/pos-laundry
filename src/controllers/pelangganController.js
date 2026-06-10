@@ -5,7 +5,8 @@ const pelangganSchema = Joi.object({
   nama:    Joi.string().max(100).required(),
   telepon: Joi.string().max(20).allow('', null),
   alamat:  Joi.string().max(500).allow('', null),
-  email:   Joi.string().email().max(100).allow('', null)
+  email:   Joi.string().email().max(100).allow('', null),
+  jarak_workshop_km: Joi.number().min(0).max(999).allow(null)
 });
 
 const LEVEL_DEFAULTS = { level_silver_min: '500', level_gold_min: '2000', level_platinum_min: '5000' };

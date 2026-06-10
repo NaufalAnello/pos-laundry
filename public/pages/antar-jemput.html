@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="/css/layout.css"/>
+  <link rel="stylesheet" href="/css/responsive.css"/>
+  <title>Antar Jemput — POS Laundry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:#2563eb; --blue-lt:#eff6ff;
+      --green:#16a34a; --green-lt:#f0fdf4;
+      --yellow:#d97706; --yellow-lt:#fffbeb;
+      --red:#dc2626; --red-lt:#fef2f2;
+      --purple:#7c3aed; --purple-lt:#f5f3ff;
+      --gray-1:#f8fafc; --gray-2:#f1f5f9; --gray-3:#e2e8f0;
+      --gray-5:#64748b; --gray-7:#374151; --gray-9:#111827;
+      --radius:10px; --shadow:0 1px 4px rgba(0,0,0,.08);
+    }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+           background:var(--gray-2); color:var(--gray-9); font-size:14px; min-height:100vh; }
+
+    .page { max-width:1100px; margin:0 auto; padding:20px 16px; }
+    .page-title  { font-size:20px; font-weight:800; margin-bottom:16px; }
+
+    .tabs { display:flex; gap:4px; border-bottom:2px solid var(--gray-3); margin-bottom:20px; }
+    .tab  { padding:10px 18px; border-radius:8px 8px 0 0; font-size:13px; font-weight:700;
+            background:none; border:none; cursor:pointer; color:var(--gray-5);
+            border-bottom:2px solid transparent; margin-bottom:-2px; }
+    .tab:hover  { color:var(--gray-9); background:var(--gray-1); }
+    .tab.active { color:var(--blue); border-bottom-color:var(--blue); background:#fff; }
+    .tab-section { display:none; }
+    .tab-section.active { display:block; }
+
+    .card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3);
+            box-shadow:var(--shadow); margin-bottom:14px; }
+    .card-head { padding:14px 18px; border-bottom:1px solid var(--gray-3);
+                 font-size:14px; font-weight:700; display:flex; align-items:center;
+                 justify-content:space-between; gap:10px; flex-wrap:wrap; }
+    .card-body { padding:16px 18px; display:flex; flex-direction:column; gap:12px; }
+
+    .field label { font-size:12px; font-weight:600; color:var(--gray-7);
+                   display:block; margin-bottom:5px; }
+    .field input, .field select { width:100%; padding:9px 12px; border:1px solid var(--gray-3);
+                                  border-radius:8px; font-size:13px; }
+    .field input:focus, .field select:focus { outline:none; border-color:var(--blue); }
+    .field small { font-size:11px; color:var(--gray-5); margin-top:4px; display:block; }
+
+    .btn { padding:9px 16px; border-radius:8px; border:1px solid transparent;
+           font-size:13px; font-weight:600; cursor:pointer; transition:opacity .15s;
+           display:inline-flex; align-items:center; gap:6px; }
+    .btn:hover    { opacity:.85; }
+    .btn:disabled { opacity:.4; cursor:default; }
+    .btn-sm  { padding:6px 11px; font-size:12px; }
+    .btn-blue    { background:var(--blue);  color:#fff; }
+    .btn-green   { background:var(--green); color:#fff; }
+    .btn-red     { background:var(--red);   color:#fff; }
+    .btn-outline { background:#fff; border-color:var(--gray-3); color:var(--gray-7); }
+    .btn-ghost   { background:none; border:none; color:var(--gray-5); }
+    .btn-ghost:hover { color:var(--gray-9); }
+
+    /* search dropdown */
+    .search-wrap { position:relative; }
+    .search-input { width:100%; padding:9px 12px; border:1px solid var(--gray-3);
+                    border-radius:8px; font-size:13px; }
+    .search-input:focus { outline:none; border-color:var(--blue); }
+    .search-dropdown { position:absolute; top:100%; left:0; right:0; background:#fff;
+                       border:1px solid var(--gray-3); border-radius:8px;
+                       margin-top:4px; max-height:280px; overflow-y:auto;
+                       box-shadow:0 4px 16px rgba(0,0,0,.08); z-index:50; display:none; }
+    .search-dropdown.open { display:block; }
+    .search-item { padding:10px 14px; cursor:pointer; font-size:13px;
+                   border-bottom:1px solid var(--gray-2); }
+    .search-item:last-child { border-bottom:none; }
+    .search-item:hover { background:var(--blue-lt); }
+    .search-item-meta { font-size:11px; color:var(--gray-5); margin-top:2px; }
+
+    /* chip list pelanggan dipilih */
+    .chip-list { display:flex; flex-direction:column; gap:6px; }
+    .chip { display:flex; align-items:center; justify-content:space-between;
+            background:var(--gray-1); padding:10px 12px; border-radius:8px;
+            border:1px solid var(--gray-3); }
+    .chip-nama { font-weight:600; font-size:13px; }
+    .chip-jarak { font-size:12px; color:var(--gray-5); }
+    .chip-x { background:none; border:none; cursor:pointer; color:var(--red);
+              font-size:18px; padding:2px 8px; }
+
+    .info-box { background:var(--blue-lt); border:1px solid #bfdbfe;
+                border-radius:8px; padding:10px 12px; font-size:12px; color:var(--gray-7); }
+    .warn-box { background:var(--yellow-lt); border:1px solid #fde68a;
+                border-radius:8px; padding:10px 12px; font-size:12px; color:var(--gray-7); }
+
+    /* hasil */
+    .breakdown { display:grid; grid-template-columns:1fr auto; gap:6px 14px;
+                 font-size:13px; padding:12px; background:var(--gray-1); border-radius:8px; }
+    .breakdown .lbl { color:var(--gray-7); }
+    .breakdown .val { font-weight:600; text-align:right; }
+    .breakdown .total { font-weight:800; border-top:1px solid var(--gray-3);
+                        padding-top:6px; margin-top:4px; color:var(--blue); }
+    .breakdown .total.val { color:var(--blue); }
+
+    .rute-display { padding:12px; background:var(--purple-lt); border:1px solid #ddd6fe;
+                    border-radius:8px; font-size:13px; line-height:1.7; }
+    .rute-display .rute-jarak { font-weight:700; color:var(--purple); margin-top:6px; display:block; }
+
+    .ai-box { padding:12px; background:#fefce8; border:1px solid #fde047;
+              border-radius:8px; font-size:13px; line-height:1.6; white-space:pre-wrap; }
+
+    .tarif-input-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .tarif-input-row input { width:140px; padding:9px 12px; border:1px solid var(--gray-3);
+                             border-radius:8px; font-size:14px; font-weight:700; }
+    .tarif-meta { font-size:12px; color:var(--gray-5); }
+
+    /* tabel riwayat */
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    thead { background:var(--gray-1); }
+    th { padding:10px 14px; text-align:left; font-size:11px; font-weight:700;
+         color:var(--gray-5); text-transform:uppercase; letter-spacing:.4px;
+         border-bottom:1px solid var(--gray-3); }
+    td { padding:10px 14px; border-bottom:1px solid var(--gray-3); }
+    tbody tr { cursor:pointer; }
+    tbody tr:hover { background:var(--gray-1); }
+    tbody tr.expanded { background:var(--blue-lt); }
+    .detail-row td { background:var(--gray-1); padding:14px; font-size:12px; line-height:1.7; }
+    .snap-box { background:#fff; border:1px dashed var(--gray-3); padding:10px 12px;
+                border-radius:8px; margin-top:6px; }
+
+    /* modal popup jarak */
+    .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:9999;
+                display:none; align-items:center; justify-content:center; padding:16px; }
+    .modal-bg.open { display:flex; }
+    .modal { background:#fff; border-radius:12px; width:100%; max-width:380px;
+             box-shadow:0 8px 32px rgba(0,0,0,.18); }
+    .modal-head { padding:14px 18px; border-bottom:1px solid var(--gray-3);
+                  font-weight:700; font-size:14px; }
+    .modal-body { padding:18px; display:flex; flex-direction:column; gap:12px; }
+    .modal-foot { padding:12px 18px; border-top:1px solid var(--gray-3);
+                  display:flex; justify-content:flex-end; gap:8px; }
+
+    .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(80px);
+             background:#1e293b; color:#fff; padding:10px 20px; border-radius:8px;
+             font-size:13px; font-weight:600; z-index:10001; transition:transform .3s; }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+    .toast.err  { background:var(--red); }
+
+    @media (max-width: 767px) {
+      .tabs { overflow-x:auto; flex-wrap:nowrap; }
+      .tab { white-space:nowrap; }
+      .tarif-input-row { flex-direction:column; align-items:stretch; }
+      .tarif-input-row input { width:100%; }
+      table thead { display:none; }
+      table, tbody, tr, td { display:block; }
+      tbody tr { padding:10px 14px; border-bottom:1px solid var(--gray-3); }
+      td { border:none; padding:4px 0; display:flex; justify-content:space-between; gap:8px; }
+      td::before { content:attr(data-label); font-size:11px; color:var(--gray-5);
+                   font-weight:700; text-transform:uppercase; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div class="page-title">🛵 Antar Jemput</div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('hitung',this)">🧮 Hitung Rute Hari Ini</button>
+    <button class="tab" onclick="switchTab('riwayat',this)">📚 Riwayat Rute</button>
+  </div>
+
+  <!-- ── TAB: Hitung ── -->
+  <div id="sec-hitung" class="tab-section active">
+    <div class="card">
+      <div class="card-head">📅 Pilih Tanggal & Pelanggan</div>
+      <div class="card-body">
+        <div class="field">
+          <label>Tanggal</label>
+          <input type="date" id="ajTanggal"/>
+        </div>
+
+        <div class="field">
+          <label>Cari Pelanggan</label>
+          <div class="search-wrap">
+            <input class="search-input" id="ajSearch" type="text"
+                   placeholder="Ketik nama atau nomor WA…"
+                   oninput="onSearchPelanggan()" onfocus="onSearchPelanggan()"/>
+            <div class="search-dropdown" id="ajDropdown"></div>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--gray-7);display:block;margin-bottom:6px">
+            Pelanggan Dipilih
+          </label>
+          <div id="ajChips" class="chip-list">
+            <div style="color:var(--gray-5);font-size:12px;padding:10px 0">
+              Belum ada pelanggan dipilih.
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          💡 Pelanggan yang belum punya data jarak akan diminta input jarak saat dipilih.
+        </div>
+
+        <button class="btn btn-blue" onclick="hitungHPP()" id="btnHitung" disabled>
+          🧮 Hitung HPP &amp; Rute Optimal
+        </button>
+      </div>
+    </div>
+
+    <!-- Hasil -->
+    <div id="ajHasilContainer" style="display:none">
+      <div class="card">
+        <div class="card-head">🗺️ Rute Optimal</div>
+        <div class="card-body">
+          <div class="rute-display" id="ajRute"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">💰 Breakdown HPP</div>
+        <div class="card-body">
+          <div class="breakdown" id="ajBreakdown"></div>
+        </div>
+      </div>
+
+      <div class="card" id="ajAICard" style="display:none">
+        <div class="card-head">🤖 Saran AI DeepSeek</div>
+        <div class="card-body">
+          <div class="ai-box" id="ajAIText"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">💵 Tarif &amp; Simpan</div>
+        <div class="card-body">
+          <div class="field">
+            <label>Tarif per Pelanggan (Rp)</label>
+            <div class="tarif-input-row">
+              <input type="number" id="ajTarif" min="0" oninput="updateTarifMeta()"/>
+              <span class="tarif-meta" id="ajTarifMeta"></span>
+            </div>
+          </div>
+          <button class="btn btn-green" onclick="simpanRute()" id="btnSimpan">
+            💾 Simpan &amp; Terapkan ke Order
+          </button>
+          <small style="color:var(--gray-5);font-size:11px">
+            Biaya AJ akan otomatis ditambahkan ke order aktif tiap pelanggan.
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: Riwayat ── -->
+  <div id="sec-riwayat" class="tab-section">
+    <div class="card">
+      <div class="card-head">📚 Riwayat Rute Antar Jemput</div>
+      <div class="card-body" style="padding:0">
+        <table>
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Pelanggan</th>
+              <th style="text-align:right">Jarak</th>
+              <th style="text-align:right">HPP/Org</th>
+              <th style="text-align:right">Tarif</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="riwayatBody">
+            <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--gray-5)">Memuat…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal popup minta jarak -->
+<div class="modal-bg" id="jarakModal">
+  <div class="modal">
+    <div class="modal-head" id="jarakModalTitle">Input Jarak Pelanggan</div>
+    <div class="modal-body">
+      <div id="jarakModalText" style="font-size:13px"></div>
+      <div class="field">
+        <label>Jarak dari workshop (km)</label>
+        <input type="number" id="jarakInput" step="0.1" min="0" placeholder="contoh: 2.5"/>
+        <small>Data ini akan disimpan ke profil pelanggan saat rute disimpan.</small>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="cancelJarakModal()">Batal</button>
+      <button class="btn btn-blue" onclick="submitJarakModal()">Simpan &amp; Lanjutkan</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ────────────────────────────────────────────────────────────────────
+const state = {
+  selected:   [],          // [{id, nama, jarak_km, fromOverride: bool}]
+  searchTO:   null,
+  hasil:      null,        // hasil hitung HPP terakhir
+  pelangganMap: {},        // id -> {nama, jarak_workshop_km}
+  pendingPelanggan: null,  // saat modal jarak terbuka
+};
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+(async () => {
+  // Set tanggal default = hari ini
+  const today = new Date();
+  document.getElementById('ajTanggal').value = today.toISOString().slice(0, 10);
+
+  loadRiwayat();
+})();
+
+// ── API helper ───────────────────────────────────────────────────────────────
+async function api(url, opts = {}) {
+  const r = await fetch(url, { credentials:'include', headers:{'Content-Type':'application/json'}, ...opts });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+  return j;
+}
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'riwayat') loadRiwayat();
+}
+
+// ── Search pelanggan ─────────────────────────────────────────────────────────
+function onSearchPelanggan() {
+  clearTimeout(state.searchTO);
+  state.searchTO = setTimeout(doSearch, 250);
+}
+
+async function doSearch() {
+  const q = document.getElementById('ajSearch').value.trim();
+  const dd = document.getElementById('ajDropdown');
+  if (!q) { dd.classList.remove('open'); return; }
+
+  try {
+    const { data } = await api('/api/v1/pelanggan?q=' + encodeURIComponent(q) + '&limit=10');
+    if (!data.length) {
+      dd.innerHTML = '<div class="search-item" style="cursor:default;color:var(--gray-5)">Tidak ditemukan</div>';
+      dd.classList.add('open');
+      return;
+    }
+
+    dd.innerHTML = data.map(p => {
+      const j = Number(p.jarak_workshop_km || 0);
+      const alreadyPicked = state.selected.some(x => x.id === p.id);
+      const jarakLabel = j > 0
+        ? `${j} km`
+        : '<span style="color:var(--yellow);font-weight:600">Belum ada jarak</span>';
+      return `
+        <div class="search-item" ${alreadyPicked ? 'style="opacity:.5;cursor:default"' : `onclick="pickPelanggan(${p.id})"`}>
+          <div style="font-weight:600">${esc(p.nama)} ${alreadyPicked ? '✓' : ''}</div>
+          <div class="search-item-meta">${esc(p.telepon || '-')} · ${jarakLabel}</div>
+        </div>
+      `;
+    }).join('');
+    dd.classList.add('open');
+
+    // Simpan ke map
+    data.forEach(p => { state.pelangganMap[p.id] = p; });
+  } catch (e) {
+    dd.innerHTML = `<div class="search-item" style="color:var(--red)">${esc(e.message)}</div>`;
+    dd.classList.add('open');
+  }
+}
+
+// Tutup dropdown saat klik di luar
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.search-wrap')) {
+    document.getElementById('ajDropdown').classList.remove('open');
+  }
+});
+
+async function pickPelanggan(id) {
+  // Tutup dropdown & reset search
+  document.getElementById('ajDropdown').classList.remove('open');
+  document.getElementById('ajSearch').value = '';
+
+  if (state.selected.some(x => x.id === id)) return;
+
+  // Ambil data pelanggan (cari dari map atau fetch detail)
+  let p = state.pelangganMap[id];
+  if (!p) {
+    try {
+      const r = await api('/api/v1/pelanggan/' + id);
+      p = r.data;
+      state.pelangganMap[id] = p;
+    } catch (e) { toast(e.message, true); return; }
+  }
+
+  const jarak = Number(p.jarak_workshop_km || 0);
+  if (jarak > 0) {
+    state.selected.push({ id: p.id, nama: p.nama, jarak_km: jarak, fromOverride: false });
+    renderChips();
+  } else {
+    // Popup minta jarak
+    openJarakModal(p);
+  }
+}
+
+function openJarakModal(p) {
+  state.pendingPelanggan = p;
+  document.getElementById('jarakModalTitle').textContent = 'Input Jarak: ' + p.nama;
+  document.getElementById('jarakModalText').innerHTML =
+    `Berapa jarak rumah <strong>${esc(p.nama)}</strong> dari workshop?`;
+  document.getElementById('jarakInput').value = '';
+  document.getElementById('jarakModal').classList.add('open');
+  setTimeout(() => document.getElementById('jarakInput').focus(), 80);
+}
+
+function cancelJarakModal() {
+  state.pendingPelanggan = null;
+  document.getElementById('jarakModal').classList.remove('open');
+}
+
+function submitJarakModal() {
+  const v = parseFloat(document.getElementById('jarakInput').value);
+  if (!isFinite(v) || v <= 0) { toast('Masukkan jarak yang valid (> 0)', true); return; }
+  const p = state.pendingPelanggan;
+  if (!p) return;
+  state.selected.push({ id: p.id, nama: p.nama, jarak_km: v, fromOverride: true });
+  state.pendingPelanggan = null;
+  document.getElementById('jarakModal').classList.remove('open');
+  renderChips();
+}
+
+function removePelanggan(id) {
+  state.selected = state.selected.filter(x => x.id !== id);
+  renderChips();
+}
+
+function renderChips() {
+  const wrap = document.getElementById('ajChips');
+  document.getElementById('btnHitung').disabled = state.selected.length === 0;
+
+  if (state.selected.length === 0) {
+    wrap.innerHTML = `<div style="color:var(--gray-5);font-size:12px;padding:10px 0">
+      Belum ada pelanggan dipilih.
+    </div>`;
+    return;
+  }
+  wrap.innerHTML = state.selected.map(p => `
+    <div class="chip">
+      <div>
+        <div class="chip-nama">${esc(p.nama)}</div>
+        <div class="chip-jarak">
+          ${p.jarak_km} km ${p.fromOverride ? '<em style="color:var(--yellow)">(baru)</em>' : ''}
+        </div>
+      </div>
+      <button class="chip-x" onclick="removePelanggan(${p.id})" title="Hapus">×</button>
+    </div>
+  `).join('');
+}
+
+// ── Hitung HPP ───────────────────────────────────────────────────────────────
+async function hitungHPP() {
+  if (state.selected.length === 0) return;
+
+  const btn = document.getElementById('btnHitung');
+  btn.disabled = true;
+  btn.textContent = '⏳ Menghitung…';
+
+  // Bangun jarak_overrides untuk semua yang fromOverride
+  const overrides = {};
+  for (const p of state.selected) {
+    if (p.fromOverride) overrides[String(p.id)] = p.jarak_km;
+  }
+
+  try {
+    const { data } = await api('/api/v1/antar-jemput/hitung', {
+      method: 'POST',
+      body: JSON.stringify({
+        pelanggan_ids: state.selected.map(p => p.id),
+        jarak_overrides: overrides
+      })
+    });
+
+    state.hasil = data;
+    renderHasil(data);
+  } catch (e) {
+    toast(e.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🧮 Hitung HPP &amp; Rute Optimal';
+  }
+}
+
+function renderHasil(d) {
+  document.getElementById('ajHasilContainer').style.display = 'block';
+
+  // Rute
+  const ruteNames = d.ruteOptimal.map((p, i) =>
+    `${esc(p.nama)} <span style="color:var(--gray-5)">(${p.jarak_km}km)</span>`
+  ).join(' → ');
+  document.getElementById('ajRute').innerHTML = `
+    <div><strong>Workshop</strong> → ${ruteNames} → <strong>Workshop</strong></div>
+    <span class="rute-jarak">Total jarak: ${d.totalJarak} km</span>
+  `;
+
+  // Breakdown
+  const s = d.snapshot;
+  document.getElementById('ajBreakdown').innerHTML = `
+    <div class="lbl">BBM (Rp ${fmt(s.harga_bbm)}/L, ${s.konsumsi_bbm}km/L)</div>
+    <div class="val">Rp ${fmt(d.biayaBBM)}</div>
+    <div class="lbl">Waktu operator (Rp ${fmt(s.nilai_waktu)}/jam)</div>
+    <div class="val">Rp ${fmt(d.biayaWaktu)}</div>
+    <div class="lbl">Aus motor (Rp ${fmt(s.biaya_aus)}/km)</div>
+    <div class="val">Rp ${fmt(d.biayaAus)}</div>
+    <div class="lbl total">Total HPP</div>
+    <div class="val total">Rp ${fmt(d.totalHPP)}</div>
+    <div class="lbl">Per pelanggan (÷${d.pelanggan.length})</div>
+    <div class="val">Rp ${fmt(d.hppPerPelanggan)}</div>
+  `;
+
+  // AI
+  if (d.saran_ai) {
+    document.getElementById('ajAICard').style.display = '';
+    document.getElementById('ajAIText').textContent = d.saran_ai;
+  } else {
+    document.getElementById('ajAICard').style.display = 'none';
+  }
+
+  // Tarif default: HPP + 25% margin, dibulatkan ke ratusan
+  const tarifSaran = Math.ceil((d.hppPerPelanggan * 1.25) / 500) * 500;
+  document.getElementById('ajTarif').value = tarifSaran;
+  updateTarifMeta();
+
+  // Scroll ke hasil
+  document.getElementById('ajHasilContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function updateTarifMeta() {
+  if (!state.hasil) return;
+  const tarif = Number(document.getElementById('ajTarif').value || 0);
+  const hpp = state.hasil.hppPerPelanggan;
+  const margin = hpp > 0 ? Math.round(((tarif - hpp) / hpp) * 100) : 0;
+  document.getElementById('ajTarifMeta').textContent =
+    `HPP: Rp ${fmt(hpp)} · Margin: ${margin}%`;
+}
+
+// ── Simpan rute ──────────────────────────────────────────────────────────────
+async function simpanRute() {
+  if (!state.hasil) return;
+  const tarif = Number(document.getElementById('ajTarif').value || 0);
+  if (tarif <= 0) { toast('Tarif harus diisi', true); return; }
+
+  if (!confirm(`Simpan rute dengan tarif Rp ${fmt(tarif)}/pelanggan? Biaya akan ditambahkan ke order aktif.`)) {
+    return;
+  }
+
+  const overrides = {};
+  for (const p of state.selected) {
+    if (p.fromOverride) overrides[String(p.id)] = p.jarak_km;
+  }
+
+  const btn = document.getElementById('btnSimpan');
+  btn.disabled = true;
+  btn.textContent = '⏳ Menyimpan…';
+
+  try {
+    const r = await api('/api/v1/antar-jemput/simpan', {
+      method: 'POST',
+      body: JSON.stringify({
+        tanggal: document.getElementById('ajTanggal').value,
+        pelanggan_ids: state.selected.map(p => p.id),
+        jarak_overrides: overrides,
+        tarif_dikenakan: tarif,
+        hasil_kalkulasi: state.hasil,
+      })
+    });
+    toast(`Rute disimpan. ${r.biaya_terpasang} dari ${r.total_pelanggan} pelanggan punya order aktif.`);
+    resetForm();
+    loadRiwayat();
+  } catch (e) {
+    toast(e.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '💾 Simpan &amp; Terapkan ke Order';
+  }
+}
+
+function resetForm() {
+  state.selected = [];
+  state.hasil = null;
+  renderChips();
+  document.getElementById('ajHasilContainer').style.display = 'none';
+  document.getElementById('ajSearch').value = '';
+}
+
+// ── Riwayat ──────────────────────────────────────────────────────────────────
+async function loadRiwayat() {
+  const tb = document.getElementById('riwayatBody');
+  try {
+    const { data } = await api('/api/v1/antar-jemput/riwayat');
+    if (!data.length) {
+      tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--gray-5)">Belum ada riwayat rute</td></tr>';
+      return;
+    }
+
+    tb.innerHTML = data.map(r => {
+      const pelangganNama = (r.pelanggan_data || []).map(p => p.nama).join(', ');
+      return `
+        <tr onclick="toggleDetail(${r.id})" id="row-${r.id}">
+          <td data-label="Tanggal">${fmtDate(r.tanggal)}</td>
+          <td data-label="Pelanggan">${esc(pelangganNama)}</td>
+          <td data-label="Jarak" style="text-align:right">${r.total_jarak_km} km</td>
+          <td data-label="HPP/Org" style="text-align:right">Rp ${fmt(r.hpp_per_pelanggan)}</td>
+          <td data-label="Tarif" style="text-align:right;font-weight:700">Rp ${fmt(r.tarif_dikenakan)}</td>
+          <td data-label=""><span class="btn btn-ghost btn-sm">Detail ▾</span></td>
+        </tr>
+        <tr class="detail-row" id="detail-${r.id}" style="display:none">
+          <td colspan="6">
+            <div><strong>🗺️ Urutan rute:</strong> Workshop → ${(r.urutan_rute || []).map(esc).join(' → ')} → Workshop</div>
+            <div style="margin-top:6px">
+              <strong>💰 Breakdown:</strong>
+              BBM Rp ${fmt(r.biaya_bbm)} ·
+              Waktu Rp ${fmt(r.biaya_waktu)} ·
+              Aus Rp ${fmt(r.biaya_aus)} ·
+              Total HPP <strong>Rp ${fmt(r.total_hpp)}</strong>
+            </div>
+            <div class="snap-box">
+              <strong>📌 Parameter saat itu (snapshot):</strong><br/>
+              Pertalite Rp ${fmt(r.snapshot_harga_bbm)}/L · konsumsi ${r.snapshot_konsumsi_bbm} km/L ·
+              aus Rp ${fmt(r.snapshot_biaya_aus)}/km · kecepatan ${r.snapshot_kecepatan} km/jam ·
+              nilai waktu Rp ${fmt(r.snapshot_nilai_waktu)}/jam
+            </div>
+            ${r.saran_ai ? `<div style="margin-top:8px;padding:10px;background:#fefce8;border-radius:6px;white-space:pre-wrap">🤖 ${esc(r.saran_ai)}</div>` : ''}
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (e) {
+    tb.innerHTML = `<tr><td colspan="6" style="color:var(--red);padding:20px">${esc(e.message)}</td></tr>`;
+  }
+}
+
+function toggleDetail(id) {
+  const row = document.getElementById('row-' + id);
+  const detail = document.getElementById('detail-' + id);
+  if (!detail) return;
+  if (detail.style.display === 'none') {
+    detail.style.display = '';
+    row.classList.add('expanded');
+  } else {
+    detail.style.display = 'none';
+    row.classList.remove('expanded');
+  }
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function fmt(n) { return Number(n || 0).toLocaleString('id-ID'); }
+function fmtDate(s) {
+  if (!s) return '-';
+  return new Date(s).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+}
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function toast(msg, err = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (err ? ' err' : '');
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+</script>
+<script src="/js/nav.js"></script>
+</body>
+</html>

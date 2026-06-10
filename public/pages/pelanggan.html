@@ -344,6 +344,11 @@
         <label>Alamat</label>
         <textarea id="fAlamat" rows="2" placeholder="Alamat pelanggan (opsional)"></textarea>
       </div>
+      <div class="field">
+        <label>Jarak dari workshop (km)</label>
+        <input type="number" id="fJarak" step="0.1" min="0" placeholder="contoh: 2.5"/>
+        <small>Dipakai untuk kalkulator HPP Antar Jemput. Input sekali, dipakai untuk semua kalkulasi.</small>
+      </div>
       <div class="err-msg" id="formErr"></div>
     </div>
     <div class="modal-foot">
@@ -632,6 +637,7 @@ function renderPanel(d) {
       ${d.alamat ? `<div class="info-item" style="grid-column:1/-1"><label>Alamat</label><p>${esc(d.alamat)}</p></div>` : ''}
       <div class="info-item"><label>Bergabung</label><p>${fmtDate(d.created_at)}</p></div>
       <div class="info-item"><label>Total Poin</label><p style="color:var(--purple)">${d.total_poin} poin</p></div>
+      <div class="info-item"><label>Jarak Workshop</label><p>${Number(d.jarak_workshop_km || 0) > 0 ? Number(d.jarak_workshop_km) + ' km' : '<span style="color:var(--gray-5)">belum diisi</span>'}</p></div>
     </div>
 
     <div class="stat-row">
@@ -721,6 +727,7 @@ function openAdd() {
   document.getElementById('fTelepon').value = '';
   document.getElementById('fEmail').value   = '';
   document.getElementById('fAlamat').value  = '';
+  document.getElementById('fJarak').value   = '';
   document.getElementById('formErr').textContent = '';
   document.getElementById('modalBg').classList.add('open');
   lockBodyScroll();
@@ -743,6 +750,7 @@ async function editCurrent() {
     document.getElementById('fTelepon').value = telepon;
     document.getElementById('fEmail').value   = data.email || '';
     document.getElementById('fAlamat').value  = data.alamat || '';
+    document.getElementById('fJarak').value   = Number(data.jarak_workshop_km || 0) || '';
     document.getElementById('formErr').textContent = '';
     document.getElementById('modalBg').classList.add('open');
     lockBodyScroll();
@@ -768,11 +776,13 @@ async function savePelanggan() {
     }
   }
 
+  const jarakRaw = document.getElementById('fJarak').value.trim();
   const body = {
     nama:    document.getElementById('fNama').value.trim(),
     telepon: telepon,
     email:   document.getElementById('fEmail').value.trim()   || null,
-    alamat:  document.getElementById('fAlamat').value.trim()  || null
+    alamat:  document.getElementById('fAlamat').value.trim()  || null,
+    jarak_workshop_km: jarakRaw === '' ? null : Number(jarakRaw)
   };
   document.getElementById('formErr').textContent = '';
   const btn = document.getElementById('saveBtn');

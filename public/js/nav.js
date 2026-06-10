@@ -38,9 +38,10 @@
     {
       group: 'Keuangan',
       items: [
-        { href: '/kas',     icon: '📒', label: 'Buku Kas' },
-        { href: '/deposit', icon: '💳', label: 'Deposit'  },
-        { href: '/laporan', icon: '📊', label: 'Laporan'  },
+        { href: '/kas',          icon: '📒', label: 'Buku Kas'    },
+        { href: '/deposit',      icon: '💳', label: 'Deposit'     },
+        { href: '/antar-jemput', icon: '🛵', label: 'Antar Jemput' },
+        { href: '/laporan',      icon: '📊', label: 'Laporan'     },
       ]
     },
     {
@@ -71,9 +72,10 @@
   ];
 
   const MORE_ITEMS = [
-    { href: '/kas',        icon: '📒', label: 'Buku Kas'   },
-    { href: '/deposit',    icon: '💳', label: 'Deposit'    },
-    { href: '/promo',      icon: '🎁', label: 'Promo'      },
+    { href: '/kas',          icon: '📒', label: 'Buku Kas'    },
+    { href: '/deposit',      icon: '💳', label: 'Deposit'     },
+    { href: '/antar-jemput', icon: '🛵', label: 'Antar Jemput' },
+    { href: '/promo',        icon: '🎁', label: 'Promo'       },
     { href: '/poin',       icon: '⭐', label: 'Poin'       },
     { href: '/pelanggan',  icon: '👤', label: 'Pelanggan'  },
     { href: '/wa-center',  icon: '💬', label: 'Pusat WA'   },

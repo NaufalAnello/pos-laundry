@@ -24,6 +24,7 @@ const printerRoutes     = require('./routes/printerRoutes');
 const depositRoutes     = require('./routes/depositRoutes');
 const aiRoutes          = require('./routes/aiRoutes');
 const masterItemRoutes  = require('./routes/masterItemRoutes');
+const antarJemputRoutes = require('./routes/antarJemputRoutes');
 
 const app = express();
 
@@ -115,6 +116,9 @@ app.use('/api/v1/ai', aiRoutes);
 
 // Master Item
 app.use('/api/v1/master-item', masterItemRoutes);
+
+// Antar Jemput
+app.use('/api/v1/antar-jemput', antarJemputRoutes);
 
 // ── Web page routes ────────────────────────────────────────────────────────────
 
@@ -223,6 +227,12 @@ app.get('/deposit', (req, res) => {
 app.get('/ai-insight', (req, res) => {
   if (!req.session?.userId) return res.redirect('/login');
   res.sendFile(path.join(__dirname, '../public/pages/ai-insight.html'));
+});
+
+// Antar Jemput
+app.get('/antar-jemput', (req, res) => {
+  if (!req.session?.userId) return res.redirect('/login');
+  res.sendFile(path.join(__dirname, '../public/pages/antar-jemput.html'));
 });
 
 // Semua route web lain → redirect ke dashboard
