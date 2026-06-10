@@ -64,10 +64,11 @@
   ];
 
   // Bottom nav HP — fokus operasional harian
+  // Order Baru di-highlight (lihat design-system.css)
   const BOTTOM = [
     { href: '/',           icon: '🏠', label: 'Home'    },
-    { href: '/order/baru', icon: '➕', label: 'Order'   },
     { href: '/order',      icon: '📋', label: 'Antrian' },
+    { href: '/order/baru', icon: '➕', label: 'Order', primary: true },
     { href: '/tagihan',    icon: '💰', label: 'Tagihan', badge: 'tagihan' },
   ];
 
@@ -163,6 +164,17 @@
   /* ── Inject into DOM ───────────────────────────────────── */
   document.body.insertAdjacentHTML('afterbegin', sidebarHTML + topbarHTML);
   document.body.insertAdjacentHTML('beforeend', bottomNavHTML);
+
+  /* ── Auto-load shared bottom sheets (lunasi + WA) ─────── */
+  // Sehingga setiap halaman yang include nav.js otomatis dapat openLunasiSheet
+  // & openWaSheet — tidak perlu tambah <script> manual di tiap halaman.
+  ['/js/lunasi-sheet.js', '/js/wa-sheet.js'].forEach(src => {
+    if (document.querySelector(`script[src="${src}"]`)) return;
+    const s = document.createElement('script');
+    s.src = src;
+    s.defer = false;
+    document.body.appendChild(s);
+  });
 
   // Wrap all existing content (not pos-sidebar, topbar, bottom-nav, overlays) in .pos-main
   const skipClasses = ['pos-sidebar','pos-topbar','pos-bottom-nav','more-overlay','more-sheet'];
