@@ -126,9 +126,9 @@
       padding: 12px 14px; box-shadow: var(--shadow-sm);
       margin-bottom: 8px;
     }
-    .order-card.urgent { border-left: 4px solid var(--danger); }
-    .order-card.warn   { border-left: 4px solid var(--warning); }
-    .order-card.proses { border-left: 4px solid var(--primary); }
+    .order-card.urgent { border-left: 3px solid var(--danger); }
+    .order-card.warn   { border-left: 3px solid var(--warning); }
+    .order-card.proses { border-left: 3px solid var(--primary); }
     .order-card-row1 {
       display: flex; align-items: flex-start; justify-content: space-between;
       gap: 10px; margin-bottom: 6px;
@@ -151,8 +151,8 @@
     .order-card-actions a.btn { flex: 0 0 44px; min-width: 44px; }
     .btn-proses  { background: var(--primary); color: #fff; }
     .btn-selesai { background: var(--success); color: #fff; }
-    .btn-lunasi  { background: var(--success); color: #fff; }
-    .btn-wa      { background: #25d366; color: #fff; }
+    .btn-lunasi  { background: #16a34a; color: #fff; }
+    .btn-wa      { background: #2563EB; color: #fff; }
     .btn-detail  { background: #fff; border-color: var(--gray-3); color: var(--gray-6); }
 
     .list { display: flex; flex-direction: column; gap: 8px; }
@@ -431,12 +431,7 @@
 
 <script>
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
-const fmtRpShort = n => {
-  n = Number(n || 0);
-  if (n >= 1_000_000) return 'Rp ' + (n / 1_000_000).toFixed(1).replace('.0','') + 'jt';
-  if (n >= 1_000)     return 'Rp ' + Math.round(n / 1_000) + 'rb';
-  return 'Rp ' + n.toLocaleString('id-ID');
-};
+const fmtRpShort = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 const fmtDate = s => s ? new Date(s).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '—';
 const daysSince = s => {
   if (!s) return 0;
