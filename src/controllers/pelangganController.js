@@ -53,6 +53,7 @@ exports.index = async (req, res) => {
     const [rows, countRow] = await Promise.all([
       baseJoin(db('pelanggan as p').select(
         'p.id', 'p.nama', 'p.telepon', 'p.email', 'p.alamat', 'p.total_poin', 'p.created_at',
+        'p.jarak_workshop_km',
         db.raw('COALESCE(tr.jumlah_transaksi, 0) as jumlah_transaksi'),
         db.raw('COALESCE(tr.total_belanja, 0) as total_belanja'),
         'tr.transaksi_terakhir'

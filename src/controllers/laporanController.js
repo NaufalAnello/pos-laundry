@@ -576,3 +576,80 @@ exports.exportCsv = async (req, res) => {
     res.status(500).json({ error: 'Gagal mengekspor laporan' });
   }
 };
+
+// ── GET /api/v1/laporan/antar-jemput ──────────────────────────────────────────
+exports.antarJemput = async (req, res) => {
+  try {
+    const { start, end } = getDateRange(req);
+
+    // Ambil semua rute antar jemput dalam periode
+    const rutes = await db('rute_antar_jemput as r')
+      .leftJoin('transaksi as t', 't.id', 'r.transaksi_id')
+      .leftJoin('pelanggan as p', 'p.id', 't.pelanggan_id')
+      .whereRaw("date(r.tanggal/1000,'unixepoch') >= ?", [start])
+      .whereRaw("date(r.tanggal/1000,'unixepoch') <= ?", [end])
+      .whereNotIn('t.status', ['dibatalkan'])
+      .orderBy('r.tanggal', 'desc')
+      .select(
+        'r.id',
+        'r.tanggal',
+        'r.transaksi_id',
+        't.nomor_transaksi',
+        'p.nama as pelanggan_nama',
+        'r.total_jarak_km',
+        'r.tarif_per_km',
+        'r.total_tarif_pelanggan',
+        'r.total_hpp',
+        'r.harga_bbm_per_liter',
+        'r.km_per_liter',
+        'r.aus_ban_per_km',
+        'r.servis_per_km',
+        'r.gaji_per_km'
+      );
+
+    // Hitung ringkasan
+    const totalOrder = rutes.length;
+    const totalTarifDiterima = rutes.reduce((sum, r) => sum + Number(r.total_tarif_pelanggan || 0), 0);
+    const totalHPP = rutes.reduce((sum, r) => sum + Number(r.total_hpp || 0), 0);
+    const profit = totalTarifDiterima - totalHPP;
+    const marginPersen = totalTarifDiterima > 0 ? (profit / totalTarifDiterima) * 100 : 0;
+    const totalJarak = rutes.reduce((sum, r) => sum + Number(r.total_jarak_km || 0), 0);
+
+    res.json({
+      periode: { start, end },
+      ringkasan: {
+        total_order_aj: totalOrder,
+        total_tarif_diterima: totalTarifDiterima,
+        total_hpp_riil: totalHPP,
+        profit_aj: profit,
+        margin_persen: marginPersen,
+        total_jarak_km: totalJarak,
+        rata_jarak_per_order: totalOrder > 0 ? totalJarak / totalOrder : 0
+      },
+      detail: rutes.map(r => ({
+        id: r.id,
+        tanggal: r.tanggal,
+        nomor_transaksi: r.nomor_transaksi,
+        pelanggan: r.pelanggan_nama || 'Walk-in',
+        jarak_km: Number(r.total_jarak_km || 0),
+        tarif_per_km: Number(r.tarif_per_km || 0),
+        tarif_total: Number(r.total_tarif_pelanggan || 0),
+        hpp_total: Number(r.total_hpp || 0),
+        margin: Number(r.total_tarif_pelanggan || 0) - Number(r.total_hpp || 0),
+        margin_persen: Number(r.total_tarif_pelanggan || 0) > 0
+          ? ((Number(r.total_tarif_pelanggan || 0) - Number(r.total_hpp || 0)) / Number(r.total_tarif_pelanggan || 0)) * 100
+          : 0,
+        // Breakdown HPP
+        hpp_detail: {
+          bbm: (Number(r.total_jarak_km || 0) / Number(r.km_per_liter || 1)) * Number(r.harga_bbm_per_liter || 0),
+          aus_ban: Number(r.total_jarak_km || 0) * Number(r.aus_ban_per_km || 0),
+          servis: Number(r.total_jarak_km || 0) * Number(r.servis_per_km || 0),
+          gaji: Number(r.total_jarak_km || 0) * Number(r.gaji_per_km || 0)
+        }
+      }))
+    });
+  } catch (err) {
+    console.error('[laporan:antarJemput]', err);
+    res.status(500).json({ error: 'Gagal mengambil laporan antar jemput' });
+  }
+};

@@ -199,6 +199,7 @@
     <button class="tab active" onclick="switchTab('ringkasan')">📊 Ringkasan</button>
     <button class="tab" onclick="switchTab('layanan')">📦 Laporan Layanan</button>
     <button class="tab" onclick="switchTab('pelanggan')">👥 Laporan Pelanggan</button>
+    <button class="tab" onclick="switchTab('antar-jemput')">🛵 Antar Jemput</button>
   </div>
 
   <!-- Filter -->
@@ -433,6 +434,68 @@
     </div>
   </div><!-- /tab-pelanggan -->
 
+  <!-- Tab Content: Antar Jemput -->
+  <div id="tab-antar-jemput" class="tab-content">
+    <!-- Card Ringkasan AJ -->
+    <div class="grid-2">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#eff6ff;color:#2563eb">🛵</div>
+        <div class="stat-content">
+          <div class="stat-label">Total Order AJ</div>
+          <div class="stat-value" id="ajTotalOrder">0</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#f0fdf4;color:#16a34a">💰</div>
+        <div class="stat-content">
+          <div class="stat-label">Tarif Diterima</div>
+          <div class="stat-value" id="ajTarifDiterima">Rp 0</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7;color:#d97706">📊</div>
+        <div class="stat-content">
+          <div class="stat-label">HPP Riil</div>
+          <div class="stat-value" id="ajHPP">Rp 0</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dcfce7;color:#16a34a">✨</div>
+        <div class="stat-content">
+          <div class="stat-label">Profit AJ</div>
+          <div class="stat-value" id="ajProfit">Rp 0</div>
+          <div class="stat-sub" id="ajMargin">Margin: 0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabel Detail AJ -->
+    <div class="card">
+      <div class="card-head">
+        <span>🛵 Detail Rute Antar Jemput</span>
+      </div>
+      <div class="card-body" style="overflow-x:auto">
+        <table id="ajTable">
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>No. Transaksi</th>
+              <th>Pelanggan</th>
+              <th>Jarak (km)</th>
+              <th>Tarif/km</th>
+              <th>Total Tarif</th>
+              <th>HPP</th>
+              <th>Margin</th>
+            </tr>
+          </thead>
+          <tbody id="ajTableBody">
+            <tr><td colspan="8" class="loading">Memuat…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /tab-antar-jemput -->
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -504,6 +567,8 @@ function loadActiveTab() {
     loadLayanan();
   } else if (activeTab === 'pelanggan') {
     loadPelanggan();
+  } else if (activeTab === 'antar-jemput') {
+    loadAntarJemput();
   }
 }
 
@@ -1100,6 +1165,49 @@ function exportPelangganExcel() {
   if (search) url += `&search=${encodeURIComponent(search)}`;
   window.location.href = url;
   toast('File CSV sedang diunduh (bisa dibuka dengan Excel)');
+}
+
+// ── Load Antar Jemput ─────────────────────────────────────────────────────────
+async function loadAntarJemput() {
+  try {
+    const start = document.getElementById('dateStart').value;
+    const end   = document.getElementById('dateEnd').value;
+    const data  = await apiFetch(`/api/v1/laporan/antar-jemput?start=${start}&end=${end}`);
+
+    // Update ringkasan
+    document.getElementById('ajTotalOrder').textContent = data.ringkasan.total_order_aj;
+    document.getElementById('ajTarifDiterima').textContent = rupiah(data.ringkasan.total_tarif_diterima);
+    document.getElementById('ajHPP').textContent = rupiah(data.ringkasan.total_hpp_riil);
+    document.getElementById('ajProfit').textContent = rupiah(data.ringkasan.profit_aj);
+    document.getElementById('ajMargin').textContent = `Margin: ${data.ringkasan.margin_persen.toFixed(1)}%`;
+
+    // Render tabel
+    const tbody = document.getElementById('ajTableBody');
+    if (data.detail.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--gray-5)">Tidak ada data antar jemput pada periode ini</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.detail.map(r => {
+      const tanggal = new Date(Number(r.tanggal)).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+      const marginColor = r.margin >= 0 ? 'var(--green)' : 'var(--red)';
+      return `<tr>
+        <td>${tanggal}</td>
+        <td style="font-weight:600;color:var(--blue)">${esc(r.nomor_transaksi)}</td>
+        <td>${esc(r.pelanggan)}</td>
+        <td class="num-cell">${r.jarak_km.toFixed(1)} km</td>
+        <td class="num-cell">${rupiah(r.tarif_per_km)}</td>
+        <td class="num-cell">${rupiah(r.tarif_total)}</td>
+        <td class="num-cell">${rupiah(r.hpp_total)}</td>
+        <td class="num-cell" style="color:${marginColor};font-weight:700">
+          ${rupiah(r.margin)} <span style="font-size:11px;opacity:0.8">(${r.margin_persen.toFixed(1)}%)</span>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch (err) {
+    console.error('[loadAntarJemput]', err);
+    toast('Gagal memuat laporan antar jemput', true);
+  }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
