@@ -255,7 +255,8 @@
     <button class="qp" data-quick="semua">Semua</button>
     <button class="qp" data-quick="aktif">Aktif</button>
     <button class="qp" data-quick="selesai">Selesai</button>
-    <button class="qp active" data-quick="belum_lunas">Belum Lunas</button>
+    <button class="qp" data-quick="lewat">🔴 Lewat Waktu</button>
+    <button class="qp active" data-quick="belum_lunas">💰 Belum Lunas</button>
   </div>
 
   <!-- Filter bar -->
@@ -379,6 +380,8 @@ async function loadOrders(page = 1) {
     // Tidak set status; client-side filter di renderTable
   } else if (quickFilter === 'selesai') {
     status = 'selesai';
+  } else if (quickFilter === 'lewat') {
+    // Client-side filter: pending/proses + tanggal_selesai < today
   }
 
   const params = new URLSearchParams({ page, limit: 20 });
@@ -399,12 +402,20 @@ async function loadOrders(page = 1) {
     lastMeta = d.meta || {};
     let data = d.data || [];
 
-    // Client-side filter untuk "aktif"
+    // Client-side filter
     if (quickFilter === 'aktif') {
       data = data.filter(t => ['pending','proses'].includes(t.status));
+    } else if (quickFilter === 'lewat') {
+      const today = new Date(); today.setHours(0,0,0,0);
+      data = data.filter(t => {
+        if (!['pending','proses'].includes(t.status)) return false;
+        if (!t.tanggal_selesai) return false;
+        const est = new Date(t.tanggal_selesai); est.setHours(0,0,0,0);
+        return est < today;
+      });
     }
 
-    const total = quickFilter === 'aktif' ? data.length : (lastMeta.total || 0);
+    const total = ['aktif','lewat'].includes(quickFilter) ? data.length : (lastMeta.total || 0);
     totalPages  = Math.max(1, Math.ceil((lastMeta.total || 0) / 20));
 
     document.getElementById('tableInfo').textContent =
@@ -477,14 +488,9 @@ function renderTable(rows) {
           <a href="/api/v1/transaksi/${t.id}/struk" target="_blank"
              class="btn btn-sm btn-outline" title="Cetak struk">Struk</a>
           ${hasPhone ? `
-          <div class="wa-menu-wrap">
-            <button class="btn btn-sm btn-wa" onclick="toggleWaMenu(this)" title="Kirim WA">WA ▾</button>
-            <div class="wa-menu">
-              <a href="#" onclick="openWa(${t.id},'nota');return false;">Nota Order</a>
-              <a href="#" onclick="openWa(${t.id},'tagihan');return false;">Tagihan</a>
-              <a href="#" onclick="openWa(${t.id},'notif');return false;">Notif Selesai</a>
-            </div>
-          </div>` : ''}
+          <button class="btn btn-sm btn-wa" title="Kirim WhatsApp"
+             onclick='event.stopPropagation();openWaSheet(${JSON.stringify({id:t.id,nomor:t.nomor_transaksi,nama:t.pelanggan_nama,telepon:t.pelanggan_telepon}).replace(/'/g,"&#39;")})'>💬 WA</button>
+          ` : ''}
         </div>
       </td>
     </tr>`;

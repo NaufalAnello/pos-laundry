@@ -226,7 +226,7 @@ function renderAll() {
         </div>
         <div class="tc-actions">
           <button class="btn btn-lunasi" onclick='openLunasi(${JSON.stringify({id:t.id,nomor:t.nomor_transaksi,nama:t.pelanggan_nama,total:t.total_bayar,dibayar:t.bayar,pelanggan_id:t.pelanggan_id}).replace(/'/g,"&#39;")})'>💰 Lunasi</button>
-          ${tel ? `<button class="btn btn-wa" onclick="kirimWa(${t.id})">💬 WA</button>` : ''}
+          ${tel ? `<button class="btn btn-wa" onclick='openWaSheet(${JSON.stringify({id:t.id,nomor:t.nomor_transaksi,nama:t.pelanggan_nama,telepon:t.pelanggan_telepon}).replace(/'/g,"&#39;")})'>💬 WA</button>` : ''}
           <a class="btn btn-detail" href="/order/detail?id=${t.id}">Detail</a>
         </div>
       </div>`;
@@ -246,19 +246,7 @@ function openLunasi(payload) {
   window.openLunasiSheet(payload);
 }
 
-async function kirimWa(id) {
-  try {
-    const r = await fetch(`/api/v1/transaksi/${id}/wa/tagihan`, { credentials: 'include' });
-    const d = await r.json();
-    if (!r.ok) { showToast('Gagal: ' + d.error); return; }
-    window.open(d.url, '_blank');
-    fetch('/api/v1/wa/log', {
-      method: 'POST', credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ telepon: d.telepon, pesan: d.teks, transaksi_id: id, status: 'terkirim' })
-    });
-  } catch { showToast('Koneksi gagal'); }
-}
+// kirimWa() lama digantikan openWaSheet() universal dari wa-sheet.js
 
 // ── Filter & search ────────────────────────────────────────────────────
 document.querySelectorAll('.pill').forEach(p => {
