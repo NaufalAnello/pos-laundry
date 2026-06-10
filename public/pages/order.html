@@ -853,6 +853,9 @@
           <label>Alamat Jemput / Antar</label>
           <textarea id="alamatJemput" placeholder="Masukkan alamat lengkap..."></textarea>
         </div>
+
+        <!-- Status jarak antar jemput -->
+        <div id="jarakAJSection" style="display:none;margin-top:10px"></div>
       </div>
     </div>
   </div>
@@ -1320,6 +1323,10 @@ async function selectCustomer(p) {
   state.pelanggan = p;
   searchEl.value  = '';
   dropdownEl.classList.add('hidden');
+  // Reset override saat pelanggan berubah
+  window.ajJarakOverride = null;
+  window.ajSkipJarak = false;
+  if (typeof refreshJarakAJSection === 'function') refreshJarakAJSection();
 
   document.getElementById('ciAvatar').textContent = p.nama.charAt(0).toUpperCase();
   document.getElementById('ciName').textContent   = p.nama;
@@ -1459,6 +1466,9 @@ document.getElementById('clearCustomer').addEventListener('click', () => {
   state.poinDigunakan = 0;
   state.usePoin = false;
   state.depositSaldo = 0;
+  window.ajJarakOverride = null;
+  window.ajSkipJarak = false;
+  if (typeof refreshJarakAJSection === 'function') refreshJarakAJSection();
   customerInfo.classList.add('hidden');
   hideRepeatSuggestion();
   document.getElementById('usePoin').checked  = false;
@@ -2229,7 +2239,118 @@ document.getElementById('bayarInput').addEventListener('input', (e) => {
 
 document.getElementById('antarJemput').addEventListener('change', (e) => {
   document.getElementById('alamatSection').style.display = e.target.checked ? 'block' : 'none';
+  refreshJarakAJSection();
 });
+
+// ════════════════════════════════════════════════════════
+// ANTAR JEMPUT — cek jarak pelanggan
+// ════════════════════════════════════════════════════════
+// State khusus jarak AJ — terisi:
+// - dari profil pelanggan jika ada (read-only display)
+// - dari input inline jika user pilih "Isi Sekarang" atau walk-in
+window.ajJarakOverride = null;     // angka km, sumber: user input atau walk-in
+window.ajSkipJarak     = false;    // true: user tekan "Lewati"
+
+function refreshJarakAJSection() {
+  const section = document.getElementById('jarakAJSection');
+  const aktif = document.getElementById('antarJemput').checked;
+  if (!aktif) {
+    section.style.display = 'none';
+    section.innerHTML = '';
+    window.ajJarakOverride = null;
+    window.ajSkipJarak = false;
+    return;
+  }
+
+  section.style.display = 'block';
+
+  const p = state.pelanggan;
+  const jarakProfil = p ? Number(p.jarak_workshop_km || 0) : 0;
+  const jarakAktif  = window.ajJarakOverride != null
+    ? Number(window.ajJarakOverride)
+    : jarakProfil;
+
+  if (!p) {
+    // Walk-in / tamu tanpa profil → input langsung
+    section.innerHTML = `
+      <div class="field">
+        <label>Jarak antar jemput (km)</label>
+        <input type="number" id="ajJarakInput" step="0.1" min="0" value="${window.ajJarakOverride ?? ''}"
+               placeholder="contoh: 2.5"
+               oninput="window.ajJarakOverride = parseFloat(this.value) || null; refreshJarakAJSection()"/>
+        <small style="font-size:11px;color:var(--gray-5);margin-top:4px;display:block">
+          Disimpan hanya untuk order ini (tidak tersimpan ke profil pelanggan).
+        </small>
+      </div>
+    `;
+    return;
+  }
+
+  if (jarakAktif > 0) {
+    const sumber = window.ajJarakOverride != null
+      ? `<span style="color:var(--yellow)">(input baru, akan disimpan ke profil saat order tersimpan)</span>`
+      : '';
+    section.innerHTML = `
+      <div style="padding:10px 12px;background:var(--green-lt);border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:var(--gray-7)">
+        📍 <strong>Jarak: ${jarakAktif} km</strong> dari workshop ${sumber}
+        ${window.ajJarakOverride == null ? `<button type="button" onclick="ajPromptEditJarak()" style="margin-left:8px;background:none;border:none;color:var(--blue);cursor:pointer;font-size:11px;font-weight:600">Ubah</button>` : ''}
+      </div>
+    `;
+    return;
+  }
+
+  if (window.ajSkipJarak) {
+    section.innerHTML = `
+      <div style="padding:10px 12px;background:var(--yellow-lt);border:1px solid #fde68a;border-radius:8px;font-size:12px;color:var(--gray-7)">
+        ⚠️ Order dibuat tanpa data jarak — HPP tidak bisa dihitung otomatis di dashboard.
+        <button type="button" onclick="window.ajSkipJarak = false; refreshJarakAJSection()" style="margin-left:8px;background:none;border:none;color:var(--blue);cursor:pointer;font-size:11px;font-weight:600">Batal lewati</button>
+      </div>
+    `;
+    return;
+  }
+
+  // Belum ada jarak — minta input
+  section.innerHTML = `
+    <div style="padding:12px;background:var(--yellow-lt);border:1px solid #fde68a;border-radius:8px;font-size:12px;color:var(--gray-7)">
+      <div style="font-weight:700;margin-bottom:4px">⚠️ Data jarak belum diisi</div>
+      <div style="margin-bottom:8px"><strong>${esc(p.nama)}</strong> belum punya data jarak dari workshop. HPP antar jemput tidak bisa dihitung otomatis.</div>
+      <div id="ajInlineInput" style="display:none;margin-bottom:8px">
+        <label style="font-size:11px;font-weight:600;color:var(--gray-7);display:block;margin-bottom:4px">Jarak dari workshop (km)</label>
+        <div style="display:flex;gap:6px">
+          <input type="number" id="ajJarakInlineField" step="0.1" min="0" placeholder="2.5"
+                 style="flex:1;padding:8px 10px;border:1px solid var(--gray-3);border-radius:6px;font-size:13px"/>
+          <button type="button" class="btn btn-sm btn-blue" onclick="ajSaveInlineJarak()">Simpan</button>
+        </div>
+      </div>
+      <div id="ajInlineActions">
+        <button type="button" class="btn btn-sm btn-blue" onclick="document.getElementById('ajInlineInput').style.display='block';document.getElementById('ajInlineActions').style.display='none';setTimeout(()=>document.getElementById('ajJarakInlineField').focus(),50)">Isi Jarak Sekarang</button>
+        <button type="button" class="btn btn-sm btn-outline" onclick="window.ajSkipJarak=true;refreshJarakAJSection()">Lewati</button>
+      </div>
+    </div>
+  `;
+}
+
+function ajSaveInlineJarak() {
+  const v = parseFloat(document.getElementById('ajJarakInlineField').value);
+  if (!isFinite(v) || v <= 0) { alert('Masukkan jarak yang valid (> 0)'); return; }
+  window.ajJarakOverride = v;
+  window.ajSkipJarak = false;
+  refreshJarakAJSection();
+}
+
+function ajPromptEditJarak() {
+  const v = prompt('Jarak baru dari workshop (km):', state.pelanggan?.jarak_workshop_km || '');
+  if (v === null) return;
+  const n = parseFloat(v);
+  if (!isFinite(n) || n <= 0) { alert('Jarak tidak valid'); return; }
+  window.ajJarakOverride = n;
+  refreshJarakAJSection();
+}
+
+// Helper esc bisa belum ada di scope — pakai default
+if (typeof esc !== 'function') {
+  window.esc = (s) => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
 // ════════════════════════════════════════════════════════
 // UPDATE ESTIMASI SELESAI
@@ -2516,6 +2637,8 @@ async function submitOrder(kirimWa, cetakSetelah) {
     tanggal_selesai: document.getElementById('tanggalSelesai').value || null,
     antar_jemput:    document.getElementById('antarJemput').checked,
     alamat_jemput:   document.getElementById('alamatJemput').value.trim() || null,
+    jarak_jemput_km: (document.getElementById('antarJemput').checked && window.ajJarakOverride != null)
+                     ? Number(window.ajJarakOverride) : null,
     kirim_wa:        kirimWa && document.getElementById('kirimWa').checked,
     kelebihan_ke_deposit:
       mode === 'bayar-sekarang' && !isDepositMode && kelebihan > 0 && !!state.pelanggan && state.kelebihanMode === 'deposit',

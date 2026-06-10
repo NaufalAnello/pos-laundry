@@ -121,6 +121,12 @@
 <div class="pos-topbar">
   <span class="pos-topbar-logo">🧺</span>
   <span class="pos-topbar-page">${pageTitle()}</span>
+  <a href="/" id="tbAJBell" title="Order antar jemput belum diproses"
+     style="display:none;margin-left:auto;margin-right:10px;text-decoration:none;
+            font-size:13px;color:#92400e;background:#fef3c7;border:1px solid #fde68a;
+            padding:4px 10px;border-radius:999px;font-weight:700">
+    🛵 <span id="tbAJBellCount">0</span>
+  </a>
   <span class="pos-topbar-user" id="tbUserName">–</span>
 </div>`;
 
@@ -183,24 +189,42 @@
     })
     .catch(() => {});
 
-  /* ── Load badge: tagihan belum lunas ──────────────────── */
+  /* ── Load badge: tagihan belum lunas + AJ belum diproses ── */
   const refreshTagihanBadge = () => {
     fetch('/api/v1/dashboard', { credentials: 'include' })
       .then(r => r.ok ? r.json() : null)
       .then(d => {
-        const n = Number(d?.tagihan_belum_lunas || 0);
+        if (!d) return;
+        const n = Number(d.tagihan_belum_lunas || 0);
         const el = document.getElementById('bnBadge-tagihan');
-        if (!el) return;
-        if (n > 0) {
-          el.textContent = n > 99 ? '99+' : n;
-          el.style.display = '';
-        } else {
-          el.style.display = 'none';
+        if (el) {
+          if (n > 0) {
+            el.textContent = n > 99 ? '99+' : n;
+            el.style.display = '';
+          } else {
+            el.style.display = 'none';
+          }
+        }
+
+        // AJ bell: tampilkan jika ada order AJ hari ini yang belum diproses
+        const ajCount = Number(d.antar_jemput_belum_diproses || 0);
+        const bell = document.getElementById('tbAJBell');
+        const bellCount = document.getElementById('tbAJBellCount');
+        if (bell && bellCount) {
+          if (ajCount > 0) {
+            bellCount.textContent = ajCount;
+            bell.title = `🛵 ${ajCount} order antar jemput hari ini belum dihitung`;
+            bell.style.display = '';
+          } else {
+            bell.style.display = 'none';
+          }
         }
       })
       .catch(() => {});
   };
   refreshTagihanBadge();
+  // Refresh tiap 60 detik supaya bell up-to-date tanpa reload
+  setInterval(refreshTagihanBadge, 60000);
   window.posRefreshBadges = refreshTagihanBadge;
 
   /* ── Exposed globals ───────────────────────────────────── */

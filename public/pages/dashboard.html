@@ -454,6 +454,17 @@
 
     <!-- Right column -->
     <div>
+      <!-- Antar Jemput hari ini (auto-show jika ada order AJ) -->
+      <div class="card" id="ajCard" style="display:none">
+        <div class="card-header">
+          <h2>🛵 Antar Jemput Hari Ini</h2>
+          <span id="ajCardBadge" class="badge badge-pending" style="display:none">—</span>
+        </div>
+        <div class="card-body" id="ajCardBody">
+          <div class="empty-state">Memuat...</div>
+        </div>
+      </div>
+
       <!-- Tagihan belum lunas -->
       <div class="card">
         <div class="card-header">
@@ -969,10 +980,226 @@ async function loadDashboard() {
     renderStok(d.stok_hampir_habis);
     renderDeposit(d.deposit);
     loadTopMargin();
+    loadAntarJemput();
   } catch (err) {
     console.error(err);
     showToast('Gagal memuat dashboard');
   }
+}
+
+// ── Widget Antar Jemput ──────────────────────────────────────────────────────
+async function loadAntarJemput() {
+  const card = document.getElementById('ajCard');
+  const body = document.getElementById('ajCardBody');
+  const badge = document.getElementById('ajCardBadge');
+  try {
+    const r = await fetch('/api/v1/dashboard/antar-jemput-hari-ini');
+    if (!r.ok) throw new Error('Gagal load AJ');
+    const d = await r.json();
+    if (!d.ada_order_aj) {
+      card.style.display = 'none';
+      return;
+    }
+    card.style.display = '';
+    window._ajData = d;
+    if (d.belum_diterapkan > 0) {
+      badge.style.display = '';
+      badge.textContent = d.belum_diterapkan + ' belum diproses';
+      badge.style.background = '#fef3c7';
+      badge.style.color = '#92400e';
+    } else {
+      badge.style.display = '';
+      badge.textContent = '✓ Semua diproses';
+      badge.style.background = '#dcfce7';
+      badge.style.color = '#15803d';
+    }
+    renderAJWidget(d);
+  } catch (err) {
+    card.style.display = '';
+    body.innerHTML = `<div class="empty-state" style="color:var(--red)">${err.message}</div>`;
+  }
+}
+
+function renderAJWidget(d) {
+  const body = document.getElementById('ajCardBody');
+
+  // List pelanggan
+  const listHTML = d.order_list.map(o => {
+    if (o.sudah_diterapkan) {
+      return `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;border-bottom:1px solid var(--gray-2)">
+        <span>✓ <span style="color:var(--gray-5)">${escHtml(o.nama_pelanggan)}</span></span>
+        <span style="color:var(--gray-5)">sudah diterapkan</span>
+      </div>`;
+    }
+    if (!o.has_jarak) {
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:12px;border-bottom:1px solid var(--gray-2)">
+        <span>⚠️ ${escHtml(o.nama_pelanggan)}</span>
+        <button class="btn btn-sm btn-outline" onclick="ajIsiJarak(${o.order_id}, ${o.pelanggan_id || 'null'}, '${escHtml(o.nama_pelanggan).replace(/'/g, "\\'")}')">Isi Sekarang</button>
+      </div>`;
+    }
+    return `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;border-bottom:1px solid var(--gray-2)">
+      <span>📦 ${escHtml(o.nama_pelanggan)}</span>
+      <span style="color:var(--gray-5)">${o.jarak_km} km</span>
+    </div>`;
+  }).join('');
+
+  let html = `<div style="display:flex;flex-direction:column;gap:8px">`;
+
+  if (d.kalkulasi) {
+    const k = d.kalkulasi;
+    const ruteText = k.rute_optimal.map(p => `${escHtml(p.nama)} (${p.jarak_km}km)`).join(' → ');
+    html += `
+      <div style="padding:10px 12px;background:#faf5ff;border:1px solid #e9d5ff;border-radius:8px;font-size:12px;line-height:1.6">
+        <div style="font-weight:700;color:var(--purple);margin-bottom:4px">🗺️ Rute Optimal</div>
+        <div>Workshop → ${ruteText} → Workshop</div>
+        <div style="font-weight:700;margin-top:4px">Total: ${k.total_jarak} km</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+        <div style="padding:8px 10px;background:var(--gray-1);border-radius:6px">
+          <div style="font-size:10px;color:var(--gray-5);text-transform:uppercase;font-weight:700">HPP/Pelanggan</div>
+          <div style="font-size:14px;font-weight:800;color:var(--blue)">Rp ${fmtRp(k.hpp_per_pelanggan)}</div>
+        </div>
+        <div style="padding:8px 10px;background:var(--gray-1);border-radius:6px">
+          <div style="font-size:10px;color:var(--gray-5);text-transform:uppercase;font-weight:700">Tarif Rekomendasi</div>
+          <div style="font-size:14px;font-weight:800;color:var(--green)">Rp ${fmtRp(k.tarif_rekomendasi)}</div>
+        </div>
+      </div>
+    `;
+  } else if (!d.semua_ada_jarak) {
+    html += `<div style="padding:10px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:12px;color:var(--gray-7)">
+      HPP belum bisa dihitung karena <strong>${d.order_list.filter(o => !o.has_jarak && !o.sudah_diterapkan).length} pelanggan</strong> belum punya data jarak.
+    </div>`;
+  }
+
+  html += `<div style="margin-top:6px"><div style="font-size:11px;font-weight:700;color:var(--gray-5);text-transform:uppercase;margin-bottom:4px">Pelanggan (${d.order_list.length})</div>${listHTML}</div>`;
+
+  // Tombol aksi
+  if (d.kalkulasi) {
+    html += `
+      <div class="field" style="margin-top:8px">
+        <label style="font-size:11px;font-weight:700;color:var(--gray-5);text-transform:uppercase">Tarif per Pelanggan (Rp)</label>
+        <input type="number" id="ajWidgetTarif" value="${d.kalkulasi.tarif_rekomendasi}" min="0"
+               style="width:100%;padding:8px 10px;border:1px solid var(--gray-3);border-radius:6px;font-size:13px;font-weight:700"/>
+      </div>
+      <button class="btn btn-success" onclick="ajTerapkanTarif()" style="background:var(--green);color:#fff">
+        ✓ Terapkan Tarif ke ${d.belum_diterapkan} Order
+      </button>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-outline" style="flex:1" onclick="ajMintaSaranAI()" id="btnAjAI">🤖 Minta Saran AI</button>
+        <a class="btn btn-outline" style="flex:1;text-align:center" href="/antar-jemput">⚙️ Edit Manual</a>
+      </div>
+      <div id="ajAIResult" style="display:none;margin-top:6px;padding:10px 12px;background:#fefce8;border:1px solid #fde047;border-radius:8px;font-size:12px;line-height:1.6;white-space:pre-wrap"></div>
+    `;
+  } else if (!d.semua_ada_jarak) {
+    html += `<button class="btn btn-outline" onclick="loadAntarJemput()" style="margin-top:6px">🔄 Refresh setelah isi jarak</button>`;
+  } else if (d.belum_diterapkan === 0 && d.sudah_diterapkan > 0) {
+    html += `<div style="padding:10px 12px;background:var(--green-lt);border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:var(--gray-7);text-align:center">
+      ✓ Semua tarif AJ hari ini sudah diterapkan
+    </div>`;
+  }
+
+  html += `</div>`;
+  body.innerHTML = html;
+}
+
+async function ajIsiJarak(orderId, pelangganId, nama) {
+  const v = prompt(`Jarak rumah ${nama} dari workshop (km):`);
+  if (v === null) return;
+  const n = parseFloat(v);
+  if (!isFinite(n) || n <= 0) { showToast('Jarak tidak valid'); return; }
+
+  try {
+    if (pelangganId && pelangganId !== 'null') {
+      // Update profil pelanggan
+      const pRes = await fetch('/api/v1/pelanggan/' + pelangganId);
+      const pData = await pRes.json();
+      if (!pRes.ok) throw new Error(pData.error || 'Gagal ambil pelanggan');
+      const p = pData.data;
+      await fetch('/api/v1/pelanggan/' + pelangganId, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nama: p.nama,
+          telepon: p.telepon || null,
+          email: p.email || null,
+          alamat: p.alamat || null,
+          jarak_workshop_km: n
+        })
+      }).then(r => r.json()).then(d => { if (d.error) throw new Error(d.error); });
+    } else {
+      // Walk-in: update jarak per order
+      await fetch('/api/v1/transaksi/' + orderId, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jarak_jemput_km: n })
+      }).then(r => r.json()).then(d => { if (d.error) throw new Error(d.error); });
+    }
+    showToast('Jarak disimpan');
+    loadAntarJemput();
+  } catch (e) {
+    showToast('Gagal: ' + e.message);
+  }
+}
+
+async function ajTerapkanTarif() {
+  const d = window._ajData;
+  if (!d) return;
+  const tarif = Number(document.getElementById('ajWidgetTarif').value || 0);
+  if (tarif <= 0) { showToast('Tarif harus > 0'); return; }
+  const orderIds = d.order_list.filter(o => !o.sudah_diterapkan && o.has_jarak).map(o => o.order_id);
+  if (orderIds.length === 0) { showToast('Tidak ada order yang bisa diterapkan'); return; }
+  if (!confirm(`Terapkan tarif Rp ${fmtRp(tarif)} ke ${orderIds.length} order?`)) return;
+
+  try {
+    const r = await fetch('/api/v1/dashboard/terapkan-tarif-aj', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tarif, order_ids: orderIds })
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error);
+    showToast(`✓ Tarif diterapkan ke ${j.biaya_terpasang} order`);
+    loadDashboard();
+    if (window.posRefreshBadges) window.posRefreshBadges();
+  } catch (e) {
+    showToast('Gagal: ' + e.message);
+  }
+}
+
+async function ajMintaSaranAI() {
+  const d = window._ajData;
+  if (!d) return;
+  const btn = document.getElementById('btnAjAI');
+  const result = document.getElementById('ajAIResult');
+  const orderIds = d.order_list.filter(o => !o.sudah_diterapkan && o.has_jarak).map(o => o.order_id);
+  if (orderIds.length === 0) return;
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Menunggu AI...';
+  result.style.display = 'block';
+  result.textContent = 'Menghubungi DeepSeek...';
+
+  try {
+    const r = await fetch('/api/v1/dashboard/antar-jemput/ai-saran', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order_ids: orderIds })
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error);
+    result.textContent = '🤖 ' + j.saran_ai;
+  } catch (e) {
+    result.style.background = '#fef2f2';
+    result.style.borderColor = '#fecaca';
+    result.textContent = '❌ ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🤖 Minta Saran AI';
+  }
+}
+
+function escHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ── Top Margin ────────────────────────────────────────────────────────────────

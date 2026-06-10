@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const db = require('../database/connection');
 const transaksiModel  = require('../models/transaksiModel');
 const layananModel    = require('../models/layananModel');
 const paketPromoModel = require('../models/paketPromoModel');
@@ -40,6 +41,7 @@ const createSchema = Joi.object({
   tanggal_selesai: Joi.date().iso().allow(null),
   antar_jemput:    Joi.boolean().default(false),
   alamat_jemput:   Joi.string().allow('', null),
+  jarak_jemput_km: Joi.number().min(0).max(999).allow(null),
   kirim_wa:        Joi.boolean().default(false),
   waktu_transaksi: Joi.date().iso().allow(null)  // Backdate feature
 });
@@ -253,12 +255,30 @@ exports.store = async (req, res) => {
       catatan:         value.catatan        || null,
       antar_jemput:    value.antar_jemput   ? 1 : 0,
       alamat_jemput:   value.alamat_jemput  || null,
+      jarak_jemput_km: value.jarak_jemput_km != null ? value.jarak_jemput_km : null,
       created_at:      new Date(),
       updated_at:      new Date()
     };
 
     const transaksiId = await transaksiModel.create(transaksiData, resolvedItems);
     const created = await transaksiModel.findById(transaksiId);
+
+    // Jika order AJ dengan jarak baru untuk pelanggan terdaftar yang belum punya
+    // data jarak, simpan ke profil pelanggan supaya order berikutnya tidak
+    // perlu tanya ulang. Override jarak yang lebih baru tidak dipakai (operator
+    // bisa edit manual di halaman pelanggan kalau salah).
+    if (
+      value.antar_jemput &&
+      value.jarak_jemput_km != null &&
+      value.jarak_jemput_km > 0 &&
+      pelanggan &&
+      !Number(pelanggan.jarak_workshop_km)
+    ) {
+      await db('pelanggan').where({ id: pelanggan.id }).update({
+        jarak_workshop_km: value.jarak_jemput_km,
+        updated_at: new Date()
+      });
+    }
 
     // ── Catat riwayat pembayaran jika ada bayar awal ──────────────────────────
     if (bayarFinal > 0) {
@@ -351,7 +371,7 @@ exports.update = async (req, res) => {
     if (t.status === 'diambil' || t.status === 'dibatalkan')
       return res.status(400).json({ error: `Transaksi sudah ${t.status}, tidak dapat diubah` });
 
-    const allowed = ['catatan', 'metode_bayar', 'bayar', 'antar_jemput', 'alamat_jemput', 'tanggal_selesai'];
+    const allowed = ['catatan', 'metode_bayar', 'bayar', 'antar_jemput', 'alamat_jemput', 'jarak_jemput_km', 'tanggal_selesai'];
     const patch = Object.fromEntries(
       Object.entries(req.body).filter(([k]) => allowed.includes(k))
     );
