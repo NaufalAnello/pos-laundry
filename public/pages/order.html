@@ -752,17 +752,22 @@
     <!-- Items -->
     <div class="card">
       <div class="card-header">
-        <h2>🧺 Item Laundry</h2>
-        <span id="itemCount" style="font-size:12px;color:var(--gray-5)">0 item</span>
+        <h2>🧺 Layanan Laundry</h2>
+        <span id="itemCount" style="font-size:12px;color:var(--gray-5)">0 layanan</span>
       </div>
       <div class="card-body">
+        <!-- Chip layanan populer — tap untuk tambah cepat -->
+        <div id="chipLayananWrap" style="margin-bottom:12px;display:none">
+          <div style="font-size:11px;font-weight:700;color:var(--gray-5);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">⚡ Tap untuk tambah cepat</div>
+          <div id="chipLayanan" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        </div>
         <div class="item-header">
           <span>Layanan</span><span>Jumlah</span><span>Satuan</span><span>Subtotal</span><span></span>
         </div>
         <div id="itemsContainer">
-          <div class="empty-items">Belum ada item. Klik "+ Tambah Item" untuk mulai.</div>
+          <div class="empty-items">Belum ada layanan. Tap chip di atas atau klik "+ Tambah Layanan".</div>
         </div>
-        <button class="btn-add-item" id="addItemBtn">+ Tambah Item</button>
+        <button class="btn-add-item" id="addItemBtn">+ Tambah Layanan</button>
       </div>
     </div>
 
@@ -868,20 +873,20 @@
         <div class="field" style="margin-top:12px">
           <label>Cara Pembayaran</label>
           <div class="payment-tabs" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px;">
-            <button class="payment-tab-btn active" data-tab="bayar-sekarang">
+            <button class="payment-tab-btn" data-tab="bayar-sekarang">
               Bayar Sekarang
             </button>
             <button class="payment-tab-btn" data-tab="dp">
               DP
             </button>
-            <button class="payment-tab-btn" data-tab="bayar-nanti">
+            <button class="payment-tab-btn active" data-tab="bayar-nanti">
               Bayar Nanti
             </button>
           </div>
         </div>
 
         <!-- TAB: Bayar Sekarang -->
-        <div class="payment-tab-content" id="tab-bayar-sekarang">
+        <div class="payment-tab-content" id="tab-bayar-sekarang" style="display:none">
           <div class="field">
             <label>Metode Bayar</label>
             <div class="pay-methods">
@@ -997,7 +1002,7 @@
         </div>
 
         <!-- TAB: Bayar Nanti -->
-        <div class="payment-tab-content" id="tab-bayar-nanti" style="display:none">
+        <div class="payment-tab-content" id="tab-bayar-nanti">
           <div style="padding:16px 12px;background:var(--gray-1);border:1.5px solid var(--gray-3);border-radius:8px;text-align:center;">
             <div style="font-size:32px;margin-bottom:8px;">⏱️</div>
             <div style="font-size:14px;font-weight:700;color:var(--gray-7);margin-bottom:4px;">Order tersimpan BELUM LUNAS</div>
@@ -1058,7 +1063,7 @@ const state = {
   usePoin:         false,
   diskonTipe:      'nominal', // 'nominal' | 'persen'
   diskonNilai:     0,
-  paymentMode:     'bayar-sekarang', // 'bayar-sekarang' | 'dp' | 'bayar-nanti'
+  paymentMode:     'bayar-nanti', // default: mayoritas Bayar Nanti, lunasi saat ambil
   metodeBayar:     'tunai',
   bayar:           0,
   dpAmount:        0,
@@ -1093,7 +1098,10 @@ let acTimer     = null;
 
   // Load layanan
   const lRes = await apiFetch('/api/v1/layanan');
-  if (lRes?.data) layananList = lRes.data;
+  if (lRes?.data) {
+    layananList = lRes.data;
+    renderChipLayanan();
+  }
 
   // Load promo
   const pRes = await apiFetch('/api/v1/paket-promo');
@@ -1315,6 +1323,44 @@ document.getElementById('clearCustomer').addEventListener('click', () => {
 // ════════════════════════════════════════════════════════
 let itemIdSeq = 0;
 
+// Render chip layanan populer (6 teratas) untuk tambah cepat
+function renderChipLayanan() {
+  const wrap = document.getElementById('chipLayananWrap');
+  const el = document.getElementById('chipLayanan');
+  if (!wrap || !el) return;
+  const populer = layananList.slice(0, 6);
+  if (!populer.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  el.innerHTML = populer.map(l => {
+    const harga = Number(l.harga || 0);
+    return `<button type="button" class="chip-svc" data-id="${l.id}"
+      style="padding:8px 12px;border:1.5px solid var(--blue-lt);border-radius:99px;background:#fff;color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px">
+      ${escapeHtml(l.nama)} <span style="opacity:.7;font-weight:600">${harga ? 'Rp ' + fmtRp(harga) : ''}</span>
+    </button>`;
+  }).join('');
+  el.querySelectorAll('.chip-svc').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = Number(btn.dataset.id);
+      const layanan = layananList.find(x => x.id === id);
+      if (!layanan) return;
+      addItemRow({
+        layanan_id: id,
+        satuan: layanan.satuan,
+        jumlah: 1
+      });
+      // visual feedback singkat
+      btn.style.background = 'var(--blue)';
+      btn.style.color = '#fff';
+      setTimeout(() => { btn.style.background = '#fff'; btn.style.color = 'var(--blue)'; }, 250);
+    });
+  });
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
 function addItemRow(defaults = {}) {
   const id = ++itemIdSeq;
   const container = document.getElementById('itemsContainer');
@@ -1348,10 +1394,10 @@ function addItemRow(defaults = {}) {
       <button class="btn-remove" title="Hapus">✕</button>
     </div>
     <button class="btn-toggle-rincian" style="display:none;">
-      <span class="rincian-icon">▼</span> Rincian Item
+      <span class="rincian-icon">▼</span> Rincian Pakaian
     </button>
     <div class="rincian-panel">
-      <div class="rincian-panel-header">📋 Rincian Item</div>
+      <div class="rincian-panel-header">📋 Rincian Pakaian</div>
       <div class="master-item-grid"></div>
       <div class="add-master-form">
         <input type="text" class="new-item-name" placeholder="Item baru..." />
@@ -1678,7 +1724,7 @@ function addItemRow(defaults = {}) {
     wrapper.remove();
     if (!document.querySelector('.item-wrapper')) {
       document.getElementById('itemsContainer').innerHTML =
-        '<div class="empty-items">Belum ada item. Klik "+ Tambah Item" untuk mulai.</div>';
+        '<div class="empty-items">Belum ada layanan. Tap chip di atas atau klik "+ Tambah Layanan".</div>';
     }
     updateItemCount();
     calcTotal();
@@ -1702,7 +1748,7 @@ document.getElementById('addItemBtn').addEventListener('click', () => addItemRow
 
 function updateItemCount() {
   const n = document.querySelectorAll('.item-row').length;
-  document.getElementById('itemCount').textContent = n + ' item';
+  document.getElementById('itemCount').textContent = n + ' layanan';
 }
 
 // ════════════════════════════════════════════════════════
@@ -2242,7 +2288,7 @@ function updatePaymentPreview() {
 // ════════════════════════════════════════════════════════
 async function submitOrder(kirimWa, cetakSetelah) {
   const validItems = state.items.filter(i => i.layanan_id && i.jumlah > 0);
-  if (validItems.length === 0) { showToast('Tambahkan minimal 1 item', 'error'); return; }
+  if (validItems.length === 0) { showToast('Tambahkan minimal 1 layanan', 'error'); return; }
 
   const total = state._totalBayar || 0;
   const mode = state.paymentMode;

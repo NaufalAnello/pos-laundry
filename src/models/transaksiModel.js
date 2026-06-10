@@ -18,12 +18,11 @@ const generateNomor = async () => {
 };
 
 // ── List dengan filter & pagination ────────────────────────────────────────
-const findAll = ({ status, tanggal, pelanggan_id, q, page = 1, limit = 20 } = {}) => {
+const findAll = ({ status, tanggal, pelanggan_id, q, belum_lunas, sort, page = 1, limit = 20 } = {}) => {
   const offset = (page - 1) * limit;
   const query = db('transaksi as t')
     .leftJoin('pelanggan as p', 'p.id', 't.pelanggan_id')
     .leftJoin('users as u',     'u.id', 't.user_id')
-    .orderBy('t.id', 'desc')
     .limit(limit)
     .offset(offset)
     .select(
@@ -37,9 +36,16 @@ const findAll = ({ status, tanggal, pelanggan_id, q, page = 1, limit = 20 } = {}
                FROM detail_transaksi WHERE transaksi_id = t.id) as layanan_ringkas`)
     );
 
+  // Default sort: terbaru dulu; untuk tagihan: terlama dulu (urgent)
+  if (sort === 'tanggal_asc') query.orderBy('t.tanggal_masuk', 'asc');
+  else                         query.orderBy('t.id', 'desc');
+
   if (status)       query.where('t.status', status);
   if (pelanggan_id) query.where('t.pelanggan_id', pelanggan_id);
   if (tanggal)      query.whereRaw("date(t.tanggal_masuk/1000,'unixepoch') = ?", [tanggal]);
+  if (belum_lunas) {
+    query.whereRaw('t.bayar < t.total_bayar').whereNotIn('t.status', ['dibatalkan', 'diambil']);
+  }
   if (q)            query.where(function () {
     this.where('t.nomor_transaksi', 'like', `%${q}%`).orWhere('p.nama', 'like', `%${q}%`);
   });
@@ -47,13 +53,16 @@ const findAll = ({ status, tanggal, pelanggan_id, q, page = 1, limit = 20 } = {}
   return query;
 };
 
-const countAll = ({ status, tanggal, pelanggan_id, q } = {}) => {
+const countAll = ({ status, tanggal, pelanggan_id, q, belum_lunas } = {}) => {
   const query = db('transaksi as t')
     .leftJoin('pelanggan as p', 'p.id', 't.pelanggan_id')
     .count('t.id as total').first();
   if (status)       query.where('t.status', status);
   if (pelanggan_id) query.where('t.pelanggan_id', pelanggan_id);
   if (tanggal)      query.whereRaw("date(t.tanggal_masuk/1000,'unixepoch') = ?", [tanggal]);
+  if (belum_lunas) {
+    query.whereRaw('t.bayar < t.total_bayar').whereNotIn('t.status', ['dibatalkan', 'diambil']);
+  }
   if (q)            query.where(function () {
     this.where('t.nomor_transaksi', 'like', `%${q}%`).orWhere('p.nama', 'like', `%${q}%`);
   });

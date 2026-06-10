@@ -91,12 +91,50 @@
       .antrian-item { padding: 10px 12px; }
       .antrian-row1 { flex-wrap: wrap; gap: 4px; }
       .antrian-actions { width: 100%; }
-      .antrian-actions .btn { flex: 1 1 auto; }
+      .antrian-actions .btn { flex: 1 1 auto; min-width: 80px; }
       .tagihan-item { flex-wrap: wrap; }
       .stat-body { min-width: 0; flex: 1; }
       .stat-value { word-break: break-word; }
       .tabs-wrap { padding: 0 12px; overflow-x: auto; }
       .tab-btn { padding: 8px 12px; font-size: 12px; white-space: nowrap; }
+      /* Stat card lama disembunyikan di HP — ada hero card khusus */
+      .stats-grid { display: none !important; }
+      .hero-section { display: flex !important; }
+      .desktop-only { display: none !important; }
+    }
+    @media (min-width: 768px) {
+      .hero-section { display: none !important; }
+    }
+    /* ── Hero cards untuk HP ── */
+    .hero-section {
+      display: none; flex-direction: column; gap: 10px; margin-bottom: 12px;
+    }
+    .hero-card {
+      border-radius: 14px; padding: 14px 16px; color: #fff;
+      box-shadow: 0 4px 16px rgba(0,0,0,.12);
+    }
+    .hero-card.tagihan {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    }
+    .hero-card.antrian {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    }
+    .hero-card-row {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .hero-card .lbl { font-size: 11px; opacity:.9; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+    .hero-card .val { font-size: 22px; font-weight: 800; margin-top: 4px; line-height: 1.1; }
+    .hero-card .sub { font-size: 12px; opacity:.85; margin-top: 2px; }
+    .hero-card a {
+      display: inline-block;
+      background: rgba(255,255,255,.25); color: #fff; padding: 6px 12px;
+      border-radius: 99px; font-size: 12px; font-weight: 700;
+      text-decoration: none;
+    }
+    /* Tombol Lunasi besar di card antrian (mobile) */
+    .btn-lunasi-inline {
+      background: var(--green) !important; color: #fff !important;
+      font-weight: 800 !important;
     }
 
     /* ── Card ── */
@@ -306,9 +344,33 @@
       <div class="page-title">Dashboard</div>
       <div class="page-sub" id="pageDate">Memuat...</div>
     </div>
-    <button class="btn btn-blue" onclick="toggleAIChat()" id="btnAIChat">
+    <button class="btn btn-blue desktop-only" onclick="toggleAIChat()" id="btnAIChat">
       🤖 Tanya AI
     </button>
+  </div>
+
+  <!-- Hero cards untuk HP (prioritas tindakan) -->
+  <div class="hero-section">
+    <a href="/tagihan" class="hero-card tagihan" style="text-decoration:none">
+      <div class="hero-card-row">
+        <div style="min-width:0">
+          <div class="lbl">⚠️ Tagihan Belum Lunas</div>
+          <div class="val" id="heroTagihanAmt">Rp 0</div>
+          <div class="sub" id="heroTagihanCount">— order</div>
+        </div>
+        <span style="background:rgba(255,255,255,.25);padding:6px 12px;border-radius:99px;font-size:12px;font-weight:700">Lihat →</span>
+      </div>
+    </a>
+    <a href="/order" class="hero-card antrian" style="text-decoration:none">
+      <div class="hero-card-row">
+        <div style="min-width:0">
+          <div class="lbl">📋 Order Aktif Hari Ini</div>
+          <div class="val" id="heroOrderCount">—</div>
+          <div class="sub">Omset: <span id="heroOmset">—</span></div>
+        </div>
+        <span style="background:rgba(255,255,255,.25);padding:6px 12px;border-radius:99px;font-size:12px;font-weight:700">Antrian →</span>
+      </div>
+    </a>
   </div>
 
   <!-- Stat cards -->
@@ -396,7 +458,7 @@
       <div class="card">
         <div class="card-header">
           <h2>Tagihan Belum Lunas</h2>
-          <a href="/order?status=belum_lunas" style="font-size:12px;color:var(--blue);text-decoration:none;">Lihat Semua</a>
+          <a href="/tagihan" style="font-size:12px;color:var(--blue);text-decoration:none;">Lihat Semua</a>
         </div>
         <div class="card-body" id="tagihanBody">
           <div class="empty-state">Memuat...</div>
@@ -622,8 +684,7 @@ function renderAntrian(list) {
       </div>
       <div class="antrian-actions">
         <button class="btn btn-sm ${btnClass}" onclick="updateStatus(${t.id}, '${nextStatus}', this)">${nextLabel}</button>
-        <button class="btn btn-sm btn-outline" onclick="updateStatus(${t.id}, 'dibatalkan', this)"
-          style="color:var(--red);border-color:var(--red);">Batalkan</button>
+        ${!lunas ? `<button class="btn btn-sm btn-lunasi-inline" onclick='event.stopPropagation();openLunasiSheet(${JSON.stringify({id:t.id,nomor:t.nomor_transaksi,nama:t.pelanggan_nama,total:t.total_bayar,dibayar:t.bayar,pelanggan_id:t.pelanggan_id}).replace(/'/g,"&#39;")})'>💰 Lunasi</button>` : ''}
         ${hasPhone ? `
         <div class="wa-menu-wrap">
           <button class="btn btn-sm btn-wa" onclick="toggleWaMenu(this)">WA ▾</button>
@@ -675,6 +736,7 @@ function renderSelesai(list) {
       </div>
       <div class="antrian-actions">
         <button class="btn btn-sm btn-green" onclick="tandaiSelesai(${t.id}, this, 'selesai');event.stopPropagation();">✓ Selesai</button>
+        ${!lunas ? `<button class="btn btn-sm btn-lunasi-inline" onclick='event.stopPropagation();openLunasiSheet(${JSON.stringify({id:t.id,nomor:t.nomor_transaksi,nama:t.pelanggan_nama,total:t.total_bayar,dibayar:(t.total_dibayar||t.bayar||0),pelanggan_id:t.pelanggan_id}).replace(/'/g,"&#39;")})'>💰 Lunasi</button>` : ''}
         ${hasPhone ? `
         <div class="wa-menu-wrap">
           <button class="btn btn-sm btn-wa" onclick="toggleWaMenu(this)">WA ▾</button>
@@ -734,6 +796,7 @@ function renderLewatWaktu(list) {
       </div>
       <div class="antrian-actions">
         <button class="btn btn-sm btn-green" onclick="tandaiSelesai(${t.id}, this, 'lewat');event.stopPropagation();">✓ Selesai</button>
+        ${!lunas ? `<button class="btn btn-sm btn-lunasi-inline" onclick='event.stopPropagation();openLunasiSheet(${JSON.stringify({id:t.id,nomor:t.nomor_transaksi,nama:t.pelanggan_nama,total:t.total_bayar,dibayar:(t.total_dibayar||t.bayar||0),pelanggan_id:t.pelanggan_id}).replace(/'/g,"&#39;")})'>💰 Lunasi</button>` : ''}
         ${hasPhone ? `
         <div class="wa-menu-wrap">
           <button class="btn btn-sm btn-wa" onclick="toggleWaMenu(this)">WA ▾</button>
@@ -752,17 +815,26 @@ function renderLewatWaktu(list) {
 function renderTagihan(list) {
   const el = document.getElementById('tagihanBody');
   if (!list.length) { el.innerHTML = '<div class="empty-state">Semua tagihan sudah lunas</div>'; return; }
-  el.innerHTML = list.map(t => `
-    <div class="tagihan-item">
-      <div>
-        <div class="tagihan-nomor">${t.nomor_transaksi}</div>
-        <div class="tagihan-meta">${t.pelanggan_nama || 'Non-member'} · <span class="badge badge-${t.status}">${t.status}</span></div>
+  el.innerHTML = list.map(t => {
+    const payload = JSON.stringify({
+      id: t.id, nomor: t.nomor_transaksi, nama: t.pelanggan_nama,
+      total: t.total_bayar, dibayar: t.bayar, pelanggan_id: t.pelanggan_id
+    }).replace(/'/g, "&#39;");
+    return `
+    <div class="tagihan-item" style="flex-direction:column;align-items:stretch;gap:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div>
+          <div class="tagihan-nomor">${t.nomor_transaksi}</div>
+          <div class="tagihan-meta">${t.pelanggan_nama || 'Non-member'} · <span class="badge badge-${t.status}">${t.status}</span></div>
+        </div>
+        <div>
+          <div class="tagihan-sisa">${fmtRp(t.total_bayar - t.bayar)}</div>
+          <div style="font-size:11px;color:var(--gray-5);text-align:right;">sisa</div>
+        </div>
       </div>
-      <div>
-        <div class="tagihan-sisa">${fmtRp(t.total_bayar - t.bayar)}</div>
-        <div style="font-size:11px;color:var(--gray-5);text-align:right;">sisa</div>
-      </div>
-    </div>`).join('');
+      <button class="btn btn-sm btn-green" onclick='openLunasiSheet(${payload})'>💰 Lunasi</button>
+    </div>`;
+  }).join('');
 }
 
 function renderPromo(list) {
@@ -869,18 +941,29 @@ async function loadDashboard() {
     document.getElementById('statWa').textContent      = d.wa_terkirim_hari_ini;
     document.getElementById('statTagihan').textContent = d.tagihan_belum_lunas;
 
+    // Hero cards (HP only)
+    const heroOrder = document.getElementById('heroOrderCount');
+    const heroOmset = document.getElementById('heroOmset');
+    if (heroOrder) heroOrder.textContent = d.order_hari_ini + ' order';
+    if (heroOmset) heroOmset.textContent = fmtRpShort(d.omset_hari_ini);
+
     renderChart(d.bar_chart_7hari);
     renderAntrian(d.antrian_aktif);
     renderSelesai(d.selesai_hari_ini || []);
     renderLewatWaktu(d.lewat_waktu || []);
 
-    // Tagihan belum lunas detail — fetch from transaksi API
-    const tagihanR = await fetch('/api/v1/transaksi?limit=10');
+    // Tagihan belum lunas detail — pakai filter belum_lunas + sort tanggal asc
+    const tagihanR = await fetch('/api/v1/transaksi?belum_lunas=1&sort=tanggal_asc&limit=20');
     const tagihanD = await tagihanR.json();
-    const belumLunas = (tagihanD.data || []).filter(t =>
-      t.bayar < t.total_bayar && !['dibatalkan','diambil'].includes(t.status)
-    ).slice(0, 8);
+    const belumLunas = (tagihanD.data || []).slice(0, 8);
     renderTagihan(belumLunas);
+
+    // Hero tagihan amt
+    const totalSisa = (tagihanD.data || []).reduce((s, t) => s + (Number(t.total_bayar) - Number(t.bayar)), 0);
+    const heroTagAmt = document.getElementById('heroTagihanAmt');
+    const heroTagCnt = document.getElementById('heroTagihanCount');
+    if (heroTagAmt) heroTagAmt.textContent = fmtRpShort(totalSisa);
+    if (heroTagCnt) heroTagCnt.textContent = `${d.tagihan_belum_lunas} order belum lunas`;
 
     renderPromo(d.promo_aktif_hari_ini);
     renderStok(d.stok_hampir_habis);
@@ -947,6 +1030,12 @@ loadDashboard();
 
 // Auto-refresh setiap 5 menit
 setInterval(loadDashboard, 300000);
+
+// Reload setelah pelunasan
+window.addEventListener('lunasi:done', () => {
+  showToast('✓ Pembayaran tersimpan');
+  loadDashboard();
+});
 
 // ── AI Chat ───────────────────────────────────────────────────────────────────
 let aiChatHistory = [];
@@ -1032,6 +1121,7 @@ function escapeHtml(text) {
   return div.innerHTML.replace(/\n/g, '<br>');
 }
 </script>
+<script src="/js/lunasi-sheet.js"></script>
 <script src="/js/nav.js"></script>
 </body>
 </html>

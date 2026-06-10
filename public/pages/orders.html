@@ -43,7 +43,21 @@
 
     /* ── Page ── */
     .page { max-width: 1400px; margin: 0 auto; padding: 20px 16px; }
-    .page-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; }
+    .page-title { font-size: 20px; font-weight: 800; margin-bottom: 12px; }
+
+    /* ── Quick filter pills ── */
+    .quick-pills {
+      display: flex; gap: 8px; margin-bottom: 14px;
+      overflow-x: auto; padding-bottom: 4px;
+    }
+    .quick-pills::-webkit-scrollbar { display: none; }
+    .qp {
+      padding: 7px 14px; border-radius: 99px;
+      border: 1px solid var(--gray-3); background: #fff;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      color: var(--gray-7); white-space: nowrap;
+    }
+    .qp.active { background: var(--blue); color: #fff; border-color: var(--blue); }
 
     /* ── Filter bar ── */
     .filter-bar {
@@ -233,7 +247,15 @@
 <body>
 
 <div class="page">
-  <div class="page-title">Kelola Order</div>
+  <div class="page-title">Antrian</div>
+
+  <!-- Filter pills (quick filter) -->
+  <div class="quick-pills" id="quickPills">
+    <button class="qp" data-quick="semua">Semua</button>
+    <button class="qp" data-quick="aktif">Aktif</button>
+    <button class="qp" data-quick="selesai">Selesai</button>
+    <button class="qp active" data-quick="belum_lunas">Belum Lunas</button>
+  </div>
 
   <!-- Filter bar -->
   <div class="filter-bar">
@@ -306,6 +328,7 @@ let currentPage = 1;
 let totalPages  = 1;
 let debTimer    = null;
 let lastMeta    = {};
+let quickFilter = 'belum_lunas'; // default sesuai operasional harian
 
 function showToast(msg, dur = 2500) {
   const el = document.getElementById('toast');
@@ -342,13 +365,27 @@ function readURLParams() {
 async function loadOrders(page = 1) {
   currentPage = page;
   const q       = document.getElementById('filterSearch').value.trim();
-  const status  = document.getElementById('filterStatus').value;
+  let status    = document.getElementById('filterStatus').value;
   const tanggal = document.getElementById('filterTanggal').value;
 
+  // Quick filter overrides
+  let belumLunas = false;
+  let sortParam = '';
+  if (quickFilter === 'belum_lunas') {
+    belumLunas = true;
+    sortParam = 'tanggal_asc'; // terlama dulu — urgent
+  } else if (quickFilter === 'aktif') {
+    // Tidak set status; client-side filter di renderTable
+  } else if (quickFilter === 'selesai') {
+    status = 'selesai';
+  }
+
   const params = new URLSearchParams({ page, limit: 20 });
-  if (q)       params.set('q', q);
-  if (status)  params.set('status', status);
-  if (tanggal) params.set('tanggal', tanggal);
+  if (q)         params.set('q', q);
+  if (status)    params.set('status', status);
+  if (tanggal)   params.set('tanggal', tanggal);
+  if (belumLunas) params.set('belum_lunas', '1');
+  if (sortParam) params.set('sort', sortParam);
 
   document.getElementById('tableBody').innerHTML =
     '<tr class="loading-row"><td colspan="9">Memuat data...</td></tr>';
@@ -359,13 +396,20 @@ async function loadOrders(page = 1) {
     const d = await r.json();
 
     lastMeta = d.meta || {};
-    const total = lastMeta.total || 0;
-    totalPages  = Math.max(1, Math.ceil(total / 20));
+    let data = d.data || [];
+
+    // Client-side filter untuk "aktif"
+    if (quickFilter === 'aktif') {
+      data = data.filter(t => ['pending','proses'].includes(t.status));
+    }
+
+    const total = quickFilter === 'aktif' ? data.length : (lastMeta.total || 0);
+    totalPages  = Math.max(1, Math.ceil((lastMeta.total || 0) / 20));
 
     document.getElementById('tableInfo').textContent =
-      `Menampilkan ${d.data.length} dari ${total} order`;
+      `Menampilkan ${data.length} dari ${total} order`;
 
-    renderTable(d.data);
+    renderTable(data);
     renderPagination(total);
   } catch (err) {
     console.error(err);
@@ -426,9 +470,8 @@ function renderTable(rows) {
       <td data-label="Aksi" class="td-actions-cell">
         <div class="td-actions">
           ${!lunas && t.status !== 'dibatalkan' ? `
-          <a href="/order/detail?id=${t.id}"
-             class="btn btn-sm btn-green" title="Lunasi pembayaran"
-             onclick="event.stopPropagation()">💰 Lunasi</a>
+          <button class="btn btn-sm btn-green" title="Lunasi pembayaran"
+             onclick='event.stopPropagation();openLunasiSheet(${JSON.stringify({id:t.id,nomor:t.nomor_transaksi,nama:t.pelanggan_nama,total:t.total_bayar,dibayar:t.bayar,pelanggan_id:t.pelanggan_id}).replace(/'/g,"&#39;")})'>💰 Lunasi</button>
           ` : ''}
           <a href="/api/v1/transaksi/${t.id}/struk" target="_blank"
              class="btn btn-sm btn-outline" title="Cetak struk">Struk</a>
@@ -601,14 +644,35 @@ fetch('/api/v1/auth/me').then(r => r.json()).then(d => {
   if (d.user) document.getElementById('userName').textContent = d.user.nama;
 }).catch(() => {});
 
+// Quick filter pills
+document.querySelectorAll('.qp').forEach(p => {
+  p.addEventListener('click', () => {
+    document.querySelectorAll('.qp').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    quickFilter = p.dataset.quick;
+    loadOrders(1);
+  });
+});
+
 // Check URL param for pre-filter
 const urlParams = new URLSearchParams(location.search);
-if (urlParams.get('status') === 'belum_lunas') {
-  // Not a real status filter, handled as empty status + client filter
+const qpParam = urlParams.get('quick') || urlParams.get('status');
+if (qpParam === 'belum_lunas') {
+  // default sudah belum_lunas
+} else if (qpParam === 'semua') {
+  quickFilter = 'semua';
+  document.querySelectorAll('.qp').forEach(x => x.classList.toggle('active', x.dataset.quick === 'semua'));
 }
+
+// Reload setelah lunasi
+window.addEventListener('lunasi:done', () => {
+  showToast('✓ Pembayaran tersimpan');
+  loadOrders(currentPage);
+});
 
 loadOrders(1);
 </script>
+<script src="/js/lunasi-sheet.js"></script>
 <script src="/js/nav.js"></script>
 </body>
 </html>

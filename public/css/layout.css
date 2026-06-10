@@ -198,8 +198,24 @@
   -webkit-tap-highlight-color: transparent;
 }
 .bn-item:hover, .bn-item.active { color: var(--blue); }
-.bn-icon  { font-size: 20px; line-height: 1; }
+.bn-icon  { font-size: 20px; line-height: 1; position: relative; }
 .bn-label { font-size: 10px; font-weight: 700; letter-spacing: .2px; }
+.bn-item { position: relative; }
+.bn-badge {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  margin-left: 4px;
+  background: var(--red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 99px;
+  line-height: 1.3;
+  min-width: 18px;
+  text-align: center;
+}
 
 /* ── More menu (slide-up sheet) ──────────────────────────────── */
 .more-overlay {

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="/css/layout.css"/>
+  <link rel="stylesheet" href="/css/responsive.css"/>
+  <title>Tagihan — POS Laundry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:   #2563eb; --blue-lt: #eff6ff;
+      --green:  #16a34a; --green-lt: #f0fdf4;
+      --yellow: #d97706; --yellow-lt: #fffbeb;
+      --red:    #dc2626; --red-lt:   #fef2f2;
+      --gray-1: #f8fafc; --gray-2: #f1f5f9; --gray-3: #e2e8f0;
+      --gray-5: #64748b; --gray-7: #374151; --gray-9: #111827;
+      --radius: 10px; --shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+           background: var(--gray-2); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
+
+    .page { max-width: 900px; margin: 0 auto; padding: 20px 16px; }
+    .page-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+    .page-sub { color: var(--gray-5); font-size: 13px; margin-bottom: 16px; }
+
+    .summary-card {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      color: #fff; border-radius: 14px; padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 16px rgba(220,38,38,.25);
+    }
+    .summary-card .lbl { font-size: 12px; opacity:.85; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+    .summary-card .amt { font-size: 28px; font-weight: 800; margin-top: 4px; line-height: 1.1; }
+    .summary-card .sub { font-size: 13px; opacity: .9; margin-top: 4px; }
+
+    .filter-pills {
+      display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .filter-pills::-webkit-scrollbar { display: none; }
+    .pill {
+      padding: 7px 14px; border-radius: 99px; border: 1px solid var(--gray-3);
+      background: #fff; font-size: 12px; font-weight: 700; cursor: pointer;
+      color: var(--gray-7); white-space: nowrap;
+    }
+    .pill.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+    .search-bar {
+      width: 100%; padding: 12px 14px; border-radius: 10px;
+      border: 1px solid var(--gray-3); font-size: 14px; margin-bottom: 12px;
+      background: #fff;
+    }
+    .search-bar:focus { outline: none; border-color: var(--blue); }
+
+    .tagihan-list { display: flex; flex-direction: column; gap: 10px; }
+    .tagihan-card {
+      background: #fff; border-radius: 12px; border: 1px solid var(--gray-3);
+      padding: 14px; box-shadow: var(--shadow);
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .tagihan-card.urgent { border-left: 4px solid var(--red); }
+    .tc-row1 {
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+    }
+    .tc-nama { font-size: 15px; font-weight: 700; color: var(--gray-9); }
+    .tc-nomor { font-size: 12px; color: var(--gray-5); margin-top: 2px; }
+    .tc-amt { font-size: 18px; font-weight: 800; color: var(--red); white-space: nowrap; }
+    .tc-row2 {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; color: var(--gray-5); flex-wrap: wrap; gap: 6px;
+    }
+    .tc-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 99px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+    }
+    .tc-badge.pending  { background: var(--yellow-lt); color: var(--yellow); }
+    .tc-badge.proses   { background: var(--blue-lt);   color: var(--blue); }
+    .tc-badge.selesai  { background: var(--green-lt);  color: var(--green); }
+    .tc-old {
+      background: var(--red-lt); color: var(--red);
+      padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: 700;
+    }
+    .tc-actions {
+      display: flex; gap: 8px; margin-top: 4px;
+    }
+    .tc-actions .btn {
+      flex: 1; padding: 10px; border-radius: 8px; border: none;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      min-height: 42px;
+      text-decoration: none;
+    }
+    .btn-lunasi { background: var(--green); color: #fff; }
+    .btn-lunasi:hover { background: #15803d; }
+    .btn-wa { background: #25d366; color: #fff; }
+    .btn-detail { background: #fff; border: 1px solid var(--gray-3); color: var(--gray-7); }
+
+    .empty {
+      text-align: center; padding: 40px 16px; color: var(--gray-5);
+      background: #fff; border-radius: 12px; border: 1px solid var(--gray-3);
+    }
+    .empty .ic { font-size: 48px; margin-bottom: 10px; }
+
+    #toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: #111; color: #fff; padding: 10px 20px; border-radius: 99px;
+      font-size: 13px; font-weight: 600; z-index: 9999;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    #toast.show { opacity: 1; }
+
+    @media (min-width: 768px) {
+      .summary-card { display: flex; justify-content: space-between; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div class="page-title">💰 Tagihan</div>
+  <div class="page-sub">Order belum lunas — terlama dulu</div>
+
+  <div class="summary-card">
+    <div>
+      <div class="lbl">Total Tagihan Belum Lunas</div>
+      <div class="amt" id="sumAmt">Rp 0</div>
+      <div class="sub" id="sumCount">— order</div>
+    </div>
+  </div>
+
+  <div class="filter-pills">
+    <button class="pill active" data-filter="semua">Semua</button>
+    <button class="pill" data-filter="selesai">Selesai (belum diambil)</button>
+    <button class="pill" data-filter="proses">Sedang Diproses</button>
+    <button class="pill" data-filter="pending">Pending</button>
+  </div>
+
+  <input type="text" id="searchInput" class="search-bar" placeholder="Cari nama / nomor order..."/>
+
+  <div class="tagihan-list" id="tagihanList">
+    <div class="empty">Memuat data...</div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+const fmtDate = s => s ? new Date(s).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+const daysSince = s => {
+  if (!s) return 0;
+  const d1 = new Date(s); d1.setHours(0,0,0,0);
+  const d2 = new Date(); d2.setHours(0,0,0,0);
+  return Math.max(0, Math.floor((d2 - d1) / 86400000));
+};
+
+let allData = [];
+let activeFilter = 'semua';
+let debounceTimer = null;
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+async function loadData() {
+  try {
+    const r = await fetch('/api/v1/transaksi?belum_lunas=1&sort=tanggal_asc&limit=200', { credentials: 'include' });
+    if (r.status === 401) { location.href = '/login'; return; }
+    const d = await r.json();
+    allData = d.data || [];
+    renderAll();
+  } catch {
+    document.getElementById('tagihanList').innerHTML =
+      '<div class="empty">Gagal memuat data</div>';
+  }
+}
+
+function renderAll() {
+  const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+
+  let filtered = allData.filter(t => {
+    if (activeFilter !== 'semua' && t.status !== activeFilter) return false;
+    if (q) {
+      const haystack = `${t.nomor_transaksi} ${t.pelanggan_nama || ''}`.toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+    return true;
+  });
+
+  // Summary (semua data — tidak terpengaruh filter)
+  const totalSisa = allData.reduce((s, t) => s + (Number(t.total_bayar) - Number(t.bayar)), 0);
+  document.getElementById('sumAmt').textContent = fmtRp(totalSisa);
+  document.getElementById('sumCount').textContent = `${allData.length} order belum lunas`;
+
+  const el = document.getElementById('tagihanList');
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty"><div class="ic">✨</div><div>${allData.length ? 'Tidak ada yang cocok dengan filter' : 'Semua tagihan sudah lunas'}</div></div>`;
+    return;
+  }
+
+  el.innerHTML = filtered.map(t => {
+    const sisa = Number(t.total_bayar) - Number(t.bayar);
+    const hari = daysSince(t.tanggal_masuk);
+    const urgent = hari >= 3;
+    const tel = t.pelanggan_telepon;
+    return `
+      <div class="tagihan-card ${urgent ? 'urgent' : ''}">
+        <div class="tc-row1">
+          <div style="min-width:0;flex:1">
+            <div class="tc-nama">${escapeHtml(t.pelanggan_nama || 'Non-member')}</div>
+            <div class="tc-nomor">${t.nomor_transaksi} · ${fmtDate(t.tanggal_masuk)}</div>
+          </div>
+          <div class="tc-amt">${fmtRp(sisa)}</div>
+        </div>
+        <div class="tc-row2">
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <span class="tc-badge ${t.status}">${t.status}</span>
+            ${hari > 0 ? `<span class="tc-old">${hari} hari</span>` : ''}
+          </div>
+          <div style="font-size:11px;color:var(--gray-5)">Total ${fmtRp(t.total_bayar)}</div>
+        </div>
+        <div class="tc-actions">
+          <button class="btn btn-lunasi" onclick='openLunasi(${JSON.stringify({id:t.id,nomor:t.nomor_transaksi,nama:t.pelanggan_nama,total:t.total_bayar,dibayar:t.bayar,pelanggan_id:t.pelanggan_id}).replace(/'/g,"&#39;")})'>💰 Lunasi</button>
+          ${tel ? `<button class="btn btn-wa" onclick="kirimWa(${t.id})">💬 WA</button>` : ''}
+          <a class="btn btn-detail" href="/order/detail?id=${t.id}">Detail</a>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function openLunasi(payload) {
+  if (typeof window.openLunasiSheet !== 'function') {
+    showToast('Komponen Lunasi belum siap');
+    return;
+  }
+  window.openLunasiSheet(payload);
+}
+
+async function kirimWa(id) {
+  try {
+    const r = await fetch(`/api/v1/transaksi/${id}/wa/tagihan`, { credentials: 'include' });
+    const d = await r.json();
+    if (!r.ok) { showToast('Gagal: ' + d.error); return; }
+    window.open(d.url, '_blank');
+    fetch('/api/v1/wa/log', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ telepon: d.telepon, pesan: d.teks, transaksi_id: id, status: 'terkirim' })
+    });
+  } catch { showToast('Koneksi gagal'); }
+}
+
+// ── Filter & search ────────────────────────────────────────────────────
+document.querySelectorAll('.pill').forEach(p => {
+  p.addEventListener('click', () => {
+    document.querySelectorAll('.pill').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    activeFilter = p.dataset.filter;
+    renderAll();
+  });
+});
+
+document.getElementById('searchInput').addEventListener('input', () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(renderAll, 200);
+});
+
+// ── Reload setelah lunasi ──────────────────────────────────────────────
+window.addEventListener('lunasi:done', () => {
+  showToast('✓ Pembayaran tersimpan');
+  loadData();
+});
+
+loadData();
+</script>
+<script src="/js/lunasi-sheet.js"></script>
+<script src="/js/nav.js"></script>
+</body>
+</html>

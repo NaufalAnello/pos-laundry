@@ -57,6 +57,8 @@ exports.index = async (req, res) => {
       tanggal:     req.query.tanggal,
       pelanggan_id: req.query.pelanggan_id,
       q:           req.query.q,
+      belum_lunas: req.query.belum_lunas === '1' || req.query.belum_lunas === 'true',
+      sort:        req.query.sort,
       page:        parseInt(req.query.page)  || 1,
       limit:       parseInt(req.query.limit) || 20
     };

@@ -142,6 +142,12 @@ app.get('/order', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/pages/orders.html'));
 });
 
+// Tagihan belum lunas — shortcut khusus
+app.get('/tagihan', (req, res) => {
+  if (!req.session?.userId) return res.redirect('/login');
+  res.sendFile(path.join(__dirname, '../public/pages/tagihan.html'));
+});
+
 // Detail order
 app.get('/order/detail', (req, res) => {
   if (!req.session?.userId) return res.redirect('/login');

@@ -187,7 +187,7 @@
     <button class="tab" onclick="switchTab('wa',this)">📱 WhatsApp</button>
     <button class="tab" onclick="switchTab('printer',this)">🖨️ Printer</button>
     <button class="tab" onclick="switchTab('margin',this)">📊 Margin & HPP</button>
-    <button class="tab" onclick="switchTab('master-item',this)">📋 Master Item</button>
+    <button class="tab" onclick="switchTab('master-item',this)">📋 Master Pakaian</button>
     <button class="tab" onclick="switchTab('ai',this)">🤖 AI Assistant</button>
     <button class="tab" onclick="switchTab('user',this)">👤 Manajemen User</button>
     <button class="tab" onclick="switchTab('backup',this)">💾 Backup & Restore</button>
@@ -439,8 +439,8 @@
   <div id="sec-master-item" class="tab-section">
     <div class="card">
       <div class="card-head" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>📋 Master Item Laundry</span>
-        <button class="btn btn-sm btn-blue" onclick="openMasterItemModal()">+ Tambah Item</button>
+        <span>📋 Master Pakaian</span>
+        <button class="btn btn-sm btn-blue" onclick="openMasterItemModal()">+ Tambah Pakaian</button>
       </div>
       <div class="card-body" style="padding:0;">
         <div id="masterItemTableContainer">
@@ -645,17 +645,17 @@
   </div>
 </div>
 
-<!-- Master Item Modal -->
+<!-- Master Pakaian Modal -->
 <div class="modal-bg" id="masterItemModal">
   <div class="modal">
     <div class="modal-head">
-      <h3 id="masterItemModalTitle">Tambah Master Item</h3>
+      <h3 id="masterItemModalTitle">Tambah Master Pakaian</h3>
       <button class="btn-ghost" onclick="closeMasterItemModal()">✕</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="miEditId"/>
       <div class="field">
-        <label>Nama Item *</label>
+        <label>Nama Pakaian *</label>
         <input id="miNama" type="text" placeholder="Contoh: Baju, Celana, Handuk..." maxlength="100"/>
       </div>
       <div class="field">
@@ -1179,8 +1179,8 @@ function renderMasterItemsTable() {
       <tr>
         <td colspan="3" style="text-align:center;padding:40px;color:var(--gray-5);">
           <div style="font-size:40px;margin-bottom:10px;">📦</div>
-          Belum ada master item.<br/>
-          <button class="btn btn-sm btn-blue" onclick="openMasterItemModal()" style="margin-top:12px;">+ Tambah Item Pertama</button>
+          Belum ada master pakaian.<br/>
+          <button class="btn btn-sm btn-blue" onclick="openMasterItemModal()" style="margin-top:12px;">+ Tambah Pakaian Pertama</button>
         </td>
       </tr>
     `;
@@ -1213,12 +1213,12 @@ function openMasterItemModal(editId = null) {
     const item = masterItems.find(m => m.id === editId);
     if (!item) return;
 
-    title.textContent = 'Edit Master Item';
+    title.textContent = 'Edit Master Pakaian';
     idInput.value = item.id;
     namaInput.value = item.nama;
     satuanSelect.value = item.satuan;
   } else {
-    title.textContent = 'Tambah Master Item';
+    title.textContent = 'Tambah Master Pakaian';
     idInput.value = '';
     namaInput.value = '';
     satuanSelect.value = 'pcs';
@@ -1245,7 +1245,7 @@ async function saveMasterItem() {
   errDiv.textContent = '';
 
   if (!nama) {
-    errDiv.textContent = 'Nama item harus diisi';
+    errDiv.textContent = 'Nama pakaian harus diisi';
     return;
   }
 
@@ -1258,11 +1258,11 @@ async function saveMasterItem() {
 
   try {
     await api(url, { method, body: JSON.stringify({ nama, satuan }) });
-    toast(isEdit ? 'Master item berhasil diperbarui' : 'Master item berhasil ditambahkan');
+    toast(isEdit ? 'Master pakaian berhasil diperbarui' : 'Master pakaian berhasil ditambahkan');
     closeMasterItemModal();
     loadMasterItems();
   } catch (err) {
-    errDiv.textContent = err.message || 'Gagal menyimpan master item';
+    errDiv.textContent = err.message || 'Gagal menyimpan master pakaian';
   } finally {
     saveBtn.disabled = false;
     saveBtn.textContent = 'Simpan';
@@ -1274,7 +1274,7 @@ function editMasterItem(id) {
 }
 
 async function deleteMasterItem(id, nama) {
-  if (!confirm(`Hapus master item "${nama}"?\n\nItem ini tidak akan muncul lagi di grid rincian order baru.`)) {
+  if (!confirm(`Hapus master pakaian "${nama}"?\n\nPakaian ini tidak akan muncul lagi di grid rincian order baru.`)) {
     return;
   }
 

@@ -57,7 +57,7 @@ exports.index = async (req, res) => {
           't.id', 't.nomor_transaksi', 't.status',
           't.total_bayar', 't.bayar', 't.tanggal_masuk', 't.tanggal_selesai',
           't.antar_jemput', 't.metode_bayar',
-          'p.nama as pelanggan_nama', 'p.telepon as pelanggan_telepon',
+          'p.id as pelanggan_id', 'p.nama as pelanggan_nama', 'p.telepon as pelanggan_telepon',
           'u.nama as kasir_nama'
         ),
 
@@ -73,7 +73,7 @@ exports.index = async (req, res) => {
           't.id', 't.nomor_transaksi', 't.status',
           't.total_bayar', 't.bayar', 't.total_dibayar',
           't.tanggal_masuk', 't.tanggal_selesai', 't.updated_at',
-          'p.nama as pelanggan_nama', 'p.telepon as pelanggan_telepon',
+          'p.id as pelanggan_id', 'p.nama as pelanggan_nama', 'p.telepon as pelanggan_telepon',
           'u.nama as kasir_nama'
         ),
 
@@ -89,7 +89,7 @@ exports.index = async (req, res) => {
           't.id', 't.nomor_transaksi', 't.status',
           't.total_bayar', 't.bayar', 't.total_dibayar',
           't.tanggal_masuk', 't.tanggal_selesai', 't.updated_at',
-          'p.nama as pelanggan_nama', 'p.telepon as pelanggan_telepon',
+          'p.id as pelanggan_id', 'p.nama as pelanggan_nama', 'p.telepon as pelanggan_telepon',
           'u.nama as kasir_nama'
         ),
 

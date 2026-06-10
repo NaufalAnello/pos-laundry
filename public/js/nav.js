@@ -13,12 +13,14 @@
 
   const bnActive = (href) => {
     if (href === '/') return p === '/';
-    if (href === '/order') return p === '/order' || p === '/order/baru';
+    if (href === '/order/baru') return p === '/order/baru';
+    if (href === '/order') return p === '/order';
+    if (href === '/tagihan') return p === '/tagihan';
     return p === href;
   };
 
   const isMoreActive = () => {
-    const main = ['/', '/order', '/order/baru', '/wa-center', '/pelanggan'];
+    const main = ['/', '/order', '/order/baru', '/tagihan'];
     return !main.includes(p);
   };
 
@@ -29,13 +31,14 @@
       items: [
         { href: '/',          icon: '🏠', label: 'Dashboard'   },
         { href: '/order/baru', icon: '➕', label: 'Order Baru'  },
-        { href: '/order',      icon: '📋', label: 'Kelola Order' },
+        { href: '/order',      icon: '📋', label: 'Antrian'    },
+        { href: '/tagihan',    icon: '💰', label: 'Tagihan'    },
       ]
     },
     {
       group: 'Keuangan',
       items: [
-        { href: '/kas',     icon: '💰', label: 'Buku Kas' },
+        { href: '/kas',     icon: '📒', label: 'Buku Kas' },
         { href: '/deposit', icon: '💳', label: 'Deposit'  },
         { href: '/laporan', icon: '📊', label: 'Laporan'  },
       ]
@@ -59,19 +62,21 @@
     }
   ];
 
+  // Bottom nav HP — fokus operasional harian
   const BOTTOM = [
-    { href: '/',          icon: '🏠', label: 'Home'     },
-    { href: '/order',     icon: '📋', label: 'Order'    },
-    { href: '/wa-center', icon: '💬', label: 'WhatsApp' },
-    { href: '/pelanggan', icon: '👤', label: 'Pelanggan'},
+    { href: '/',           icon: '🏠', label: 'Home'    },
+    { href: '/order/baru', icon: '➕', label: 'Order'   },
+    { href: '/order',      icon: '📋', label: 'Antrian' },
+    { href: '/tagihan',    icon: '💰', label: 'Tagihan', badge: 'tagihan' },
   ];
 
   const MORE_ITEMS = [
-    { href: '/order/baru', icon: '➕', label: 'Order Baru' },
-    { href: '/kas',        icon: '💰', label: 'Buku Kas'   },
+    { href: '/kas',        icon: '📒', label: 'Buku Kas'   },
     { href: '/deposit',    icon: '💳', label: 'Deposit'    },
     { href: '/promo',      icon: '🎁', label: 'Promo'      },
     { href: '/poin',       icon: '⭐', label: 'Poin'       },
+    { href: '/pelanggan',  icon: '👤', label: 'Pelanggan'  },
+    { href: '/wa-center',  icon: '💬', label: 'Pusat WA'   },
     { href: '/laporan',    icon: '📊', label: 'Laporan'    },
     { href: '/layanan',    icon: '🧺', label: 'Layanan'    },
     { href: '/ai-insight', icon: '🤖', label: 'AI Insight'  },
@@ -123,10 +128,11 @@
     <a href="${it.href}" class="${a('bn-item', bnActive(it.href))}">
       <span class="bn-icon">${it.icon}</span>
       <span class="bn-label">${it.label}</span>
+      ${it.badge ? `<span class="bn-badge" id="bnBadge-${it.badge}" style="display:none">0</span>` : ''}
     </a>`).join('')}
   <button class="${a('bn-item', isMoreActive())}" id="bn-more" onclick="openMoreSheet()" style="cursor:pointer">
     <span class="bn-icon">⋯</span>
-    <span class="bn-label">More</span>
+    <span class="bn-label">Lainnya</span>
   </button>
 </nav>
 <div class="more-overlay" id="moreOverlay" onclick="closeMoreSheet()"></div>
@@ -174,6 +180,26 @@
       if (legacy) legacy.textContent = name;
     })
     .catch(() => {});
+
+  /* ── Load badge: tagihan belum lunas ──────────────────── */
+  const refreshTagihanBadge = () => {
+    fetch('/api/v1/dashboard', { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        const n = Number(d?.tagihan_belum_lunas || 0);
+        const el = document.getElementById('bnBadge-tagihan');
+        if (!el) return;
+        if (n > 0) {
+          el.textContent = n > 99 ? '99+' : n;
+          el.style.display = '';
+        } else {
+          el.style.display = 'none';
+        }
+      })
+      .catch(() => {});
+  };
+  refreshTagihanBadge();
+  window.posRefreshBadges = refreshTagihanBadge;
 
   /* ── Exposed globals ───────────────────────────────────── */
   window.posLogout = async () => {
