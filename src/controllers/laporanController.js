@@ -583,33 +583,32 @@ exports.antarJemput = async (req, res) => {
     const { start, end } = getDateRange(req);
 
     // Ambil semua rute antar jemput dalam periode
-    const rutes = await db('rute_antar_jemput as r')
-      .leftJoin('transaksi as t', 't.id', 'r.transaksi_id')
-      .leftJoin('pelanggan as p', 'p.id', 't.pelanggan_id')
-      .whereRaw("date(r.tanggal/1000,'unixepoch') >= ?", [start])
-      .whereRaw("date(r.tanggal/1000,'unixepoch') <= ?", [end])
-      .whereNotIn('t.status', ['dibatalkan'])
-      .orderBy('r.tanggal', 'desc')
+    const rutes = await db('rute_antar_jemput')
+      .whereRaw("date(tanggal) >= ?", [start])
+      .whereRaw("date(tanggal) <= ?", [end])
+      .orderBy('tanggal', 'desc')
       .select(
-        'r.id',
-        'r.tanggal',
-        'r.transaksi_id',
-        't.nomor_transaksi',
-        'p.nama as pelanggan_nama',
-        'r.total_jarak_km',
-        'r.tarif_per_km',
-        'r.total_tarif_pelanggan',
-        'r.total_hpp',
-        'r.harga_bbm_per_liter',
-        'r.km_per_liter',
-        'r.aus_ban_per_km',
-        'r.servis_per_km',
-        'r.gaji_per_km'
+        'id',
+        'tanggal',
+        'pelanggan_data',
+        'urutan_rute',
+        'total_jarak_km',
+        'biaya_bbm',
+        'biaya_waktu',
+        'biaya_aus',
+        'total_hpp',
+        'hpp_per_pelanggan',
+        'tarif_dikenakan',
+        'snapshot_harga_bbm',
+        'snapshot_konsumsi_bbm',
+        'snapshot_biaya_aus',
+        'snapshot_kecepatan',
+        'snapshot_nilai_waktu'
       );
 
     // Hitung ringkasan
     const totalOrder = rutes.length;
-    const totalTarifDiterima = rutes.reduce((sum, r) => sum + Number(r.total_tarif_pelanggan || 0), 0);
+    const totalTarifDiterima = rutes.reduce((sum, r) => sum + Number(r.tarif_dikenakan || 0), 0);
     const totalHPP = rutes.reduce((sum, r) => sum + Number(r.total_hpp || 0), 0);
     const profit = totalTarifDiterima - totalHPP;
     const marginPersen = totalTarifDiterima > 0 ? (profit / totalTarifDiterima) * 100 : 0;
@@ -626,27 +625,57 @@ exports.antarJemput = async (req, res) => {
         total_jarak_km: totalJarak,
         rata_jarak_per_order: totalOrder > 0 ? totalJarak / totalOrder : 0
       },
-      detail: rutes.map(r => ({
-        id: r.id,
-        tanggal: r.tanggal,
-        nomor_transaksi: r.nomor_transaksi,
-        pelanggan: r.pelanggan_nama || 'Walk-in',
-        jarak_km: Number(r.total_jarak_km || 0),
-        tarif_per_km: Number(r.tarif_per_km || 0),
-        tarif_total: Number(r.total_tarif_pelanggan || 0),
-        hpp_total: Number(r.total_hpp || 0),
-        margin: Number(r.total_tarif_pelanggan || 0) - Number(r.total_hpp || 0),
-        margin_persen: Number(r.total_tarif_pelanggan || 0) > 0
-          ? ((Number(r.total_tarif_pelanggan || 0) - Number(r.total_hpp || 0)) / Number(r.total_tarif_pelanggan || 0)) * 100
-          : 0,
-        // Breakdown HPP
-        hpp_detail: {
-          bbm: (Number(r.total_jarak_km || 0) / Number(r.km_per_liter || 1)) * Number(r.harga_bbm_per_liter || 0),
-          aus_ban: Number(r.total_jarak_km || 0) * Number(r.aus_ban_per_km || 0),
-          servis: Number(r.total_jarak_km || 0) * Number(r.servis_per_km || 0),
-          gaji: Number(r.total_jarak_km || 0) * Number(r.gaji_per_km || 0)
+      detail: rutes.map(r => {
+        // Parse pelanggan_data JSON
+        let pelangganList = [];
+        try {
+          pelangganList = JSON.parse(r.pelanggan_data || '[]');
+        } catch (e) {
+          pelangganList = [];
         }
-      }))
+
+        // Gabungkan nama pelanggan
+        const namaPelanggan = pelangganList.length > 0
+          ? pelangganList.map(p => p.nama).join(', ')
+          : 'Walk-in';
+
+        // Hitung tarif per km
+        const tarifPerKm = Number(r.total_jarak_km || 0) > 0
+          ? Number(r.tarif_dikenakan || 0) / Number(r.total_jarak_km || 0)
+          : 0;
+
+        const tarifTotal = Number(r.tarif_dikenakan || 0);
+        const hppTotal = Number(r.total_hpp || 0);
+        const margin = tarifTotal - hppTotal;
+        const marginPersen = tarifTotal > 0 ? (margin / tarifTotal) * 100 : 0;
+
+        return {
+          id: r.id,
+          tanggal: r.tanggal,
+          pelanggan: namaPelanggan,
+          jumlah_pelanggan: pelangganList.length,
+          jarak_km: Number(r.total_jarak_km || 0),
+          tarif_per_km: tarifPerKm,
+          tarif_total: tarifTotal,
+          hpp_total: hppTotal,
+          margin: margin,
+          margin_persen: marginPersen,
+          // Breakdown HPP
+          hpp_detail: {
+            bbm: Number(r.biaya_bbm || 0),
+            aus: Number(r.biaya_aus || 0),
+            waktu: Number(r.biaya_waktu || 0)
+          },
+          // Snapshot parameter
+          snapshot: {
+            harga_bbm: Number(r.snapshot_harga_bbm || 0),
+            konsumsi_bbm: Number(r.snapshot_konsumsi_bbm || 0),
+            biaya_aus: Number(r.snapshot_biaya_aus || 0),
+            kecepatan: Number(r.snapshot_kecepatan || 0),
+            nilai_waktu: Number(r.snapshot_nilai_waktu || 0)
+          }
+        };
+      })
     });
   } catch (err) {
     console.error('[laporan:antarJemput]', err);

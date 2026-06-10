@@ -479,7 +479,7 @@
           <thead>
             <tr>
               <th>Tanggal</th>
-              <th>No. Transaksi</th>
+              <th>ID Rute</th>
               <th>Pelanggan</th>
               <th>Jarak (km)</th>
               <th>Tarif/km</th>
@@ -1189,12 +1189,12 @@ async function loadAntarJemput() {
     }
 
     tbody.innerHTML = data.detail.map(r => {
-      const tanggal = new Date(Number(r.tanggal)).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+      const tanggal = new Date(r.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
       const marginColor = r.margin >= 0 ? 'var(--green)' : 'var(--red)';
       return `<tr>
         <td>${tanggal}</td>
-        <td style="font-weight:600;color:var(--blue)">${esc(r.nomor_transaksi)}</td>
-        <td>${esc(r.pelanggan)}</td>
+        <td style="font-weight:600;color:var(--blue)">Rute #${r.id}</td>
+        <td>${esc(r.pelanggan)} ${r.jumlah_pelanggan > 1 ? '<span style="font-size:10px;opacity:0.7">('+r.jumlah_pelanggan+' pel.)</span>' : ''}</td>
         <td class="num-cell">${r.jarak_km.toFixed(1)} km</td>
         <td class="num-cell">${rupiah(r.tarif_per_km)}</td>
         <td class="num-cell">${rupiah(r.tarif_total)}</td>
