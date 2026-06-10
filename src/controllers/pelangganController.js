@@ -136,6 +136,48 @@ exports.show = async (req, res) => {
   }
 };
 
+// ── GET /api/v1/pelanggan/:id/order-terakhir ─────────────────────────────────
+// Dipakai oleh fitur Quick Repeat Order di form order baru.
+// Return: { data: { id, nomor_transaksi, tanggal_masuk, total, layanan: [...] } | null }
+exports.orderTerakhir = async (req, res) => {
+  try {
+    const trx = await db('transaksi')
+      .where('pelanggan_id', req.params.id)
+      .whereNot('status', 'dibatalkan')
+      .orderBy('id', 'desc')
+      .first('id', 'nomor_transaksi', 'tanggal_masuk', 'total_bayar', 'status');
+
+    if (!trx) return res.json({ data: null });
+
+    const layanan = await db('detail_transaksi as d')
+      .leftJoin('layanan as l', 'l.id', 'd.layanan_id')
+      .where('d.transaksi_id', trx.id)
+      // Hanya layanan yang masih aktif (id ada) — yang sudah dihapus diabaikan biar
+      // tidak gagal saat di-repeat
+      .whereNotNull('l.id')
+      .select(
+        'd.layanan_id',
+        'd.nama_layanan as nama',
+        'd.jumlah',
+        'd.satuan',
+        'd.harga_satuan as harga'
+      );
+
+    res.json({
+      data: {
+        id: trx.id,
+        nomor_transaksi: trx.nomor_transaksi,
+        tanggal_masuk: trx.tanggal_masuk,
+        total: Number(trx.total_bayar),
+        layanan
+      }
+    });
+  } catch (err) {
+    console.error('[pelanggan:orderTerakhir]', err);
+    res.status(500).json({ error: 'Gagal mengambil order terakhir pelanggan' });
+  }
+};
+
 // ── PUT /api/v1/pelanggan/:id ─────────────────────────────────────────────────
 exports.update = async (req, res) => {
   const { error, value } = pelangganSchema.validate(req.body, { abortEarly: false });

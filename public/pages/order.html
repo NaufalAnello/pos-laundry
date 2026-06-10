@@ -245,6 +245,53 @@
     .ci-clear { background: none; border: none; cursor: pointer;
                 color: var(--gray-5); font-size: 18px; padding: 4px; }
 
+    /* ── Quick Repeat Order suggestion ── */
+    .repeat-card {
+      margin-top: 10px;
+      border-radius: 10px; padding: 12px 14px;
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 1.5px solid #f59e0b;
+      box-shadow: 0 2px 8px rgba(245,158,11,.15);
+      animation: repeatPop .25s ease-out;
+    }
+    @keyframes repeatPop {
+      from { transform: translateY(-4px); opacity: 0; }
+      to   { transform: none; opacity: 1; }
+    }
+    .repeat-head {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 800; color: #92400e;
+      margin-bottom: 6px;
+    }
+    .repeat-bolt { font-size: 16px; }
+    .repeat-title { letter-spacing: .2px; }
+    .repeat-summary {
+      font-size: 14px; font-weight: 700; color: #78350f;
+      line-height: 1.35;
+    }
+    .repeat-meta {
+      font-size: 12px; color: #92400e; opacity: .85; margin-top: 3px;
+    }
+    .repeat-actions {
+      display: flex; gap: 8px; margin-top: 10px;
+    }
+    .btn-repeat-yes {
+      flex: 1; padding: 10px 14px;
+      background: var(--green); color: #fff; border: none;
+      border-radius: 8px; font-size: 13px; font-weight: 800;
+      cursor: pointer; min-height: 42px;
+    }
+    .btn-repeat-yes:hover { opacity: .9; }
+    .btn-repeat-yes:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-repeat-no {
+      padding: 10px 16px;
+      background: #fff; color: #78350f;
+      border: 1.5px solid #fbbf24; border-radius: 8px;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      min-height: 42px;
+    }
+    .btn-repeat-no:hover { background: #fffbeb; }
+
     /* ── Items table ── */
     .item-row {
       display: grid;
@@ -745,6 +792,22 @@
             <div class="ci-poin" id="ciPoin">—</div>
           </div>
           <button class="ci-clear" id="clearCustomer" title="Hapus pilihan">✕</button>
+        </div>
+
+        <!-- Quick Repeat Order — suggestion order seperti terakhir -->
+        <div id="repeatSuggestion" class="repeat-card" style="display:none">
+          <div class="repeat-head">
+            <span class="repeat-bolt">⚡</span>
+            <span class="repeat-title">Order seperti terakhir kali?</span>
+          </div>
+          <div class="repeat-body">
+            <div class="repeat-summary" id="repeatSummary">—</div>
+            <div class="repeat-meta" id="repeatMeta">—</div>
+          </div>
+          <div class="repeat-actions">
+            <button type="button" id="btnRepeatYes" class="btn-repeat-yes">✓ Ya, Ulangi Order</button>
+            <button type="button" id="btnRepeatNo" class="btn-repeat-no">Tidak</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1291,6 +1354,104 @@ async function selectCustomer(p) {
   updateDepositPanel();
   updatePaymentPreview();
   calcTotal();
+
+  // Quick Repeat Order — cek order terakhir pelanggan
+  loadRepeatSuggestion(p.id);
+}
+
+// ════════════════════════════════════════════════════════
+// QUICK REPEAT ORDER
+// ════════════════════════════════════════════════════════
+let lastOrderCache = null; // { layanan: [...], total, tanggal_masuk, nomor_transaksi }
+
+function hideRepeatSuggestion() {
+  document.getElementById('repeatSuggestion').style.display = 'none';
+  lastOrderCache = null;
+}
+
+async function loadRepeatSuggestion(pelangganId) {
+  hideRepeatSuggestion();
+  try {
+    const r = await apiFetch(`/api/v1/pelanggan/${pelangganId}/order-terakhir`);
+    const last = r?.data;
+    if (!last || !last.layanan || !last.layanan.length) return;
+
+    lastOrderCache = last;
+
+    // Format ringkasan
+    let summary;
+    if (last.layanan.length > 3) {
+      summary = `${last.layanan.length} layanan · Rp ${fmtRp(last.total)}`;
+    } else {
+      summary = last.layanan
+        .map(l => `${l.nama} · ${l.jumlah} ${l.satuan || ''}`.trim())
+        .join(' + ') + ` · Rp ${fmtRp(last.total)}`;
+    }
+    document.getElementById('repeatSummary').textContent = summary;
+    document.getElementById('repeatMeta').textContent =
+      `${last.nomor_transaksi} · ${formatRelativeDate(last.tanggal_masuk)}`;
+    document.getElementById('repeatSuggestion').style.display = '';
+  } catch (e) {
+    // Silently ignore — fitur ini opsional
+  }
+}
+
+function formatRelativeDate(ms) {
+  if (!ms) return '—';
+  const d = new Date(Number(ms));
+  const now = new Date();
+  const dayMs = 86400000;
+  const diff = Math.floor((now.setHours(0,0,0,0) - new Date(d).setHours(0,0,0,0)) / dayMs);
+  if (diff <= 0) return 'hari ini';
+  if (diff === 1) return 'kemarin';
+  if (diff < 7)   return `${diff} hari lalu`;
+  if (diff < 30)  return `${Math.floor(diff/7)} minggu lalu`;
+  return d.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function applyRepeatOrder() {
+  if (!lastOrderCache) return;
+  const btn = document.getElementById('btnRepeatYes');
+  btn.disabled = true;
+
+  // 1. Hapus semua item row yang ada
+  state.items = [];
+  document.getElementById('itemsContainer').innerHTML = '';
+  itemIdSeq = 0;
+
+  // 2. Tambah ulang setiap layanan dari order terakhir
+  //    addItemRow dengan defaults layanan_id → akan auto-fill nama via layananList.find,
+  //    set selectedLayanan & filled class, lalu kita override jumlah & trigger updateRow.
+  let added = 0;
+  lastOrderCache.layanan.forEach(l => {
+    const masih = layananList.find(x => x.id === l.layanan_id);
+    if (!masih) return; // layanan sudah dihapus → skip
+    addItemRow({
+      layanan_id: l.layanan_id,
+      jumlah: Number(l.jumlah) || 1,
+      satuan: l.satuan || masih.satuan
+    });
+    added++;
+  });
+
+  if (added === 0) {
+    showToast('Layanan order terakhir sudah tidak tersedia', 'error');
+    btn.disabled = false;
+    return;
+  }
+
+  // 3. Update estimasi dari sekarang (default jadwal sudah besok dari init)
+  updateEstimasiSelesai();
+  calcTotal();
+  updateItemCount();
+
+  // 4. Sembunyikan suggestion + lompat ke ringkasan/bayar
+  hideRepeatSuggestion();
+  showToast(`✓ ${added} layanan diulang dari order terakhir`);
+
+  const target = document.querySelector('.panel-right') || document.getElementById('sumTotal');
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  btn.disabled = false;
 }
 
 document.getElementById('clearCustomer').addEventListener('click', () => {
@@ -1299,6 +1460,7 @@ document.getElementById('clearCustomer').addEventListener('click', () => {
   state.usePoin = false;
   state.depositSaldo = 0;
   customerInfo.classList.add('hidden');
+  hideRepeatSuggestion();
   document.getElementById('usePoin').checked  = false;
   document.getElementById('usePoin').disabled = true;
   document.getElementById('kirimWa').checked  = false;
@@ -1745,6 +1907,10 @@ function escapeRegex(str) {
 }
 
 document.getElementById('addItemBtn').addEventListener('click', () => addItemRow());
+
+// Quick Repeat Order — tombol konfirmasi & tolak
+document.getElementById('btnRepeatYes').addEventListener('click', applyRepeatOrder);
+document.getElementById('btnRepeatNo').addEventListener('click', hideRepeatSuggestion);
 
 function updateItemCount() {
   const n = document.querySelectorAll('.item-row').length;
