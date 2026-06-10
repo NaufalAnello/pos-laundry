@@ -172,6 +172,20 @@
         overflow-y: auto;
         border-radius: 16px 16px 0 0;
       }
+
+      /* Table di settings — wrap dengan scroll, font lebih kecil */
+      #masterItemTableContainer,
+      .card .card-body table,
+      .card table { display: table; }
+      .card-body { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .card-body table { min-width: 0; width: 100%; font-size: 12px; }
+      .card-body th, .card-body td { padding: 8px 10px !important; }
+      .save-bar { gap: 8px; }
+
+      /* Form: input/select min height 44px (sebagian sudah dari responsive.css global,
+         pertegas untuk #marginDefault yang punya inline max-width:160px) */
+      input[type=number], input[type=text], select { width: 100%; }
+      input[style*="max-width:160px"] { max-width: 100% !important; }
     }
   </style>
 </head>

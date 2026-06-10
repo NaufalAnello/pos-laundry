@@ -78,7 +78,11 @@
     .card-head { padding:14px 18px; border-bottom:1px solid var(--gray-3); font-weight:700; font-size:14px; display:flex; justify-content:space-between; align-items:center; }
     .card-body { padding:18px; }
     /* Tabel lebar (mis. profitabilitas 6 kolom) bisa di-scroll horizontal di HP, tdk overflow halaman */
-    #profitBody, #distribusiBody { overflow-x:auto; }
+    #profitBody, #distribusiBody, #layananTableBody, #pelangganTableBody {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      max-width: 100%;
+    }
     #profitBody table, #distribusiBody table { min-width:520px; }
 
     .chart-wrap { position:relative; height:240px; }
@@ -172,8 +176,13 @@
 
       .chart-wrap { height: 200px; }
 
-      /* Tables scroll horizontal di HP - tetap pakai pendekatan scroll utk laporan */
+      /* Tables scroll horizontal di dalam card-nya (tidak overflow page) */
       #profitBody table, #distribusiBody table, #layananTableBody table { min-width: 480px; }
+      /* Font lebih kecil supaya kolom muat lebih banyak */
+      #profitBody td, #distribusiBody td, #layananTableBody td,
+      #profitBody th, #distribusiBody th, #layananTableBody th {
+        font-size: 12px; padding: 8px 10px;
+      }
     }
   </style>
 </head>

@@ -26,6 +26,11 @@
       box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
       animation: slideUp .35s ease;
     }
+    @media (max-width: 480px) {
+      .card { padding: 32px 22px; border-radius: 14px; }
+      .brand-icon { font-size: 44px; }
+      .brand h1 { font-size: 20px; }
+    }
 
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(24px); }
@@ -71,14 +76,15 @@
     }
     .input-wrap input {
       width: 100%;
-      padding: 11px 44px 11px 14px;
+      padding: 13px 44px 13px 14px;
       border: 1.5px solid #d1d5db;
       border-radius: 8px;
-      font-size: 15px;
+      font-size: 16px; /* cegah iOS auto-zoom */
       color: #111827;
       background: #f9fafb;
       transition: border-color .2s, box-shadow .2s, background .2s;
       outline: none;
+      min-height: 44px;
     }
     .input-wrap input:focus {
       border-color: #3b82f6;

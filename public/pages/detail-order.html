@@ -101,6 +101,18 @@
       .actions-grid { grid-template-columns: 1fr 1fr !important; }
       .actions-grid .btn,
       .actions-grid button { min-height: 44px; font-size: 13px; }
+
+      /* Modal jadi bottom-sheet di HP — modal inline detail-order */
+      #modalHapus, #modalLunasi, #modalBiaya, #modalDiskon {
+        align-items: flex-end !important;
+        padding: 0 !important;
+      }
+      #modalHapus > div, #modalLunasi > div, #modalBiaya > div, #modalDiskon > div {
+        max-width: 100% !important;
+        border-radius: 16px 16px 0 0 !important;
+        max-height: 92vh !important;
+        overflow-y: auto !important;
+      }
     }
 
     /* ── Card ── */

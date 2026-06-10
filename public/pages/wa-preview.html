@@ -93,10 +93,13 @@
     /* ── Edit area ── */
     .msg-editor {
       width: 100%; border: 1.5px solid var(--gray-3); border-radius: 8px;
-      padding: 10px 12px; font-size: 13px; line-height: 1.6;
+      padding: 12px 14px; font-size: 14px; line-height: 1.6;
       font-family: inherit; resize: vertical; min-height: 200px;
       color: var(--gray-9); background: var(--gray-2); outline: none;
       transition: border-color .15s, box-shadow .15s;
+    }
+    @media (max-width: 767px) {
+      .msg-editor { font-size: 16px; } /* cegah iOS auto-zoom */
     }
     .msg-editor:focus {
       border-color: var(--wa-dk); background: #fff;
