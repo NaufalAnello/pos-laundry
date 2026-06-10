@@ -6,331 +6,355 @@
   <link rel="stylesheet" href="/css/design-system.css"/>
   <link rel="stylesheet" href="/css/layout.css"/>
   <link rel="stylesheet" href="/css/responsive.css"/>
-  <title>Kelola Order — POS Laundry</title>
+  <title>Antrian — POS Laundry</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --blue:   #2563eb; --blue-dk: #1d4ed8; --blue-lt: #eff6ff;
-      --green:  #16a34a; --green-lt: #f0fdf4;
-      --yellow: #d97706; --yellow-lt: #fffbeb;
-      --red:    #dc2626; --red-lt:   #fef2f2;
-      --gray-1: #f8fafc; --gray-2: #f1f5f9; --gray-3: #e2e8f0;
-      --gray-5: #64748b; --gray-7: #374151; --gray-9: #111827;
-      --radius: 10px; --shadow: 0 1px 4px rgba(0,0,0,.08);
-    }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-           background: var(--gray-2); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
+    body { font-family: var(--font); background: var(--gray-2); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
 
-    /* ── Header ── */
-    header {
-      background: #fff; border-bottom: 1px solid var(--gray-3);
-      padding: 0 20px; height: 56px;
-      display: flex; align-items: center; gap: 20px;
+    .page { max-width: 1200px; margin: 0 auto; padding: 0 0 100px; }
+
+    /* ── Sticky Header ─────────────────────────────────── */
+    .ord-head {
       position: sticky; top: 0; z-index: 20;
-      box-shadow: var(--shadow);
+      background: #fff; border-bottom: 1px solid var(--gray-3);
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
     }
-    .logo { font-size: 16px; font-weight: 800; color: var(--blue); white-space: nowrap; }
-    header nav { display: flex; gap: 4px; flex: 1; }
-    header nav a {
-      padding: 6px 14px; border-radius: 8px; text-decoration: none;
-      font-size: 13px; font-weight: 600; color: var(--gray-7); transition: background .15s;
+    .ord-head-top {
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 14px 10px;
     }
-    header nav a:hover { background: var(--gray-2); }
-    header nav a.active { background: var(--blue-lt); color: var(--blue); }
-    .header-user { font-size: 13px; color: var(--gray-5); display: flex; align-items: center; gap: 8px; }
-    .logout-btn { padding: 5px 12px; border: 1px solid var(--gray-3); border-radius: 7px;
-                  background: none; font-size: 13px; cursor: pointer; color: var(--gray-7); }
-    .logout-btn:hover { background: var(--gray-2); }
+    .ord-back {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: transparent; color: var(--gray-7); border: none;
+      text-decoration: none; font-size: 20px; cursor: pointer;
+      flex-shrink: 0;
+    }
+    .ord-back:hover { background: var(--gray-2); }
+    .ord-head-title {
+      flex: 1; font-size: 17px; font-weight: 800; color: var(--gray-9);
+      min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ord-search-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: transparent; color: var(--gray-7); border: none;
+      cursor: pointer; font-size: 18px; flex-shrink: 0;
+    }
+    .ord-search-btn:hover { background: var(--gray-2); }
+    .ord-search-btn.active { background: var(--primary-lt); color: var(--primary); }
 
-    /* ── Page ── */
-    .page { max-width: 1400px; margin: 0 auto; padding: 20px 16px; }
-    .page-title { font-size: 20px; font-weight: 800; margin-bottom: 12px; }
-
-    /* ── Quick filter pills ── */
-    .quick-pills {
-      display: flex; gap: 8px; margin-bottom: 14px;
-      overflow-x: auto; padding-bottom: 4px;
+    .ord-search-wrap {
+      padding: 0 14px 10px; display: none;
     }
-    .quick-pills::-webkit-scrollbar { display: none; }
-    .qp {
-      padding: 7px 14px; border-radius: 99px;
+    .ord-search-wrap.open { display: block; }
+    .ord-search-wrap input {
+      width: 100%; min-height: 44px; padding: 10px 14px;
+      border: 1px solid var(--gray-3); border-radius: 10px;
+      background: var(--gray-1); font-size: 14px; font-family: inherit;
+      outline: none;
+    }
+    .ord-search-wrap input:focus { border-color: var(--primary); background: #fff; }
+
+    /* ── Filter pills ───────────────────────────────────── */
+    .ord-pills {
+      display: flex; gap: 8px; padding: 0 14px 12px;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .ord-pills::-webkit-scrollbar { display: none; }
+    .ord-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 99px;
       border: 1px solid var(--gray-3); background: #fff;
-      font-size: 13px; font-weight: 700; cursor: pointer;
-      color: var(--gray-7); white-space: nowrap;
+      font-size: 12px; font-weight: 700; color: var(--gray-7);
+      cursor: pointer; white-space: nowrap; min-height: 36px;
+      font-family: inherit; transition: all .15s;
     }
-    .qp.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .ord-pill:active { transform: scale(.97); }
+    .ord-pill.active { background: var(--gray-9); color: #fff; border-color: var(--gray-9); }
+    .ord-pill .cnt {
+      background: var(--gray-2); color: var(--gray-6);
+      padding: 1px 7px; border-radius: 99px;
+      font-size: 10px; font-weight: 800;
+    }
+    .ord-pill.active .cnt { background: rgba(255,255,255,.25); color: #fff; }
+    .ord-pill.danger.active { background: var(--danger); border-color: var(--danger); }
+    .ord-pill.warning.active { background: var(--warning); border-color: var(--warning); }
 
-    /* ── Filter bar ── */
-    .filter-bar {
-      background: #fff; border: 1px solid var(--gray-3); border-radius: var(--radius);
-      box-shadow: var(--shadow); padding: 14px 16px; margin-bottom: 16px;
-      display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;
-    }
-    .filter-group { display: flex; flex-direction: column; gap: 4px; }
-    .filter-label { font-size: 11px; font-weight: 700; color: var(--gray-5); text-transform: uppercase; letter-spacing: .4px; }
-    .filter-input, .filter-select {
-      padding: 7px 10px; border: 1px solid var(--gray-3); border-radius: 7px;
-      font-size: 13px; background: #fff; color: var(--gray-9);
-      outline: none; transition: border-color .15s;
-    }
-    .filter-input:focus, .filter-select:focus { border-color: var(--blue); }
-    .filter-search { min-width: 200px; }
-    .filter-actions { display: flex; gap: 8px; margin-left: auto; align-items: flex-end; }
-    .btn { padding: 7px 14px; border-radius: 7px; border: 1px solid transparent;
-           font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s;
-           display: inline-flex; align-items: center; gap: 5px; }
-    .btn:hover { opacity: .85; }
-    .btn:disabled { opacity: .5; cursor: default; }
-    .btn-sm { padding: 4px 10px; font-size: 12px; }
-    .btn-blue   { background: var(--blue); color: #fff; }
-    .btn-outline { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
-    .btn-green  { background: var(--green); color: #fff; }
-    .btn-wa     { background: #25d366; color: #fff; }
-    .btn-red    { background: var(--red); color: #fff; }
-    .btn-ghost  { background: none; border: none; padding: 4px 8px; color: var(--gray-5); }
-    .btn-ghost:hover { color: var(--gray-9); background: var(--gray-2); }
-
-    /* ── Badge ── */
-    .badge {
-      display: inline-block; padding: 2px 9px; border-radius: 99px;
-      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
-    }
-    .badge-pending    { background: var(--yellow-lt); color: var(--yellow); }
-    .badge-proses     { background: var(--blue-lt);   color: var(--blue); }
-    .badge-selesai    { background: var(--green-lt);  color: var(--green); }
-    .badge-diambil    { background: var(--gray-2);    color: var(--gray-5); }
-    .badge-dibatalkan { background: var(--red-lt);    color: var(--red); }
-    .badge-lunas      { background: var(--green-lt);  color: var(--green); }
-    .badge-belum      { background: var(--red-lt);    color: var(--red); }
-
-    /* ── Table card ── */
-    .table-card {
-      background: #fff; border: 1px solid var(--gray-3); border-radius: var(--radius);
-      box-shadow: var(--shadow); overflow: hidden;
-    }
-    .table-toolbar {
-      padding: 12px 16px; border-bottom: 1px solid var(--gray-3);
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    }
-    .table-info { font-size: 13px; color: var(--gray-5); }
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; min-width: 900px; }
-    thead th {
-      padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .4px; color: var(--gray-5);
-      background: var(--gray-1); border-bottom: 1px solid var(--gray-3);
-      white-space: nowrap;
-    }
-    tbody tr { border-bottom: 1px solid var(--gray-3); transition: background .1s; cursor: pointer; }
-    tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: var(--gray-1); }
-    tbody td { padding: 10px 14px; vertical-align: middle; font-size: 13px; }
-    .td-nomor { font-weight: 700; white-space: nowrap; }
-    .td-nomor a { color: var(--blue); text-decoration: none; }
-    .td-nomor a:hover { text-decoration: underline; }
-    .td-meta { font-size: 11px; color: var(--gray-5); margin-top: 2px; }
-    .td-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-    .status-select {
-      padding: 4px 8px; border: 1px solid var(--gray-3); border-radius: 6px;
-      font-size: 12px; background: #fff; cursor: pointer; font-weight: 600; max-width: 130px;
+    /* ── Body ───────────────────────────────────────────── */
+    .body-wrap { padding: 14px; }
+    .ord-info {
+      font-size: 12px; color: var(--gray-5); margin-bottom: 10px;
     }
 
-    /* ── Pagination ── */
+    /* ── Order Card ─────────────────────────────────────── */
+    .ord-card {
+      background: #fff; border-radius: 12px;
+      border: 1px solid var(--gray-3); border-left: 3px solid var(--gray-4);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .ord-card.pending  { border-left-color: var(--gray-4); }
+    .ord-card.proses   { border-left-color: var(--primary); }
+    .ord-card.selesai  { border-left-color: var(--success); }
+    .ord-card.diambil  { border-left-color: var(--gray-3); opacity: .85; }
+    .ord-card.dibatalkan { border-left-color: var(--gray-3); opacity: .75; }
+    .ord-card.lewat    { border-left-color: var(--danger); }
+
+    .ord-card-body {
+      padding: 12px 14px;
+      cursor: pointer;
+    }
+    .ord-card-row1 {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 10px;
+    }
+    .ord-card-nomor { font-size: 14px; font-weight: 800; color: var(--gray-9); }
+    .ord-card-tgl {
+      font-size: 11px; color: var(--gray-5); white-space: nowrap;
+    }
+    .ord-card-pelanggan {
+      font-size: 12px; color: var(--gray-6); margin-top: 4px;
+      line-height: 1.4; word-break: break-word;
+    }
+    .ord-card-pelanggan .nama { font-weight: 700; color: var(--gray-7); }
+    .ord-card-layanan {
+      font-size: 12px; color: var(--gray-6); margin-top: 4px;
+      display: flex; justify-content: space-between; gap: 10px;
+    }
+    .ord-card-layanan .items {
+      flex: 1; min-width: 0; word-break: break-word; line-height: 1.4;
+    }
+    .ord-card-layanan .amt {
+      font-size: 14px; font-weight: 800; color: var(--gray-9); white-space: nowrap;
+    }
+    .ord-card-badges {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .ord-card-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 9px; border-radius: 99px;
+      font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .3px;
+    }
+    .ord-card-badge .dot {
+      width: 6px; height: 6px; border-radius: 50%; background: currentColor;
+    }
+    .badge-st-pending    { background: var(--gray-2); color: var(--gray-6); }
+    .badge-st-proses     { background: var(--primary-lt); color: var(--primary); }
+    .badge-st-selesai    { background: var(--success-lt); color: var(--success); }
+    .badge-st-diambil    { background: var(--gray-2); color: var(--gray-6); }
+    .badge-st-dibatalkan { background: var(--danger-lt); color: var(--danger); }
+    .badge-pay-belum     { background: var(--danger-lt); color: var(--danger); }
+    .badge-pay-lunas     { background: var(--success-lt); color: var(--success); }
+    .badge-telat         { background: var(--danger); color: #fff; }
+
+    /* ── Actions ────────────────────────────────────────── */
+    .ord-card-actions {
+      display: flex; gap: 6px; padding: 0 14px 12px;
+      flex-wrap: wrap;
+    }
+    .ord-act {
+      flex: 1 1 auto; min-width: 80px;
+      min-height: 40px; padding: 8px 10px;
+      border: 1px solid transparent; border-radius: 8px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 4px; font-family: inherit; text-decoration: none;
+      transition: opacity .15s;
+    }
+    .ord-act:active { transform: scale(.98); }
+    .ord-act.proses  { background: var(--primary); color: #fff; }
+    .ord-act.selesai { background: var(--success); color: #fff; }
+    .ord-act.diambil { background: var(--gray-7); color: #fff; }
+    .ord-act.lunasi  { background: var(--success); color: #fff; }
+    .ord-act.wa      { background: #25d366; color: #fff; }
+    .ord-act.detail  {
+      background: #fff; border-color: var(--gray-3); color: var(--gray-6);
+      flex: 0 0 44px; min-width: 44px; padding: 0;
+    }
+    .ord-act.detail:hover { background: var(--gray-1); }
+
+    /* ── Empty ──────────────────────────────────────────── */
+    .ord-empty {
+      text-align: center; padding: 40px 20px;
+      background: #fff; border-radius: 12px;
+      border: 1px dashed var(--gray-3);
+    }
+    .ord-empty .ic {
+      font-size: 56px; display: block; margin-bottom: 12px; opacity: .8;
+    }
+    .ord-empty h3 {
+      font-size: 16px; font-weight: 700; color: var(--gray-7);
+      margin-bottom: 6px;
+    }
+    .ord-empty p {
+      font-size: 13px; color: var(--gray-5); margin-bottom: 16px;
+    }
+    .ord-empty .btn-new {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 18px; background: var(--primary); color: #fff;
+      border-radius: 99px; text-decoration: none;
+      font-size: 13px; font-weight: 700;
+    }
+
+    /* ── Pagination ─────────────────────────────────────── */
     .pagination {
-      padding: 12px 16px; border-top: 1px solid var(--gray-3);
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      display: flex; justify-content: center; gap: 4px;
+      margin-top: 16px; flex-wrap: wrap;
     }
-    .page-btns { display: flex; gap: 4px; }
     .page-btn {
-      min-width: 32px; height: 32px; padding: 0 8px; border: 1px solid var(--gray-3);
-      border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px; font-weight: 600;
-      transition: background .1s;
+      min-width: 38px; min-height: 38px; padding: 0 10px;
+      border: 1px solid var(--gray-3); border-radius: 8px;
+      background: #fff; cursor: pointer; font-size: 13px; font-weight: 700;
+      color: var(--gray-7); font-family: inherit;
     }
-    .page-btn:hover { background: var(--gray-2); }
-    .page-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
-    .page-btn:disabled { opacity: .4; cursor: default; }
+    .page-btn:hover { background: var(--gray-1); }
+    .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .page-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-    /* ── Empty & loading ── */
-    .table-empty {
-      text-align: center; padding: 60px 20px; color: var(--gray-5);
-    }
-    .table-empty .icon { font-size: 40px; margin-bottom: 10px; }
-    .loading-row td { text-align: center; padding: 40px; color: var(--gray-5); }
-
-    /* ── Toast ── */
+    /* ── Toast ──────────────────────────────────────────── */
     #toast {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-      background: #111; color: #fff; padding: 10px 20px; border-radius: 99px;
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: var(--gray-9); color: #fff; padding: 10px 20px; border-radius: 99px;
       font-size: 13px; font-weight: 600; z-index: 9999;
       opacity: 0; pointer-events: none; transition: opacity .25s;
     }
     #toast.show { opacity: 1; }
 
-    /* ── WA Dropdown ── */
-    .wa-menu-wrap { position: relative; display: inline-block; }
-    .wa-menu {
-      display: none; position: absolute; right: 0; top: 100%; margin-top: 4px;
-      background: #fff; border: 1px solid var(--gray-3); border-radius: 8px;
-      box-shadow: 0 4px 16px rgba(0,0,0,.12); min-width: 160px; z-index: 100; overflow: hidden;
-    }
-    .wa-menu.open { display: block; }
-    .wa-menu a {
-      display: block; padding: 9px 14px; font-size: 13px; color: var(--gray-9);
-      text-decoration: none;
-    }
-    .wa-menu a:hover { background: var(--gray-2); }
+    /* ══════════════════════════════════════════════════════
+       LAPTOP (≥1024px) — pakai tabel
+       ══════════════════════════════════════════════════════ */
+    @media (min-width: 1024px) {
+      .desktop-only { display: block; }
+      .mobile-only  { display: none !important; }
 
-    /* ══ MOBILE: table → card list ══ */
-    @media (max-width: 767px) {
-      .filter-bar { padding: 12px; }
-      .filter-bar .filter-group { width: 100%; }
-      .filter-bar .filter-actions {
-        width: 100%; margin-left: 0;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 6px;
+      .body-wrap { padding: 20px; }
+
+      .ord-info {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 14px;
       }
-      .filter-bar .filter-actions a.btn-blue { grid-column: 1 / -1; }
-      .table-wrap { overflow-x: visible; }
-      table { min-width: 0 !important; width: 100%; display: block; }
-      thead { display: none; }
-      tbody { display: block; }
-      tbody tr {
-        display: block;
-        background: #fff;
-        border: 1px solid var(--gray-3);
-        border-radius: 10px;
-        padding: 12px 14px;
-        margin-bottom: 10px;
-        cursor: pointer;
-        box-shadow: 0 1px 3px rgba(0,0,0,.05);
+      .ord-info .btn-new {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 9px 16px; background: var(--primary); color: #fff;
+        border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 700;
       }
-      tbody td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 10px;
-        padding: 6px 0;
-        border-bottom: 1px dashed var(--gray-3);
-        text-align: right;
-        font-size: 13px;
+
+      .ord-table-card {
+        background: #fff; border-radius: 12px; border: 1px solid var(--gray-3);
+        box-shadow: var(--shadow-sm); overflow: hidden;
       }
-      tbody td:last-child { border-bottom: none; }
-      tbody td::before {
-        content: attr(data-label);
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: .4px;
-        color: var(--gray-5);
-        text-align: left;
-        flex-shrink: 0;
+      .ord-table-wrap { overflow-x: auto; }
+      table.ord-table { width: 100%; border-collapse: collapse; }
+      table.ord-table thead th {
+        padding: 11px 14px; text-align: left;
+        font-size: 11px; font-weight: 700; color: var(--gray-5);
+        text-transform: uppercase; letter-spacing: .4px;
+        background: var(--gray-1); border-bottom: 1px solid var(--gray-3);
+        white-space: nowrap;
       }
-      tbody td.td-actions-cell {
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        padding-top: 10px;
+      table.ord-table tbody tr {
+        border-bottom: 1px solid var(--gray-2); transition: background .1s; cursor: pointer;
       }
-      tbody td.td-actions-cell::before { width: 100%; }
-      .td-actions { flex-wrap: wrap; justify-content: flex-end; gap: 6px; width: 100%; }
-      .td-actions .btn { min-height: 36px; padding: 6px 10px; font-size: 12px; }
-      .status-select { width: auto; max-width: 100%; min-height: 36px; }
-      .pagination {
-        flex-direction: column;
-        gap: 8px;
-        align-items: stretch;
+      table.ord-table tbody tr:hover { background: var(--gray-1); }
+      table.ord-table tbody tr:last-child { border-bottom: none; }
+      table.ord-table tbody td {
+        padding: 12px 14px; font-size: 13px; vertical-align: middle;
       }
-      .page-btns { justify-content: center; flex-wrap: wrap; }
-      .page-btn { min-height: 36px; }
+      table.ord-table .td-actions {
+        display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end;
+      }
+      table.ord-table .td-actions .ord-act {
+        min-height: 32px; padding: 4px 10px; font-size: 11px; min-width: 0; flex: 0 0 auto;
+      }
+      table.ord-table .td-actions .ord-act.detail { flex: 0 0 32px; min-width: 32px; }
+    }
+    @media (max-width: 1023px) {
+      .desktop-only { display: none !important; }
     }
   </style>
 </head>
 <body>
 
 <div class="page">
-  <div class="page-title">Antrian</div>
-
-  <!-- Filter pills (quick filter) -->
-  <div class="quick-pills" id="quickPills">
-    <button class="qp" data-quick="semua">Semua</button>
-    <button class="qp" data-quick="aktif">Aktif</button>
-    <button class="qp" data-quick="selesai">Selesai</button>
-    <button class="qp" data-quick="lewat">🔴 Lewat Waktu</button>
-    <button class="qp active" data-quick="belum_lunas">💰 Belum Lunas</button>
-  </div>
-
-  <!-- Filter bar -->
-  <div class="filter-bar">
-    <div class="filter-group">
-      <div class="filter-label">Cari</div>
-      <input type="text" id="filterSearch" class="filter-input filter-search"
-             placeholder="Nomor order / nama pelanggan..." oninput="debounceLoad()"/>
+  <!-- HEADER -->
+  <div class="ord-head">
+    <div class="ord-head-top">
+      <a class="ord-back" href="/" title="Kembali">←</a>
+      <div class="ord-head-title">Antrian</div>
+      <button class="ord-search-btn" id="searchToggle" title="Cari">🔍</button>
     </div>
-    <div class="filter-group">
-      <div class="filter-label">Status</div>
-      <select id="filterStatus" class="filter-select" onchange="loadOrders(1)">
-        <option value="">Semua Status</option>
-        <option value="pending">Pending</option>
-        <option value="proses">Proses</option>
-        <option value="selesai">Selesai</option>
-        <option value="diambil">Diambil</option>
-        <option value="dibatalkan">Dibatalkan</option>
-      </select>
+    <div class="ord-search-wrap" id="searchWrap">
+      <input type="text" id="searchInput" placeholder="Cari nomor order / nama pelanggan..." autocomplete="off"/>
     </div>
-    <div class="filter-group">
-      <div class="filter-label">Tanggal</div>
-      <input type="date" id="filterTanggal" class="filter-input" onchange="loadOrders(1)"/>
-    </div>
-    <div class="filter-actions">
-      <button class="btn btn-outline" onclick="clearFilters()">Reset Filter</button>
-      <button class="btn btn-green" onclick="exportCSV()">Export CSV</button>
-      <a href="/order/baru" class="btn btn-blue">+ Order Baru</a>
+    <div class="ord-pills" id="pillRow">
+      <button class="ord-pill active" data-filter="semua">Semua <span class="cnt" id="cntSemua">0</span></button>
+      <button class="ord-pill" data-filter="aktif">Aktif <span class="cnt" id="cntAktif">0</span></button>
+      <button class="ord-pill" data-filter="selesai">Selesai <span class="cnt" id="cntSelesai">0</span></button>
+      <button class="ord-pill danger" data-filter="lewat">🔴 Lewat Waktu <span class="cnt" id="cntLewat">0</span></button>
+      <button class="ord-pill warning" data-filter="belum_lunas">💰 Belum Lunas <span class="cnt" id="cntBelumLunas">0</span></button>
     </div>
   </div>
 
-  <!-- Table -->
-  <div class="table-card">
-    <div class="table-toolbar">
-      <div class="table-info" id="tableInfo">Memuat...</div>
+  <div class="body-wrap">
+    <div class="ord-info" id="infoBar">
+      <span id="infoText">Memuat...</span>
+      <a href="/order/baru" class="btn-new desktop-only">+ Order Baru</a>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>No. Order</th>
-            <th>Pelanggan</th>
-            <th>Layanan</th>
-            <th>Total</th>
-            <th>Bayar</th>
-            <th>Status</th>
-            <th>Tgl Masuk</th>
-            <th>Est. Selesai</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody">
-          <tr class="loading-row"><td colspan="9">Memuat data...</td></tr>
-        </tbody>
-      </table>
+
+    <!-- MOBILE: card list -->
+    <div class="mobile-only" id="cardList"></div>
+
+    <!-- LAPTOP: table -->
+    <div class="ord-table-card desktop-only">
+      <div class="ord-table-wrap">
+        <table class="ord-table">
+          <thead>
+            <tr>
+              <th>No. Order</th>
+              <th>Pelanggan</th>
+              <th>Layanan</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Bayar</th>
+              <th>Est. Selesai</th>
+              <th style="text-align:right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--gray-5)">Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <div class="pagination" id="pagination" style="display:none">
-      <div class="table-info" id="paginationInfo"></div>
-      <div class="page-btns" id="pageBtns"></div>
-    </div>
+
+    <div class="pagination" id="pagination"></div>
   </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-const fmtRp  = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+const fmtRpShort = n => {
+  n = Number(n || 0);
+  if (n >= 1_000_000) return 'Rp ' + (n / 1_000_000).toFixed(1).replace('.0','') + 'jt';
+  if (n >= 1_000)     return 'Rp ' + Math.round(n / 1_000) + 'rb';
+  return 'Rp ' + n.toLocaleString('id-ID');
+};
 const fmtDate = s => s ? new Date(s).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+const fmtDateShort = s => s ? new Date(s).toLocaleDateString('id-ID', { day:'2-digit', month:'short' }) : '—';
+const escHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+let allData = [];      // semua transaksi (limit 500)
+let filtered = [];
+let activeFilter = 'belum_lunas'; // default sesuai prioritas operasional
+let searchQuery = '';
 let currentPage = 1;
-let totalPages  = 1;
-let debTimer    = null;
-let lastMeta    = {};
-let quickFilter = 'belum_lunas'; // default sesuai operasional harian
+const PAGE_SIZE = 20;
+let debTimer = null;
 
 function showToast(msg, dur = 2500) {
   const el = document.getElementById('toast');
@@ -338,348 +362,374 @@ function showToast(msg, dur = 2500) {
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), dur);
 }
+window.showToast = showToast;
 
-async function logout() {
-  await fetch('/api/v1/auth/logout', { method: 'POST' });
-  location.href = '/login';
+/* ── Filter helpers ──────────────────────────────────── */
+function isLewat(t) {
+  if (!['pending','proses'].includes(t.status)) return false;
+  if (!t.tanggal_selesai) return false;
+  const est = new Date(t.tanggal_selesai); est.setHours(0,0,0,0);
+  const today = new Date(); today.setHours(0,0,0,0);
+  return est < today;
+}
+function isLunas(t) {
+  return Number(t.bayar || 0) >= Number(t.total_bayar || 0);
 }
 
-function debounceLoad() {
-  clearTimeout(debTimer);
-  debTimer = setTimeout(() => loadOrders(1), 400);
+function applyFilter(data, key) {
+  if (key === 'semua')        return data;
+  if (key === 'aktif')        return data.filter(t => ['pending','proses'].includes(t.status));
+  if (key === 'selesai')      return data.filter(t => t.status === 'selesai');
+  if (key === 'lewat')        return data.filter(isLewat);
+  if (key === 'belum_lunas')  return data.filter(t => !isLunas(t) && !['dibatalkan'].includes(t.status));
+  return data;
 }
 
-function clearFilters() {
-  document.getElementById('filterSearch').value  = '';
-  document.getElementById('filterStatus').value  = '';
-  document.getElementById('filterTanggal').value = '';
-  loadOrders(1);
+function updatePillCounts() {
+  const counts = {
+    semua: allData.length,
+    aktif: applyFilter(allData, 'aktif').length,
+    selesai: applyFilter(allData, 'selesai').length,
+    lewat: applyFilter(allData, 'lewat').length,
+    belum_lunas: applyFilter(allData, 'belum_lunas').length,
+  };
+  document.getElementById('cntSemua').textContent       = counts.semua;
+  document.getElementById('cntAktif').textContent       = counts.aktif;
+  document.getElementById('cntSelesai').textContent     = counts.selesai;
+  document.getElementById('cntLewat').textContent       = counts.lewat;
+  document.getElementById('cntBelumLunas').textContent  = counts.belum_lunas;
 }
 
-// Check URL params on load
-function readURLParams() {
-  const params = new URLSearchParams(location.search);
-  if (params.get('status') === 'belum_lunas') {
-    // handled client-side after fetch
+/* ── Render ──────────────────────────────────────────── */
+function lunasiPayload(t) {
+  return {
+    id: t.id, nomor: t.nomor_transaksi, nama: t.pelanggan_nama,
+    total: t.total_bayar, dibayar: t.bayar, pelanggan_id: t.pelanggan_id
+  };
+}
+function waPayload(t) {
+  return { id: t.id, nomor: t.nomor_transaksi, nama: t.pelanggan_nama, telepon: t.pelanggan_telepon };
+}
+
+function actionsHtml(t, layout) {
+  const lunas = isLunas(t);
+  const tel = t.pelanggan_telepon;
+  const tidakBoleh = t.status === 'dibatalkan';
+  const pl = JSON.stringify(lunasiPayload(t)).replace(/'/g, "&#39;");
+  const wp = JSON.stringify(waPayload(t)).replace(/'/g, "&#39;");
+
+  const acts = [];
+
+  // Aksi status sesuai konteks
+  if (t.status === 'pending') {
+    acts.push(`<button class="ord-act proses" onclick='event.stopPropagation();updateStatus(${t.id},"proses",this)'>▶ Proses</button>`);
+    acts.push(`<button class="ord-act selesai" onclick='event.stopPropagation();updateStatus(${t.id},"selesai",this)'>✓ Selesai</button>`);
+  } else if (t.status === 'proses') {
+    acts.push(`<button class="ord-act selesai" onclick='event.stopPropagation();updateStatus(${t.id},"selesai",this)'>✓ Selesai</button>`);
+  } else if (t.status === 'selesai') {
+    acts.push(`<button class="ord-act diambil" onclick='event.stopPropagation();updateStatus(${t.id},"diambil",this)'>✓ Diambil</button>`);
+    if (tel) acts.push(`<button class="ord-act wa" onclick='event.stopPropagation();openWaSheet(${wp})'>💬 WA Siap Diambil</button>`);
   }
+  // diambil & dibatalkan: tidak ada aksi status
+
+  // Lunasi: muncul untuk semua kecuali dibatalkan, selama belum lunas
+  if (!lunas && !tidakBoleh) {
+    acts.push(`<button class="ord-act lunasi" onclick='event.stopPropagation();openLunasiSheet(${pl})'>💰 Lunasi</button>`);
+  }
+
+  // WA umum: kalau ada telepon dan belum disebut di selesai
+  if (tel && t.status !== 'selesai') {
+    acts.push(`<button class="ord-act wa" onclick='event.stopPropagation();openWaSheet(${wp})'>💬 WA</button>`);
+  }
+
+  // Detail
+  acts.push(`<a class="ord-act detail" href="/order/detail?id=${t.id}" onclick='event.stopPropagation()' title="Detail">›</a>`);
+
+  return acts.join('');
 }
 
-async function loadOrders(page = 1) {
-  currentPage = page;
-  const q       = document.getElementById('filterSearch').value.trim();
-  let status    = document.getElementById('filterStatus').value;
-  const tanggal = document.getElementById('filterTanggal').value;
-
-  // Quick filter overrides
-  let belumLunas = false;
-  let sortParam = '';
-  if (quickFilter === 'belum_lunas') {
-    belumLunas = true;
-    sortParam = 'tanggal_asc'; // terlama dulu — urgent
-  } else if (quickFilter === 'aktif') {
-    // Tidak set status; client-side filter di renderTable
-  } else if (quickFilter === 'selesai') {
-    status = 'selesai';
-  } else if (quickFilter === 'lewat') {
-    // Client-side filter: pending/proses + tanggal_selesai < today
+function renderCardList(rows) {
+  const el = document.getElementById('cardList');
+  if (!rows.length) {
+    el.innerHTML = `
+      <div class="ord-empty">
+        <span class="ic">${emptyIcon()}</span>
+        <h3>${emptyTitle()}</h3>
+        <p>${emptyDesc()}</p>
+        <a href="/order/baru" class="btn-new">+ Buat Order Baru</a>
+      </div>`;
+    return;
   }
 
-  const params = new URLSearchParams({ page, limit: 20 });
-  if (q)         params.set('q', q);
-  if (status)    params.set('status', status);
-  if (tanggal)   params.set('tanggal', tanggal);
-  if (belumLunas) params.set('belum_lunas', '1');
-  if (sortParam) params.set('sort', sortParam);
-
-  document.getElementById('tableBody').innerHTML =
-    '<tr class="loading-row"><td colspan="9">Memuat data...</td></tr>';
-
-  try {
-    const r = await fetch('/api/v1/transaksi?' + params);
-    if (r.status === 401) { location.href = '/login'; return; }
-    const d = await r.json();
-
-    lastMeta = d.meta || {};
-    let data = d.data || [];
-
-    // Client-side filter
-    if (quickFilter === 'aktif') {
-      data = data.filter(t => ['pending','proses'].includes(t.status));
-    } else if (quickFilter === 'lewat') {
-      const today = new Date(); today.setHours(0,0,0,0);
-      data = data.filter(t => {
-        if (!['pending','proses'].includes(t.status)) return false;
-        if (!t.tanggal_selesai) return false;
-        const est = new Date(t.tanggal_selesai); est.setHours(0,0,0,0);
-        return est < today;
-      });
-    }
-
-    const total = ['aktif','lewat'].includes(quickFilter) ? data.length : (lastMeta.total || 0);
-    totalPages  = Math.max(1, Math.ceil((lastMeta.total || 0) / 20));
-
-    document.getElementById('tableInfo').textContent =
-      `Menampilkan ${data.length} dari ${total} order`;
-
-    renderTable(data);
-    renderPagination(total);
-  } catch (err) {
-    console.error(err);
-    document.getElementById('tableBody').innerHTML =
-      '<tr class="loading-row"><td colspan="9">Gagal memuat data</td></tr>';
-  }
+  el.innerHTML = rows.map(t => {
+    const lewat = isLewat(t);
+    const lunas = isLunas(t);
+    const itemsText = (t.layanan_ringkas || (t.items || []).map(i => `${i.jumlah}${i.satuan ? ' ' + i.satuan : ''} ${i.nama_layanan}`).join(', ')) || '—';
+    const klass = lewat ? 'lewat' : t.status;
+    return `
+    <div class="ord-card ${klass}">
+      <div class="ord-card-body" onclick="goDetail(${t.id}, event)">
+        <div class="ord-card-row1">
+          <div class="ord-card-nomor">${t.nomor_transaksi}</div>
+          <div class="ord-card-tgl">${fmtDateShort(t.tanggal_masuk)}</div>
+        </div>
+        <div class="ord-card-pelanggan">
+          <span class="nama">${escHtml(t.pelanggan_nama || 'Non-member')}</span>${t.pelanggan_telepon ? ' · ' + escHtml(t.pelanggan_telepon) : ''}
+        </div>
+        <div class="ord-card-layanan">
+          <span class="items">${escHtml(itemsText)}</span>
+          <span class="amt">${fmtRp(t.total_bayar)}</span>
+        </div>
+        <div class="ord-card-badges">
+          <span class="ord-card-badge badge-st-${t.status}"><span class="dot"></span>${t.status.toUpperCase()}</span>
+          ${lunas
+            ? `<span class="ord-card-badge badge-pay-lunas">💰 LUNAS</span>`
+            : (t.status !== 'dibatalkan' ? `<span class="ord-card-badge badge-pay-belum">💰 BELUM LUNAS</span>` : '')}
+          ${lewat ? `<span class="ord-card-badge badge-telat">🔴 LEWAT WAKTU</span>` : ''}
+        </div>
+      </div>
+      <div class="ord-card-actions">
+        ${actionsHtml(t, 'card')}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function renderTable(rows) {
   const tbody = document.getElementById('tableBody');
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="9">
-      <div class="table-empty">
-        <div class="icon">📭</div>
-        <div>Tidak ada order yang cocok dengan filter</div>
+    tbody.innerHTML = `<tr><td colspan="8">
+      <div class="ord-empty" style="border:none;padding:40px 20px">
+        <span class="ic">${emptyIcon()}</span>
+        <h3>${emptyTitle()}</h3>
+        <p>${emptyDesc()}</p>
+        <a href="/order/baru" class="btn-new">+ Buat Order Baru</a>
       </div>
     </td></tr>`;
     return;
   }
 
   tbody.innerHTML = rows.map(t => {
-    const lunas = t.bayar >= t.total_bayar;
-    const statusOpts = ['pending','proses','selesai','diambil','dibatalkan'];
-    const selectHtml = `<select class="status-select" onchange="updateStatus(${t.id}, this.value, this)"
-      data-current="${t.status}" ${['diambil','dibatalkan'].includes(t.status) ? 'disabled' : ''}>
-      ${statusOpts.map(s => `<option value="${s}" ${s === t.status ? 'selected' : ''}>${s}</option>`).join('')}
-    </select>`;
-
-    const hasPhone = t.pelanggan_telepon;
-
-    return `<tr id="row-${t.id}" onclick="navigateToDetail(${t.id}, event)">
-      <td data-label="No. Order">
-        <div class="td-nomor">
-          <a href="/order/detail?id=${t.id}" onclick="event.stopPropagation()">${t.nomor_transaksi}</a>
-        </div>
-        <div class="td-meta">${t.kasir_nama || '—'}</div>
+    const lewat = isLewat(t);
+    const lunas = isLunas(t);
+    const itemsText = (t.layanan_ringkas || (t.items || []).map(i => `${i.jumlah}${i.satuan ? ' ' + i.satuan : ''} ${i.nama_layanan}`).join(', ')) || '—';
+    return `
+    <tr onclick="goDetail(${t.id}, event)" style="border-left:3px solid ${lewat ? 'var(--danger)' : statusColor(t.status)}">
+      <td>
+        <div style="font-weight:800">${t.nomor_transaksi}</div>
+        <div style="font-size:11px;color:var(--gray-5)">${fmtDate(t.tanggal_masuk)}</div>
       </td>
-      <td data-label="Pelanggan">
-        <div>${t.pelanggan_nama || '<span style="color:var(--gray-5)">Non-member</span>'}</div>
-        ${t.pelanggan_telepon ? `<div class="td-meta">${t.pelanggan_telepon}</div>` : ''}
+      <td>
+        <div>${escHtml(t.pelanggan_nama || '—')}</div>
+        ${t.pelanggan_telepon ? `<div style="font-size:11px;color:var(--gray-5)">${escHtml(t.pelanggan_telepon)}</div>` : ''}
       </td>
-      <td data-label="Layanan">
-        <div style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;"
-             title="${t.layanan_ringkas || ''}">
-          ${t.layanan_ringkas || '—'}
-        </div>
+      <td style="max-width:200px;font-size:12px;color:var(--gray-6)" title="${escHtml(itemsText)}">
+        <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(itemsText)}</div>
       </td>
-      <td data-label="Total" style="font-weight:700;white-space:nowrap;">${fmtRp(t.total_bayar)}</td>
-      <td data-label="Bayar">
-        <div>
-          <span class="badge ${lunas ? 'badge-lunas' : 'badge-belum'}">${lunas ? 'Lunas' : 'Belum'}</span>
-          ${!lunas ? `<div class="td-meta" style="margin-top:3px;">Sisa ${fmtRp(t.total_bayar - t.bayar)}</div>` : ''}
-        </div>
+      <td style="white-space:nowrap;font-weight:700">${fmtRp(t.total_bayar)}</td>
+      <td>
+        <span class="ord-card-badge badge-st-${t.status}"><span class="dot"></span>${t.status}</span>
+        ${lewat ? `<div style="margin-top:4px"><span class="ord-card-badge badge-telat">🔴 LEWAT</span></div>` : ''}
       </td>
-      <td data-label="Status">${selectHtml}</td>
-      <td data-label="Tgl Masuk" style="white-space:nowrap;font-size:12px;">${fmtDate(t.tanggal_masuk)}</td>
-      <td data-label="Est. Selesai" style="white-space:nowrap;font-size:12px;">${fmtDate(t.tanggal_selesai)}</td>
-      <td data-label="Aksi" class="td-actions-cell">
-        <div class="td-actions">
-          ${!lunas && t.status !== 'dibatalkan' ? `
-          <button class="btn btn-sm btn-green" title="Lunasi pembayaran"
-             onclick='event.stopPropagation();openLunasiSheet(${JSON.stringify({id:t.id,nomor:t.nomor_transaksi,nama:t.pelanggan_nama,total:t.total_bayar,dibayar:t.bayar,pelanggan_id:t.pelanggan_id}).replace(/'/g,"&#39;")})'>💰 Lunasi</button>
-          ` : ''}
-          <a href="/api/v1/transaksi/${t.id}/struk" target="_blank"
-             class="btn btn-sm btn-outline" title="Cetak struk">Struk</a>
-          ${hasPhone ? `
-          <button class="btn btn-sm btn-wa" title="Kirim WhatsApp"
-             onclick='event.stopPropagation();openWaSheet(${JSON.stringify({id:t.id,nomor:t.nomor_transaksi,nama:t.pelanggan_nama,telepon:t.pelanggan_telepon}).replace(/'/g,"&#39;")})'>💬 WA</button>
-          ` : ''}
-        </div>
+      <td>
+        ${lunas
+          ? `<span class="ord-card-badge badge-pay-lunas">LUNAS</span>`
+          : (t.status !== 'dibatalkan'
+              ? `<span class="ord-card-badge badge-pay-belum">BELUM</span><div style="font-size:11px;color:var(--gray-5);margin-top:2px">Sisa ${fmtRp(t.total_bayar - t.bayar)}</div>`
+              : '—')}
+      </td>
+      <td style="font-size:12px;color:var(--gray-6);white-space:nowrap">${fmtDate(t.tanggal_selesai)}</td>
+      <td>
+        <div class="td-actions">${actionsHtml(t, 'table')}</div>
       </td>
     </tr>`;
   }).join('');
 }
 
-function renderPagination(total) {
+function statusColor(s) {
+  return {
+    pending: 'var(--gray-4)',
+    proses: 'var(--primary)',
+    selesai: 'var(--success)',
+    diambil: 'var(--gray-3)',
+    dibatalkan: 'var(--gray-3)',
+  }[s] || 'var(--gray-3)';
+}
+
+function emptyIcon() {
+  return ({
+    semua: '📦',
+    aktif: '✨',
+    selesai: '🧺',
+    lewat: '👍',
+    belum_lunas: '✅',
+  }[activeFilter] || '📭');
+}
+function emptyTitle() {
+  return ({
+    semua: 'Belum ada order',
+    aktif: 'Tidak ada order aktif',
+    selesai: 'Tidak ada order yang sudah selesai',
+    lewat: 'Tidak ada order lewat waktu',
+    belum_lunas: 'Semua tagihan sudah lunas',
+  }[activeFilter] || 'Tidak ada order');
+}
+function emptyDesc() {
+  if (searchQuery) return `Tidak ada order yang cocok dengan "${escHtml(searchQuery)}"`;
+  return 'Buat order baru untuk mulai mencatat transaksi laundry.';
+}
+
+/* ── Pagination ──────────────────────────────────────── */
+function renderPagination() {
   const el = document.getElementById('pagination');
-  if (totalPages <= 1) { el.style.display = 'none'; return; }
-  el.style.display = 'flex';
-
-  document.getElementById('paginationInfo').textContent =
-    `Halaman ${currentPage} dari ${totalPages}`;
-
-  const btns = document.getElementById('pageBtns');
-  let html = `<button class="page-btn" onclick="loadOrders(${currentPage - 1})"
-    ${currentPage <= 1 ? 'disabled' : ''}>‹</button>`;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  if (totalPages <= 1) { el.innerHTML = ''; return; }
 
   const start = Math.max(1, currentPage - 2);
   const end   = Math.min(totalPages, currentPage + 2);
-  if (start > 1) html += `<button class="page-btn" onclick="loadOrders(1)">1</button>`;
+  let html = `<button class="page-btn" ${currentPage <= 1 ? 'disabled' : ''} onclick="goPage(${currentPage - 1})">‹</button>`;
+  if (start > 1) html += `<button class="page-btn" onclick="goPage(1)">1</button>`;
   if (start > 2) html += `<span style="padding:0 4px;align-self:center;color:var(--gray-5)">…</span>`;
-
   for (let p = start; p <= end; p++) {
-    html += `<button class="page-btn ${p === currentPage ? 'active' : ''}"
-      onclick="loadOrders(${p})">${p}</button>`;
+    html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="goPage(${p})">${p}</button>`;
   }
-
   if (end < totalPages - 1) html += `<span style="padding:0 4px;align-self:center;color:var(--gray-5)">…</span>`;
-  if (end < totalPages) html += `<button class="page-btn" onclick="loadOrders(${totalPages})">${totalPages}</button>`;
-
-  html += `<button class="page-btn" onclick="loadOrders(${currentPage + 1})"
-    ${currentPage >= totalPages ? 'disabled' : ''}>›</button>`;
-
-  btns.innerHTML = html;
+  if (end < totalPages) html += `<button class="page-btn" onclick="goPage(${totalPages})">${totalPages}</button>`;
+  html += `<button class="page-btn" ${currentPage >= totalPages ? 'disabled' : ''} onclick="goPage(${currentPage + 1})">›</button>`;
+  el.innerHTML = html;
 }
 
-function navigateToDetail(id, event) {
-  // Jangan navigasi jika klik pada elemen interaktif
-  if (event.target.closest('select, button, a, .wa-menu-wrap')) {
-    return;
+window.goPage = p => {
+  currentPage = p;
+  rerender();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+window.goDetail = (id, ev) => {
+  if (ev && ev.target.closest('button, a.ord-act')) return;
+  location.href = `/order/detail?id=${id}`;
+};
+
+/* ── Render orchestrator ─────────────────────────────── */
+function rerender() {
+  // Search filter
+  let f = applyFilter(allData, activeFilter);
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    f = f.filter(t => (
+      (t.nomor_transaksi || '').toLowerCase().includes(q) ||
+      (t.pelanggan_nama || '').toLowerCase().includes(q) ||
+      (t.pelanggan_telepon || '').includes(q)
+    ));
   }
-  window.location.href = `/order/detail?id=${id}`;
+  // Sort: belum_lunas/lewat → terlama dulu (urgent); lainnya → terbaru dulu
+  if (['belum_lunas','lewat'].includes(activeFilter)) {
+    f = [...f].sort((a, b) => new Date(a.tanggal_masuk) - new Date(b.tanggal_masuk));
+  } else {
+    f = [...f].sort((a, b) => new Date(b.tanggal_masuk) - new Date(a.tanggal_masuk));
+  }
+  filtered = f;
+
+  // Info bar
+  document.getElementById('infoText').textContent =
+    `Menampilkan ${filtered.length} order${searchQuery ? ' untuk "' + searchQuery + '"' : ''}`;
+
+  // Slice for pagination
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const slice = filtered.slice(start, start + PAGE_SIZE);
+
+  renderCardList(slice);
+  renderTable(slice);
+  renderPagination();
 }
 
-async function updateStatus(id, status, selectEl) {
-  const prev = selectEl.dataset.current;
-  if (status === prev) return;
-  if (!confirm(`Ubah status ke "${status}"?`)) { selectEl.value = prev; return; }
-
-  selectEl.disabled = true;
+/* ── Update status ───────────────────────────────────── */
+async function updateStatus(id, status, btn) {
+  if (!confirm(`Ubah status order ke "${status}"?`)) return;
+  btn.disabled = true;
   try {
     const r = await fetch(`/api/v1/transaksi/${id}/status`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status })
     });
     const d = await r.json();
-    if (!r.ok) {
-      showToast('Gagal: ' + d.error);
-      selectEl.value = prev;
-    } else {
-      showToast('Status diubah ke "' + status + '"');
-      selectEl.dataset.current = status;
-      if (['diambil','dibatalkan'].includes(status)) selectEl.disabled = true;
-      loadOrders(currentPage);
-    }
-  } catch {
-    showToast('Koneksi gagal');
-    selectEl.value = prev;
-  } finally {
-    if (!['diambil','dibatalkan'].includes(status)) selectEl.disabled = false;
+    if (!r.ok) { showToast('Gagal: ' + d.error); return; }
+    showToast(`Status → "${status}"`);
+    await loadOrders();
+  } catch { showToast('Koneksi gagal'); }
+  finally { btn.disabled = false; }
+}
+window.updateStatus = updateStatus;
+
+/* ── Loader ──────────────────────────────────────────── */
+async function loadOrders() {
+  document.getElementById('infoText').textContent = 'Memuat...';
+  try {
+    // Ambil hingga 500 order terbaru untuk derive count semua filter client-side
+    const r = await fetch('/api/v1/transaksi?limit=500&sort=tanggal_desc', { credentials: 'include' });
+    if (r.status === 401) { location.href = '/login'; return; }
+    const d = await r.json();
+    allData = d.data || [];
+    updatePillCounts();
+    currentPage = 1;
+    rerender();
+  } catch (err) {
+    console.error(err);
+    document.getElementById('infoText').textContent = 'Gagal memuat data';
   }
 }
 
-async function openWa(id, type) {
-  try {
-    const r = await fetch(`/api/v1/transaksi/${id}/wa/${type}`);
-    const d = await r.json();
-    if (!r.ok) { showToast('Gagal: ' + d.error); return; }
-    window.open(d.url, '_blank');
-    await fetch('/api/v1/wa/log', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ telepon: d.telepon, pesan: d.teks, transaksi_id: id, status: 'terkirim' })
-    });
-    showToast('WA dibuka di tab baru');
-  } catch { showToast('Koneksi gagal'); }
-}
-
-function toggleWaMenu(btn) {
-  const menu = btn.nextElementSibling;
-  document.querySelectorAll('.wa-menu.open').forEach(m => { if (m !== menu) m.classList.remove('open'); });
-  menu.classList.toggle('open');
-}
-
-document.addEventListener('click', e => {
-  if (!e.target.closest('.wa-menu-wrap'))
-    document.querySelectorAll('.wa-menu.open').forEach(m => m.classList.remove('open'));
-});
-
-async function exportCSV() {
-  const q       = document.getElementById('filterSearch').value.trim();
-  const status  = document.getElementById('filterStatus').value;
-  const tanggal = document.getElementById('filterTanggal').value;
-
-  showToast('Mengambil data untuk export...');
-  const params = new URLSearchParams({ page: 1, limit: 1000 });
-  if (q)       params.set('q', q);
-  if (status)  params.set('status', status);
-  if (tanggal) params.set('tanggal', tanggal);
-
-  try {
-    const r = await fetch('/api/v1/transaksi?' + params);
-    const d = await r.json();
-    const rows = d.data || [];
-
-    const headers = ['No','Nomor Order','Pelanggan','Telepon','Total Bayar','Sudah Bayar','Kembalian',
-                     'Metode Bayar','Status','Kasir','Tgl Masuk','Est Selesai','Tgl Diambil','Catatan'];
-    const csvRows = [
-      headers.join(','),
-      ...rows.map((t, i) => [
-        i + 1,
-        t.nomor_transaksi,
-        csvEsc(t.pelanggan_nama || 'Non-member'),
-        csvEsc(t.pelanggan_telepon || ''),
-        t.total_bayar,
-        t.bayar,
-        t.kembalian,
-        t.metode_bayar,
-        t.status,
-        csvEsc(t.kasir_nama || ''),
-        fmtDate(t.tanggal_masuk),
-        fmtDate(t.tanggal_selesai),
-        fmtDate(t.tanggal_ambil),
-        csvEsc(t.catatan || '')
-      ].join(','))
-    ];
-
-    const blob = new Blob(['﻿' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    const now  = new Date().toISOString().slice(0, 10);
-    a.href     = url;
-    a.download = `orders-${now}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast(`Export ${rows.length} order selesai`);
-  } catch { showToast('Gagal export CSV'); }
-}
-
-function csvEsc(v) {
-  if (!v) return '';
-  v = String(v).replace(/"/g, '""');
-  return /[,"\n]/.test(v) ? `"${v}"` : v;
-}
-
-// Load user
-fetch('/api/v1/auth/me').then(r => r.json()).then(d => {
-  if (d.user) document.getElementById('userName').textContent = d.user.nama;
-}).catch(() => {});
-
-// Quick filter pills
-document.querySelectorAll('.qp').forEach(p => {
+/* ── Pill click ──────────────────────────────────────── */
+document.querySelectorAll('.ord-pill').forEach(p => {
   p.addEventListener('click', () => {
-    document.querySelectorAll('.qp').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.ord-pill').forEach(x => x.classList.remove('active'));
     p.classList.add('active');
-    quickFilter = p.dataset.quick;
-    loadOrders(1);
+    activeFilter = p.dataset.filter;
+    currentPage = 1;
+    rerender();
   });
 });
 
-// Check URL param for pre-filter
-const urlParams = new URLSearchParams(location.search);
-const qpParam = urlParams.get('quick') || urlParams.get('status');
-if (qpParam === 'belum_lunas') {
-  // default sudah belum_lunas
-} else if (qpParam === 'semua') {
-  quickFilter = 'semua';
-  document.querySelectorAll('.qp').forEach(x => x.classList.toggle('active', x.dataset.quick === 'semua'));
-}
-
-// Reload setelah lunasi
-window.addEventListener('lunasi:done', () => {
-  showToast('✓ Pembayaran tersimpan');
-  loadOrders(currentPage);
+/* ── Search toggle ───────────────────────────────────── */
+document.getElementById('searchToggle').addEventListener('click', () => {
+  const wrap = document.getElementById('searchWrap');
+  const btn = document.getElementById('searchToggle');
+  const open = !wrap.classList.contains('open');
+  wrap.classList.toggle('open', open);
+  btn.classList.toggle('active', open);
+  if (open) document.getElementById('searchInput').focus();
 });
 
-loadOrders(1);
+document.getElementById('searchInput').addEventListener('input', e => {
+  clearTimeout(debTimer);
+  debTimer = setTimeout(() => {
+    searchQuery = e.target.value.trim();
+    currentPage = 1;
+    rerender();
+  }, 200);
+});
+
+/* ── URL params ──────────────────────────────────────── */
+const urlParams = new URLSearchParams(location.search);
+const qpParam = urlParams.get('quick') || urlParams.get('status');
+if (['semua','aktif','selesai','lewat','belum_lunas'].includes(qpParam)) {
+  activeFilter = qpParam;
+} else if (qpParam === 'belum_lunas') {
+  activeFilter = 'belum_lunas';
+}
+document.querySelectorAll('.ord-pill').forEach(p => {
+  p.classList.toggle('active', p.dataset.filter === activeFilter);
+});
+
+/* ── Lunasi callback ─────────────────────────────────── */
+window.addEventListener('lunasi:done', () => {
+  showToast('✓ Pembayaran tersimpan');
+  loadOrders();
+});
+
+loadOrders();
 </script>
-<script src="/js/lunasi-sheet.js"></script>
 <script src="/js/nav.js"></script>
 </body>
 </html>
