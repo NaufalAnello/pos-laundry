@@ -576,14 +576,7 @@
           </div>
 
           <div id="waActions" style="margin-top:8px;display:none">
-            <div class="wa-menu-wrap">
-              <button class="btn btn-wa btn-block" onclick="toggleWaMenu()">📱 Kirim WA ▾</button>
-              <div class="wa-menu" id="waMenu">
-                <a href="#" onclick="openWa('nota');return false;">Kirim Nota</a>
-                <a href="#" onclick="openWa('tagihan');return false;">Kirim Tagihan</a>
-                <a href="#" onclick="openWa('notif');return false;">Notif Selesai</a>
-              </div>
-            </div>
+            <button class="btn btn-wa btn-block" onclick="openWaFromDetail()">💬 Kirim WhatsApp</button>
           </div>
 
           <div id="btnBatal" style="margin-top:8px;display:none">
@@ -1499,26 +1492,34 @@ let modalData = {
 
 function lunasi() {
   const o = orderData;
+  if (!o) return;
+  // Pakai bottom sheet universal supaya konsisten dengan halaman lain
+  if (typeof window.openLunasiSheet === 'function') {
+    window.openLunasiSheet({
+      id: o.id,
+      nomor: o.nomor_transaksi,
+      nama: o.pelanggan?.nama,
+      total: o.total_bayar,
+      dibayar: o.total_dibayar || o.bayar || 0,
+      pelanggan_id: o.pelanggan?.id
+    });
+    return;
+  }
+  // Fallback ke modal lama jika sheet belum termuat
   const total = o.total_bayar;
   const dibayar = o.total_dibayar || o.bayar || 0;
   const sisa = Math.max(0, total - dibayar);
-
-  // Isi data modal
   document.getElementById('modalNomor').textContent = o.nomor_transaksi;
   document.getElementById('modalPelanggan').textContent = o.pelanggan?.nama || 'Non-member';
   document.getElementById('modalTotal').textContent = fmtRp(total);
   document.getElementById('modalDibayar').textContent = fmtRp(dibayar);
   document.getElementById('modalSisa').textContent = fmtRp(sisa);
-
-  // Reset form
   modalData = { metode: 'tunai', nominal: 0, kelebihanMode: 'deposit' };
   document.getElementById('modalNominalInput').value = '';
   document.querySelectorAll('.modal-metode-btn').forEach(b => b.classList.remove('active'));
   document.querySelector('.modal-metode-btn[data-metode="tunai"]').classList.add('active');
   document.getElementById('modalPreview').style.display = 'none';
   document.getElementById('modalKelebihanPanel').style.display = 'none';
-
-  // Tampilkan modal
   document.getElementById('modalLunasi').style.display = 'flex';
   document.body.style.overflow = 'hidden';
 }
@@ -1656,28 +1657,15 @@ async function submitLunasi() {
   }
 }
 
-async function openWa(type) {
-  try {
-    const r = await fetch(`/api/v1/transaksi/${orderId}/wa/${type}`);
-    const d = await r.json();
-    if (!r.ok) {
-      showToast('Gagal: ' + d.error);
-      return;
-    }
-    window.open(d.url, '_blank');
-    await fetch('/api/v1/wa/log', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        telepon: d.telepon,
-        pesan: d.teks,
-        transaksi_id: orderId,
-        status: 'terkirim'
-      })
-    });
-  } catch {
-    showToast('Koneksi gagal');
-  }
+function openWaFromDetail() {
+  if (!orderData) { showToast('Data order belum siap'); return; }
+  if (typeof window.openWaSheet !== 'function') { showToast('Komponen WA belum siap'); return; }
+  window.openWaSheet({
+    id: orderData.id,
+    nomor: orderData.nomor_transaksi,
+    nama: orderData.pelanggan_nama,
+    telepon: orderData.pelanggan_telepon
+  });
 }
 
 function batalOrder() {
@@ -1946,6 +1934,12 @@ if (document.readyState === 'loading') {
 } else {
   bootstrapDetail();
 }
+
+// Reload detail setelah pelunasan dari bottom sheet universal
+window.addEventListener('lunasi:done', () => {
+  if (typeof showToast === 'function') showToast('✓ Pembayaran tersimpan');
+  loadDetail();
+});
 </script>
 <script src="/js/nav.js"></script>
 </body>
