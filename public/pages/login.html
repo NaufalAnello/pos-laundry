@@ -4,70 +4,72 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login — POS Laundry</title>
+  <link rel="stylesheet" href="/css/design-system.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: var(--font, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+      background: var(--gray-1, #F8FAFC);
       padding: 16px;
     }
 
     .card {
       background: #fff;
       border-radius: 16px;
-      padding: 48px 40px;
+      padding: 40px 32px;
       width: 100%;
       max-width: 400px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
-      animation: slideUp .35s ease;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      animation: slideUp .3s ease;
     }
     @media (max-width: 480px) {
-      .card { padding: 32px 22px; border-radius: 14px; }
-      .brand-icon { font-size: 44px; }
-      .brand h1 { font-size: 20px; }
+      .card { padding: 32px 20px; }
     }
 
     @keyframes slideUp {
-      from { opacity: 0; transform: translateY(24px); }
+      from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
+    /* ── Brand ── */
     .brand {
       text-align: center;
       margin-bottom: 32px;
     }
     .brand-icon {
-      font-size: 52px;
+      font-size: 48px;
       display: block;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
+      line-height: 1;
     }
     .brand h1 {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 700;
-      color: #1e3a8a;
+      color: var(--gray-9, #111827);
       letter-spacing: -.3px;
     }
     .brand p {
       font-size: 14px;
-      color: #64748b;
+      color: var(--gray-5, #64748b);
       margin-top: 4px;
     }
 
+    /* ── Fields ── */
     .field {
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
     .field label {
       display: block;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
-      color: #374151;
+      color: var(--gray-7, #374151);
       margin-bottom: 6px;
-      letter-spacing: .3px;
+      letter-spacing: .5px;
       text-transform: uppercase;
     }
 
@@ -76,87 +78,91 @@
     }
     .input-wrap input {
       width: 100%;
-      padding: 13px 44px 13px 14px;
-      border: 1.5px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 16px; /* cegah iOS auto-zoom */
-      color: #111827;
-      background: #f9fafb;
-      transition: border-color .2s, box-shadow .2s, background .2s;
+      padding: 12px 44px 12px 12px;
+      border: 1px solid var(--gray-3, #e2e8f0);
+      border-radius: var(--radius-md, 8px);
+      font-size: 16px;
+      color: var(--gray-9, #111827);
+      background: #fff;
+      transition: border-color .2s, box-shadow .2s;
       outline: none;
-      min-height: 44px;
     }
     .input-wrap input:focus {
-      border-color: #3b82f6;
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, .15);
+      border-color: var(--primary, #2563EB);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
     }
     .input-wrap input.error {
-      border-color: #ef4444;
+      border-color: var(--danger, #dc2626);
     }
     .input-wrap input.error:focus {
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, .15);
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, .12);
+    }
+    .input-wrap input::placeholder {
+      color: var(--gray-4, #94a3b8);
     }
 
     .toggle-pwd {
       position: absolute;
-      right: 12px;
+      right: 10px;
       top: 50%;
       transform: translateY(-50%);
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 18px;
-      color: #9ca3af;
+      font-size: 17px;
+      color: var(--gray-4, #94a3b8);
       padding: 4px;
       line-height: 1;
       transition: color .15s;
     }
-    .toggle-pwd:hover { color: #6b7280; }
+    .toggle-pwd:hover { color: var(--gray-6, #334155); }
 
+    /* ── Error box ── */
     .error-msg {
       display: flex;
       align-items: center;
       gap: 8px;
-      background: #fef2f2;
+      background: var(--danger-lt, #fef2f2);
       border: 1px solid #fecaca;
-      color: #b91c1c;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 13.5px;
-      margin-bottom: 20px;
+      color: var(--danger-dk, #b91c1c);
+      border-radius: var(--radius-md, 8px);
+      padding: 10px 12px;
+      font-size: 13px;
+      margin-bottom: 18px;
       animation: shake .35s ease;
     }
     .error-msg.hidden { display: none; }
 
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
-      20%       { transform: translateX(-6px); }
-      40%       { transform: translateX(6px); }
+      20%       { transform: translateX(-5px); }
+      40%       { transform: translateX(5px); }
       60%       { transform: translateX(-4px); }
       80%       { transform: translateX(4px); }
     }
 
-    .btn {
+    /* ── Submit button ── */
+    .btn-login {
       width: 100%;
-      padding: 13px;
-      background: #2563eb;
+      height: 48px;
+      background: var(--primary, #2563EB);
       color: #fff;
       border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 600;
+      border-radius: var(--radius-md, 8px);
+      font-size: 16px;
+      font-weight: 700;
       cursor: pointer;
       transition: background .2s, transform .1s, box-shadow .2s;
       position: relative;
       overflow: hidden;
+      margin-top: 4px;
     }
-    .btn:hover:not(:disabled) {
-      background: #1d4ed8;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, .35);
+    .btn-login:hover:not(:disabled) {
+      background: var(--primary-dk, #1d4ed8);
+      box-shadow: 0 4px 14px rgba(37, 99, 235, .35);
     }
-    .btn:active:not(:disabled) { transform: scale(.98); }
-    .btn:disabled {
+    .btn-login:active:not(:disabled) { transform: scale(.98); }
+    .btn-login:disabled {
       background: #93c5fd;
       cursor: not-allowed;
     }
@@ -169,8 +175,8 @@
       align-items: center;
       justify-content: center;
     }
-    .btn.loading .btn-text   { opacity: 0; }
-    .btn.loading .btn-spinner { display: flex; }
+    .btn-login.loading .btn-text    { opacity: 0; }
+    .btn-login.loading .btn-spinner { display: flex; }
 
     .spinner {
       width: 20px; height: 20px;
@@ -181,18 +187,19 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── Footer ── */
     .footer-text {
       text-align: center;
       margin-top: 24px;
       font-size: 12px;
-      color: #9ca3af;
+      color: var(--gray-4, #94a3b8);
     }
 
-    /* Checking auth overlay */
+    /* ── Auth check overlay ── */
     #authCheck {
       position: fixed;
       inset: 0;
-      background: #1e40af;
+      background: var(--primary, #2563EB);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -200,11 +207,9 @@
       transition: opacity .3s;
     }
     #authCheck.hidden { opacity: 0; pointer-events: none; }
-    #authCheck .dot-wrap {
-      display: flex; gap: 10px;
-    }
+    #authCheck .dot-wrap { display: flex; gap: 10px; }
     #authCheck .dot {
-      width: 12px; height: 12px;
+      width: 11px; height: 11px;
       border-radius: 50%;
       background: rgba(255,255,255,.7);
       animation: bounce .9s infinite ease-in-out;
@@ -213,13 +218,12 @@
     #authCheck .dot:nth-child(3) { animation-delay: .3s; }
     @keyframes bounce {
       0%, 80%, 100% { transform: scale(.6); opacity: .4; }
-      40%            { transform: scale(1); opacity: 1; }
+      40%            { transform: scale(1);  opacity: 1; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Auth check overlay saat halaman dimuat -->
   <div id="authCheck" aria-hidden="true">
     <div class="dot-wrap">
       <div class="dot"></div>
@@ -231,8 +235,8 @@
   <div class="card" role="main">
     <div class="brand">
       <span class="brand-icon">🧺</span>
-      <h1>POS Laundry</h1>
-      <p>Masuk untuk melanjutkan</p>
+      <h1>Nala Laundry</h1>
+      <p>Masuk ke akun Anda</p>
     </div>
 
     <form id="loginForm" novalidate>
@@ -273,7 +277,7 @@
         <span id="errorText"></span>
       </div>
 
-      <button type="submit" id="submitBtn" class="btn">
+      <button type="submit" id="submitBtn" class="btn-login">
         <span class="btn-text">Masuk</span>
         <span class="btn-spinner" aria-hidden="true">
           <span class="spinner"></span>
@@ -281,41 +285,36 @@
       </button>
     </form>
 
-    <p class="footer-text">POS Laundry &copy; 2025</p>
+    <p class="footer-text">POS Laundry v1.0</p>
   </div>
 
   <script>
-    const authCheck = document.getElementById('authCheck');
-    const form      = document.getElementById('loginForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const errorMsg  = document.getElementById('errorMsg');
-    const errorText = document.getElementById('errorText');
+    const authCheck  = document.getElementById('authCheck');
+    const form       = document.getElementById('loginForm');
+    const submitBtn  = document.getElementById('submitBtn');
+    const errorMsg   = document.getElementById('errorMsg');
+    const errorText  = document.getElementById('errorText');
     const usernameEl = document.getElementById('username');
     const passwordEl = document.getElementById('password');
 
-    // ── Cek sesi aktif → langsung redirect ke dashboard ─────────────────────
+    // Cek sesi aktif → langsung redirect ke dashboard
     fetch('/api/v1/auth/me', { credentials: 'include' })
       .then(r => {
-        if (r.ok) {
-          window.location.replace('/');
-        } else {
-          authCheck.classList.add('hidden');
-        }
+        if (r.ok) window.location.replace('/');
+        else authCheck.classList.add('hidden');
       })
       .catch(() => authCheck.classList.add('hidden'));
 
-    // ── Toggle visibility password ──────────────────────────────────────────
+    // Toggle visibility password
     document.getElementById('togglePwd').addEventListener('click', () => {
-      const isPassword = passwordEl.type === 'password';
-      passwordEl.type = isPassword ? 'text' : 'password';
-      document.getElementById('eyeIcon').textContent = isPassword ? '👁️' : '🙈';
+      const isPwd = passwordEl.type === 'password';
+      passwordEl.type = isPwd ? 'text' : 'password';
+      document.getElementById('eyeIcon').textContent = isPwd ? '👁️' : '🙈';
     });
 
-    // ── Tampilkan error ──────────────────────────────────────────────────────
     function showError(msg) {
       errorText.textContent = msg;
       errorMsg.classList.remove('hidden');
-      // re-trigger animasi shake
       errorMsg.style.animation = 'none';
       requestAnimationFrame(() => { errorMsg.style.animation = ''; });
       usernameEl.classList.add('error');
@@ -328,11 +327,8 @@
       passwordEl.classList.remove('error');
     }
 
-    [usernameEl, passwordEl].forEach(el =>
-      el.addEventListener('input', clearError)
-    );
+    [usernameEl, passwordEl].forEach(el => el.addEventListener('input', clearError));
 
-    // ── Submit login ─────────────────────────────────────────────────────────
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       clearError();
@@ -363,7 +359,6 @@
           return;
         }
 
-        // Sukses → tampilkan overlay loading lalu redirect
         authCheck.classList.remove('hidden');
         window.location.replace('/');
 
