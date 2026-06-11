@@ -9,138 +9,344 @@
   <title>Tagihan — POS Laundry</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --blue:   #2563eb; --blue-lt: #eff6ff;
-      --green:  #16a34a; --green-lt: #f0fdf4;
-      --yellow: #d97706; --yellow-lt: #fffbeb;
-      --red:    #dc2626; --red-lt:   #fef2f2;
-      --gray-1: #f8fafc; --gray-2: #f1f5f9; --gray-3: #e2e8f0;
-      --gray-5: #64748b; --gray-7: #374151; --gray-9: #111827;
-      --radius: 10px; --shadow: 0 1px 4px rgba(0,0,0,.08);
+    body { font-family: var(--font); background: var(--gray-2); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
+
+    .page { max-width: 1200px; margin: 0 auto; padding: 0 0 100px; }
+
+    /* ── Sticky Header ─────────────────────────────────── */
+    .tg-head {
+      position: sticky; top: 0; z-index: 20;
+      background: #fff; border-bottom: 1px solid var(--gray-3);
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 14px;
     }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-           background: var(--gray-2); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
+    .tg-back {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: transparent; color: var(--gray-7); border: none;
+      text-decoration: none; font-size: 20px; cursor: pointer;
+      flex-shrink: 0;
+    }
+    .tg-back:hover { background: var(--gray-2); }
+    .tg-title {
+      flex: 1; font-size: 17px; font-weight: 800; color: var(--gray-9);
+      min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
 
-    .page { max-width: 900px; margin: 0 auto; padding: 20px 16px; }
-    .page-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
-    .page-sub { color: var(--gray-5); font-size: 13px; margin-bottom: 16px; }
+    /* ── Body ───────────────────────────────────────────── */
+    .body-wrap { padding: 14px; }
 
-    .summary-card {
-      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    /* ── Summary card ───────────────────────────────────── */
+    .sum-card {
+      background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dk) 100%);
       color: #fff; border-radius: 14px; padding: 18px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 16px rgba(220,38,38,.25);
+      box-shadow: 0 6px 20px rgba(220,38,38,.25);
+      margin-bottom: 14px;
     }
-    .summary-card .lbl { font-size: 12px; opacity:.85; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
-    .summary-card .amt { font-size: 28px; font-weight: 800; margin-top: 4px; line-height: 1.1; }
-    .summary-card .sub { font-size: 13px; opacity: .9; margin-top: 4px; }
+    .sum-card.empty {
+      background: linear-gradient(135deg, var(--success) 0%, var(--success-dk) 100%);
+      box-shadow: 0 6px 20px rgba(22,163,74,.2);
+    }
+    .sum-lbl {
+      font-size: 11px; opacity: .9; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .sum-amt { font-size: 28px; font-weight: 800; margin-top: 6px; line-height: 1.1; }
+    .sum-sub { font-size: 13px; opacity: .9; margin-top: 4px; }
+    .sum-breakdown {
+      display: flex; gap: 8px; margin-top: 12px; padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,.2);
+      font-size: 12px; font-weight: 700; flex-wrap: wrap;
+    }
+    .sum-breakdown .pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(255,255,255,.2); padding: 4px 10px;
+      border-radius: 99px;
+    }
 
-    .filter-pills {
-      display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto;
+    /* ── Filter pill ───────────────────────────────────── */
+    .tg-pills {
+      display: flex; gap: 8px; margin-bottom: 12px;
+      overflow-x: auto; scrollbar-width: none;
       padding-bottom: 4px;
     }
-    .filter-pills::-webkit-scrollbar { display: none; }
-    .pill {
-      padding: 7px 14px; border-radius: 99px; border: 1px solid var(--gray-3);
-      background: #fff; font-size: 12px; font-weight: 700; cursor: pointer;
-      color: var(--gray-7); white-space: nowrap;
+    .tg-pills::-webkit-scrollbar { display: none; }
+    .tg-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 99px;
+      border: 1px solid var(--gray-3); background: #fff;
+      font-size: 12px; font-weight: 700; color: var(--gray-7);
+      cursor: pointer; white-space: nowrap; min-height: 36px;
+      font-family: inherit; transition: all .15s;
     }
-    .pill.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .tg-pill:active { transform: scale(.97); }
+    .tg-pill.active { background: var(--gray-9); color: #fff; border-color: var(--gray-9); }
+    .tg-pill .cnt {
+      background: var(--gray-2); color: var(--gray-6);
+      padding: 1px 7px; border-radius: 99px;
+      font-size: 10px; font-weight: 800;
+    }
+    .tg-pill.active .cnt { background: rgba(255,255,255,.25); color: #fff; }
 
-    .search-bar {
-      width: 100%; padding: 12px 14px; border-radius: 10px;
-      border: 1px solid var(--gray-3); font-size: 14px; margin-bottom: 12px;
-      background: #fff;
+    /* ── Search ─────────────────────────────────────────── */
+    .tg-search {
+      position: relative; margin-bottom: 12px;
     }
-    .search-bar:focus { outline: none; border-color: var(--blue); }
+    .tg-search input {
+      width: 100%; min-height: 44px;
+      padding: 10px 14px 10px 40px;
+      border: 1px solid var(--gray-3); border-radius: 10px;
+      background: #fff; font-size: 14px; font-family: inherit;
+      outline: none;
+    }
+    .tg-search input:focus { border-color: var(--primary); }
+    .tg-search::before {
+      content: '🔍';
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      font-size: 16px; pointer-events: none;
+    }
 
-    .tagihan-list { display: flex; flex-direction: column; gap: 10px; }
-    .tagihan-card {
-      background: #fff; border-radius: 12px; border: 1px solid var(--gray-3);
-      padding: 14px; box-shadow: var(--shadow);
-      display: flex; flex-direction: column; gap: 8px;
+    /* ── Sort toggle ────────────────────────────────────── */
+    .tg-sort {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 12px;
     }
-    .tagihan-card.urgent { border-left: 4px solid var(--red); }
-    .tc-row1 {
-      display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+    .tg-sort-lbl {
+      font-size: 11px; font-weight: 700; color: var(--gray-5); text-transform: uppercase;
+      letter-spacing: .3px;
     }
-    .tc-nama { font-size: 15px; font-weight: 700; color: var(--gray-9); }
-    .tc-nomor { font-size: 12px; color: var(--gray-5); margin-top: 2px; }
-    .tc-amt { font-size: 18px; font-weight: 800; color: var(--red); white-space: nowrap; }
-    .tc-row2 {
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: 12px; color: var(--gray-5); flex-wrap: wrap; gap: 6px;
+    .tg-sort-group {
+      display: inline-flex; gap: 2px; background: var(--gray-2);
+      border-radius: 99px; padding: 3px;
     }
-    .tc-badge {
-      display: inline-block; padding: 2px 8px; border-radius: 99px;
-      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+    .tg-sort-btn {
+      padding: 6px 12px; border: none; background: transparent;
+      cursor: pointer; font-size: 11px; font-weight: 700; color: var(--gray-6);
+      border-radius: 99px; font-family: inherit; transition: all .15s;
+      min-height: 30px;
     }
-    .tc-badge.pending  { background: var(--yellow-lt); color: var(--yellow); }
-    .tc-badge.proses   { background: var(--blue-lt);   color: var(--blue); }
-    .tc-badge.selesai  { background: var(--green-lt);  color: var(--green); }
-    .tc-old {
-      background: var(--red-lt); color: var(--red);
-      padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: 700;
+    .tg-sort-btn.active { background: #fff; color: var(--gray-9); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+
+    /* ── Tagihan card ───────────────────────────────────── */
+    .tg-card {
+      background: #fff; border-radius: 12px;
+      border: 1px solid var(--gray-3);
+      border-left: 3px solid var(--danger);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 10px;
+      overflow: hidden;
     }
-    .tc-actions {
-      display: flex; gap: 8px; margin-top: 4px;
+    .tg-card.dp { border-left-color: var(--warning); }
+    .tg-card.urgent { border-left-width: 4px; }
+
+    .tg-card-body { padding: 12px 14px; cursor: pointer; }
+
+    .tg-row1 {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 10px;
     }
-    .tc-actions .btn {
-      flex: 1; padding: 10px; border-radius: 8px; border: none;
+    .tg-nama { font-size: 15px; font-weight: 800; color: var(--gray-9); line-height: 1.2; }
+    .tg-amt { font-size: 18px; font-weight: 800; color: var(--danger); white-space: nowrap; }
+    .tg-amt.dp { color: var(--warning); }
+
+    .tg-nomor { font-size: 12px; color: var(--gray-5); margin-top: 4px; font-family: ui-monospace, monospace; }
+
+    .tg-meta { font-size: 12px; color: var(--gray-6); margin-top: 4px; }
+    .tg-meta .urgent { color: var(--danger); font-weight: 700; }
+
+    .tg-dp-info {
+      margin-top: 6px; padding: 8px 10px;
+      background: var(--warning-lt); color: var(--gray-7);
+      border-radius: 8px; font-size: 12px;
+      display: flex; justify-content: space-between; gap: 8px;
+    }
+    .tg-dp-info b { color: var(--warning); }
+
+    .tg-badges {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .tg-badge {
+      padding: 3px 9px; border-radius: 99px;
+      font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .3px;
+    }
+    .tg-badge.belum { background: var(--danger-lt); color: var(--danger); }
+    .tg-badge.dp    { background: var(--warning-lt); color: var(--warning); }
+    .tg-badge.lama  { background: var(--danger); color: #fff; }
+
+    .tg-actions {
+      display: flex; gap: 6px; padding: 0 14px 12px;
+    }
+    .tg-act {
+      flex: 1; min-height: 42px; padding: 10px 12px;
+      border: 1px solid transparent; border-radius: 8px;
       font-size: 13px; font-weight: 700; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-      min-height: 42px;
-      text-decoration: none;
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 5px; font-family: inherit; text-decoration: none;
     }
-    .btn-lunasi { background: var(--green); color: #fff; }
-    .btn-lunasi:hover { background: #15803d; }
-    .btn-wa { background: #25d366; color: #fff; }
-    .btn-detail { background: #fff; border: 1px solid var(--gray-3); color: var(--gray-7); }
-
-    .empty {
-      text-align: center; padding: 40px 16px; color: var(--gray-5);
-      background: #fff; border-radius: 12px; border: 1px solid var(--gray-3);
+    .tg-act:active { transform: scale(.98); }
+    .tg-act.lunasi { background: var(--success); color: #fff; }
+    .tg-act.wa     { background: #25d366; color: #fff; }
+    .tg-act.detail {
+      background: #fff; border-color: var(--gray-3); color: var(--gray-6);
+      flex: 0 0 44px; min-width: 44px; padding: 0;
     }
-    .empty .ic { font-size: 48px; margin-bottom: 10px; }
 
+    /* ── Empty ──────────────────────────────────────────── */
+    .tg-empty {
+      text-align: center; padding: 60px 20px;
+      background: #fff; border-radius: 12px;
+      border: 1px dashed var(--gray-3);
+    }
+    .tg-empty .ic {
+      font-size: 72px; display: block; margin-bottom: 16px;
+    }
+    .tg-empty h3 {
+      font-size: 18px; font-weight: 800; color: var(--success);
+      margin-bottom: 8px;
+    }
+    .tg-empty p {
+      font-size: 14px; color: var(--gray-5);
+    }
+
+    /* ── Info bar ──────────────────────────────────────── */
+    .tg-info {
+      font-size: 12px; color: var(--gray-5); margin-bottom: 10px;
+    }
+
+    /* ── Toast ─────────────────────────────────────────── */
     #toast {
       position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-      background: #111; color: #fff; padding: 10px 20px; border-radius: 99px;
+      background: var(--gray-9); color: #fff; padding: 10px 20px; border-radius: 99px;
       font-size: 13px; font-weight: 600; z-index: 9999;
       opacity: 0; pointer-events: none; transition: opacity .25s;
     }
     #toast.show { opacity: 1; }
 
-    @media (min-width: 768px) {
-      .summary-card { display: flex; justify-content: space-between; align-items: center; }
+    /* ══════════════════════════════════════════════════════
+       LAPTOP (≥1024px) — pakai tabel
+       ══════════════════════════════════════════════════════ */
+    @media (min-width: 1024px) {
+      .desktop-only { display: block; }
+      .mobile-only  { display: none !important; }
+
+      .body-wrap { padding: 20px; }
+
+      .sum-card { display: flex; justify-content: space-between; align-items: center; padding: 22px 24px; }
+      .sum-card > div:first-child { flex: 1; }
+      .sum-breakdown { border-top: none; padding-top: 0; margin-top: 0; }
+
+      .tg-controls {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 14px; flex-wrap: wrap; margin-bottom: 14px;
+      }
+      .tg-pills, .tg-search { margin-bottom: 0; flex: 1 1 auto; }
+      .tg-search { max-width: 320px; min-width: 200px; }
+
+      .tg-table-card {
+        background: #fff; border-radius: 12px; border: 1px solid var(--gray-3);
+        box-shadow: var(--shadow-sm); overflow: hidden;
+      }
+      .tg-table-wrap { overflow-x: auto; }
+      table.tg-table { width: 100%; border-collapse: collapse; }
+      table.tg-table thead th {
+        padding: 11px 14px; text-align: left;
+        font-size: 11px; font-weight: 700; color: var(--gray-5);
+        text-transform: uppercase; letter-spacing: .4px;
+        background: var(--gray-1); border-bottom: 1px solid var(--gray-3);
+        white-space: nowrap;
+      }
+      table.tg-table tbody tr {
+        border-bottom: 1px solid var(--gray-2); transition: background .1s; cursor: pointer;
+      }
+      table.tg-table tbody tr:hover { background: var(--gray-1); }
+      table.tg-table tbody tr:last-child { border-bottom: none; }
+      table.tg-table tbody td {
+        padding: 12px 14px; font-size: 13px; vertical-align: middle;
+      }
+      table.tg-table .td-actions {
+        display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end;
+      }
+      table.tg-table .td-actions .tg-act {
+        min-height: 32px; padding: 4px 10px; font-size: 11px; min-width: 0; flex: 0 0 auto;
+      }
+      table.tg-table .td-actions .tg-act.detail { flex: 0 0 32px; min-width: 32px; }
+    }
+    @media (max-width: 1023px) {
+      .desktop-only { display: none !important; }
     }
   </style>
 </head>
 <body>
 
 <div class="page">
-  <div class="page-title">💰 Tagihan</div>
-  <div class="page-sub">Order belum lunas — terlama dulu</div>
+  <div class="tg-head">
+    <a class="tg-back" href="/" title="Kembali">←</a>
+    <div class="tg-title">💰 Tagihan</div>
+  </div>
 
-  <div class="summary-card">
-    <div>
-      <div class="lbl">Total Tagihan Belum Lunas</div>
-      <div class="amt" id="sumAmt">Rp 0</div>
-      <div class="sub" id="sumCount">— order</div>
+  <div class="body-wrap">
+    <!-- Summary -->
+    <div class="sum-card" id="sumCard">
+      <div>
+        <div class="sum-lbl">💰 Total Tagihan</div>
+        <div class="sum-amt" id="sumAmt">Rp 0</div>
+        <div class="sum-sub" id="sumSub">— order belum lunas</div>
+        <div class="sum-breakdown" id="sumBreakdown" style="display:none">
+          <span class="pill" id="sumBelum">— Belum Bayar</span>
+          <span class="pill" id="sumDp">— DP</span>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="filter-pills">
-    <button class="pill active" data-filter="semua">Semua</button>
-    <button class="pill" data-filter="selesai">Selesai (belum diambil)</button>
-    <button class="pill" data-filter="proses">Sedang Diproses</button>
-    <button class="pill" data-filter="pending">Pending</button>
-  </div>
+    <!-- Controls -->
+    <div class="tg-controls">
+      <div class="tg-pills">
+        <button class="tg-pill active" data-filter="semua">Semua <span class="cnt" id="cntSemua">0</span></button>
+        <button class="tg-pill" data-filter="belum">Belum Bayar <span class="cnt" id="cntBelum">0</span></button>
+        <button class="tg-pill" data-filter="dp">DP <span class="cnt" id="cntDp">0</span></button>
+      </div>
+      <div class="tg-search">
+        <input type="text" id="searchInput" placeholder="Cari nama pelanggan / nomor order..." autocomplete="off"/>
+      </div>
+    </div>
 
-  <input type="text" id="searchInput" class="search-bar" placeholder="Cari nama / nomor order..."/>
+    <div class="tg-sort">
+      <span class="tg-sort-lbl">Urutkan</span>
+      <div class="tg-sort-group" id="sortGroup">
+        <button class="tg-sort-btn active" data-sort="terlama">Terlama</button>
+        <button class="tg-sort-btn" data-sort="terbaru">Terbaru</button>
+        <button class="tg-sort-btn" data-sort="terbesar">Terbesar</button>
+      </div>
+    </div>
 
-  <div class="tagihan-list" id="tagihanList">
-    <div class="empty">Memuat data...</div>
+    <div class="tg-info" id="infoBar">Memuat...</div>
+
+    <!-- MOBILE: card list -->
+    <div class="mobile-only" id="cardList"></div>
+
+    <!-- LAPTOP: table -->
+    <div class="tg-table-card desktop-only">
+      <div class="tg-table-wrap">
+        <table class="tg-table">
+          <thead>
+            <tr>
+              <th>Pelanggan</th>
+              <th>No. Order</th>
+              <th>Masuk</th>
+              <th>Status</th>
+              <th>Total</th>
+              <th>Sisa</th>
+              <th style="text-align:right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--gray-5)">Memuat...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -148,122 +354,299 @@
 
 <script>
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+const fmtRpShort = n => {
+  n = Number(n || 0);
+  if (n >= 1_000_000) return 'Rp ' + (n / 1_000_000).toFixed(1).replace('.0','') + 'jt';
+  if (n >= 1_000)     return 'Rp ' + Math.round(n / 1_000) + 'rb';
+  return 'Rp ' + n.toLocaleString('id-ID');
+};
 const fmtDate = s => s ? new Date(s).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+const fmtDateShort = s => s ? new Date(s).toLocaleDateString('id-ID', { day:'2-digit', month:'short' }) : '—';
 const daysSince = s => {
   if (!s) return 0;
   const d1 = new Date(s); d1.setHours(0,0,0,0);
   const d2 = new Date(); d2.setHours(0,0,0,0);
   return Math.max(0, Math.floor((d2 - d1) / 86400000));
 };
+const escHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 let allData = [];
 let activeFilter = 'semua';
-let debounceTimer = null;
+let activeSort = 'terlama';
+let searchQuery = '';
+let debTimer = null;
 
-function showToast(msg) {
+function showToast(msg, dur = 2500) {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2200);
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+window.showToast = showToast;
+
+/* ── Helpers ─────────────────────────────────────────── */
+function tipeTagihan(t) {
+  const bayar = Number(t.bayar || 0);
+  if (bayar <= 0) return 'belum';
+  return 'dp';
+}
+function sisa(t) { return Math.max(0, Number(t.total_bayar) - Number(t.bayar)); }
+
+function lunasiPayload(t) {
+  return {
+    id: t.id, nomor: t.nomor_transaksi, nama: t.pelanggan_nama,
+    total: t.total_bayar, dibayar: t.bayar, pelanggan_id: t.pelanggan_id
+  };
+}
+function waPayload(t) {
+  return { id: t.id, nomor: t.nomor_transaksi, nama: t.pelanggan_nama, telepon: t.pelanggan_telepon };
 }
 
-async function loadData() {
-  try {
-    const r = await fetch('/api/v1/transaksi?belum_lunas=1&sort=tanggal_asc&limit=200', { credentials: 'include' });
-    if (r.status === 401) { location.href = '/login'; return; }
-    const d = await r.json();
-    allData = d.data || [];
-    renderAll();
-  } catch {
-    document.getElementById('tagihanList').innerHTML =
-      '<div class="empty">Gagal memuat data</div>';
+/* ── Filter ──────────────────────────────────────────── */
+function applyFilter(data, key) {
+  if (key === 'semua') return data;
+  if (key === 'belum') return data.filter(t => tipeTagihan(t) === 'belum');
+  if (key === 'dp')    return data.filter(t => tipeTagihan(t) === 'dp');
+  return data;
+}
+
+function applySort(data, key) {
+  const arr = [...data];
+  if (key === 'terbaru')  return arr.sort((a, b) => new Date(b.tanggal_masuk) - new Date(a.tanggal_masuk));
+  if (key === 'terbesar') return arr.sort((a, b) => sisa(b) - sisa(a));
+  return arr.sort((a, b) => new Date(a.tanggal_masuk) - new Date(b.tanggal_masuk));
+}
+
+/* ── Update pill counts + summary ────────────────────── */
+function updateSummary() {
+  const belumList = applyFilter(allData, 'belum');
+  const dpList    = applyFilter(allData, 'dp');
+  document.getElementById('cntSemua').textContent = allData.length;
+  document.getElementById('cntBelum').textContent = belumList.length;
+  document.getElementById('cntDp').textContent    = dpList.length;
+
+  const totalSisa = allData.reduce((s, t) => s + sisa(t), 0);
+  const sumCard = document.getElementById('sumCard');
+  const sumAmt = document.getElementById('sumAmt');
+  const sumSub = document.getElementById('sumSub');
+  const sumBreakdown = document.getElementById('sumBreakdown');
+
+  if (!allData.length) {
+    sumCard.classList.add('empty');
+    sumAmt.textContent = '✓ Lunas';
+    sumSub.textContent = 'Tidak ada tagihan';
+    sumBreakdown.style.display = 'none';
+    return;
   }
+  sumCard.classList.remove('empty');
+  sumAmt.textContent = fmtRp(totalSisa);
+  sumSub.textContent = `${allData.length} order belum lunas`;
+  sumBreakdown.style.display = 'flex';
+  document.getElementById('sumBelum').textContent = `${belumList.length} Belum Bayar`;
+  document.getElementById('sumDp').textContent    = `${dpList.length} DP`;
 }
 
-function renderAll() {
-  const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
-
-  let filtered = allData.filter(t => {
-    if (activeFilter !== 'semua' && t.status !== activeFilter) return false;
-    if (q) {
-      const haystack = `${t.nomor_transaksi} ${t.pelanggan_nama || ''}`.toLowerCase();
-      if (!haystack.includes(q)) return false;
-    }
-    return true;
-  });
-
-  // Summary (semua data — tidak terpengaruh filter)
-  const totalSisa = allData.reduce((s, t) => s + (Number(t.total_bayar) - Number(t.bayar)), 0);
-  document.getElementById('sumAmt').textContent = fmtRp(totalSisa);
-  document.getElementById('sumCount').textContent = `${allData.length} order belum lunas`;
-
-  const el = document.getElementById('tagihanList');
-  if (!filtered.length) {
-    el.innerHTML = `<div class="empty"><div class="ic">✨</div><div>${allData.length ? 'Tidak ada yang cocok dengan filter' : 'Semua tagihan sudah lunas'}</div></div>`;
+/* ── Render ──────────────────────────────────────────── */
+function renderCardList(rows) {
+  const el = document.getElementById('cardList');
+  if (!rows.length) {
+    el.innerHTML = emptyHtml();
     return;
   }
 
-  el.innerHTML = filtered.map(t => {
-    const sisa = Number(t.total_bayar) - Number(t.bayar);
+  el.innerHTML = rows.map(t => {
+    const tipe = tipeTagihan(t);
+    const s = sisa(t);
     const hari = daysSince(t.tanggal_masuk);
     const urgent = hari >= 3;
     const tel = t.pelanggan_telepon;
-    return `
-      <div class="tagihan-card ${urgent ? 'urgent' : ''}">
-        <div class="tc-row1">
+    const pl = JSON.stringify(lunasiPayload(t)).replace(/'/g, "&#39;");
+    const wp = JSON.stringify(waPayload(t)).replace(/'/g, "&#39;");
+
+    let body = '';
+    if (tipe === 'dp') {
+      body = `
+        <div class="tg-row1">
           <div style="min-width:0;flex:1">
-            <div class="tc-nama">${escapeHtml(t.pelanggan_nama || 'Non-member')}</div>
-            <div class="tc-nomor">${t.nomor_transaksi} · ${fmtDate(t.tanggal_masuk)}</div>
+            <div class="tg-nama">${escHtml(t.pelanggan_nama || 'Non-member')}</div>
+            <div class="tg-nomor">${t.nomor_transaksi}</div>
           </div>
-          <div class="tc-amt">${fmtRp(sisa)}</div>
+          <div class="tg-amt dp">${fmtRp(s)}</div>
         </div>
-        <div class="tc-row2">
-          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-            <span class="tc-badge ${t.status}">${t.status}</span>
-            ${hari > 0 ? `<span class="tc-old">${hari} hari</span>` : ''}
+        <div class="tg-dp-info">
+          <span>DP: <b>${fmtRp(t.bayar)}</b></span>
+          <span>Sisa: <b>${fmtRp(s)}</b></span>
+        </div>
+        <div class="tg-meta">
+          Masuk: ${fmtDate(t.tanggal_masuk)} · ${hari > 0 ? `<span class="${urgent ? 'urgent' : ''}">${hari} hari lalu</span>` : 'hari ini'}
+        </div>
+        <div class="tg-badges">
+          <span class="tg-badge dp">💰 DP</span>
+          ${hari >= 7 ? `<span class="tg-badge lama">> 7 hari</span>` : ''}
+        </div>`;
+    } else {
+      body = `
+        <div class="tg-row1">
+          <div style="min-width:0;flex:1">
+            <div class="tg-nama">${escHtml(t.pelanggan_nama || 'Non-member')}</div>
+            <div class="tg-nomor">${t.nomor_transaksi}</div>
           </div>
-          <div style="font-size:11px;color:var(--gray-5)">Total ${fmtRp(t.total_bayar)}</div>
+          <div class="tg-amt">${fmtRp(s)}</div>
         </div>
-        <div class="tc-actions">
-          <button class="btn btn-lunasi" onclick='openLunasi(${JSON.stringify({id:t.id,nomor:t.nomor_transaksi,nama:t.pelanggan_nama,total:t.total_bayar,dibayar:t.bayar,pelanggan_id:t.pelanggan_id}).replace(/'/g,"&#39;")})'>💰 Lunasi</button>
-          ${tel ? `<button class="btn btn-wa" onclick='openWaSheet(${JSON.stringify({id:t.id,nomor:t.nomor_transaksi,nama:t.pelanggan_nama,telepon:t.pelanggan_telepon}).replace(/'/g,"&#39;")})'>💬 WA</button>` : ''}
-          <a class="btn btn-detail" href="/order/detail?id=${t.id}">Detail</a>
+        <div class="tg-meta">
+          Masuk: ${fmtDate(t.tanggal_masuk)} · ${hari > 0 ? `<span class="${urgent ? 'urgent' : ''}">${hari} hari lalu</span>` : 'hari ini'}
         </div>
-      </div>`;
+        <div class="tg-badges">
+          <span class="tg-badge belum">💰 BELUM BAYAR</span>
+          ${hari >= 7 ? `<span class="tg-badge lama">> 7 hari</span>` : ''}
+        </div>`;
+    }
+
+    return `
+    <div class="tg-card ${tipe === 'dp' ? 'dp' : ''} ${urgent ? 'urgent' : ''}">
+      <div class="tg-card-body" onclick="goDetail(${t.id}, event)">
+        ${body}
+      </div>
+      <div class="tg-actions">
+        <button class="tg-act lunasi" onclick='event.stopPropagation();openLunasiSheet(${pl})'>💰 ${tipe === 'dp' ? 'Lunasi Sisa' : 'Lunasi'}</button>
+        ${tel ? `<button class="tg-act wa" onclick='event.stopPropagation();openWaSheet(${wp})'>💬 Tagih WA</button>` : ''}
+        <a class="tg-act detail" href="/order/detail?id=${t.id}" onclick='event.stopPropagation()' title="Detail">›</a>
+      </div>
+    </div>`;
   }).join('');
 }
 
-function escapeHtml(s) {
-  if (s == null) return '';
-  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-}
-
-function openLunasi(payload) {
-  if (typeof window.openLunasiSheet !== 'function') {
-    showToast('Komponen Lunasi belum siap');
+function renderTable(rows) {
+  const tbody = document.getElementById('tableBody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="padding:0">${emptyHtml(true)}</td></tr>`;
     return;
   }
-  window.openLunasiSheet(payload);
+
+  tbody.innerHTML = rows.map(t => {
+    const tipe = tipeTagihan(t);
+    const s = sisa(t);
+    const hari = daysSince(t.tanggal_masuk);
+    const tel = t.pelanggan_telepon;
+    const pl = JSON.stringify(lunasiPayload(t)).replace(/'/g, "&#39;");
+    const wp = JSON.stringify(waPayload(t)).replace(/'/g, "&#39;");
+
+    return `
+    <tr onclick="goDetail(${t.id}, event)" style="border-left:3px solid ${tipe === 'dp' ? 'var(--warning)' : 'var(--danger)'}">
+      <td>
+        <div style="font-weight:700">${escHtml(t.pelanggan_nama || 'Non-member')}</div>
+        ${tel ? `<div style="font-size:11px;color:var(--gray-5)">${escHtml(tel)}</div>` : ''}
+      </td>
+      <td style="font-family:ui-monospace,monospace;font-size:12px">${t.nomor_transaksi}</td>
+      <td style="white-space:nowrap">
+        <div>${fmtDate(t.tanggal_masuk)}</div>
+        ${hari > 0 ? `<div style="font-size:11px;color:${hari >= 3 ? 'var(--danger)' : 'var(--gray-5)'};font-weight:${hari >= 3 ? 700 : 400}">${hari} hari lalu</div>` : ''}
+      </td>
+      <td>
+        ${tipe === 'dp'
+          ? `<span class="tg-badge dp">DP</span><div style="font-size:11px;color:var(--gray-5);margin-top:2px">Bayar ${fmtRp(t.bayar)}</div>`
+          : `<span class="tg-badge belum">BELUM BAYAR</span>`}
+      </td>
+      <td style="white-space:nowrap;font-weight:700">${fmtRp(t.total_bayar)}</td>
+      <td style="white-space:nowrap;font-weight:800;color:${tipe === 'dp' ? 'var(--warning)' : 'var(--danger)'}">${fmtRp(s)}</td>
+      <td>
+        <div class="td-actions">
+          <button class="tg-act lunasi" onclick='event.stopPropagation();openLunasiSheet(${pl})'>💰 ${tipe === 'dp' ? 'Lunasi Sisa' : 'Lunasi'}</button>
+          ${tel ? `<button class="tg-act wa" onclick='event.stopPropagation();openWaSheet(${wp})'>💬 Tagih</button>` : ''}
+          <a class="tg-act detail" href="/order/detail?id=${t.id}" onclick='event.stopPropagation()' title="Detail">›</a>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
 }
 
-// kirimWa() lama digantikan openWaSheet() universal dari wa-sheet.js
+function emptyHtml(inline) {
+  if (allData.length === 0) {
+    return `
+      <div class="tg-empty" ${inline ? 'style="border:none;border-radius:0"' : ''}>
+        <span class="ic">✅</span>
+        <h3>Semua tagihan sudah lunas!</h3>
+        <p>Tidak ada yang perlu ditagih.</p>
+      </div>`;
+  }
+  // Ada data tapi filter/search tidak match
+  return `
+    <div class="tg-empty" ${inline ? 'style="border:none;border-radius:0"' : ''}>
+      <span class="ic">🔍</span>
+      <h3 style="color:var(--gray-7)">Tidak ada yang cocok</h3>
+      <p>Coba ganti filter atau pencarian.</p>
+    </div>`;
+}
 
-// ── Filter & search ────────────────────────────────────────────────────
-document.querySelectorAll('.pill').forEach(p => {
+window.goDetail = (id, ev) => {
+  if (ev && ev.target.closest('button, a.tg-act')) return;
+  location.href = `/order/detail?id=${id}`;
+};
+
+/* ── Render orchestrator ─────────────────────────────── */
+function rerender() {
+  let rows = applyFilter(allData, activeFilter);
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    rows = rows.filter(t => (
+      (t.pelanggan_nama || '').toLowerCase().includes(q) ||
+      (t.nomor_transaksi || '').toLowerCase().includes(q) ||
+      (t.pelanggan_telepon || '').includes(q)
+    ));
+  }
+  rows = applySort(rows, activeSort);
+
+  document.getElementById('infoBar').textContent =
+    `Menampilkan ${rows.length} dari ${allData.length} tagihan${searchQuery ? ' untuk "' + searchQuery + '"' : ''}`;
+
+  renderCardList(rows);
+  renderTable(rows);
+}
+
+/* ── Loader ──────────────────────────────────────────── */
+async function loadData() {
+  try {
+    const r = await fetch('/api/v1/transaksi?belum_lunas=1&sort=tanggal_asc&limit=500', { credentials: 'include' });
+    if (r.status === 401) { location.href = '/login'; return; }
+    const d = await r.json();
+    allData = d.data || [];
+    updateSummary();
+    rerender();
+  } catch {
+    document.getElementById('infoBar').textContent = 'Gagal memuat data';
+    document.getElementById('cardList').innerHTML =
+      `<div class="tg-empty"><span class="ic">⚠️</span><h3 style="color:var(--danger)">Gagal memuat</h3><p>Periksa koneksi dan coba lagi.</p></div>`;
+  }
+}
+
+/* ── Bind filter ─────────────────────────────────────── */
+document.querySelectorAll('.tg-pill').forEach(p => {
   p.addEventListener('click', () => {
-    document.querySelectorAll('.pill').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tg-pill').forEach(x => x.classList.remove('active'));
     p.classList.add('active');
     activeFilter = p.dataset.filter;
-    renderAll();
+    rerender();
   });
 });
 
-document.getElementById('searchInput').addEventListener('input', () => {
-  clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(renderAll, 200);
+document.querySelectorAll('.tg-sort-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.tg-sort-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    activeSort = b.dataset.sort;
+    rerender();
+  });
 });
 
-// ── Reload setelah lunasi ──────────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input', e => {
+  clearTimeout(debTimer);
+  debTimer = setTimeout(() => {
+    searchQuery = e.target.value.trim();
+    rerender();
+  }, 200);
+});
+
+/* ── Reload setelah pelunasan ───────────────────────── */
 window.addEventListener('lunasi:done', () => {
   showToast('✓ Pembayaran tersimpan');
   loadData();
@@ -271,7 +654,6 @@ window.addEventListener('lunasi:done', () => {
 
 loadData();
 </script>
-<script src="/js/lunasi-sheet.js"></script>
 <script src="/js/nav.js"></script>
 </body>
 </html>
