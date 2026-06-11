@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Jadwal Jemput — POS Laundry</title>
+  <link rel="stylesheet" href="/css/design-system.css"/>
+  <link rel="stylesheet" href="/css/layout.css"/>
+  <link rel="stylesheet" href="/css/responsive.css"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font);background:var(--gray-1);min-height:100vh}
+
+    /* sticky header */
+    .pg-head{
+      position:sticky; top:0; z-index:10;
+      background:#fff; border-bottom:1px solid var(--gray-2);
+      padding:14px 16px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .pg-head h1{font-size:18px;font-weight:800;color:var(--gray-9)}
+    .pg-head .sub{font-size:12px;color:var(--gray-5)}
+    .btn-add{
+      background:var(--primary); color:#fff; border:none;
+      padding:10px 14px; border-radius:var(--radius-md);
+      font-size:13px; font-weight:700; cursor:pointer;
+      display:inline-flex; align-items:center; gap:6px;
+    }
+
+    /* filter pills */
+    .pill-row{
+      display:flex; gap:8px; padding:12px 16px;
+      overflow-x:auto; scrollbar-width:none; background:#fff;
+      border-bottom:1px solid var(--gray-2);
+    }
+    .pill-row::-webkit-scrollbar{display:none}
+    .pill{
+      padding:8px 14px; border:1px solid var(--gray-3);
+      background:#fff; color:var(--gray-7);
+      border-radius:999px; font-size:13px; font-weight:600;
+      cursor:pointer; white-space:nowrap; flex-shrink:0;
+    }
+    .pill.active{ background:var(--primary); color:#fff; border-color:var(--primary); }
+
+    /* list */
+    .list{ padding:14px 16px; display:grid; gap:12px; }
+    .card{
+      background:#fff; border-radius:14px; padding:14px;
+      border:1px solid var(--gray-2);
+      box-shadow:0 1px 2px rgba(0,0,0,.04);
+    }
+    .card.terjadwal{ border-left:4px solid var(--primary); }
+    .card.selesai{ border-left:4px solid var(--success); opacity:.85; }
+    .card.batal{ border-left:4px solid var(--gray-4); opacity:.7; }
+
+    .c-row1{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+    .c-date{ font-size:13px; font-weight:700; color:var(--gray-8); }
+    .c-jam{ font-size:14px; font-weight:800; color:var(--primary); }
+    .c-nama{ font-size:15px; font-weight:700; color:var(--gray-9); margin-top:6px; }
+    .c-meta{ font-size:12px; color:var(--gray-6); margin-top:2px; }
+    .c-catatan{
+      font-size:12px; color:var(--gray-7); margin-top:6px;
+      padding:6px 8px; background:var(--gray-1); border-radius:8px;
+    }
+    .c-status{
+      display:inline-flex; align-items:center; gap:4px;
+      padding:3px 8px; border-radius:999px;
+      font-size:11px; font-weight:700; margin-top:8px;
+    }
+    .c-status.terjadwal{ background:var(--primary-lt); color:var(--primary); }
+    .c-status.selesai{ background:var(--success-lt); color:var(--success); }
+    .c-status.batal{ background:var(--gray-2); color:var(--gray-6); }
+    .c-act{ display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+    .c-act button, .c-act a{
+      flex:1; min-height:36px; padding:8px 10px;
+      border:none; border-radius:8px; font-size:12px; font-weight:700;
+      cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px;
+      text-decoration:none;
+    }
+    .btn-ok{ background:var(--success); color:#fff; }
+    .btn-edit{ background:var(--gray-2); color:var(--gray-8); }
+    .btn-del{ background:var(--danger); color:#fff; flex:0 0 44px; }
+
+    .empty{
+      text-align:center; padding:60px 20px; color:var(--gray-5);
+    }
+    .empty .ic{ font-size:48px; display:block; margin-bottom:10px; }
+    .empty .ttl{ font-weight:700; color:var(--gray-7); margin-bottom:6px; }
+
+    /* modal sheet — pattern aman, hindari .modal-body */
+    .lm-bg{
+      position:fixed!important; inset:0; background:rgba(0,0,0,.5);
+      display:none; align-items:flex-end; justify-content:center; z-index:9999;
+    }
+    .lm-bg.open{ display:flex; }
+    .lm{
+      background:#fff; width:100%; max-width:560px;
+      border-radius:16px 16px 0 0; max-height:92vh;
+      display:flex; flex-direction:column;
+    }
+    .lm-h{ padding:14px 16px; border-bottom:1px solid var(--gray-2);
+      display:flex; justify-content:space-between; align-items:center; }
+    .lm-h h3{ font-size:16px; font-weight:800; }
+    .lm-x{ background:none; border:none; font-size:22px; cursor:pointer; color:var(--gray-6); }
+    .lm-b{ padding:16px; overflow-y:auto; flex:1; }
+    .lm-f{ padding:12px 16px; border-top:1px solid var(--gray-2);
+      display:flex; gap:8px; }
+    .lm-f button{
+      flex:1; padding:12px; border:none; border-radius:var(--radius-md);
+      font-size:14px; font-weight:700; cursor:pointer;
+    }
+    .lm-f .cancel{ background:var(--gray-2); color:var(--gray-8); }
+    .lm-f .save{ background:var(--primary); color:#fff; }
+
+    .field{ margin-bottom:14px; }
+    .field label{ display:block; font-size:12px; font-weight:700; color:var(--gray-7);
+      margin-bottom:6px; text-transform:uppercase; letter-spacing:.3px; }
+    .field input, .field textarea, .field select{
+      width:100%; padding:10px 12px; border:1px solid var(--gray-3);
+      border-radius:var(--radius-md); font-size:14px; background:#fff;
+      font-family:var(--font);
+    }
+    .field input:focus, .field textarea:focus, .field select:focus{
+      outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.12);
+    }
+    .field textarea{ min-height:60px; resize:vertical; }
+
+    /* pelanggan picker */
+    .pl-result{
+      border:1px solid var(--gray-2); border-top:none;
+      border-radius:0 0 8px 8px; max-height:200px; overflow-y:auto;
+      background:#fff; display:none;
+    }
+    .pl-result.open{ display:block; }
+    .pl-item{ padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--gray-1); font-size:13px; }
+    .pl-item:hover{ background:var(--gray-1); }
+    .pl-selected{
+      padding:10px 12px; background:var(--primary-lt); border:1px solid var(--primary);
+      border-radius:var(--radius-md); margin-bottom:8px;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .pl-selected .ttl{ font-weight:700; color:var(--primary-dk, #1d4ed8); font-size:13px; }
+    .pl-selected .meta{ font-size:11px; color:var(--gray-7); margin-top:2px; }
+    .pl-selected .x{
+      background:none; border:none; cursor:pointer;
+      color:var(--danger); font-size:18px; font-weight:700;
+    }
+
+    .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+    /* desktop centered modal */
+    @media (min-width:1024px){
+      .lm-bg{ align-items:center; padding:16px; }
+      .lm{ border-radius:16px; max-width:520px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="pg-head">
+      <div>
+        <h1>📅 Jadwal Penjemputan</h1>
+        <div class="sub" id="subInfo">Memuat...</div>
+      </div>
+      <button class="btn-add" onclick="openForm()">＋ Tambah</button>
+    </div>
+
+    <div class="pill-row">
+      <button class="pill active" data-f="hari-ini" onclick="setFilter('hari-ini')">Hari Ini</button>
+      <button class="pill" data-f="besok" onclick="setFilter('besok')">Besok</button>
+      <button class="pill" data-f="minggu-ini" onclick="setFilter('minggu-ini')">Minggu Ini</button>
+      <button class="pill" data-f="semua" onclick="setFilter('semua')">Semua</button>
+      <button class="pill" data-f="selesai" onclick="setFilter('selesai')">Selesai</button>
+    </div>
+
+    <div class="list" id="list">
+      <div class="empty"><span class="ic">⏳</span>Memuat...</div>
+    </div>
+  </main>
+
+  <!-- Modal form -->
+  <div class="lm-bg" id="formModal">
+    <div class="lm">
+      <div class="lm-h">
+        <h3 id="formTitle">Tambah Jadwal Jemput</h3>
+        <button class="lm-x" onclick="closeForm()">×</button>
+      </div>
+      <div class="lm-b">
+        <div class="field">
+          <label>Pelanggan *</label>
+          <div id="plSelectedWrap"></div>
+          <input type="text" id="plSearch" placeholder="🔍 Cari nama atau no. telepon..." oninput="onSearchPelanggan()" autocomplete="off"/>
+          <div class="pl-result" id="plResult"></div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Tanggal Jemput *</label>
+            <input type="date" id="fTanggal"/>
+          </div>
+          <div class="field">
+            <label>Jam (opsional)</label>
+            <input type="time" id="fJam"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Alamat</label>
+          <textarea id="fAlamat" placeholder="Otomatis dari profil pelanggan jika kosong"></textarea>
+        </div>
+        <div class="field">
+          <label>Catatan</label>
+          <textarea id="fCatatan" placeholder="Contoh: 2 kantong besar, tunggu di teras"></textarea>
+        </div>
+      </div>
+      <div class="lm-f">
+        <button class="cancel" onclick="closeForm()">Batal</button>
+        <button class="save" id="btnSave" onclick="simpan()">Simpan Jadwal</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const state = {
+  filter: 'hari-ini',
+  items: [],
+  editId: null,
+  pelanggan: null,
+  searchTimer: null
+};
+
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function showToast(msg) {
+  let t = document.getElementById('__toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = '__toast';
+    t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;z-index:99999;box-shadow:0 4px 16px rgba(0,0,0,.2)';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.display = '';
+  clearTimeout(window.__toastT);
+  window.__toastT = setTimeout(() => t.style.display = 'none', 2500);
+}
+
+const todayISO = () => new Date().toISOString().slice(0,10);
+function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x.toISOString().slice(0,10); }
+
+const HARI = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const BULAN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+function fmtTanggal(iso) {
+  if (!iso) return '-';
+  const d = new Date(iso + 'T00:00:00');
+  return `${HARI[d.getDay()]}, ${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+/* ── Filter ──────────────────────────────────── */
+function setFilter(f) {
+  state.filter = f;
+  document.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.dataset.f === f));
+  load();
+}
+
+/* ── Load list ───────────────────────────────── */
+async function load() {
+  const listEl = document.getElementById('list');
+  listEl.innerHTML = '<div class="empty"><span class="ic">⏳</span>Memuat...</div>';
+
+  let url = '/api/v1/reservasi-jemput';
+  const params = new URLSearchParams();
+  const today = todayISO();
+
+  if (state.filter === 'hari-ini') {
+    params.set('tanggal', today);
+    params.set('status', 'terjadwal');
+  } else if (state.filter === 'besok') {
+    params.set('tanggal', addDays(today, 1));
+    params.set('status', 'terjadwal');
+  } else if (state.filter === 'minggu-ini') {
+    params.set('tanggal', today);
+    params.set('sampai_tanggal', addDays(today, 6));
+    params.set('status', 'terjadwal');
+  } else if (state.filter === 'selesai') {
+    params.set('status', 'selesai');
+  }
+  if (params.toString()) url += '?' + params.toString();
+
+  try {
+    const r = await fetch(url, { credentials:'include' });
+    if (!r.ok) throw new Error('Gagal memuat');
+    const d = await r.json();
+    state.items = d.data || [];
+    render();
+  } catch (e) {
+    listEl.innerHTML = `<div class="empty"><span class="ic">⚠️</span><div class="ttl">Gagal memuat</div>${esc(e.message)}</div>`;
+  }
+}
+
+function render() {
+  const listEl = document.getElementById('list');
+  const items = state.items;
+  document.getElementById('subInfo').textContent = `${items.length} jadwal`;
+
+  if (items.length === 0) {
+    listEl.innerHTML = `
+      <div class="empty">
+        <span class="ic">📅</span>
+        <div class="ttl">Tidak ada jadwal penjemputan</div>
+        <button class="btn-add" style="margin-top:14px" onclick="openForm()">＋ Tambah Jadwal Jemput</button>
+      </div>`;
+    return;
+  }
+
+  listEl.innerHTML = items.map(r => {
+    const status = r.status;
+    const alamat = r.alamat || r.pelanggan_alamat || '';
+    const isOpen = status === 'terjadwal';
+    return `
+      <div class="card ${status}">
+        <div class="c-row1">
+          <div>
+            <div class="c-date">📅 ${esc(fmtTanggal(r.tanggal_jemput))}</div>
+            <div class="c-jam">⏰ ${esc(r.jam_jemput || '--:--')}</div>
+          </div>
+        </div>
+        <div class="c-nama">${esc(r.pelanggan_nama || '-')}</div>
+        ${r.pelanggan_telepon ? `<div class="c-meta">📱 ${esc(r.pelanggan_telepon)}</div>` : ''}
+        ${alamat ? `<div class="c-meta">📍 ${esc(alamat)}</div>` : ''}
+        ${r.catatan ? `<div class="c-catatan">📝 ${esc(r.catatan)}</div>` : ''}
+        <div class="c-status ${status}">● ${status.toUpperCase()}</div>
+        ${r.nomor_transaksi ? `<div class="c-meta" style="margin-top:4px">🧾 <a href="/order/detail?id=${r.transaksi_id}" style="color:var(--primary)">${esc(r.nomor_transaksi)}</a></div>` : ''}
+        ${isOpen ? `
+        <div class="c-act">
+          <button class="btn-ok" onclick="markSelesai(${r.id}, ${r.pelanggan_id || 'null'})">✓ Selesai</button>
+          <button class="btn-edit" onclick="openForm(${r.id})">✏️ Edit</button>
+          <button class="btn-del" onclick="batalkan(${r.id})">🗑️</button>
+        </div>` : ''}
+        ${r.alasan_batal ? `<div class="c-meta" style="margin-top:6px;color:var(--danger)">❌ ${esc(r.alasan_batal)}</div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+/* ── Form open/close ─────────────────────────── */
+async function openForm(id) {
+  state.editId = id || null;
+  state.pelanggan = null;
+  document.getElementById('formTitle').textContent = id ? 'Edit Jadwal Jemput' : 'Tambah Jadwal Jemput';
+  document.getElementById('plSearch').value = '';
+  document.getElementById('plResult').classList.remove('open');
+  document.getElementById('plSelectedWrap').innerHTML = '';
+  document.getElementById('fTanggal').value = todayISO();
+  document.getElementById('fTanggal').min = todayISO();
+  document.getElementById('fJam').value = '';
+  document.getElementById('fAlamat').value = '';
+  document.getElementById('fCatatan').value = '';
+
+  if (id) {
+    try {
+      const r = await fetch(`/api/v1/reservasi-jemput/${id}`, { credentials:'include' });
+      const { data } = await r.json();
+      state.pelanggan = {
+        id: data.pelanggan_id,
+        nama: data.pelanggan_nama,
+        telepon: data.pelanggan_telepon,
+        alamat: data.pelanggan_alamat
+      };
+      renderSelectedPelanggan();
+      document.getElementById('fTanggal').value = data.tanggal_jemput;
+      document.getElementById('fJam').value = data.jam_jemput || '';
+      document.getElementById('fAlamat').value = data.alamat || '';
+      document.getElementById('fCatatan').value = data.catatan || '';
+    } catch (e) {
+      showToast('Gagal memuat data edit');
+      return;
+    }
+  }
+
+  document.getElementById('formModal').classList.add('open');
+}
+
+function closeForm() {
+  document.getElementById('formModal').classList.remove('open');
+}
+
+function renderSelectedPelanggan() {
+  const wrap = document.getElementById('plSelectedWrap');
+  const search = document.getElementById('plSearch');
+  if (!state.pelanggan) { wrap.innerHTML = ''; search.style.display = ''; return; }
+  search.style.display = 'none';
+  wrap.innerHTML = `
+    <div class="pl-selected">
+      <div>
+        <div class="ttl">${esc(state.pelanggan.nama)}</div>
+        <div class="meta">${esc(state.pelanggan.telepon || '-')}</div>
+      </div>
+      <button class="x" onclick="clearPelanggan()">×</button>
+    </div>`;
+  if (state.pelanggan.alamat && !document.getElementById('fAlamat').value) {
+    document.getElementById('fAlamat').value = state.pelanggan.alamat;
+  }
+}
+
+function clearPelanggan() {
+  state.pelanggan = null;
+  renderSelectedPelanggan();
+  document.getElementById('plSearch').focus();
+}
+
+/* ── Search pelanggan ────────────────────────── */
+function onSearchPelanggan() {
+  clearTimeout(state.searchTimer);
+  state.searchTimer = setTimeout(searchPelanggan, 300);
+}
+
+async function searchPelanggan() {
+  const q = document.getElementById('plSearch').value.trim();
+  const res = document.getElementById('plResult');
+  if (q.length < 1) { res.classList.remove('open'); return; }
+  try {
+    const r = await fetch(`/api/v1/pelanggan?q=${encodeURIComponent(q)}&limit=8`, { credentials:'include' });
+    const d = await r.json();
+    const items = d.data || [];
+    if (items.length === 0) {
+      res.innerHTML = '<div class="pl-item" style="color:var(--gray-5)">Tidak ditemukan</div>';
+    } else {
+      res.innerHTML = items.map(p => `
+        <div class="pl-item" onclick='pickPelanggan(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
+          <div style="font-weight:700">${esc(p.nama)}</div>
+          <div style="font-size:11px;color:var(--gray-6)">${esc(p.telepon || '-')}</div>
+        </div>`).join('');
+    }
+    res.classList.add('open');
+  } catch {
+    res.innerHTML = '<div class="pl-item" style="color:var(--danger)">Error</div>';
+    res.classList.add('open');
+  }
+}
+
+function pickPelanggan(p) {
+  state.pelanggan = p;
+  document.getElementById('plSearch').value = '';
+  document.getElementById('plResult').classList.remove('open');
+  renderSelectedPelanggan();
+}
+
+/* ── Simpan ──────────────────────────────────── */
+async function simpan() {
+  if (!state.pelanggan) { showToast('Pilih pelanggan dulu'); return; }
+  const tanggal = document.getElementById('fTanggal').value;
+  if (!tanggal) { showToast('Tanggal wajib diisi'); return; }
+
+  const body = {
+    pelanggan_id: state.pelanggan.id,
+    tanggal_jemput: tanggal,
+    jam_jemput: document.getElementById('fJam').value || null,
+    alamat: document.getElementById('fAlamat').value.trim() || null,
+    catatan: document.getElementById('fCatatan').value.trim() || null
+  };
+
+  const btn = document.getElementById('btnSave');
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan...';
+  try {
+    const url = state.editId
+      ? `/api/v1/reservasi-jemput/${state.editId}`
+      : '/api/v1/reservasi-jemput';
+    const r = await fetch(url, {
+      method: state.editId ? 'PUT' : 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    if (!r.ok) { showToast(d.error || 'Gagal menyimpan'); return; }
+    showToast(state.editId ? 'Reservasi diperbarui' : 'Reservasi dibuat');
+    closeForm();
+    load();
+    if (window.posRefreshBadges) window.posRefreshBadges();
+  } catch (e) {
+    showToast('Gagal: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Simpan Jadwal';
+  }
+}
+
+/* ── Aksi card ───────────────────────────────── */
+async function markSelesai(id, pelangganId) {
+  if (!confirm('Tandai reservasi ini sudah dijemput?')) return;
+  try {
+    const r = await fetch(`/api/v1/reservasi-jemput/${id}/selesai`, {
+      method: 'PUT', credentials:'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    const d = await r.json();
+    if (!r.ok) { showToast(d.error || 'Gagal'); return; }
+    showToast('Reservasi selesai');
+    load();
+    if (window.posRefreshBadges) window.posRefreshBadges();
+    if (pelangganId && confirm('Langsung buat order untuk pelanggan ini sekarang?')) {
+      location.href = `/order/baru?pelanggan_id=${pelangganId}&reservasi_id=${id}`;
+    }
+  } catch (e) { showToast('Gagal: ' + e.message); }
+}
+
+async function batalkan(id) {
+  const alasan = prompt('Alasan pembatalan (opsional):');
+  if (alasan === null) return;
+  try {
+    const r = await fetch(`/api/v1/reservasi-jemput/${id}/batal`, {
+      method:'PUT', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ alasan })
+    });
+    const d = await r.json();
+    if (!r.ok) { showToast(d.error || 'Gagal'); return; }
+    showToast('Reservasi dibatalkan');
+    load();
+    if (window.posRefreshBadges) window.posRefreshBadges();
+  } catch (e) { showToast('Gagal: ' + e.message); }
+}
+
+/* ── Init: cek query param ?edit= ─────────────── */
+(function init() {
+  const p = new URLSearchParams(location.search);
+  const editId = p.get('edit');
+  if (editId) { openForm(Number(editId)); }
+  load();
+})();
+</script>
+<script src="/js/nav.js"></script>
+</body>
+</html>

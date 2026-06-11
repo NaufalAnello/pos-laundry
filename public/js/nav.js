@@ -41,6 +41,7 @@
         { href: '/kas',          icon: '📒', label: 'Buku Kas'    },
         { href: '/deposit',      icon: '💳', label: 'Deposit'     },
         { href: '/antar-jemput', icon: '🛵', label: 'Antar Jemput' },
+        { href: '/reservasi-jemput', icon: '📅', label: 'Jadwal Jemput' },
         { href: '/laporan',      icon: '📊', label: 'Laporan'     },
       ]
     },
@@ -76,6 +77,7 @@
     { href: '/kas',          icon: '📒', label: 'Buku Kas'    },
     { href: '/deposit',      icon: '💳', label: 'Deposit'     },
     { href: '/antar-jemput', icon: '🛵', label: 'Antar Jemput' },
+    { href: '/reservasi-jemput', icon: '📅', label: 'Jadwal Jemput', badge: 'reservasi' },
     { href: '/promo',        icon: '🎁', label: 'Promo'       },
     { href: '/poin',       icon: '⭐', label: 'Poin'       },
     { href: '/pelanggan',  icon: '👤', label: 'Pelanggan'  },
@@ -142,6 +144,7 @@
   <button class="${a('bn-item', isMoreActive())}" id="bn-more" onclick="openMoreSheet()" style="cursor:pointer">
     <span class="bn-icon">⋯</span>
     <span class="bn-label">Lainnya</span>
+    <span class="bn-badge" id="bnBadge-more" style="display:none">0</span>
   </button>
 </nav>
 <div class="more-overlay" id="moreOverlay" onclick="closeMoreSheet()"></div>
@@ -150,9 +153,10 @@
   <div class="more-sheet-title">Menu Lainnya</div>
   <div class="more-sheet-grid">
     ${MORE_ITEMS.map(it => `
-      <a href="${it.href}" class="${a('more-grid-item', sbActive(it.href))}">
+      <a href="${it.href}" class="${a('more-grid-item', sbActive(it.href))}" style="position:relative">
         <span class="mgi-icon">${it.icon}</span>
         <span class="mgi-label">${it.label}</span>
+        ${it.badge ? `<span class="bn-badge" id="miBadge-${it.badge}" style="display:none;position:absolute;top:4px;right:4px">0</span>` : ''}
       </a>`).join('')}
   </div>
   <div class="more-sheet-footer">
@@ -231,6 +235,17 @@
             bell.style.display = 'none';
           }
         }
+
+        // Reservasi jemput: badge di tombol Lainnya + item Jadwal Jemput
+        const rj = Number(d.reservasi_jemput_hari_ini || 0);
+        const setBadge = (id, val) => {
+          const e = document.getElementById(id);
+          if (!e) return;
+          if (val > 0) { e.textContent = val > 99 ? '99+' : val; e.style.display = ''; }
+          else         { e.style.display = 'none'; }
+        };
+        setBadge('miBadge-reservasi', rj);
+        setBadge('bnBadge-more', rj);
       })
       .catch(() => {});
   };

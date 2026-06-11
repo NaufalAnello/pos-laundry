@@ -381,6 +381,15 @@
           <div class="aj-widget" id="ajWidget"></div>
         </div>
 
+        <!-- SEKSI 3B: WIDGET RESERVASI JEMPUT -->
+        <div class="section" id="rjSection" style="display:none">
+          <div class="section-head">
+            <h2>📅 Penjemputan Hari Ini <span id="rjCount" style="color:var(--primary)"></span></h2>
+            <a href="/reservasi-jemput">Kelola →</a>
+          </div>
+          <div class="aj-widget" id="rjWidget"></div>
+        </div>
+
         <!-- GRAFIK (laptop only) -->
         <div class="section desktop-only">
           <div class="section-head"><h2>📊 Omset 7 Hari</h2></div>
@@ -813,10 +822,95 @@ async function loadDashboard() {
     renderDeposit(d.deposit);
 
     loadAntarJemput();
+    loadReservasiJemput();
   } catch (err) {
     console.error(err);
     showToast('Gagal memuat dashboard');
   }
+}
+
+/* ── Widget Reservasi Jemput ─────────────────────────── */
+async function loadReservasiJemput() {
+  const section = document.getElementById('rjSection');
+  try {
+    const r = await fetch('/api/v1/reservasi-jemput/hari-ini', { credentials: 'include' });
+    if (!r.ok) { section.style.display = 'none'; return; }
+    const d = await r.json();
+    const list = d.data || [];
+    if (list.length === 0) { section.style.display = 'none'; return; }
+    section.style.display = '';
+    renderReservasiWidget(list);
+  } catch {
+    section.style.display = 'none';
+  }
+}
+
+function renderReservasiWidget(list) {
+  const widget = document.getElementById('rjWidget');
+  document.getElementById('rjCount').textContent = `(${list.length})`;
+
+  const rows = list.map(r => {
+    const jam = r.jam_jemput || '--:--';
+    const alamat = r.alamat || r.pelanggan_alamat || '';
+    const catatan = r.catatan ? `<div style="font-size:11px;color:var(--gray-6);margin-top:2px">📝 ${escHtml(r.catatan)}</div>` : '';
+    return `
+      <div style="padding:10px;background:#fff;border-radius:10px;margin-bottom:8px;border-left:3px solid var(--primary)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:800;font-size:13px;color:var(--primary)">⏰ ${escHtml(jam)}</div>
+            <div style="font-weight:700;font-size:14px;margin-top:2px">${escHtml(r.pelanggan_nama || '—')}</div>
+            ${alamat ? `<div style="font-size:12px;color:var(--gray-6);margin-top:2px">📍 ${escHtml(alamat)}</div>` : ''}
+            ${catatan}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="btn btn-selesai" style="flex:1;padding:8px;min-height:36px;font-size:12px" onclick="rjSelesai(${r.id}, ${r.pelanggan_id || 'null'})">✓ Selesai</button>
+          <a class="btn btn-detail" style="padding:8px 12px;min-height:36px;font-size:12px;text-decoration:none" href="/reservasi-jemput?edit=${r.id}">✏️</a>
+          <button class="btn btn-wa" style="padding:8px 12px;min-height:36px;font-size:12px;background:#dc2626" onclick="rjBatal(${r.id})">🗑️</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  widget.innerHTML = rows + `
+    <a class="btn btn-detail" style="display:block;text-align:center;padding:10px;font-size:13px;text-decoration:none;margin-top:6px" href="/reservasi-jemput">+ Tambah Jadwal Jemput</a>`;
+}
+
+async function rjSelesai(id, pelangganId) {
+  if (!confirm('Tandai reservasi ini sudah dijemput?')) return;
+  try {
+    const r = await fetch(`/api/v1/reservasi-jemput/${id}/selesai`, {
+      method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    if (!r.ok) {
+      const e = await r.json(); showToast(e.error || 'Gagal'); return;
+    }
+    showToast('Reservasi selesai');
+    loadReservasiJemput();
+    if (window.posRefreshBadges) window.posRefreshBadges();
+    if (pelangganId && confirm('Langsung buat order untuk pelanggan ini sekarang?')) {
+      location.href = `/order/baru?pelanggan_id=${pelangganId}&reservasi_id=${id}`;
+    }
+  } catch (e) { showToast('Gagal: ' + e.message); }
+}
+
+async function rjBatal(id) {
+  const alasan = prompt('Alasan pembatalan (opsional):');
+  if (alasan === null) return;
+  try {
+    const r = await fetch(`/api/v1/reservasi-jemput/${id}/batal`, {
+      method: 'PUT', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ alasan })
+    });
+    if (!r.ok) {
+      const e = await r.json(); showToast(e.error || 'Gagal'); return;
+    }
+    showToast('Reservasi dibatalkan');
+    loadReservasiJemput();
+    if (window.posRefreshBadges) window.posRefreshBadges();
+  } catch (e) { showToast('Gagal: ' + e.message); }
 }
 
 /* ── Widget Antar Jemput ─────────────────────────────── */

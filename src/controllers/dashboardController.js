@@ -190,9 +190,22 @@ exports.index = async (req, res) => {
       .count('id as total')
       .first();
 
+    // ── Reservasi penjemputan hari ini — counter untuk badge ───────────────
+    // Pakai try-catch supaya kalau migration belum jalan, dashboard tetap load.
+    let reservasiCount = 0;
+    try {
+      const reservasiRow = await db('reservasi_jemput')
+        .where('tanggal_jemput', today)
+        .where('status', 'terjadwal')
+        .count('id as total')
+        .first();
+      reservasiCount = Number(reservasiRow?.total ?? 0);
+    } catch (_e) { /* tabel belum ada */ }
+
     res.json({
       order_hari_ini:      Number(orderHariIni?.total  ?? 0),
       antar_jemput_belum_diproses: Number(ajCountRow?.total ?? 0),
+      reservasi_jemput_hari_ini: reservasiCount,
       omset_hari_ini:      Number(omsetHariIni?.total  ?? 0),
       wa_terkirim_hari_ini: Number(waHariIni?.total    ?? 0),
       tagihan_belum_lunas: Number(tagihanBelumLunas?.total ?? 0),

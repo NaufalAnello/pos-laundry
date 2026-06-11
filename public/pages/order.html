@@ -2664,6 +2664,18 @@ async function submitOrder(kirimWa, cetakSetelah) {
   const data = await res.json();
   if (!res.ok) { showToast(data.error || 'Gagal menyimpan', 'error'); return; }
 
+  // Jika order dibuat dari reservasi jemput, tandai reservasi selesai + link
+  const reservasiId = new URLSearchParams(location.search).get('reservasi_id');
+  if (reservasiId) {
+    try {
+      await fetch(`/api/v1/reservasi-jemput/${reservasiId}/selesai`, {
+        method: 'PUT', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transaksi_id: data.data.id })
+      });
+    } catch (_) { /* non-fatal */ }
+  }
+
   // Compose result toast with deposit info if applicable
   let toastMsg = `✓ Order ${data.data.nomor_transaksi} berhasil disimpan`;
   const di = data.deposit_info;

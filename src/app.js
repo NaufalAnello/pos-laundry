@@ -25,6 +25,7 @@ const depositRoutes     = require('./routes/depositRoutes');
 const aiRoutes          = require('./routes/aiRoutes');
 const masterItemRoutes  = require('./routes/masterItemRoutes');
 const antarJemputRoutes = require('./routes/antarJemputRoutes');
+const reservasiJemputRoutes = require('./routes/reservasiJemputRoutes');
 
 const app = express();
 
@@ -119,6 +120,9 @@ app.use('/api/v1/master-item', masterItemRoutes);
 
 // Antar Jemput
 app.use('/api/v1/antar-jemput', antarJemputRoutes);
+
+// Reservasi Jemput (jadwal penjemputan)
+app.use('/api/v1/reservasi-jemput', reservasiJemputRoutes);
 
 // ── Web page routes ────────────────────────────────────────────────────────────
 
@@ -233,6 +237,12 @@ app.get('/ai-insight', (req, res) => {
 app.get('/antar-jemput', (req, res) => {
   if (!req.session?.userId) return res.redirect('/login');
   res.sendFile(path.join(__dirname, '../public/pages/antar-jemput.html'));
+});
+
+// Reservasi Jemput (jadwal penjemputan)
+app.get('/reservasi-jemput', (req, res) => {
+  if (!req.session?.userId) return res.redirect('/login');
+  res.sendFile(path.join(__dirname, '../public/pages/reservasi-jemput.html'));
 });
 
 // Semua route web lain → redirect ke dashboard
