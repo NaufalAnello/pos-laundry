@@ -942,7 +942,9 @@ function renderDetail() {
   // Catatan
   const catParts = [];
   if (o.catatan) catParts.push(`<strong>Catatan order:</strong> ${esc(o.catatan)}`);
-  if (o.pelanggan?.parfum) catParts.push(`<strong>Parfum:</strong> ${esc(o.pelanggan.parfum)}`);
+  if (o.pelanggan_parfum)     catParts.push(`<strong>Parfum:</strong> ${esc(o.pelanggan_parfum)}`);
+  if (o.pelanggan_instruksi)  catParts.push(`<strong>Instruksi:</strong> ${esc(o.pelanggan_instruksi)}`);
+  if (o.pelanggan_catatan)    catParts.push(`<strong>Catatan pelanggan:</strong> ${esc(o.pelanggan_catatan)}`);
   if (o.antar_jemput) catParts.push(`<strong>Antar jemput:</strong> Ya`);
   if (catParts.length) {
     document.getElementById('catatanBody').innerHTML = catParts.join('<br>');

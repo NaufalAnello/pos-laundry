@@ -80,6 +80,9 @@ const findById = async (id) => {
       't.*',
       'p.nama as pelanggan_nama', 'p.telepon as pelanggan_telepon',
       'p.total_poin as pelanggan_poin',
+      'p.parfum as pelanggan_parfum',
+      'p.instruksi_khusus as pelanggan_instruksi',
+      'p.catatan as pelanggan_catatan',
       'u.nama as kasir_nama',
       'pr.nama as promo_nama'
     );

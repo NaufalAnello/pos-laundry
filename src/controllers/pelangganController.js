@@ -6,7 +6,10 @@ const pelangganSchema = Joi.object({
   telepon: Joi.string().max(20).allow('', null),
   alamat:  Joi.string().max(500).allow('', null),
   email:   Joi.string().email().max(100).allow('', null),
-  jarak_workshop_km: Joi.number().min(0).max(999).allow(null)
+  jarak_workshop_km: Joi.number().min(0).max(999).allow(null),
+  parfum:           Joi.string().max(100).allow('', null),
+  instruksi_khusus: Joi.string().max(500).allow('', null),
+  catatan:          Joi.string().max(500).allow('', null)
 });
 
 const LEVEL_DEFAULTS = { level_silver_min: '500', level_gold_min: '2000', level_platinum_min: '5000' };
@@ -54,6 +57,7 @@ exports.index = async (req, res) => {
       baseJoin(db('pelanggan as p').select(
         'p.id', 'p.nama', 'p.telepon', 'p.email', 'p.alamat', 'p.total_poin', 'p.created_at',
         'p.jarak_workshop_km',
+        'p.parfum', 'p.instruksi_khusus', 'p.catatan',
         db.raw('COALESCE(tr.jumlah_transaksi, 0) as jumlah_transaksi'),
         db.raw('COALESCE(tr.total_belanja, 0) as total_belanja'),
         'tr.transaksi_terakhir'

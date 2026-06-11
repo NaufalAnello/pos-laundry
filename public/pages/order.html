@@ -794,6 +794,10 @@
           </div>
           <button class="ci-clear" id="clearCustomer" title="Hapus pilihan">✕</button>
         </div>
+        <div id="ciNoteBox" style="display:none;background:#fef9c3;border:1px solid #fde047;border-left:4px solid #d97706;border-radius:10px;padding:10px 12px;margin-top:8px;font-size:13px;color:#713f12">
+          <div style="font-weight:700;margin-bottom:4px">📋 Catatan Pelanggan</div>
+          <div id="ciNoteBody" style="line-height:1.55"></div>
+        </div>
 
         <!-- Quick Repeat Order — suggestion order seperti terakhir -->
         <div id="repeatSuggestion" class="repeat-card" style="display:none">
@@ -1337,6 +1341,9 @@ async function selectCustomer(p) {
     `⭐ ${p.total_poin} poin &nbsp;<span class="level-badge level-${lvl.label}">${lvl.label}</span>`;
   customerInfo.classList.remove('hidden');
 
+  // Info box catatan pelanggan
+  renderCatatanPelanggan(p);
+
   // Aktifkan toggle poin jika ada poin
   const poinToggle = document.getElementById('usePoin');
   const waToggle   = document.getElementById('kirimWa');
@@ -1471,6 +1478,7 @@ document.getElementById('clearCustomer').addEventListener('click', () => {
   window.ajSkipJarak = false;
   if (typeof refreshJarakAJSection === 'function') refreshJarakAJSection();
   customerInfo.classList.add('hidden');
+  document.getElementById('ciNoteBox').style.display = 'none';
   hideRepeatSuggestion();
   document.getElementById('usePoin').checked  = false;
   document.getElementById('usePoin').disabled = true;
@@ -1532,6 +1540,19 @@ function renderChipLayanan() {
 function escapeHtml(s) {
   if (s == null) return '';
   return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function renderCatatanPelanggan(p) {
+  const box  = document.getElementById('ciNoteBox');
+  const body = document.getElementById('ciNoteBody');
+  if (!box || !body) return;
+  const parts = [];
+  if (p.parfum)            parts.push(`<strong>Parfum:</strong> ${escapeHtml(p.parfum)}`);
+  if (p.instruksi_khusus)  parts.push(`<strong>Instruksi:</strong> ${escapeHtml(p.instruksi_khusus)}`);
+  if (p.catatan)           parts.push(`<strong>Catatan:</strong> ${escapeHtml(p.catatan)}`);
+  if (parts.length === 0) { box.style.display = 'none'; return; }
+  body.innerHTML = parts.join('<br>');
+  box.style.display = '';
 }
 
 function addItemRow(defaults = {}) {
