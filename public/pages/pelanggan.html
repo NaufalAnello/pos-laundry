@@ -681,7 +681,7 @@ async function load() {
   try {
     const d = await api('/api/v1/pelanggan?page=1&limit=1000');
     allPelanggan = d.data || [];
-    updateSummary();
+    updateListStats();
     updateCounts();
     render();
   } catch (e) {
@@ -698,7 +698,7 @@ function onSearch() {
   searchTimeout = setTimeout(() => render(), 250);
 }
 
-function updateSummary() {
+function updateListStats() {
   const total = allPelanggan.length;
   const totalBelanja = allPelanggan.reduce((s, p) => s + Number(p.total_belanja || 0), 0);
   document.getElementById('smTotal').textContent = total + ' Orang';
