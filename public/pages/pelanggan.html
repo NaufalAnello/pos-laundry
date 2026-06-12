@@ -11,7 +11,10 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: var(--font); background: var(--gray-2); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
 
-    .page { max-width: 1200px; margin: 0 auto; padding: 0 0 100px; }
+    .page { max-width: 1200px; margin: 0 auto; padding: 0 0 calc(var(--bn-h, 64px) + 20px); }
+    @media (min-width: 1024px) {
+      .page { padding: 0 0 40px; }
+    }
 
     /* ── Sticky Header ─────────────────────────────────── */
     .head {

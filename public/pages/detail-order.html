@@ -12,7 +12,10 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: var(--font); background: var(--gray-2); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
 
-    .page { max-width: 1200px; margin: 0 auto; padding: 0 0 140px; }
+    .page { max-width: 1200px; margin: 0 auto; padding: 0 0 calc(var(--bn-h, 64px) + 140px); }
+    @media (min-width: 1024px) {
+      .page { padding: 0 0 40px; }
+    }
 
     /* ── Sticky Header ─────────────────────────────────── */
     .head {
@@ -198,6 +201,11 @@
       padding: 10px 12px calc(env(safe-area-inset-bottom, 0) + 10px);
       box-shadow: 0 -2px 8px rgba(0,0,0,.05);
       z-index: 25;
+    }
+    @media (max-width: 1023px) {
+      .action-bar {
+        bottom: var(--bn-h, 64px);
+      }
     }
     .action-bar .primary-row {
       display: flex; gap: 6px; margin-bottom: 6px;
