@@ -131,6 +131,13 @@
   let mode = 'wa'; // 'wa' atau 'wabiz'
   const $ = id => document.getElementById(id);
 
+  /* ── Format nomor telepon ────────────────────────────────── */
+  function tampilkanNomor(nomor) {
+    if (!nomor) return '';
+    if (nomor.startsWith('628')) return '0' + nomor.slice(2);
+    return nomor;
+  }
+
   /* ── Open / close ─────────────────────────────────────── */
   window.openWaSheet = (data) => {
     ctx = Object.assign({}, data);
@@ -138,7 +145,8 @@
       alert('Pelanggan ini tidak punya nomor telepon');
       return;
     }
-    $('wsSub').textContent = `${ctx.nama || 'Non-member'} · ${ctx.telepon}`;
+    const telDisplay = tampilkanNomor(ctx.telepon);
+    $('wsSub').textContent = `${ctx.nama || 'Non-member'} · ${telDisplay}`;
     $('wsErr').style.display = 'none';
     mode = 'wa';
     $('wsBtnWa').classList.add('active');

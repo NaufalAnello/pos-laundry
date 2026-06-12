@@ -119,12 +119,13 @@
       padding: 10px 14px;
       border-top: 1px solid var(--gray-2);
       background: var(--gray-1);
+      align-items: stretch;
     }
     .oc-actions .btn {
-      flex: 1; min-height: 40px; padding: 8px 10px; font-size: 12px;
+      flex: 1 1 auto; min-height: 40px; padding: 8px 10px; font-size: 12px;
       border-radius: 8px; border: 1px solid transparent; cursor: pointer; font-weight: 700;
       display: inline-flex; align-items: center; justify-content: center; gap: 4px;
-      text-decoration: none; font-family: inherit; min-width: 70px;
+      text-decoration: none; font-family: inherit; min-width: 70px; white-space: nowrap;
     }
     .oc-actions .btn:active { transform: scale(.98); }
     .oc-actions a.btn-detail { flex: 0 0 44px; min-width: 44px; }
@@ -298,6 +299,22 @@ const fmtDateShort = s => s ? new Date(s).toLocaleDateString('id-ID', { day:'2-d
 const fmtDate = s => s ? new Date(s).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '—';
 const escHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+// Format nomor telepon untuk tampilan (628xxx → 08xxx)
+function tampilkanNomor(nomor) {
+  if (!nomor) return '';
+  if (nomor.startsWith('628')) return '0' + nomor.slice(2);
+  return nomor;
+}
+
+// Format nomor telepon untuk URL WA (08xxx → 62xxx)
+function waUrl(nomor) {
+  if (!nomor) return '';
+  let n = nomor.replace(/\D/g, '');
+  if (n.startsWith('0')) n = '62' + n.slice(1);
+  if (!n.startsWith('62')) n = '62' + n;
+  return n;
+}
+
 let currentPage = 1;
 let totalPages  = 1;
 let debTimer    = null;
@@ -438,12 +455,14 @@ function renderCards(rows) {
     const lunas = (Number(t.bayar) || 0) >= Number(t.total_bayar);
     const lewat = isLewat(t);
     const tel = t.pelanggan_telepon;
+    const telDisplay = tampilkanNomor(tel); // Format untuk tampilan: 08xxx
     const cardClass = lewat ? 's-lewat' : 's-' + t.status;
     const layanan = t.layanan_ringkas || '—';
     const pl = JSON.stringify(payload(t)).replace(/'/g, "&#39;");
     const wp = JSON.stringify(waPayload(t)).replace(/'/g, "&#39;");
 
     let actions = '';
+    // Tombol status
     if (t.status === 'pending') {
       actions += `<button class="btn btn-proses" onclick="updateStatus(${t.id},'proses',this)">▶ Proses</button>`;
       actions += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">✓ Selesai</button>`;
@@ -451,15 +470,19 @@ function renderCards(rows) {
       actions += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">✓ Selesai</button>`;
     } else if (t.status === 'selesai') {
       actions += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'diambil',this)">✓ Diambil</button>`;
-      if (tel) actions += `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>💬 WA Siap Diambil</button>`;
     }
 
+    // Tombol lunasi (jika belum lunas dan belum dibatalkan)
     if (!lunas && t.status !== 'dibatalkan') {
       actions += `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>💰 Lunasi</button>`;
     }
-    if (tel && t.status !== 'selesai' && t.status !== 'dibatalkan' && t.status !== 'diambil') {
+
+    // Tombol WA (tampil di semua card selama ada nomor telepon, kecuali tamu/dibatalkan)
+    if (tel && t.status !== 'dibatalkan') {
       actions += `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>💬 WA</button>`;
     }
+
+    // Tombol detail (selalu ada)
     actions += `<a class="btn btn-detail" href="/order/detail?id=${t.id}" title="Detail">›</a>`;
 
     return `
@@ -471,7 +494,7 @@ function renderCards(rows) {
         </div>
         <div class="oc-nama">
           ${escHtml(t.pelanggan_nama || 'Non-member')}
-          ${tel ? `<span class="tel"> · ${escHtml(tel)}</span>` : ''}
+          ${telDisplay ? `<span class="tel"> · ${escHtml(telDisplay)}</span>` : ''}
         </div>
         <div class="oc-svc">
           <span class="layanan" title="${escHtml(layanan)}">${escHtml(layanan)}</span>
@@ -498,6 +521,7 @@ function renderTable(rows) {
     const lunas = (Number(t.bayar) || 0) >= Number(t.total_bayar);
     const lewat = isLewat(t);
     const tel = t.pelanggan_telepon;
+    const telDisplay = tampilkanNomor(tel); // Format untuk tampilan: 08xxx
     const pl = JSON.stringify(payload(t)).replace(/'/g, "&#39;");
     const wp = JSON.stringify(waPayload(t)).replace(/'/g, "&#39;");
 
@@ -512,7 +536,8 @@ function renderTable(rows) {
     if (!lunas && t.status !== 'dibatalkan') {
       actions += `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>💰</button>`;
     }
-    if (tel) {
+    // Tombol WA tampil di semua card selama ada nomor telepon, kecuali dibatalkan
+    if (tel && t.status !== 'dibatalkan') {
       actions += `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>💬</button>`;
     }
     actions += `<a class="btn btn-detail" href="/order/detail?id=${t.id}">›</a>`;
@@ -524,7 +549,7 @@ function renderTable(rows) {
       </td>
       <td>
         <div>${escHtml(t.pelanggan_nama || 'Non-member')}</div>
-        ${tel ? `<div class="td-meta">${escHtml(tel)}</div>` : ''}
+        ${telDisplay ? `<div class="td-meta">${escHtml(telDisplay)}</div>` : ''}
       </td>
       <td><div style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;" title="${escHtml(t.layanan_ringkas || '')}">${escHtml(t.layanan_ringkas || '—')}</div></td>
       <td style="font-weight:700;white-space:nowrap;">${fmtRp(t.total_bayar)}</td>
