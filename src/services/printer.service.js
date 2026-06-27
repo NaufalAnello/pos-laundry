@@ -243,6 +243,18 @@ function generateLabelEscPos(transaksi, pengaturan, layanan_ids = null) {
   const center = ()   => bytes.push(ESC, 0x61, 0x01);
   const left   = ()   => bytes.push(ESC, 0x61, 0x00);
   const line   = ()   => { push('-'.repeat(LEBAR)); nl(); };
+  const dline  = ()   => { push('='.repeat(LEBAR)); nl(); };
+  const lr     = (l, r) => {
+    const sp = LEBAR - l.length - r.length;
+    push(l + ' '.repeat(Math.max(1, sp)) + r); nl();
+  };
+  const formatTelepon = (nomor) => {
+    if (!nomor) return '';
+    const n = String(nomor).trim();
+    if (n.startsWith('628')) return '08' + n.slice(3);
+    if (n.startsWith('62'))  return '0'  + n.slice(2);
+    return n;
+  };
 
   // Filter items jika layanan_ids diberikan
   let items = transaksi.items || [];
@@ -252,100 +264,85 @@ function generateLabelEscPos(transaksi, pengaturan, layanan_ids = null) {
 
   // Init printer
   bytes.push(ESC, 0x40);
-
-  // Header mini
-  center();
-  bold(true);
-  push(pengaturan.nama_toko || 'LAUNDRY'); nl();
-  bold(false);
-  line();
-
-  // Info utama - nomor order (BESAR)
   left();
-  bold(true);
-  push('ORDER:'); nl();
-  // Double height untuk nomor order agar mudah dibaca
-  bytes.push(ESC, 0x21, 0x30); // Double height + double width
-  push(transaksi.nomor_transaksi); nl();
-  bytes.push(ESC, 0x21, 0x00); // Reset size
-  bold(false);
-  nl();
 
-  // Nama pelanggan
-  push('Pelanggan:'); nl();
+  // Nomor order
+  dline();
+  bold(true);
+  push('ORDER: ' + (transaksi.nomor_transaksi || '')); nl();
+  bold(false);
+  dline();
+
+  // Pelanggan
   bold(true);
   push(transaksi.pelanggan_nama || 'Non-member'); nl();
   bold(false);
-  if (transaksi.pelanggan_telepon) { push('WA: ' + transaksi.pelanggan_telepon); nl(); }
-  nl();
+  const tel = formatTelepon(transaksi.pelanggan_telepon);
+  if (tel) { push('WA: ' + tel); nl(); }
+  dline();
 
-  // Estimasi selesai - PENTING!
+  // Estimasi selesai
   if (transaksi.tanggal_selesai) {
-    push('Estimasi Selesai:'); nl();
-    bold(true);
-    push(new Date(transaksi.tanggal_selesai).toLocaleDateString('id-ID', {
+    const tgl = new Date(transaksi.tanggal_selesai).toLocaleDateString('id-ID', {
       timeZone: 'Asia/Makassar',
       weekday: 'short',
       day: '2-digit',
       month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })); nl();
+      year: 'numeric'
+    });
+    push('Estimasi: ' + tgl); nl();
+    dline();
+  }
+
+  // Layanan
+  if (items.length === 1) {
+    const item = items[0];
+    bold(true);
+    push(String(item.nama_layanan || '').substring(0, LEBAR)); nl();
     bold(false);
-    nl();
-  }
-
-  // Ringkasan singkat layanan (hanya yang dipilih)
-  const itemCount = items.length;
-  if (itemCount > 0) {
-    push('Layanan (' + itemCount + '):'); nl();
-    items.forEach(item => {
-      push('- ' + item.nama_layanan + ' (' + item.jumlah + ' ' + (item.satuan || '') + ')'); nl();
+    push('  ' + item.jumlah + ' ' + (item.satuan || '').trim()); nl();
+  } else if (items.length > 1) {
+    items.forEach((item, idx) => {
+      bold(true);
+      push((idx + 1) + '. ' + String(item.nama_layanan || '').substring(0, LEBAR - 3)); nl();
+      bold(false);
+      push('   ' + item.jumlah + ' ' + (item.satuan || '').trim()); nl();
     });
-    nl();
   }
 
-  // Biaya Tambahan (format hemat)
+  // Biaya Tambahan
   if (transaksi.biaya_tambahan && transaksi.biaya_tambahan.length > 0) {
-    (transaksi.biaya_tambahan || []).forEach(bt => {
-      const namaShort = String(bt.keterangan).substring(0, 20);
-      const sp = Math.max(1, LEBAR - namaShort.length - 1 - ('Rp' + fmtRp(bt.nominal)).length);
-      push('+' + namaShort + ' '.repeat(sp) + 'Rp' + fmtRp(bt.nominal)); nl();
+    line();
+    push('Biaya Tambahan:'); nl();
+    transaksi.biaya_tambahan.forEach(bt => {
+      const nama = '  ' + String(bt.keterangan || '').substring(0, 18);
+      lr(nama, 'Rp' + fmtRp(bt.nominal));
     });
-    nl();
   }
 
-  // Total bayar
+  // Total & status
+  line();
   bold(true);
-  push('TOTAL: Rp' + fmtRp(transaksi.total_bayar)); nl();
+  push('Total: Rp' + fmtRp(transaksi.total_bayar)); nl();
   bold(false);
 
-  // Status bayar
   const lunas = (transaksi.bayar || 0) >= transaksi.total_bayar;
   if (!lunas) {
-    push('Status: ');
-    bold(true);
     if ((transaksi.bayar || 0) > 0) {
-      push('DP Rp' + fmtRp(transaksi.bayar)); nl();
-      bold(false);
-      push('Sisa: Rp' + fmtRp(transaksi.total_bayar - transaksi.bayar));
+      push('Status: DP Rp' + fmtRp(transaksi.bayar)); nl();
+      push('Sisa: Rp' + fmtRp(transaksi.total_bayar - transaksi.bayar)); nl();
     } else {
-      push('BELUM BAYAR');
+      push('Status: BELUM LUNAS'); nl();
     }
-    nl();
-    bold(false);
   } else {
-    bold(true);
-    push('LUNAS'); nl();
-    bold(false);
+    push('Status: LUNAS'); nl();
   }
 
-  line();
+  dline();
   center();
   push('Tunjukkan label saat ambil'); nl();
 
-  // Feed 3 baris untuk robekan manual (lebih hemat dari struk)
+  // Feed 3 baris untuk robekan manual
   for (let i = 0; i < 3; i++) nl();
 
   return Buffer.from(bytes);
