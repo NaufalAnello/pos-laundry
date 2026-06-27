@@ -149,40 +149,102 @@
     .toast.show { transform:translateX(-50%) translateY(0); }
     .toast.err  { background:var(--red); }
 
+    /* ── Mobile-card list (render dipakai bareng table — table di-hide di HP) ── */
+    .rep-list { display: flex; flex-direction: column; gap: 10px; }
+    .rep-item {
+      background:#fff; border:1px solid var(--gray-3); border-radius:12px;
+      padding:12px 14px; box-shadow:0 1px 2px rgba(0,0,0,.04);
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .rep-item-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+    .rep-item-title { font-weight:700; font-size:14px; color:var(--gray-9); flex:1; }
+    .rep-item-sub  { font-size:12px; color:var(--gray-5); }
+    .rep-item-meta { display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:13px; }
+    .rep-item-omset { font-weight:700; color:var(--blue); }
+    .rep-rank {
+      flex-shrink:0; width:26px; height:26px; border-radius:8px;
+      background:var(--blue-lt); color:var(--blue); font-weight:800; font-size:12px;
+      display:inline-flex; align-items:center; justify-content:center;
+    }
+    .rep-rank.gold   { background:#fef3c7; color:#92400e; }
+    .rep-rank.silver { background:#e5e7eb; color:#374151; }
+    .rep-rank.bronze { background:#fed7aa; color:#9a3412; }
+
+    .rep-export-bar { display:flex; gap:8px; padding:12px 14px; border-bottom:1px solid var(--gray-3); }
+    .rep-export-bar .btn { flex:1; }
+
+    /* default: cards untuk mobile disembunyikan di desktop */
+    .rep-list-wrap { display:none; }
+    .rep-table-wrap { display:block; }
+
     /* ══ MOBILE laporan ══ */
     @media (max-width: 767px) {
       .page { padding: 12px 10px 80px; }
       body > header { display: none !important; }
       .page-header { flex-direction: column; align-items: stretch; gap: 10px; }
       .page-header .btn { width: 100%; min-height: 44px; }
+      .page-title { font-size: 18px; }
 
-      .tabs { gap: 6px; padding: 0 4px; }
-      .tab { padding: 8px 12px; font-size: 13px; }
+      /* Tabs — pill scroll horizontal, hilangkan border-bottom yg seperti underline */
+      .tabs {
+        gap: 8px; padding: 4px 2px 8px;
+        border-bottom: none;
+        margin: 0 -10px 14px;
+        padding-left: 10px; padding-right: 10px;
+        scrollbar-width: none;
+      }
+      .tabs::-webkit-scrollbar { display: none; }
+      .tab {
+        padding: 8px 14px; font-size: 13px; font-weight: 700;
+        border: 1px solid var(--gray-3); border-radius: 999px;
+        background: #fff; color: var(--gray-7);
+        margin-bottom: 0;
+      }
+      .tab.active {
+        background: var(--blue); color: #fff; border-color: var(--blue);
+      }
 
       .filter-bar {
         padding: 12px;
         align-items: stretch;
         flex-direction: column;
+        gap: 10px;
       }
+      .filter-bar > label { display:none; }
       .filter-bar > * { width: 100%; }
       .filter-bar input[type=date], .filter-bar select { min-height: 44px; width: 100%; }
-      .preset-btns { width: 100%; }
-      .preset-btn { min-height: 36px; flex: 1 0 calc(33% - 4px); }
+      .preset-btns { width: 100%; display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+      .preset-btns::-webkit-scrollbar { display:none; }
+      .preset-btn { min-height: 36px; flex: 0 0 auto; white-space:nowrap; }
       .sep { display: none; }
+      /* tanggal HP: dua input side by side */
+      .filter-bar .date-row { display:flex; gap:8px; }
+      .filter-bar .date-row input { flex:1; }
 
-      .stats-grid { grid-template-columns: 1fr 1fr !important; }
+      /* Stats — selalu 2x2 di HP */
+      .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
       .stat-card { padding: 12px; }
       .stat-val { font-size: 18px; }
       .stat-label { font-size: 10px; }
+      .stat-sub  { font-size: 11px; }
 
-      .chart-wrap { height: 200px; }
+      /* Chart — lebih tinggi supaya kebaca di HP */
+      .chart-wrap { height: 220px; }
 
-      /* Tables scroll horizontal di dalam card-nya (tidak overflow page) */
-      #profitBody table, #distribusiBody table, #layananTableBody table { min-width: 480px; }
-      /* Font lebih kecil supaya kolom muat lebih banyak */
-      #profitBody td, #distribusiBody td, #layananTableBody td,
-      #profitBody th, #distribusiBody th, #layananTableBody th {
-        font-size: 12px; padding: 8px 10px;
+      /* grid-2 jadi satu kolom di HP */
+      .grid-2 { grid-template-columns: 1fr; gap: 12px; }
+
+      /* Tukar tabel <→ card list */
+      .rep-table-wrap { display: none !important; }
+      .rep-list-wrap  { display: block !important; }
+
+      /* card-body lebih ramping di HP */
+      .card-body { padding: 14px; }
+      .card-head { padding: 12px 14px; font-size: 13px; }
+
+      /* Tabel yg memang masih tampil di HP (mis. detail modal) tetap bisa scroll */
+      #profitBody table, #distribusiBody table, #layananTableBody table, #pelangganTableBody table {
+        min-width: 0; width:100%;
       }
     }
   </style>
@@ -197,24 +259,34 @@
 
   <!-- Tabs -->
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('ringkasan')">📊 Ringkasan</button>
-    <button class="tab" onclick="switchTab('layanan')">📦 Laporan Layanan</button>
-    <button class="tab" onclick="switchTab('pelanggan')">👥 Laporan Pelanggan</button>
-    <button class="tab" onclick="switchTab('antar-jemput')">🛵 Antar Jemput</button>
+    <button class="tab active" onclick="switchTab('ringkasan', event)">
+      <span class="hide-mobile">📊 Ringkasan</span><span class="show-mobile">📊 Ringkasan</span>
+    </button>
+    <button class="tab" onclick="switchTab('layanan', event)">
+      <span class="hide-mobile">📦 Laporan Layanan</span><span class="show-mobile">🧺 Layanan</span>
+    </button>
+    <button class="tab" onclick="switchTab('pelanggan', event)">
+      <span class="hide-mobile">👥 Laporan Pelanggan</span><span class="show-mobile">👥 Pelanggan</span>
+    </button>
+    <button class="tab" onclick="switchTab('antar-jemput', event)">
+      <span class="hide-mobile">🛵 Antar Jemput</span><span class="show-mobile">🛵 AJ</span>
+    </button>
   </div>
 
   <!-- Filter -->
   <div class="filter-bar">
     <label>Periode:</label>
-    <input type="date" id="dateStart" onchange="loadActiveTab()"/>
-    <span class="sep">–</span>
-    <input type="date" id="dateEnd" onchange="loadActiveTab()"/>
+    <div class="date-row" style="display:flex;gap:8px;flex:1;min-width:0">
+      <input type="date" id="dateStart" onchange="loadActiveTab()" style="flex:1"/>
+      <span class="sep" style="align-self:center">–</span>
+      <input type="date" id="dateEnd" onchange="loadActiveTab()" style="flex:1"/>
+    </div>
     <div class="preset-btns">
-      <button class="preset-btn" onclick="setPreset('today')">Hari Ini</button>
-      <button class="preset-btn" onclick="setPreset('week')">7 Hari</button>
-      <button class="preset-btn active" onclick="setPreset('month')">Bulan Ini</button>
-      <button class="preset-btn" onclick="setPreset('last3')">3 Bulan</button>
-      <button class="preset-btn" onclick="setPreset('year')">Tahun Ini</button>
+      <button class="preset-btn" onclick="setPreset('today', event)">Hari Ini</button>
+      <button class="preset-btn" onclick="setPreset('week', event)">7 Hari</button>
+      <button class="preset-btn active" onclick="setPreset('month', event)">Bulan Ini</button>
+      <button class="preset-btn" onclick="setPreset('last3', event)">3 Bulan</button>
+      <button class="preset-btn" onclick="setPreset('year', event)">Tahun Ini</button>
     </div>
     <div id="filterKategori" style="display:none">
       <label>Kategori:</label>
@@ -282,7 +354,10 @@
   <div class="grid-2">
     <div class="card">
       <div class="card-head">🏆 Top Layanan</div>
-      <div id="distribusiBody">
+      <div class="rep-list-wrap" id="distribusiCardList">
+        <div class="card-body"><div class="loading">Memuat…</div></div>
+      </div>
+      <div class="rep-table-wrap" id="distribusiBody">
         <div class="loading">Memuat…</div>
       </div>
     </div>
@@ -324,7 +399,10 @@
   <!-- Profitabilitas section -->
   <div class="card" style="margin-top:14px;" id="profitCard">
     <div class="card-head">📊 Profitabilitas Layanan <span style="font-size:11px;font-weight:400;color:var(--gray-5)">berdasarkan HPP yang diisi</span></div>
-    <div class="card-body" id="profitBody">
+    <div class="rep-list-wrap card-body" id="profitCardList">
+      <div class="loading">Memuat…</div>
+    </div>
+    <div class="rep-table-wrap card-body" id="profitBody">
       <div class="loading">Memuat…</div>
     </div>
   </div>
@@ -368,14 +446,19 @@
 
     <!-- Tabel Laporan Layanan -->
     <div class="card">
-      <div class="card-head" style="display:flex;justify-content:space-between;align-items:center">
+      <div class="card-head" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
         <span>📦 Detail Laporan Layanan</span>
         <div style="display:flex;gap:8px">
           <button class="btn btn-sm btn-outline" onclick="exportLayananCsv()">⬇ CSV</button>
           <button class="btn btn-sm btn-green" onclick="exportLayananExcel()">⬇ Excel</button>
         </div>
       </div>
-      <div class="card-body" id="layananTableBody" style="overflow-x:auto">
+      <!-- Mobile: card list -->
+      <div class="rep-list-wrap" id="layananCardList">
+        <div class="card-body"><div class="loading">Memuat…</div></div>
+      </div>
+      <!-- Desktop: table -->
+      <div class="rep-table-wrap card-body" id="layananTableBody" style="overflow-x:auto">
         <div class="loading">Memuat…</div>
       </div>
     </div>
@@ -409,14 +492,19 @@
 
     <!-- Tabel Laporan Pelanggan -->
     <div class="card">
-      <div class="card-head" style="display:flex;justify-content:space-between;align-items:center">
+      <div class="card-head" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
         <span>👥 Ringkasan per Pelanggan</span>
         <div style="display:flex;gap:8px">
           <button class="btn btn-sm btn-outline" onclick="exportPelangganCsv()">⬇ CSV</button>
           <button class="btn btn-sm btn-green" onclick="exportPelangganExcel()">⬇ Excel</button>
         </div>
       </div>
-      <div class="card-body" id="pelangganTableBody" style="overflow-x:auto">
+      <!-- Mobile: card list -->
+      <div class="rep-list-wrap" id="pelangganCardList">
+        <div class="card-body"><div class="loading">Memuat…</div></div>
+      </div>
+      <!-- Desktop: table -->
+      <div class="rep-table-wrap card-body" id="pelangganTableBody" style="overflow-x:auto">
         <div class="loading">Memuat…</div>
       </div>
     </div>
@@ -438,35 +526,26 @@
   <!-- Tab Content: Antar Jemput -->
   <div id="tab-antar-jemput" class="tab-content">
     <!-- Card Ringkasan AJ -->
-    <div class="grid-2">
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
       <div class="stat-card">
-        <div class="stat-icon" style="background:#eff6ff;color:#2563eb">🛵</div>
-        <div class="stat-content">
-          <div class="stat-label">Total Order AJ</div>
-          <div class="stat-value" id="ajTotalOrder">0</div>
-        </div>
+        <div class="stat-label">Total Order AJ</div>
+        <div class="stat-val" id="ajTotalOrder">0</div>
+        <div class="stat-sub">rute di periode ini</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background:#f0fdf4;color:#16a34a">💰</div>
-        <div class="stat-content">
-          <div class="stat-label">Tarif Diterima</div>
-          <div class="stat-value" id="ajTarifDiterima">Rp 0</div>
-        </div>
+        <div class="stat-label">Tarif Diterima</div>
+        <div class="stat-val" id="ajTarifDiterima" style="font-size:18px">Rp 0</div>
+        <div class="stat-sub">total tarif AJ</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background:#fef3c7;color:#d97706">📊</div>
-        <div class="stat-content">
-          <div class="stat-label">HPP Riil</div>
-          <div class="stat-value" id="ajHPP">Rp 0</div>
-        </div>
+        <div class="stat-label">HPP Riil</div>
+        <div class="stat-val" id="ajHPP" style="font-size:18px">Rp 0</div>
+        <div class="stat-sub">biaya operasional</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon" style="background:#dcfce7;color:#16a34a">✨</div>
-        <div class="stat-content">
-          <div class="stat-label">Profit AJ</div>
-          <div class="stat-value" id="ajProfit">Rp 0</div>
-          <div class="stat-sub" id="ajMargin">Margin: 0%</div>
-        </div>
+        <div class="stat-label">Profit AJ</div>
+        <div class="stat-val" id="ajProfit" style="font-size:18px">Rp 0</div>
+        <div class="stat-sub" id="ajMargin">Margin: 0%</div>
       </div>
     </div>
 
@@ -475,7 +554,12 @@
       <div class="card-head">
         <span>🛵 Detail Rute Antar Jemput</span>
       </div>
-      <div class="card-body" style="overflow-x:auto">
+      <!-- Mobile: card list -->
+      <div class="rep-list-wrap" id="ajCardList">
+        <div class="card-body"><div class="loading">Memuat…</div></div>
+      </div>
+      <!-- Desktop: table -->
+      <div class="rep-table-wrap card-body" style="overflow-x:auto">
         <table id="ajTable">
           <thead>
             <tr>
@@ -508,6 +592,21 @@ let activeTab = 'ringkasan';
 const today = () => new Date().toISOString().slice(0, 10);
 const fmt   = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '–';
 const rupiah = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+// Compact rupiah: Rp 1.5jt / Rp 250rb (untuk ruang sempit di HP)
+const rupiahCompact = (n) => {
+  const v = Number(n || 0);
+  if (v >= 1_000_000) return 'Rp ' + (v/1_000_000).toFixed(v >= 10_000_000 ? 0 : 1) + 'jt';
+  if (v >= 1_000)     return 'Rp ' + Math.round(v/1_000) + 'rb';
+  return 'Rp ' + v.toLocaleString('id-ID');
+};
+// Format nomor telepon: 628xxx → 08xxx untuk tampilan UI
+function formatTelepon(nomor) {
+  if (!nomor) return '-';
+  let n = nomor.toString().trim();
+  if (n.startsWith('628')) return '0' + n.slice(2);
+  if (n.startsWith('62'))  return '0' + n.slice(2);
+  return n;
+}
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 (async () => {
@@ -532,12 +631,13 @@ async function logout() {
 }
 
 // ── Tab Switching ─────────────────────────────────────────────────────────────
-function switchTab(tabName) {
+function switchTab(tabName, ev) {
   activeTab = tabName;
 
   // Update tab buttons
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
+  const tabBtn = ev?.target?.closest('.tab');
+  if (tabBtn) tabBtn.classList.add('active');
 
   // Update tab content
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -590,7 +690,7 @@ async function loadKategoriFilter() {
 }
 
 // ── Preset dates ──────────────────────────────────────────────────────────────
-function setPreset(key) {
+function setPreset(key, ev) {
   const t = new Date();
   let start, end = today();
 
@@ -604,7 +704,7 @@ function setPreset(key) {
   document.getElementById('dateEnd').value   = end;
 
   document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  if (ev?.target) ev.target.classList.add('active');
   loadActiveTab();
 }
 
@@ -618,12 +718,14 @@ async function load() {
   ['sOmset','sTrx','sAvg','sPelanggan','sPoin','sPromo'].forEach(id => {
     document.getElementById(id).textContent = '…';
   });
-  document.getElementById('distribusiBody').innerHTML    = '<div class="loading">Memuat…</div>';
-  document.getElementById('labaRugiBody').innerHTML      = '<div class="loading">Memuat…</div>';
-  document.getElementById('statusBody').innerHTML        = '<div class="loading">Memuat…</div>';
-  document.getElementById('poinPromoBody').innerHTML     = '<div class="loading">Memuat…</div>';
+  document.getElementById('distribusiBody').innerHTML     = '<div class="loading">Memuat…</div>';
+  document.getElementById('distribusiCardList').innerHTML = '<div class="card-body"><div class="loading">Memuat…</div></div>';
+  document.getElementById('labaRugiBody').innerHTML       = '<div class="loading">Memuat…</div>';
+  document.getElementById('statusBody').innerHTML         = '<div class="loading">Memuat…</div>';
+  document.getElementById('poinPromoBody').innerHTML      = '<div class="loading">Memuat…</div>';
   document.getElementById('depositLaporanBody').innerHTML = '<div class="loading">Memuat…</div>';
-  document.getElementById('profitBody').innerHTML        = '<div class="loading">Memuat…</div>';
+  document.getElementById('profitBody').innerHTML         = '<div class="loading">Memuat…</div>';
+  document.getElementById('profitCardList').innerHTML     = '<div class="loading">Memuat…</div>';
 
   try {
     const data = await apiFetch(`/api/v1/laporan?start=${start}&end=${end}`);
@@ -701,8 +803,9 @@ function renderAll(d) {
     }
   });
 
-  // Distribusi layanan
-  const distRows = (distribusi_layanan || []).map((r, i) => `
+  // Distribusi layanan — table (desktop)
+  const distList = distribusi_layanan || [];
+  const distRows = distList.map((r, i) => `
     <tr>
       <td style="color:var(--gray-5)">${i+1}</td>
       <td style="font-weight:600">${esc(r.nama_layanan)}</td>
@@ -717,6 +820,22 @@ function renderAll(d) {
       <tbody>${distRows}</tbody>
     </table>
   `;
+
+  // Distribusi layanan — card list (mobile)
+  const distCards = distList.slice(0, 10).map((r, i) => {
+    const rankCls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+    return `<div class="rep-item">
+      <div class="rep-item-head">
+        <span class="rep-rank ${rankCls}">${i+1}</span>
+        <div class="rep-item-title">${esc(r.nama_layanan)}</div>
+      </div>
+      <div class="rep-item-meta">
+        <span class="rep-item-sub">${Number(r.total_jumlah).toLocaleString('id-ID')} order</span>
+        <span class="rep-item-omset">${rupiah(r.total_omset)}</span>
+      </div>
+    </div>`;
+  }).join('') || '<div style="text-align:center;color:var(--gray-5);padding:20px;font-size:13px">Tidak ada data</div>';
+  document.getElementById('distribusiCardList').innerHTML = `<div class="card-body"><div class="rep-list">${distCards}</div></div>`;
 
   // Laba Rugi
   const lr = laba_rugi;
@@ -773,12 +892,15 @@ function renderAll(d) {
 // ── Profitabilitas ────────────────────────────────────────────────────────────
 function renderProfitabilitas(distribusi) {
   const el = document.getElementById('profitBody');
+  const elList = document.getElementById('profitCardList');
   const withHpp = distribusi.filter(r => Number(r.hpp) > 0);
 
   if (!withHpp.length) {
-    el.innerHTML = `<div style="text-align:center;color:var(--gray-5);padding:20px;font-size:13px">
+    const emptyHtml = `<div style="text-align:center;color:var(--gray-5);padding:20px;font-size:13px">
       Belum ada layanan dengan HPP yang diisi. <a href="/layanan" style="color:var(--blue)">Isi HPP di halaman Layanan →</a>
     </div>`;
+    el.innerHTML = emptyHtml;
+    elList.innerHTML = emptyHtml;
     return;
   }
 
@@ -840,6 +962,23 @@ function renderProfitabilitas(distribusi) {
       <tbody>${tableRows}</tbody>
     </table>
     <div style="margin-top:8px;font-size:11px;color:var(--gray-5)">* Estimasi berdasarkan HPP × volume transaksi pada periode ini</div>`;
+
+  // Mobile card list
+  const cardItems = rows.map(r => {
+    const mc = r.marginPct >= 30 ? 'var(--green)' : r.marginPct >= 20 ? 'var(--yellow)' : 'var(--red)';
+    const pc = r.estProfit >= 0 ? 'var(--green)' : 'var(--red)';
+    return `<div class="rep-item">
+      <div class="rep-item-title">${esc(r.nama_layanan)}</div>
+      <div class="rep-item-sub">Vol ${Number(r.vol).toLocaleString('id-ID')} · Omset ${rupiah(r.omset)}</div>
+      <div class="rep-item-sub">Est. HPP ${rupiah(r.estHpp)}</div>
+      <div class="rep-item-meta">
+        <span style="color:${pc};font-weight:700">${rupiah(r.estProfit)}</span>
+        <span style="font-weight:800;color:${mc}">${r.marginPct.toFixed(1)}%</span>
+      </div>
+    </div>`;
+  }).join('');
+  elList.innerHTML = cards + `<div class="rep-list">${cardItems}</div>
+    <div style="margin-top:10px;font-size:11px;color:var(--gray-5)">* Estimasi berdasarkan HPP × volume transaksi pada periode ini</div>`;
 }
 
 // ── Load Laporan Layanan ──────────────────────────────────────────────────────
@@ -854,6 +993,7 @@ async function loadLayanan() {
     document.getElementById(id).textContent = '…';
   });
   document.getElementById('layananTableBody').innerHTML = '<div class="loading">Memuat…</div>';
+  document.getElementById('layananCardList').innerHTML  = '<div class="card-body"><div class="loading">Memuat…</div></div>';
 
   try {
     let url = `/api/v1/laporan/layanan?start=${start}&end=${end}`;
@@ -959,6 +1099,27 @@ function renderLayanan(d) {
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
+
+  // Mobile card list
+  const cards = layanan.map((r, i) => {
+    const rankCls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+    return `<div class="rep-item">
+      <div class="rep-item-head">
+        <span class="rep-rank ${rankCls}">${i+1}</span>
+        <div style="flex:1">
+          <div class="rep-item-title">${esc(r.nama)}</div>
+          <div class="rep-item-sub">${esc(r.kategori || '-')}</div>
+        </div>
+      </div>
+      <div class="rep-item-sub">${r.total_order} order · ${r.total_volume.toFixed(1)} ${r.satuan}</div>
+      <div class="rep-item-meta">
+        <span class="rep-item-sub">Rata ${rupiah(r.rata_per_order)}</span>
+        <span class="rep-item-omset">${rupiah(r.total_omset)}</span>
+      </div>
+    </div>`;
+  }).join('') || '<div style="text-align:center;color:var(--gray-5);padding:20px;font-size:13px">Tidak ada data</div>';
+
+  document.getElementById('layananCardList').innerHTML = `<div class="card-body"><div class="rep-list">${cards}</div></div>`;
 }
 
 // ── Export CSV ────────────────────────────────────────────────────────────────
@@ -1011,6 +1172,7 @@ async function loadPelanggan() {
     document.getElementById(id).textContent = '…';
   });
   document.getElementById('pelangganTableBody').innerHTML = '<div class="loading">Memuat…</div>';
+  document.getElementById('pelangganCardList').innerHTML  = '<div class="card-body"><div class="loading">Memuat…</div></div>';
 
   try {
     let url = `/api/v1/laporan/pelanggan?start=${start}&end=${end}`;
@@ -1047,14 +1209,14 @@ function renderPelanggan(d) {
 
   document.getElementById('pBaru').textContent = ringkasan.pelanggan_baru;
 
-  // Tabel
+  // Tabel (desktop)
   const rows = pelanggan.map((r, i) => {
     const levelClass = r.level_poin === 'Gold' ? 'badge-gold' : r.level_poin === 'Silver' ? 'badge-silver' : 'badge-bronze';
     const terakhir = r.terakhir_order ? fmt(new Date(r.terakhir_order)) : '–';
     return `<tr class="row-clickable" onclick="showDetailPelanggan(${r.id}, '${esc(r.nama)}')">
       <td style="color:var(--gray-5)">${i+1}</td>
       <td style="font-weight:600">${esc(r.nama)}</td>
-      <td>${esc(r.telepon || '–')}</td>
+      <td>${esc(formatTelepon(r.telepon))}</td>
       <td class="num-cell">${r.total_order}</td>
       <td class="num-cell">${rupiah(r.total_belanja)}</td>
       <td class="num-cell">${rupiah(r.rata_order)}</td>
@@ -1078,6 +1240,31 @@ function renderPelanggan(d) {
       <tbody>${rows}</tbody>
     </table>
     <div style="margin-top:8px;font-size:11px;color:var(--gray-5)">* Klik baris untuk melihat detail riwayat order</div>`;
+
+  // Mobile card list
+  const cards = pelanggan.map((r, i) => {
+    const levelClass = r.level_poin === 'Gold' ? 'badge-gold' : r.level_poin === 'Silver' ? 'badge-silver' : 'badge-bronze';
+    return `<div class="rep-item" onclick="showDetailPelanggan(${r.id}, '${esc(r.nama)}')" style="cursor:pointer">
+      <div class="rep-item-head">
+        <span class="rep-rank">${i+1}</span>
+        <div style="flex:1;min-width:0">
+          <div class="rep-item-title">${esc(r.nama)}</div>
+          <div class="rep-item-sub">${esc(formatTelepon(r.telepon))}</div>
+        </div>
+        <span class="badge ${levelClass}">${r.level_poin}</span>
+      </div>
+      <div class="rep-item-meta">
+        <span class="rep-item-sub">${r.total_order} order</span>
+        <span class="rep-item-omset">${rupiah(r.total_belanja)}</span>
+      </div>
+    </div>`;
+  }).join('') || '<div style="text-align:center;color:var(--gray-5);padding:20px;font-size:13px">Tidak ada data</div>';
+
+  document.getElementById('pelangganCardList').innerHTML = `
+    <div class="card-body">
+      <div class="rep-list">${cards}</div>
+      <div style="margin-top:10px;font-size:11px;color:var(--gray-5)">* Ketuk kartu untuk melihat detail riwayat order</div>
+    </div>`;
 }
 
 // ── Detail Pelanggan Modal ────────────────────────────────────────────────────
@@ -1182,10 +1369,12 @@ async function loadAntarJemput() {
     document.getElementById('ajProfit').textContent = rupiah(data.ringkasan.profit_aj);
     document.getElementById('ajMargin').textContent = `Margin: ${data.ringkasan.margin_persen.toFixed(1)}%`;
 
-    // Render tabel
-    const tbody = document.getElementById('ajTableBody');
+    // Render tabel (desktop) & card list (mobile)
+    const tbody    = document.getElementById('ajTableBody');
+    const cardList = document.getElementById('ajCardList');
     if (data.detail.length === 0) {
       tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--gray-5)">Tidak ada data antar jemput pada periode ini</td></tr>';
+      cardList.innerHTML = '<div class="card-body"><div style="text-align:center;color:var(--gray-5);padding:20px;font-size:13px">Tidak ada data antar jemput pada periode ini</div></div>';
       return;
     }
 
@@ -1205,6 +1394,26 @@ async function loadAntarJemput() {
         </td>
       </tr>`;
     }).join('');
+
+    // Mobile card list
+    const cards = data.detail.map(r => {
+      const tanggal = new Date(r.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'short' });
+      const mc = r.margin >= 0 ? 'var(--green)' : 'var(--red)';
+      const pelLabel = r.jumlah_pelanggan > 1 ? ` (${r.jumlah_pelanggan} pel.)` : '';
+      return `<div class="rep-item">
+        <div class="rep-item-head">
+          <div style="flex:1;min-width:0">
+            <div class="rep-item-title">Rute #${r.id} · ${esc(r.pelanggan)}${pelLabel}</div>
+            <div class="rep-item-sub">${tanggal} · ${r.jarak_km.toFixed(1)} km @ ${rupiah(r.tarif_per_km)}</div>
+          </div>
+        </div>
+        <div class="rep-item-meta">
+          <span class="rep-item-sub">Tarif ${rupiah(r.tarif_total)}<br>HPP ${rupiah(r.hpp_total)}</span>
+          <span style="color:${mc};font-weight:800;text-align:right">${rupiah(r.margin)}<br><span style="font-size:11px">${r.margin_persen.toFixed(1)}%</span></span>
+        </div>
+      </div>`;
+    }).join('');
+    cardList.innerHTML = `<div class="card-body"><div class="rep-list">${cards}</div></div>`;
   } catch (err) {
     console.error('[loadAntarJemput]', err);
     toast('Gagal memuat laporan antar jemput', true);
