@@ -69,7 +69,7 @@
   const BOTTOM = [
     { href: '/',           icon: '🏠', label: 'Home'    },
     { href: '/order',      icon: '📋', label: 'Antrian' },
-    { href: '/order/baru', icon: '➕', label: 'Order', primary: true },
+    { href: '/order/baru', icon: '<span style="color:white;font-size:24px;font-weight:700;line-height:1">+</span>', label: 'Order', primary: true },
     { href: '/tagihan',    icon: '💰', label: 'Tagihan', badge: 'tagihan' },
   ];
 
