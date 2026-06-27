@@ -407,6 +407,19 @@ exports.updateStatus = async (req, res) => {
     if (t.status === 'dibatalkan')
       return res.status(400).json({ error: 'Transaksi sudah dibatalkan' });
 
+    const ALUR_VALID = {
+      pending : ['proses', 'selesai', 'dibatalkan'],
+      proses  : ['selesai', 'dibatalkan'],
+      selesai : ['diambil', 'dibatalkan'],
+      diambil : [],
+    };
+    const boleh = ALUR_VALID[t.status] || [];
+    if (!boleh.includes(value.status)) {
+      return res.status(400).json({
+        error: `Tidak bisa mengubah status dari "${t.status}" ke "${value.status}"`
+      });
+    }
+
     const extra = {};
     if (value.bayar !== undefined) {
       extra.bayar     = value.bayar;
