@@ -115,26 +115,36 @@
     .oc-badges { display: flex; gap: 6px; flex-wrap: wrap; }
 
     .oc-actions {
-      display: flex; gap: 6px; flex-wrap: wrap;
       padding: 10px 14px;
       border-top: 1px solid var(--gray-2);
       background: var(--gray-1);
-      align-items: stretch;
+      display: flex; flex-direction: column; gap: 8px;
     }
-    .oc-actions .btn {
-      flex: 1 1 auto; min-height: 40px; padding: 8px 10px; font-size: 12px;
-      border-radius: 8px; border: 1px solid transparent; cursor: pointer; font-weight: 700;
-      display: inline-flex; align-items: center; justify-content: center; gap: 4px;
-      text-decoration: none; font-family: inherit; min-width: 70px; white-space: nowrap;
+    .card-actions-row1,
+    .card-actions-row2 {
+      display: flex; gap: 8px; align-items: stretch;
     }
-    .oc-actions .btn:active { transform: scale(.98); }
-    .oc-actions a.btn-detail { flex: 0 0 44px; min-width: 44px; }
-    .btn-proses  { background: var(--primary); color: #fff; }
-    .btn-selesai { background: var(--success); color: #fff; }
+    .card-actions-row1 .btn,
+    .card-actions-row2 .btn {
+      flex: 1;
+      min-height: 44px; padding: 8px 10px; font-size: 13px;
+      border-radius: 8px; border: 1px solid transparent; cursor: pointer; font-weight: 600;
+      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+      text-decoration: none; font-family: inherit; white-space: nowrap;
+      transition: opacity .15s;
+    }
+    .card-actions-row1 .btn:active,
+    .card-actions-row2 .btn:active { opacity: .8; transform: scale(.98); }
+    .card-actions-row2 .btn-detail {
+      flex: 0 0 44px !important; width: 44px; min-width: 44px;
+    }
+    .btn-proses  { background: #2563eb; color: #fff; }
+    .btn-selesai { background: #16a34a; color: #fff; }
+    .btn-diambil { background: #15803d; color: #fff; }
     .btn-lunasi  { background: #16a34a; color: #fff; }
     .btn-wa      { background: #2563eb; color: #fff; }
-    .btn-label   { background: #8b5cf6; color: #fff; }
-    .btn-detail  { background: #fff; border-color: var(--gray-3); color: var(--gray-6); }
+    .btn-label   { background: #7c3aed; color: #fff; }
+    .btn-detail  { background: #fff; border-color: var(--gray-3); color: #64748b; font-size: 18px; font-weight: 700; }
 
     /* ── Empty state ───────────────────────────────────── */
     .empty {
@@ -462,34 +472,34 @@ function renderCards(rows) {
     const pl = JSON.stringify(payload(t)).replace(/'/g, "&#39;");
     const wp = JSON.stringify(waPayload(t)).replace(/'/g, "&#39;");
 
-    let actions = '';
-    // Tombol status
+    // Baris 1: tombol status
+    let row1 = '';
     if (t.status === 'pending') {
-      actions += `<button class="btn btn-proses" onclick="updateStatus(${t.id},'proses',this)">▶ Proses</button>`;
-      actions += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">✓ Selesai</button>`;
+      row1 += `<button class="btn btn-proses" onclick="updateStatus(${t.id},'proses',this)">▶ Proses</button>`;
+      row1 += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">✓ Selesai</button>`;
     } else if (t.status === 'proses') {
-      actions += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">✓ Selesai</button>`;
+      row1 += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">✓ Selesai</button>`;
     } else if (t.status === 'selesai') {
-      actions += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'diambil',this)">✓ Diambil</button>`;
+      row1 += `<button class="btn btn-diambil" onclick="updateStatus(${t.id},'diambil',this)">✓ Diambil</button>`;
     }
 
-    // Tombol lunasi (jika belum lunas dan belum dibatalkan)
+    // Baris 2: Lunasi, WA, Label, Detail
+    let row2 = '';
     if (!lunas && t.status !== 'dibatalkan') {
-      actions += `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>💰 Lunasi</button>`;
+      row2 += `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>💰 Lunasi</button>`;
     }
-
-    // Tombol WA (tampil di semua card selama ada nomor telepon, kecuali tamu/dibatalkan)
     if (tel && t.status !== 'dibatalkan') {
-      actions += `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>💬 WA</button>`;
+      row2 += `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>💬 WA</button>`;
     }
-
-    // Tombol Label (selalu ada kecuali dibatalkan)
     if (t.status !== 'dibatalkan') {
-      actions += `<button class="btn btn-label" onclick="openLabelSheet(${t.id})">🏷️ Label</button>`;
+      row2 += `<button class="btn btn-label" onclick="openLabelSheet(${t.id})">🏷️ Label</button>`;
     }
+    row2 += `<a class="btn btn-detail" href="/order/detail?id=${t.id}" title="Detail">›</a>`;
 
-    // Tombol detail (selalu ada)
-    actions += `<a class="btn btn-detail" href="/order/detail?id=${t.id}" title="Detail">›</a>`;
+    const actionsHtml = `<div class="oc-actions">
+      ${row1 ? `<div class="card-actions-row1">${row1}</div>` : ''}
+      <div class="card-actions-row2">${row2}</div>
+    </div>`;
 
     return `
     <div class="order-card ${cardClass}">
@@ -512,7 +522,7 @@ function renderCards(rows) {
           ${lewat ? `<span class="ds-badge ds-badge-belum">🔴 LEWAT WAKTU</span>` : ''}
         </div>
       </div>
-      ${actions ? `<div class="oc-actions">${actions}</div>` : ''}
+      ${actionsHtml}
     </div>`;
   }).join('');
 }
@@ -534,10 +544,11 @@ function renderTable(rows) {
     let actions = '';
     if (t.status === 'pending') {
       actions += `<button class="btn btn-proses" onclick="updateStatus(${t.id},'proses',this)">▶ Proses</button>`;
+      actions += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">✓ Selesai</button>`;
     } else if (t.status === 'proses') {
       actions += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">✓ Selesai</button>`;
     } else if (t.status === 'selesai') {
-      actions += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'diambil',this)">✓ Diambil</button>`;
+      actions += `<button class="btn btn-diambil" onclick="updateStatus(${t.id},'diambil',this)">✓ Diambil</button>`;
     }
     if (!lunas && t.status !== 'dibatalkan') {
       actions += `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>💰</button>`;
