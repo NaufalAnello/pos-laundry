@@ -126,7 +126,7 @@
   <span class="pos-topbar-page">${pageTitle()}</span>
   <a href="/" id="tbAJBell" title="Order antar jemput belum diproses"
      style="display:none;margin-left:auto;margin-right:10px;text-decoration:none;
-            font-size:13px;color:#92400e;background:#fef3c7;border:1px solid #fde68a;
+            font-size:13px;color:#B45309;background:#FFFBEB;border:1px solid #FDE68A;
             padding:4px 10px;border-radius:999px;font-weight:700">
     🛵 <span id="tbAJBellCount">0</span>
   </a>

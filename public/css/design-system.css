@@ -1,53 +1,68 @@
 /* ════════════════════════════════════════════════════════════
-   POS Laundry — Design System (terpusat)
+   POS Laundry — Design System Nala Laundry
+   Palet brand: biru tua (logo "nala") + biru muda (logo "laundry")
+                + emas (bintang logo).
    Diimport SEBELUM layout.css & responsive.css di semua halaman.
-   Aman dipakai berdampingan dengan style halaman lama —
-   variabel & komponen utama bersifat additif/override aman.
    ════════════════════════════════════════════════════════════ */
 
 :root {
-  /* Warna utama */
-  --primary:    #2563EB;
-  --primary-dk: #1d4ed8;
-  --primary-lt: #eff6ff;
+  /* Brand — biru tua "nala" */
+  --primary:    #2D3BB5;
+  --primary-dk: #1E2A8A;
+  --primary-lt: #EEF2FF;
 
-  --success:    #16a34a;
-  --success-dk: #15803d;
-  --success-lt: #f0fdf4;
+  /* Brand — biru muda "laundry" */
+  --secondary:    #4BB8FA;
+  --secondary-dk: #2196D9;
+  --secondary-lt: #E8F6FF;
 
-  --warning:    #d97706;
-  --warning-lt: #fffbeb;
+  /* Brand — emas bintang */
+  --accent:    #F59E0B;
+  --accent-lt: #FFFBEB;
 
-  --danger:     #dc2626;
-  --danger-dk:  #b91c1c;
-  --danger-lt:  #fef2f2;
+  /* Semantic */
+  --success:    #10B981;
+  --success-dk: #059669;
+  --success-lt: #ECFDF5;
 
-  --purple:     #7c3aed;
-  --purple-lt:  #f5f3ff;
+  --warning:    #F59E0B;
+  --warning-dk: #B45309;
+  --warning-lt: #FFFBEB;
 
-  /* Gray scale */
-  --gray-1: #f8fafc;
-  --gray-2: #f1f5f9;
-  --gray-3: #e2e8f0;
-  --gray-4: #94a3b8;
-  --gray-5: #64748b;
+  --danger:     #EF4444;
+  --danger-dk:  #DC2626;
+  --danger-lt:  #FEF2F2;
+
+  --purple:     #8B5CF6;
+  --purple-lt:  #F5F3FF;
+
+  /* Gray scale — biru-abu, kesan bersih */
+  --gray-1: #F8FAFF;
+  --gray-2: #F1F5F9;
+  --gray-3: #E2E8F0;
+  --gray-4: #94A3B8;
+  --gray-5: #64748B;
   --gray-6: #334155;
-  --gray-7: #374151;
-  --gray-8: #1f2937;
-  --gray-9: #111827;
+  --gray-7: #334155;
+  --gray-8: #1E2A6E;
+  --gray-9: #1E2A6E;
 
-  /* Alias yang umum dipakai halaman lama (backward-compat) */
-  --blue:    var(--primary);
-  --blue-dk: var(--primary-dk);
-  --blue-lt: var(--primary-lt);
-  --green:   var(--success);
-  --green-lt:var(--success-lt);
-  --yellow:  var(--warning);
+  /* Background app */
+  --bg-page: #F0F7FF;
+  --bg-card: #FFFFFF;
+
+  /* Alias kompat halaman lama */
+  --blue:     var(--primary);
+  --blue-dk:  var(--primary-dk);
+  --blue-lt:  var(--primary-lt);
+  --green:    var(--success);
+  --green-lt: var(--success-lt);
+  --yellow:   var(--warning);
   --yellow-lt:var(--warning-lt);
-  --red:     var(--danger);
-  --red-lt:  var(--danger-lt);
+  --red:      var(--danger);
+  --red-lt:   var(--danger-lt);
 
-  /* Spacing scale */
+  /* Spacing */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -58,15 +73,16 @@
   /* Radius */
   --radius-sm: 6px;
   --radius-md: 8px;
-  --radius:    10px;  /* legacy */
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius:    10px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-btn: 8px;
 
-  /* Shadow */
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-  --shadow-md: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-lg: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
-  --shadow:    var(--shadow-md); /* legacy */
+  /* Shadow — subtle, nuansa biru */
+  --shadow-sm: 0 1px 2px rgba(45,59,181,0.05);
+  --shadow-md: 0 1px 3px rgba(45,59,181,0.08);
+  --shadow-lg: 0 2px 8px rgba(45,59,181,0.10);
+  --shadow:    var(--shadow-md);
 
   /* Typography */
   --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -85,7 +101,7 @@
 
 body {
   font-family: var(--font);
-  background: var(--gray-2);
+  background: var(--bg-page);
   color: var(--gray-9);
 }
 
@@ -93,7 +109,7 @@ body {
    CARD
    ═══════════════════════════════════════════════════════════ */
 .ds-card {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   border: 1px solid var(--gray-3);
@@ -109,51 +125,66 @@ body {
 .ds-card-header h2 { font-size: var(--text-sm); font-weight: 700; color: var(--gray-7); margin: 0; }
 .ds-card-body { padding: 14px 16px; }
 
+/* Card hero (summary / tagihan) — hanya untuk yang perlu menonjol */
+.ds-card-hero {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: #fff;
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+}
+
 /* ═══════════════════════════════════════════════════════════
-   BUTTON
+   BUTTON — simpel, tanpa gradient, tanpa shadow
    ═══════════════════════════════════════════════════════════ */
 .ds-btn {
   min-height: 44px;
   padding: 10px 16px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-btn);
   font-weight: 600;
   font-size: var(--text-sm);
   cursor: pointer;
   border: 1px solid transparent;
-  transition: all 150ms ease;
+  transition: opacity .15s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   text-decoration: none;
   font-family: inherit;
+  box-shadow: none;
 }
+.ds-btn:hover:not(:disabled) { opacity: .9; }
 .ds-btn:active { transform: scale(.98); }
 .ds-btn:disabled { opacity: .5; cursor: not-allowed; }
 
-.ds-btn-primary { background: var(--primary); color: #fff; }
-.ds-btn-primary:hover:not(:disabled) { background: var(--primary-dk); }
+.ds-btn-primary   { background: var(--primary);   color: #fff; }
+.ds-btn-success   { background: var(--success);   color: #fff; }
+.ds-btn-secondary { background: var(--secondary); color: #fff; }
+.ds-btn-danger    { background: var(--danger);    color: #fff; }
+.ds-btn-purple    { background: var(--purple);    color: #fff; }
+.ds-btn-warning   { background: var(--accent);    color: #fff; }
 
-.ds-btn-success { background: var(--success); color: #fff; }
-.ds-btn-success:hover:not(:disabled) { background: var(--success-dk); }
+.ds-btn-outline {
+  background: #fff;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+.ds-btn-outline:hover:not(:disabled) { background: var(--primary-lt); opacity: 1; }
 
-.ds-btn-danger  { background: var(--danger);  color: #fff; }
-.ds-btn-danger:hover:not(:disabled)  { background: var(--danger-dk); }
-
-.ds-btn-outline { background: #fff; border-color: var(--primary); color: var(--primary); border-width: 1.5px; }
-.ds-btn-outline:hover:not(:disabled) { background: var(--primary-lt); }
-
-.ds-btn-ghost   { background: transparent; color: var(--gray-6); }
-.ds-btn-ghost:hover:not(:disabled) { background: var(--gray-2); }
+.ds-btn-ghost {
+  background: #fff;
+  border: 1px solid var(--gray-3);
+  color: var(--gray-5);
+}
+.ds-btn-ghost:hover:not(:disabled) { background: var(--gray-1); opacity: 1; }
 
 .ds-btn-wa { background: #25d366; color: #fff; }
-.ds-btn-wa:hover:not(:disabled) { background: #1ebe5d; }
 
 .ds-btn-sm { min-height: 36px; padding: 6px 12px; font-size: var(--text-xs); }
 .ds-btn-block { width: 100%; }
 
 /* ═══════════════════════════════════════════════════════════
-   BADGE STATUS
+   BADGE STATUS — subtle, bordered, bersih
    ═══════════════════════════════════════════════════════════ */
 .ds-badge {
   display: inline-block;
@@ -164,16 +195,18 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.4px;
   white-space: nowrap;
+  border: 1px solid transparent;
 }
-.ds-badge-pending     { background: var(--warning-lt); color: var(--warning); }
-.ds-badge-proses      { background: var(--primary-lt); color: var(--primary); }
-.ds-badge-selesai     { background: var(--success-lt); color: var(--success); }
-.ds-badge-diambil     { background: var(--gray-2);     color: var(--gray-6); }
-.ds-badge-dibatalkan  { background: var(--danger-lt);  color: var(--danger); }
-.ds-badge-batal       { background: var(--danger-lt);  color: var(--danger); }
-.ds-badge-lunas       { background: var(--success-lt); color: var(--success); }
-.ds-badge-belum       { background: var(--danger-lt);  color: var(--danger); }
-.ds-badge-dp          { background: var(--warning-lt); color: var(--warning); }
+.ds-badge-pending     { background: #EEF2FF; color: #2D3BB5; border-color: #C7D2FE; }
+.ds-badge-proses      { background: #E8F6FF; color: #2196D9; border-color: #BAE6FD; }
+.ds-badge-selesai     { background: #ECFDF5; color: #10B981; border-color: #A7F3D0; }
+.ds-badge-diambil     { background: #1E2A6E; color: #fff;    border-color: #1E2A6E; }
+.ds-badge-dibatalkan  { background: #FEF2F2; color: #EF4444; border-color: #FECACA; }
+.ds-badge-batal       { background: #FEF2F2; color: #EF4444; border-color: #FECACA; }
+.ds-badge-lunas       { background: #ECFDF5; color: #10B981; border-color: #A7F3D0; }
+.ds-badge-belum       { background: #FEF2F2; color: #EF4444; border-color: #FECACA; }
+.ds-badge-dp          { background: #FFFBEB; color: #F59E0B; border-color: #FDE68A; }
+.ds-badge-lewat       { background: #FEF2F2; color: #EF4444; border-color: #FECACA; }
 
 /* ═══════════════════════════════════════════════════════════
    PILL (filter chip)
@@ -221,7 +254,7 @@ body {
 .ds-sheet-bg {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(30,42,110,0.45);
   z-index: 9000;
   display: none;
 }
@@ -240,7 +273,7 @@ body {
   transform: translateY(100%);
   transition: transform .25s cubic-bezier(.4,0,.2,1);
   padding-bottom: env(safe-area-inset-bottom, 12px);
-  box-shadow: 0 -6px 24px rgba(0,0,0,.18);
+  box-shadow: 0 -6px 24px rgba(45,59,181,.12);
 }
 .ds-sheet.open { transform: translateY(0); }
 .ds-sheet-handle {
@@ -272,7 +305,6 @@ body {
   background: #fff;
 }
 
-/* Desktop: bottom sheet jadi center modal */
 @media (min-width: 768px) {
   .ds-sheet {
     left: 50%;
@@ -315,7 +347,7 @@ body {
 .ds-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 .ds-toast.success { background: var(--success); }
 .ds-toast.error   { background: var(--danger); }
-.ds-toast.warning { background: var(--warning); }
+.ds-toast.warning { background: var(--accent); }
 
 /* ═══════════════════════════════════════════════════════════
    EMPTY STATE
@@ -353,26 +385,28 @@ body {
   width: 100%;
   min-height: 44px;
   padding: 10px 12px;
-  font-size: 16px; /* cegah iOS auto-zoom */
+  font-size: 16px;
   border: 1px solid var(--gray-3);
   border-radius: var(--radius-md);
   background: #fff;
   color: var(--gray-9);
   font-family: inherit;
   outline: none;
-  transition: border-color .15s;
+  transition: border-color .15s, box-shadow .15s;
 }
 .ds-input:focus,
 .ds-select:focus,
-.ds-textarea:focus { border-color: var(--primary); }
+.ds-textarea:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(75,184,250,0.15);
+}
 
 /* ═══════════════════════════════════════════════════════════
-   ACTION ROW (group tombol kecil di card)
+   ACTION ROW
    ═══════════════════════════════════════════════════════════ */
 .ds-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 .ds-actions .ds-btn { flex: 1 1 auto; min-width: 64px; }
 
-/* Tombol icon-only mini untuk inline action di card */
 .ds-icon-btn {
   width: 40px;
   height: 40px;
@@ -389,13 +423,14 @@ body {
   flex-shrink: 0;
 }
 .ds-icon-btn:hover { background: var(--gray-1); }
-.ds-icon-btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
-.ds-icon-btn.success { background: var(--success); color: #fff; border-color: var(--success); }
-.ds-icon-btn.wa { background: #25d366; color: #fff; border-color: #25d366; }
-.ds-icon-btn.danger  { background: var(--danger); color: #fff; border-color: var(--danger); }
+.ds-icon-btn.primary { background: var(--primary);   color: #fff; border-color: var(--primary); }
+.ds-icon-btn.success { background: var(--success);   color: #fff; border-color: var(--success); }
+.ds-icon-btn.wa      { background: #25d366;          color: #fff; border-color: #25d366; }
+.ds-icon-btn.danger  { background: var(--danger);    color: #fff; border-color: var(--danger); }
+.ds-icon-btn.purple  { background: var(--purple);    color: #fff; border-color: var(--purple); }
 
 /* ═══════════════════════════════════════════════════════════
-   BOTTOM NAV — Highlight Order Baru (FAB-style) di tengah
+   BOTTOM NAV — tombol Order (+) di tengah
    ═══════════════════════════════════════════════════════════ */
 .pos-bottom-nav { position: relative; }
 .pos-bottom-nav .bn-item[href="/order/baru"] {
@@ -403,7 +438,7 @@ body {
   z-index: 2;
 }
 .pos-bottom-nav .bn-item[href="/order/baru"] .bn-icon {
-  background: #4BB8FA;
+  background: var(--secondary);
   color: #fff;
   width: 52px;
   height: 52px;
@@ -411,9 +446,9 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(75,184,250,0.45);
+  box-shadow: 0 4px 12px rgba(75,184,250,0.35);
   margin-top: -14px;
   margin-bottom: 2px;
 }
@@ -421,14 +456,13 @@ body {
   display: none;
 }
 
-/* Tagihan badge: pastikan tetap terlihat di atas */
 .pos-bottom-nav .bn-badge {
   background: var(--danger);
   box-shadow: 0 1px 3px rgba(0,0,0,.2);
 }
 
 /* ═══════════════════════════════════════════════════════════
-   STICKY BOTTOM BAR (untuk form)
+   STICKY BOTTOM BAR
    ═══════════════════════════════════════════════════════════ */
 .ds-sticky-bar {
   position: sticky;
@@ -437,7 +471,7 @@ body {
   border-top: 1px solid var(--gray-3);
   padding: 12px 14px;
   z-index: 15;
-  box-shadow: 0 -2px 10px rgba(0,0,0,.06);
+  box-shadow: 0 -1px 4px rgba(45,59,181,.06);
   margin-left: -16px;
   margin-right: -16px;
 }

@@ -1,33 +1,33 @@
 /* ════════════════════════════════════════════════════════════
-   POS Laundry — Shared Responsive Layout
-   Desktop ≥768px : sidebar 196px + main content
+   POS Laundry — Shared Responsive Layout (Nala palette)
+   Desktop ≥768px : sidebar 200px putih + main content
    Mobile  <768px  : bottom navigation + scroll body
    ════════════════════════════════════════════════════════════ */
 
-/* ── CSS vars (shared across all pages) ─────────────────────── */
 :root {
-  --sb-w:       196px;      /* sidebar width */
-  --bn-h:       60px;       /* bottom nav height */
-  --topbar-h:   50px;       /* mobile top bar height */
+  --sb-w:       200px;
+  --bn-h:       60px;
+  --topbar-h:   50px;
 
-  /* design tokens (mirror page :root — declared here for layout use) */
-  --blue:    #2563eb;
-  --blue-lt: #eff6ff;
-  --green:   #16a34a;
-  --red:     #dc2626;
-  --gray-1:  #f8fafc;
-  --gray-2:  #f1f5f9;
-  --gray-3:  #e2e8f0;
-  --gray-5:  #64748b;
-  --gray-7:  #374151;
-  --gray-9:  #111827;
+  /* design tokens (mirror design-system :root) */
+  --blue:    #2D3BB5;
+  --blue-lt: #EEF2FF;
+  --green:   #10B981;
+  --red:     #EF4444;
+  --gray-1:  #F8FAFF;
+  --gray-2:  #F1F5F9;
+  --gray-3:  #E2E8F0;
+  --gray-5:  #64748B;
+  --gray-7:  #334155;
+  --gray-9:  #1E2A6E;
 
-  /* sidebar palette */
-  --sb-bg:       #1e293b;
-  --sb-text:     #94a3b8;
-  --sb-text-act: #ffffff;
-  --sb-item-act: rgba(37,99,235,.25);
-  --sb-border:   rgba(255,255,255,.06);
+  /* Sidebar palette — putih bersih, brand biru tua */
+  --sb-bg:        #FFFFFF;
+  --sb-text:      #64748B;
+  --sb-text-act:  #2D3BB5;
+  --sb-item-act:  #EEF2FF;
+  --sb-item-hov:  #F8FAFF;
+  --sb-border:    #E2E8F0;
 }
 
 /* ── Sidebar ─────────────────────────────────────────────────── */
@@ -38,6 +38,7 @@
   min-width: var(--sb-w);
   max-width: var(--sb-w);
   background: var(--sb-bg);
+  border-right: 1px solid var(--sb-border);
   display: flex;
   flex-direction: column;
   z-index: 30;
@@ -45,7 +46,7 @@
   height: 100vh;
   flex-shrink: 0;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,.1) transparent;
+  scrollbar-color: var(--gray-3) transparent;
 }
 
 .sb-brand {
@@ -57,7 +58,7 @@
   flex-shrink: 0;
 }
 .sb-brand-icon { font-size: 22px; }
-.sb-brand-text { font-size: 15px; font-weight: 800; color: #fff; letter-spacing: .2px; }
+.sb-brand-text { font-size: 15px; font-weight: 800; color: var(--blue); letter-spacing: .2px; }
 
 .sb-nav {
   display: flex;
@@ -72,13 +73,12 @@
 .sb-group-label {
   display: block;
   width: 100%;
-  padding: 8px 16px 3px;
-  font-size: 10px;
+  padding: 10px 16px 4px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .7px;
-  color: var(--sb-text);
-  opacity: .6;
+  color: #94A3B8;
   white-space: nowrap;
   overflow: hidden;
 }
@@ -88,13 +88,14 @@
   flex-direction: row;
   align-items: center;
   gap: 10px;
-  padding: 8px 14px;
+  padding: 9px 14px;
   margin: 1px 8px;
   border-radius: 8px;
   text-decoration: none;
   font-size: 13px;
   font-weight: 600;
   color: var(--sb-text);
+  border-left: 3px solid transparent;
   transition: background .15s, color .15s;
   width: calc(100% - 16px);
   max-width: calc(100% - 16px);
@@ -102,8 +103,12 @@
   flex-shrink: 0;
   box-sizing: border-box;
 }
-.sb-item:hover   { background: rgba(255,255,255,.07); color: #fff; }
-.sb-item.active  { background: var(--sb-item-act); color: var(--sb-text-act); }
+.sb-item:hover   { background: var(--sb-item-hov); color: var(--blue); }
+.sb-item.active  {
+  background: var(--sb-item-act);
+  color: var(--sb-text-act);
+  border-left-color: var(--blue);
+}
 .sb-item .sb-icon{ font-size: 15px; flex-shrink: 0; width: 20px; text-align: center; }
 .sb-item .sb-lbl {
   white-space: nowrap;
@@ -121,7 +126,7 @@
 .sb-user-name {
   font-size: 12px;
   font-weight: 600;
-  color: var(--sb-text);
+  color: var(--gray-7);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -129,18 +134,18 @@
 }
 .sb-logout {
   width: 100%;
-  padding: 6px 10px;
-  border: 1px solid rgba(255,255,255,.12);
+  padding: 7px 10px;
+  border: 1px solid var(--gray-3);
   border-radius: 7px;
-  background: none;
-  color: var(--sb-text);
+  background: #fff;
+  color: var(--gray-5);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: background .15s;
+  transition: background .15s, color .15s;
   text-align: left;
 }
-.sb-logout:hover { background: rgba(255,255,255,.08); color: #fff; }
+.sb-logout:hover { background: #FEF2F2; color: var(--red); border-color: #FECACA; }
 
 /* ── Main content wrapper ────────────────────────────────────── */
 .pos-main {
@@ -150,7 +155,7 @@
 
 /* ── Mobile top bar ──────────────────────────────────────────── */
 .pos-topbar {
-  display: none; /* shown on mobile only */
+  display: none;
   align-items: center;
   justify-content: space-between;
   height: var(--topbar-h);
@@ -160,7 +165,7 @@
   position: sticky;
   top: 0;
   z-index: 25;
-  box-shadow: 0 1px 4px rgba(0,0,0,.07);
+  box-shadow: 0 1px 4px rgba(45,59,181,.08);
 }
 .pos-topbar-logo { font-size: 16px; font-weight: 800; color: var(--blue); }
 .pos-topbar-page { font-size: 13px; font-weight: 700; color: var(--gray-7); }
@@ -169,13 +174,13 @@
 
 /* ── Bottom navigation (mobile) ─────────────────────────────── */
 .pos-bottom-nav {
-  display: none; /* shown on mobile only */
+  display: none;
   position: fixed;
   bottom: 0; left: 0; right: 0;
   height: var(--bn-h);
   background: #fff;
   border-top: 1px solid var(--gray-3);
-  box-shadow: 0 -2px 12px rgba(0,0,0,.08);
+  box-shadow: 0 -1px 4px rgba(45,59,181,.06);
   z-index: 30;
   justify-content: space-around;
   align-items: stretch;
@@ -193,7 +198,7 @@
   border: none;
   background: none;
   cursor: pointer;
-  color: var(--gray-5);
+  color: #94A3B8;
   transition: color .15s;
   -webkit-tap-highlight-color: transparent;
 }
@@ -222,7 +227,7 @@
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.4);
+  background: rgba(30,42,110,.4);
   z-index: 40;
 }
 .more-overlay.open { display: block; }
@@ -238,6 +243,7 @@
   transition: transform .3s cubic-bezier(.4,0,.2,1);
   max-height: 80vh;
   overflow-y: auto;
+  box-shadow: 0 -6px 24px rgba(45,59,181,.15);
 }
 .more-sheet.open { transform: none; }
 
@@ -294,13 +300,12 @@
   cursor: pointer;
   color: var(--red);
 }
-.more-sheet-logout:hover { background: #fef2f2; }
+.more-sheet-logout:hover { background: #FEF2F2; }
 
 /* ══════════════════════════════════════════════════════════════
    RESPONSIVE BREAKPOINTS
    ══════════════════════════════════════════════════════════════ */
 
-/* ── DESKTOP ≥768px ─────────────────────────────────────────── */
 @media (min-width: 768px) {
   .pos-topbar        { display: none !important; }
   .pos-bottom-nav    { display: none !important; }
@@ -308,7 +313,6 @@
   .more-sheet        { display: none !important; }
 }
 
-/* ── MOBILE <768px ──────────────────────────────────────────── */
 @media (max-width: 767px) {
   .pos-sidebar    { display: none !important; }
   .pos-topbar     { display: flex; }
