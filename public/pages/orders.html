@@ -9,7 +9,7 @@
   <title>Antrian — POS Laundry</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--font); background: var(--gray-2); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
+    body { font-family: var(--font); background: var(--bg-page); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
 
     .page { max-width: 1200px; margin: 0 auto; padding: 0 0 calc(var(--bn-h, 64px) + 20px); }
     @media (min-width: 1024px) {
@@ -90,9 +90,9 @@
       border-left: 3px solid var(--gray-4);
     }
     .order-card.s-pending { border-left-color: #94a3b8; }
-    .order-card.s-proses  { border-left-color: #2563eb; }
-    .order-card.s-selesai { border-left-color: #16a34a; }
-    .order-card.s-lewat   { border-left-color: #dc2626; }
+    .order-card.s-proses  { border-left-color: #2D3BB5; }
+    .order-card.s-selesai { border-left-color: #10B981; }
+    .order-card.s-lewat   { border-left-color: #EF4444; }
     .order-card.s-diambil { border-left-color: var(--gray-3); opacity: .85; }
     .order-card.s-dibatalkan { border-left-color: var(--gray-4); opacity: .7; }
 
@@ -138,12 +138,12 @@
     .card-actions-row2 .btn-detail {
       flex: 0 0 44px !important; width: 44px; min-width: 44px;
     }
-    .btn-proses  { background: #2563eb; color: #fff; }
-    .btn-selesai { background: #16a34a; color: #fff; }
-    .btn-diambil { background: #15803d; color: #fff; }
-    .btn-lunasi  { background: #16a34a; color: #fff; }
-    .btn-wa      { background: #2563eb; color: #fff; }
-    .btn-label   { background: #7c3aed; color: #fff; }
+    .btn-proses  { background: #2D3BB5; color: #fff; }
+    .btn-selesai { background: #10B981; color: #fff; }
+    .btn-diambil { background: #059669; color: #fff; }
+    .btn-lunasi  { background: #10B981; color: #fff; }
+    .btn-wa      { background: #2D3BB5; color: #fff; }
+    .btn-label   { background: #8B5CF6; color: #fff; }
     .btn-detail  { background: #fff; border-color: var(--gray-3); color: #64748b; font-size: 18px; font-weight: 700; }
 
     /* ── Empty state ───────────────────────────────────── */

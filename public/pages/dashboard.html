@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--font); background: var(--gray-2); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
+    body { font-family: var(--font); background: var(--bg-page); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
 
     .page { max-width: 1200px; margin: 0 auto; padding: 0 0 100px; }
 
@@ -151,8 +151,8 @@
     .order-card-actions a.btn { flex: 0 0 44px; min-width: 44px; }
     .btn-proses  { background: var(--primary); color: #fff; }
     .btn-selesai { background: var(--success); color: #fff; }
-    .btn-lunasi  { background: #16a34a; color: #fff; }
-    .btn-wa      { background: #2563EB; color: #fff; }
+    .btn-lunasi  { background: #10B981; color: #fff; }
+    .btn-wa      { background: #2D3BB5; color: #fff; }
     .btn-detail  { background: #fff; border-color: var(--gray-3); color: var(--gray-6); }
 
     .list { display: flex; flex-direction: column; gap: 8px; }
@@ -866,7 +866,7 @@ function renderReservasiWidget(list) {
         <div style="display:flex;gap:6px;margin-top:8px">
           <button class="btn btn-selesai" style="flex:1;padding:8px;min-height:36px;font-size:12px" onclick="rjSelesai(${r.id}, ${r.pelanggan_id || 'null'})">✓ Selesai</button>
           <a class="btn btn-detail" style="padding:8px 12px;min-height:36px;font-size:12px;text-decoration:none" href="/reservasi-jemput?edit=${r.id}">✏️</a>
-          <button class="btn btn-wa" style="padding:8px 12px;min-height:36px;font-size:12px;background:#dc2626" onclick="rjBatal(${r.id})">🗑️</button>
+          <button class="btn btn-wa" style="padding:8px 12px;min-height:36px;font-size:12px;background:#EF4444" onclick="rjBatal(${r.id})">🗑️</button>
         </div>
       </div>`;
   }).join('');
