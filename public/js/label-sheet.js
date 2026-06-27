@@ -1,5 +1,79 @@
 // ── Label Sheet: pilih layanan yang mau dicetak ─────────────────────────────
 (function() {
+  // Inject CSS sekali saja
+  if (!document.getElementById('label-sheet-css')) {
+    const s = document.createElement('style');
+    s.id = 'label-sheet-css';
+    s.textContent = `
+      .bs-overlay {
+        display: none;
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,.5);
+        z-index: 9000;
+      }
+      .bs-overlay.open { display: block; }
+      .bs-sheet {
+        position: fixed;
+        left: 0; right: 0; bottom: 0;
+        background: #fff;
+        border-radius: 18px 18px 0 0;
+        max-height: 90vh;
+        overflow-y: auto;
+        z-index: 9001;
+        transform: translateY(100%);
+        transition: transform .25s cubic-bezier(.4,0,.2,1);
+        padding-bottom: env(safe-area-inset-bottom, 12px);
+        box-shadow: 0 -4px 24px rgba(0,0,0,.18);
+      }
+      .bs-sheet.open { transform: translateY(0); }
+      .bs-header {
+        padding: 10px 16px 12px;
+        border-bottom: 1px solid #e2e8f0;
+        position: sticky; top: 0;
+        background: #fff; z-index: 1;
+      }
+      .bs-pill {
+        width: 40px; height: 4px;
+        background: #e2e8f0; border-radius: 99px;
+        margin: 0 auto 10px;
+      }
+      .bs-title {
+        font-size: 16px; font-weight: 800;
+        color: #111827; margin-bottom: 4px;
+      }
+      .bs-subtitle {
+        font-size: 12px; color: #64748b;
+      }
+      .bs-body { padding: 14px 16px; }
+      .bs-btn {
+        width: 100%; min-height: 48px;
+        padding: 12px 16px; border-radius: 10px;
+        font-size: 14px; font-weight: 700;
+        cursor: pointer; border: 1px solid transparent;
+        font-family: inherit; transition: opacity .15s;
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      }
+      .bs-btn:active { opacity: .85; }
+      .bs-btn:disabled { opacity: .4; cursor: not-allowed; }
+      .bs-btn-primary { background: #2563eb; color: #fff; }
+      .bs-btn-outline { background: #fff; border-color: #e2e8f0; color: #374151; }
+      .bs-btn-outline:hover { background: #f8fafc; }
+      @media (min-width: 768px) {
+        .bs-sheet {
+          left: 50%; right: auto; bottom: auto; top: 50%;
+          width: 440px; max-height: 85vh;
+          border-radius: 14px;
+          transform: translate(-50%, -45%) scale(.96);
+          opacity: 0;
+          transition: transform .2s ease, opacity .2s ease;
+        }
+        .bs-sheet.open { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        .bs-pill { display: none; }
+      }
+    `;
+    document.head.appendChild(s);
+  }
+
   let currentOrderId = null;
   let currentItems = [];
   let sheet = null;
@@ -71,7 +145,6 @@
 
   async function openSheet(orderId) {
     currentOrderId = orderId;
-    createSheet();
 
     try {
       const r = await fetch(`/api/v1/transaksi/${orderId}/detail`, { credentials: 'include' });
@@ -81,22 +154,21 @@
 
       currentItems = data.items || [];
 
+      // 1 layanan → langsung cetak tanpa sheet
+      if (currentItems.length <= 1) {
+        if (currentItems.length === 0) {
+          if (window.showToast) window.showToast('Tidak ada layanan');
+          return;
+        }
+        await cetakLabel([currentItems[0].id]);
+        return;
+      }
+
+      // 2+ layanan → tampilkan sheet pilihan
+      createSheet();
       const orderInfo = `${data.nomor_transaksi} · ${data.pelanggan_nama || 'Non-member'}`;
       document.getElementById('labelOrderInfo').textContent = orderInfo;
-
-      if (currentItems.length === 0) {
-        document.getElementById('labelBody').innerHTML = `
-          <div style="text-align:center;padding:30px;color:var(--gray-5)">
-            Tidak ada layanan
-          </div>
-        `;
-      } else if (currentItems.length === 1) {
-        // Langsung cetak jika hanya 1 layanan
-        closeSheet();
-        await cetakLabel([currentItems[0].id]);
-      } else {
-        renderItems();
-      }
+      renderItems();
 
       setTimeout(() => {
         overlay.classList.add('open');
@@ -104,13 +176,7 @@
       }, 10);
     } catch (err) {
       console.error(err);
-      if (sheet) {
-        document.getElementById('labelBody').innerHTML = `
-          <div style="text-align:center;padding:30px;color:var(--danger)">
-            Gagal memuat data: ${err.message}
-          </div>
-        `;
-      }
+      if (window.showToast) window.showToast('Gagal: ' + err.message);
     }
   }
 

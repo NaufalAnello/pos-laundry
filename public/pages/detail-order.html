@@ -997,7 +997,7 @@ function renderActions() {
 
   // Util buttons
   util.push(`<button class="btn btn-struk" onclick="cetakStruk()">🖨️ Struk</button>`);
-  util.push(`<button class="btn btn-label" onclick="cetakLabel()">🏷️ Label</button>`);
+  util.push(`<button class="btn btn-label" onclick="openLabelSheet(orderId)">🏷️ Label</button>`);
   if (tel && o.status !== 'selesai') {
     util.push(`<button class="btn btn-wa" onclick="openWaFromDetail()">💬 WA</button>`);
   }
@@ -1086,14 +1086,6 @@ async function updateStatus(newStatus, btn) {
 // ── Aksi cetak ─────────────────────────────────────
 function cetakStruk() {
   window.open(`/api/v1/transaksi/${orderId}/struk`, '_blank');
-}
-async function cetakLabel() {
-  try {
-    const r = await fetch(`/api/v1/transaksi/${orderId}/label`, { method: 'POST', credentials: 'include' });
-    const d = await r.json();
-    if (!r.ok) { showToast('Gagal: ' + (d.error || 'Printer error')); return; }
-    showToast('✓ Label berhasil dicetak');
-  } catch { showToast('Koneksi gagal'); }
 }
 
 // ── Lunasi (via bottom sheet universal) ────────────
@@ -1463,6 +1455,7 @@ window.addEventListener('lunasi:done', () => {
 </script>
 <script src="/js/lunasi-sheet.js"></script>
 <script src="/js/wa-sheet.js"></script>
+<script src="/js/label-sheet.js"></script>
 <script src="/js/nav.js"></script>
 </body>
 </html>
