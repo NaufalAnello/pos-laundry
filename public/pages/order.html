@@ -10,14 +10,14 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --blue:   #2563eb; --blue-dk: #1d4ed8; --blue-lt: #eff6ff;
-      --green:  #16a34a; --red: #dc2626; --yellow: #d97706;
+      --blue:   #2D3BB5; --blue-dk: #1E2A8A; --blue-lt: #EEF2FF;
+      --green:  #10B981; --red: #EF4444; --yellow: #F59E0B;
       --gray-1: #f8fafc; --gray-2: #f1f5f9; --gray-3: #e2e8f0;
-      --gray-5: #64748b; --gray-7: #374151; --gray-9: #111827;
+      --gray-5: #64748b; --gray-7: #374151; --gray-9: #1E2A6E;
       --radius: 10px; --shadow: 0 1px 4px rgba(0,0,0,.08);
     }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-           background: var(--gray-2); color: var(--gray-9); font-size: 14px; }
+           background: var(--bg-page); color: var(--gray-9); font-size: 14px; }
 
     /* ── Header ── */
     header {
@@ -334,7 +334,7 @@
       cursor: pointer; font-size: 13px; font-weight: 600;
       width: 100%; transition: background .15s;
     }
-    .btn-add-item:hover { background: #dbeafe; }
+    .btn-add-item:hover { background: #C7D2FE; }
 
     /* ── Rincian Item Panel ── */
     .item-wrapper {
@@ -393,7 +393,7 @@
       cursor: pointer; font-size: 11px; font-weight: 600;
       width: 100%; transition: background .15s;
     }
-    .btn-add-rincian:hover { background: #dbeafe; }
+    .btn-add-rincian:hover { background: #C7D2FE; }
 
     /* ── Master Item Grid ── */
     .master-item-grid {
@@ -465,7 +465,7 @@
       white-space: nowrap;
     }
     .add-master-form button:hover {
-      background: #15803d;
+      background: #059669;
     }
     .selected-items-list {
       margin-top: 12px;
@@ -620,7 +620,7 @@
       color: var(--gray-5); transition: all .15s;
     }
     .diskon-type-btn.active {
-      border-color: var(--green); background: #f0fdf4; color: var(--green);
+      border-color: var(--green); background: #ECFDF5; color: var(--green);
     }
     .payment-tab-content {
       animation: fadeIn 0.2s ease-in;
@@ -661,10 +661,10 @@
     .btn-secondary:hover:not(:disabled) { background: var(--gray-3); }
     .btn-success { background: var(--green); color: #fff; }
     .btn-success:hover:not(:disabled) {
-      background: #15803d; box-shadow: 0 4px 12px rgba(22,163,74,.35); }
+      background: #059669; box-shadow: 0 4px 12px rgba(22,163,74,.35); }
 
     /* ── Poin input ── */
-    #poinSection { background: #f0fdf4; border: 1.5px solid #bbf7d0;
+    #poinSection { background: #ECFDF5; border: 1.5px solid #A7F3D0;
                    border-radius: 8px; padding: 12px 14px; margin-top: 8px; }
     #poinSection.hidden { display: none; }
     .poin-avail { font-size: 12px; color: var(--green); margin-bottom: 8px; font-weight: 600; }
@@ -672,7 +672,7 @@
     /* ── Toast notification ── */
     #toast {
       position: fixed; bottom: 24px; right: 24px;
-      background: #1e293b; color: #fff; padding: 12px 20px;
+      background: #1E2A6E; color: #fff; padding: 12px 20px;
       border-radius: 10px; font-size: 14px; font-weight: 500;
       box-shadow: 0 8px 24px rgba(0,0,0,.2); z-index: 999;
       transform: translateY(80px); opacity: 0;
@@ -794,7 +794,7 @@
           </div>
           <button class="ci-clear" id="clearCustomer" title="Hapus pilihan">✕</button>
         </div>
-        <div id="ciNoteBox" style="display:none;background:#fef9c3;border:1px solid #fde047;border-left:4px solid #d97706;border-radius:10px;padding:10px 12px;margin-top:8px;font-size:13px;color:#713f12">
+        <div id="ciNoteBox" style="display:none;background:#fef9c3;border:1px solid #fde047;border-left:4px solid #F59E0B;border-radius:10px;padding:10px 12px;margin-top:8px;font-size:13px;color:#713f12">
           <div style="font-weight:700;margin-bottom:4px">📋 Catatan Pelanggan</div>
           <div id="ciNoteBody" style="line-height:1.55"></div>
         </div>
@@ -977,10 +977,10 @@
           </div>
 
         <!-- Panel deposit saldo pelanggan -->
-        <div id="depositPanel" style="display:none;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;padding:12px 14px;margin-top:4px;">
-          <div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:6px;">💳 Saldo Deposit</div>
-          <div id="depositSaldoInfo" style="font-size:13px;color:#1e40af;">Pilih pelanggan untuk lihat saldo</div>
-          <div id="depositKurangInfo" style="display:none;margin-top:8px;padding:8px;background:#fef2f2;border-radius:6px;border:1px solid #fecaca;">
+        <div id="depositPanel" style="display:none;background:#EEF2FF;border:1.5px solid #BAE6FD;border-radius:8px;padding:12px 14px;margin-top:4px;">
+          <div style="font-size:12px;font-weight:700;color:#1E2A8A;margin-bottom:6px;">💳 Saldo Deposit</div>
+          <div id="depositSaldoInfo" style="font-size:13px;color:#1E2A8A;">Pilih pelanggan untuk lihat saldo</div>
+          <div id="depositKurangInfo" style="display:none;margin-top:8px;padding:8px;background:#FEF2F2;border-radius:6px;border:1px solid #fecaca;">
             <div style="font-size:12px;color:var(--red);font-weight:700;margin-bottom:6px;" id="depositKurangTxt"></div>
             <label style="font-size:11px;font-weight:700;color:var(--gray-5);text-transform:uppercase;margin-bottom:4px;display:block;">Bayar kekurangan dengan:</label>
             <div style="display:flex;gap:6px;margin-bottom:8px;">
@@ -1005,7 +1005,7 @@
           </div>
 
           <!-- Kelebihan bayar → deposit (hanya muncul jika ada pelanggan & kelebihan > 0) -->
-          <div id="kelebihanPanel" style="display:none;margin-top:6px;padding:10px 12px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;">
+          <div id="kelebihanPanel" style="display:none;margin-top:6px;padding:10px 12px;background:#ECFDF5;border:1.5px solid #A7F3D0;border-radius:8px;">
             <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px;" id="kelebihanInfo"></div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
               <button id="btnKembaliTunai" class="keleb-btn" onclick="setKelebihanMode('tunai')"
@@ -1022,12 +1022,12 @@
               </button>
             </div>
             <!-- Preview saldo baru jika masuk deposit -->
-            <div id="kelebihanDepositPreview" style="display:none;margin-top:8px;padding:8px 10px;background:#dcfce7;border-radius:6px;font-size:12px;color:var(--green);font-weight:600;"></div>
+            <div id="kelebihanDepositPreview" style="display:none;margin-top:8px;padding:8px 10px;background:#D1FAE5;border-radius:6px;font-size:12px;color:var(--green);font-weight:600;"></div>
           </div>
         </div>
 
         <!-- Preview ringkasan pembayaran deposit (tunggal/kekurangan) -->
-        <div id="depositPreviewBox" style="display:none;margin-top:6px;padding:10px 12px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;font-size:13px;"></div>
+        <div id="depositPreviewBox" style="display:none;margin-top:6px;padding:10px 12px;background:#EEF2FF;border:1.5px solid #BAE6FD;border-radius:8px;font-size:13px;"></div>
         </div>
 
         <!-- TAB: DP -->
@@ -2175,7 +2175,7 @@ function updateDepositPanel() {
   if (cukup) {
     const saldoSesudah = saldo - total;
     depPrev.innerHTML = `
-      <div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:6px;">📋 Preview Pembayaran</div>
+      <div style="font-size:12px;font-weight:700;color:#1E2A8A;margin-bottom:6px;">📋 Preview Pembayaran</div>
       <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">
         <span>Total Order</span><span style="font-weight:700;">Rp ${fmtRp(total)}</span>
       </div>
@@ -2185,24 +2185,24 @@ function updateDepositPanel() {
       <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;color:var(--red);">
         <span>Dipotong</span><span>- Rp ${fmtRp(total)}</span>
       </div>
-      <div style="display:flex;justify-content:space-between;padding:4px 0 0;font-size:13px;font-weight:700;border-top:1px solid #bfdbfe;margin-top:4px;color:var(--green);">
+      <div style="display:flex;justify-content:space-between;padding:4px 0 0;font-size:13px;font-weight:700;border-top:1px solid #BAE6FD;margin-top:4px;color:var(--green);">
         <span>Saldo Deposit Sesudah</span><span>Rp ${fmtRp(saldoSesudah)}</span>
       </div>`;
   } else if (kurang > 0) {
     const bayarKekurangan = parseFloat(document.getElementById('kekuranganInput')?.value) || 0;
     const saldoSesudah = saldo > 0 ? 0 : 0;
     depPrev.innerHTML = `
-      <div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:6px;">📋 Preview Pembayaran Kombinasi</div>
+      <div style="font-size:12px;font-weight:700;color:#1E2A8A;margin-bottom:6px;">📋 Preview Pembayaran Kombinasi</div>
       <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">
         <span>Total Order</span><span style="font-weight:700;">Rp ${fmtRp(total)}</span>
       </div>
-      <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;color:#1d4ed8;">
+      <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;color:#1E2A8A;">
         <span>Bayar Deposit</span><span>Rp ${fmtRp(saldo)}</span>
       </div>
       <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">
         <span>Bayar Kekurangan (${state.metodKekurangan})</span><span>Rp ${fmtRp(bayarKekurangan)}</span>
       </div>
-      <div style="display:flex;justify-content:space-between;padding:4px 0 0;font-size:13px;font-weight:700;border-top:1px solid #bfdbfe;margin-top:4px;color:var(--green);">
+      <div style="display:flex;justify-content:space-between;padding:4px 0 0;font-size:13px;font-weight:700;border-top:1px solid #BAE6FD;margin-top:4px;color:var(--green);">
         <span>Saldo Deposit Sesudah</span><span>Rp 0</span>
       </div>`;
   }
@@ -2313,7 +2313,7 @@ function refreshJarakAJSection() {
       ? `<span style="color:var(--yellow)">(input baru, akan disimpan ke profil saat order tersimpan)</span>`
       : '';
     section.innerHTML = `
-      <div style="padding:10px 12px;background:var(--green-lt);border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:var(--gray-7)">
+      <div style="padding:10px 12px;background:var(--green-lt);border:1px solid #A7F3D0;border-radius:8px;font-size:12px;color:var(--gray-7)">
         📍 <strong>Jarak: ${jarakAktif} km</strong> dari workshop ${sumber}
         ${window.ajJarakOverride == null ? `<button type="button" onclick="ajPromptEditJarak()" style="margin-left:8px;background:none;border:none;color:var(--blue);cursor:pointer;font-size:11px;font-weight:600">Ubah</button>` : ''}
       </div>
@@ -2530,20 +2530,20 @@ function updatePaymentPreview() {
                border-top:1px solid var(--gray-3);margin-top:4px;color:var(--green);">
         <span>Kembalian</span><span>Rp ${fmtRp(kembalian)}</span>
       </div>`;
-      prevEl.style.borderColor = '#bbf7d0';
-      prevEl.style.background  = '#f0fdf4';
+      prevEl.style.borderColor = '#A7F3D0';
+      prevEl.style.background  = '#ECFDF5';
     } else if (kurang > 0) {
       html += `<div style="display:flex;justify-content:space-between;padding:2px 0 0;font-size:13px;font-weight:700;
                border-top:1px solid var(--gray-3);margin-top:4px;color:var(--red);">
         <span>Kekurangan</span><span>Rp ${fmtRp(kurang)}</span>
       </div>`;
       prevEl.style.borderColor = '#fecaca';
-      prevEl.style.background  = '#fef2f2';
+      prevEl.style.background  = '#FEF2F2';
     } else if (lunas) {
       html += `<div style="padding:2px 0 0;font-size:12px;color:var(--green);font-weight:700;
                border-top:1px solid var(--gray-3);margin-top:4px;">✓ Pas — Tidak ada kembalian</div>`;
-      prevEl.style.borderColor = '#bbf7d0';
-      prevEl.style.background  = '#f0fdf4';
+      prevEl.style.borderColor = '#A7F3D0';
+      prevEl.style.background  = '#ECFDF5';
     } else {
       prevEl.style.borderColor = 'var(--gray-3)';
       prevEl.style.background  = 'var(--gray-1)';
