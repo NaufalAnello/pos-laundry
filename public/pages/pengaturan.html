@@ -1103,7 +1103,12 @@ async function toggleUser(id, aktif) {
 
 // ── Backup ────────────────────────────────────────────────────────────────────
 function downloadBackup() {
-  window.location.href = '/api/v1/pengaturan/backup';
+  const a = document.createElement('a');
+  a.href = '/api/v1/pengaturan/backup';
+  a.download = 'backup-laundry.db';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
   toast('Download backup dimulai');
 }
 
