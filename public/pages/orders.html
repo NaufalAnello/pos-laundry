@@ -133,6 +133,7 @@
     .btn-selesai { background: var(--success); color: #fff; }
     .btn-lunasi  { background: #16a34a; color: #fff; }
     .btn-wa      { background: #2563eb; color: #fff; }
+    .btn-label   { background: #8b5cf6; color: #fff; }
     .btn-detail  { background: #fff; border-color: var(--gray-3); color: var(--gray-6); }
 
     /* ── Empty state ───────────────────────────────────── */
@@ -482,6 +483,11 @@ function renderCards(rows) {
       actions += `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>💬 WA</button>`;
     }
 
+    // Tombol Label (selalu ada kecuali dibatalkan)
+    if (t.status !== 'dibatalkan') {
+      actions += `<button class="btn btn-label" onclick="openLabelSheet(${t.id})">🏷️ Label</button>`;
+    }
+
     // Tombol detail (selalu ada)
     actions += `<a class="btn btn-detail" href="/order/detail?id=${t.id}" title="Detail">›</a>`;
 
@@ -539,6 +545,10 @@ function renderTable(rows) {
     // Tombol WA tampil di semua card selama ada nomor telepon, kecuali dibatalkan
     if (tel && t.status !== 'dibatalkan') {
       actions += `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>💬</button>`;
+    }
+    // Tombol Label (selalu ada kecuali dibatalkan)
+    if (t.status !== 'dibatalkan') {
+      actions += `<button class="btn btn-label" onclick="openLabelSheet(${t.id})">🏷️</button>`;
     }
     actions += `<a class="btn btn-detail" href="/order/detail?id=${t.id}">›</a>`;
 
@@ -652,6 +662,7 @@ loadOrders(1);
 </script>
 <script src="/js/lunasi-sheet.js"></script>
 <script src="/js/wa-sheet.js"></script>
+<script src="/js/label-sheet.js"></script>
 <script src="/js/nav.js"></script>
 </body>
 </html>

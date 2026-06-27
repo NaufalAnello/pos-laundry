@@ -50,8 +50,9 @@ exports.cetakLabel = async (req, res) => {
     if (!transaksi) return res.status(404).json({ error: 'Transaksi tidak ditemukan' });
 
     const pengaturan = await getSettings();
+    const { layanan_ids } = req.body; // Array ID layanan yang dipilih
 
-    await cetakLabel(transaksi, pengaturan);
+    await cetakLabel(transaksi, pengaturan, layanan_ids);
     res.json({ success: true, message: 'Label berhasil dicetak' });
   } catch (err) {
     console.error('[printer:cetakLabel]', err);

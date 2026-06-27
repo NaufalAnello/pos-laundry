@@ -235,7 +235,7 @@ async function cetakTest() {
 }
 
 // Generate ESC/POS bytes untuk LABEL (hemat kertas, ringkas)
-function generateLabelEscPos(transaksi, pengaturan) {
+function generateLabelEscPos(transaksi, pengaturan, layanan_ids = null) {
   const bytes = [];
   const push   = (s)  => Buffer.from(String(s), 'utf8').forEach(b => bytes.push(b));
   const nl     = ()   => bytes.push(0x0a);
@@ -243,6 +243,12 @@ function generateLabelEscPos(transaksi, pengaturan) {
   const center = ()   => bytes.push(ESC, 0x61, 0x01);
   const left   = ()   => bytes.push(ESC, 0x61, 0x00);
   const line   = ()   => { push('-'.repeat(LEBAR)); nl(); };
+
+  // Filter items jika layanan_ids diberikan
+  let items = transaksi.items || [];
+  if (layanan_ids && Array.isArray(layanan_ids) && layanan_ids.length > 0) {
+    items = items.filter(item => layanan_ids.includes(item.id));
+  }
 
   // Init printer
   bytes.push(ESC, 0x40);
@@ -290,11 +296,11 @@ function generateLabelEscPos(transaksi, pengaturan) {
     nl();
   }
 
-  // Ringkasan singkat layanan
-  const itemCount = (transaksi.items || []).length;
+  // Ringkasan singkat layanan (hanya yang dipilih)
+  const itemCount = items.length;
   if (itemCount > 0) {
     push('Layanan (' + itemCount + '):'); nl();
-    (transaksi.items || []).forEach(item => {
+    items.forEach(item => {
       push('- ' + item.nama_layanan + ' (' + item.jumlah + ' ' + (item.satuan || '') + ')'); nl();
     });
     nl();
@@ -345,8 +351,8 @@ function generateLabelEscPos(transaksi, pengaturan) {
   return Buffer.from(bytes);
 }
 
-async function cetakLabel(transaksi, pengaturan) {
-  const buf = generateLabelEscPos(transaksi, pengaturan);
+async function cetakLabel(transaksi, pengaturan, layanan_ids = null) {
+  const buf = generateLabelEscPos(transaksi, pengaturan, layanan_ids);
   await sendToPrinter(buf);
 }
 
