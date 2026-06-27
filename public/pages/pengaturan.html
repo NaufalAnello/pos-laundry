@@ -10,18 +10,18 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --blue:#2563eb; --blue-lt:#eff6ff;
-      --green:#16a34a; --green-lt:#f0fdf4;
-      --yellow:#d97706; --yellow-lt:#fffbeb;
-      --red:#dc2626; --red-lt:#fef2f2;
-      --purple:#7c3aed; --purple-lt:#f5f3ff;
-      --wa:#25D366; --wa-lt:#f0fdf4;
+      --blue:#2D3BB5; --blue-lt:#EEF2FF;
+      --green:#10B981; --green-lt:#ECFDF5;
+      --yellow:#F59E0B; --yellow-lt:#fffbeb;
+      --red:#EF4444; --red-lt:#FEF2F2;
+      --purple:#8B5CF6; --purple-lt:#f5f3ff;
+      --wa:#25D366; --wa-lt:#ECFDF5;
       --gray-1:#f8fafc; --gray-2:#f1f5f9; --gray-3:#e2e8f0;
-      --gray-5:#64748b; --gray-7:#374151; --gray-9:#111827;
+      --gray-5:#64748b; --gray-7:#374151; --gray-9:#1E2A6E;
       --radius:10px; --shadow:0 1px 4px rgba(0,0,0,.08);
     }
     body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-           background:var(--gray-2); color:var(--gray-9); font-size:14px; min-height:100vh; }
+           background:var(--bg-page); color:var(--gray-9); font-size:14px; min-height:100vh; }
 
     header { background:#fff; border-bottom:1px solid var(--gray-3); padding:0 20px; height:56px;
              display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:20; box-shadow:var(--shadow); }
@@ -107,8 +107,8 @@
 
     .role-badge { display:inline-flex; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; text-transform:uppercase; }
     .role-admin { background:#fef3c7; color:#92400e; }
-    .role-kasir  { background:#dbeafe; color:#1d4ed8; }
-    .role-operator { background:#dcfce7; color:#166534; }
+    .role-kasir  { background:#C7D2FE; color:#1E2A8A; }
+    .role-operator { background:#D1FAE5; color:#166534; }
 
     /* ── Modal ── */
     .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:50; display:none;
@@ -137,7 +137,7 @@
     .save-ok  { font-size:13px; color:var(--green); }
 
     .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
-             background:#1e293b; color:#fff; padding:10px 20px; border-radius:8px;
+             background:#1E2A6E; color:#fff; padding:10px 20px; border-radius:8px;
              font-size:13px; font-weight:600; z-index:99; transition:transform .3s; white-space:nowrap; }
     .toast.show { transform:translateX(-50%) translateY(0); }
     .toast.err  { background:var(--red); }
@@ -929,11 +929,11 @@ async function cekPrinter() {
     const d = await api('/api/v1/printer/status');
     port.textContent = 'Port: ' + d.port;
     if (d.connected) {
-      dot.style.cssText = 'width:14px;height:14px;border-radius:50%;flex-shrink:0;background:#16a34a;box-shadow:0 0 8px #16a34a';
+      dot.style.cssText = 'width:14px;height:14px;border-radius:50%;flex-shrink:0;background:#10B981;box-shadow:0 0 8px #10B981';
       txt.textContent = 'Printer terhubung — siap cetak';
       btn.disabled = false;
     } else {
-      dot.style.cssText = 'width:14px;height:14px;border-radius:50%;flex-shrink:0;background:#dc2626';
+      dot.style.cssText = 'width:14px;height:14px;border-radius:50%;flex-shrink:0;background:#EF4444';
       txt.textContent = 'Printer tidak terhubung' + (d.error ? ': ' + d.error : '');
       btn.disabled = true;
     }

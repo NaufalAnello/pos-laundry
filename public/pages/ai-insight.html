@@ -10,17 +10,17 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --blue:#2563eb; --blue-dk:#1d4ed8; --blue-lt:#eff6ff;
-      --green:#16a34a; --green-lt:#f0fdf4;
-      --yellow:#d97706; --yellow-lt:#fffbeb;
-      --red:#dc2626; --red-lt:#fef2f2;
-      --purple:#7c3aed; --purple-lt:#f5f3ff;
+      --blue:#2D3BB5; --blue-dk:#1E2A8A; --blue-lt:#EEF2FF;
+      --green:#10B981; --green-lt:#ECFDF5;
+      --yellow:#F59E0B; --yellow-lt:#fffbeb;
+      --red:#EF4444; --red-lt:#FEF2F2;
+      --purple:#8B5CF6; --purple-lt:#f5f3ff;
       --gray-1:#f8fafc; --gray-2:#f1f5f9; --gray-3:#e2e8f0;
-      --gray-5:#64748b; --gray-7:#374151; --gray-9:#111827;
+      --gray-5:#64748b; --gray-7:#374151; --gray-9:#1E2A6E;
       --radius:10px; --shadow:0 1px 4px rgba(0,0,0,.08);
     }
     body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-           background:var(--gray-2); color:var(--gray-9); font-size:14px; min-height:100vh; }
+           background:var(--bg-page); color:var(--gray-9); font-size:14px; min-height:100vh; }
 
     header { background:#fff; border-bottom:1px solid var(--gray-3); padding:0 20px; height:56px;
              display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:20; box-shadow:var(--shadow); }
@@ -65,8 +65,8 @@
     .warning-item .icon { font-size:20px; flex-shrink:0; }
     .warning-item .msg { font-size:13px; line-height:1.6; }
     .warning-item.warning { background:var(--yellow-lt); border-color:#fde68a; }
-    .warning-item.info { background:var(--blue-lt); border-color:#bfdbfe; }
-    .warning-item.success { background:var(--green-lt); border-color:#bbf7d0; }
+    .warning-item.info { background:var(--blue-lt); border-color:#BAE6FD; }
+    .warning-item.success { background:var(--green-lt); border-color:#A7F3D0; }
 
     .prediksi-box { background:var(--purple-lt); padding:16px; border-radius:8px; margin-bottom:10px; }
     .prediksi-box h4 { font-size:13px; font-weight:700; color:var(--purple); margin-bottom:8px; }

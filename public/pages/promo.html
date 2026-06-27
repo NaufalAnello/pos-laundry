@@ -10,18 +10,18 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --blue:#2563eb; --blue-lt:#eff6ff;
-      --green:#16a34a; --green-lt:#f0fdf4;
-      --yellow:#d97706; --yellow-lt:#fffbeb;
-      --red:#dc2626; --red-lt:#fef2f2;
-      --purple:#7c3aed; --purple-lt:#f5f3ff;
+      --blue:#2D3BB5; --blue-lt:#EEF2FF;
+      --green:#10B981; --green-lt:#ECFDF5;
+      --yellow:#F59E0B; --yellow-lt:#fffbeb;
+      --red:#EF4444; --red-lt:#FEF2F2;
+      --purple:#8B5CF6; --purple-lt:#f5f3ff;
       --orange:#ea580c; --orange-lt:#fff7ed;
       --gray-1:#f8fafc; --gray-2:#f1f5f9; --gray-3:#e2e8f0;
-      --gray-5:#64748b; --gray-7:#374151; --gray-9:#111827;
+      --gray-5:#64748b; --gray-7:#374151; --gray-9:#1E2A6E;
       --radius:10px; --shadow:0 1px 4px rgba(0,0,0,.08);
     }
     body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-           background:var(--gray-2); color:var(--gray-9); font-size:14px; min-height:100vh; }
+           background:var(--bg-page); color:var(--gray-9); font-size:14px; min-height:100vh; }
 
     header { background:#fff; border-bottom:1px solid var(--gray-3); padding:0 20px; height:56px;
              display:flex; align-items:center; gap:20px; position:sticky; top:0; z-index:20; box-shadow:var(--shadow); }
@@ -57,7 +57,7 @@
             border-radius:var(--radius); border:1px solid var(--gray-3); box-shadow:var(--shadow); flex-wrap:wrap; }
     .tab-btn { padding:7px 16px; border:none; background:none; font-size:13px; font-weight:600;
                color:var(--gray-5); cursor:pointer; border-radius:8px; transition:all .15s; }
-    .tab-btn:hover  { background:var(--gray-2); color:var(--gray-9); }
+    .tab-btn:hover  { background:var(--bg-page); color:var(--gray-9); }
     .tab-btn.active { background:var(--blue); color:#fff; }
     .tab-count { background:rgba(255,255,255,.3); border-radius:99px; padding:1px 7px; font-size:11px; margin-left:4px; }
     .tab-btn:not(.active) .tab-count { background:var(--gray-3); color:var(--gray-5); }

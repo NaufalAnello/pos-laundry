@@ -12,17 +12,17 @@
       --wa-bg:       #e5ddd5;
       --wa-bubble:   #dcf8c6;
       --wa-header:   #075e54;
-      --blue:        #2563eb;
+      --blue:        #2D3BB5;
       --gray-2:      #f1f5f9;
       --gray-3:      #e2e8f0;
       --gray-5:      #64748b;
       --gray-7:      #374151;
-      --gray-9:      #111827;
+      --gray-9:      #1E2A6E;
       --radius:      10px;
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--gray-2); color: var(--gray-9);
+      background: var(--bg-page); color: var(--gray-9);
       min-height: 100vh;
     }
 
@@ -78,7 +78,7 @@
     /* ── Info penerima ── */
     .recipient-card {
       display: flex; align-items: center; gap: 12px;
-      background: #f0fdf4; border: 1.5px solid #bbf7d0;
+      background: #ECFDF5; border: 1.5px solid #A7F3D0;
       border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;
     }
     .recipient-avatar {
@@ -145,7 +145,7 @@
     .btn-copy {
       background: var(--blue); color: #fff;
     }
-    .btn-copy:hover:not(:disabled) { background: #1d4ed8; }
+    .btn-copy:hover:not(:disabled) { background: #1E2A8A; }
 
     /* ── WA Phone Mockup ── */
     .phone-mockup {
@@ -254,14 +254,14 @@
     /* ── Toast ── */
     #toast {
       position: fixed; bottom: 20px; right: 20px;
-      background: #1e293b; color: #fff; padding: 10px 18px;
+      background: #1E2A6E; color: #fff; padding: 10px 18px;
       border-radius: 8px; font-size: 13px; z-index: 999;
       transform: translateY(60px); opacity: 0;
       transition: transform .3s, opacity .3s;
     }
     #toast.show { transform: translateY(0); opacity: 1; }
     #toast.success { background: var(--wa-dk); }
-    #toast.error   { background: #dc2626; }
+    #toast.error   { background: #EF4444; }
 
     .empty-log { text-align: center; color: var(--gray-5); font-size: 13px; padding: 20px 0; }
   </style>
@@ -693,17 +693,17 @@ function renderTxInfo(t) {
             </span>
           </td></tr>
       <tr><td style="color:#64748b;padding:3px 0">Total</td>
-          <td style="font-weight:700;color:#2563eb;padding:3px 0">Rp ${fmtRp(t.total_bayar)}</td></tr>
+          <td style="font-weight:700;color:#2D3BB5;padding:3px 0">Rp ${fmtRp(t.total_bayar)}</td></tr>
       <tr><td style="color:#64748b;padding:3px 0">Item</td>
           <td style="padding:3px 0">${(t.items||[]).length} layanan</td></tr>
     </table>`;
 }
 
 function statusBg(s) {
-  return { pending:'#fef3c7', proses:'#dbeafe', selesai:'#d1fae5', diambil:'#f1f5f9', dibatalkan:'#fee2e2' }[s] || '#f1f5f9';
+  return { pending:'#fef3c7', proses:'#C7D2FE', selesai:'#d1fae5', diambil:'#f1f5f9', dibatalkan:'#fee2e2' }[s] || '#f1f5f9';
 }
 function statusColor(s) {
-  return { pending:'#92400e', proses:'#1e40af', selesai:'#065f46', diambil:'#475569', dibatalkan:'#991b1b' }[s] || '#374151';
+  return { pending:'#92400e', proses:'#1E2A8A', selesai:'#065f46', diambil:'#475569', dibatalkan:'#991b1b' }[s] || '#374151';
 }
 
 function formatPhone(telepon) {

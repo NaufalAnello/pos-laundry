@@ -14,7 +14,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--gray-1, #F8FAFC);
+      background: var(--bg-page, #F0F7FF);
       padding: 16px;
     }
 
@@ -50,7 +50,7 @@
     .brand h1 {
       font-size: 24px;
       font-weight: 700;
-      color: var(--gray-9, #111827);
+      color: var(--gray-9, #1E2A6E);
       letter-spacing: -.3px;
     }
     .brand p {
@@ -82,17 +82,17 @@
       border: 1px solid var(--gray-3, #e2e8f0);
       border-radius: var(--radius-md, 8px);
       font-size: 16px;
-      color: var(--gray-9, #111827);
+      color: var(--gray-9, #1E2A6E);
       background: #fff;
       transition: border-color .2s, box-shadow .2s;
       outline: none;
     }
     .input-wrap input:focus {
-      border-color: var(--primary, #2563EB);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+      border-color: var(--secondary, #4BB8FA);
+      box-shadow: 0 0 0 3px rgba(75, 184, 250, .15);
     }
     .input-wrap input.error {
-      border-color: var(--danger, #dc2626);
+      border-color: var(--danger, #EF4444);
     }
     .input-wrap input.error:focus {
       box-shadow: 0 0 0 3px rgba(220, 38, 38, .12);
@@ -122,9 +122,9 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      background: var(--danger-lt, #fef2f2);
+      background: var(--danger-lt, #FEF2F2);
       border: 1px solid #fecaca;
-      color: var(--danger-dk, #b91c1c);
+      color: var(--danger-dk, #DC2626);
       border-radius: var(--radius-md, 8px);
       padding: 10px 12px;
       font-size: 13px;
@@ -145,7 +145,7 @@
     .btn-login {
       width: 100%;
       height: 48px;
-      background: var(--primary, #2563EB);
+      background: var(--primary, #2D3BB5);
       color: #fff;
       border: none;
       border-radius: var(--radius-md, 8px);
@@ -158,12 +158,11 @@
       margin-top: 4px;
     }
     .btn-login:hover:not(:disabled) {
-      background: var(--primary-dk, #1d4ed8);
-      box-shadow: 0 4px 14px rgba(37, 99, 235, .35);
+      background: var(--primary-dk, #1E2A8A);
     }
     .btn-login:active:not(:disabled) { transform: scale(.98); }
     .btn-login:disabled {
-      background: #93c5fd;
+      background: #4BB8FA;
       cursor: not-allowed;
     }
 
@@ -199,7 +198,7 @@
     #authCheck {
       position: fixed;
       inset: 0;
-      background: var(--primary, #2563EB);
+      background: var(--primary, #2D3BB5);
       display: flex;
       align-items: center;
       justify-content: center;

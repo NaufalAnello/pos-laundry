@@ -852,13 +852,13 @@ const ICONS = [
 ];
 
 const COLORS = [
-  '#6366f1','#2563eb','#0891b2','#16a34a','#84cc16',
-  '#d97706','#ea580c','#dc2626','#db2777','#7c3aed',
+  '#2D3BB5','#2D3BB5','#0891b2','#10B981','#84cc16',
+  '#F59E0B','#ea580c','#EF4444','#db2777','#8B5CF6',
   '#475569','#0f172a'
 ];
 
 let selectedIcon  = 'category';
-let selectedColor = '#6366f1';
+let selectedColor = '#2D3BB5';
 let catData       = [];
 let activeFilter  = 'all';
 
@@ -907,7 +907,7 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 
 function openKategoriModal(existing = null) {
   selectedIcon  = existing?.ikon  || 'category';
-  selectedColor = existing?.warna || '#6366f1';
+  selectedColor = existing?.warna || '#2D3BB5';
   document.getElementById('katId').value        = existing?.id || '';
   document.getElementById('katNama').value      = existing?.nama || '';
   document.getElementById('katDeskripsi').value = existing?.deskripsi || '';
@@ -1133,7 +1133,7 @@ function renderPills() {
   let html = `<button class="pill ${activeFilter === 'all' ? 'active' : ''}" data-cat="all" onclick="setFilter('all')">Semua</button>`;
   catData.forEach(k => {
     html += `<button class="pill ${activeFilter === String(k.id) ? 'active' : ''}" data-cat="${k.id}" onclick="setFilter('${k.id}')">
-      <span class="pill-dot" style="background:${k.warna || '#6366f1'}"></span>
+      <span class="pill-dot" style="background:${k.warna || '#2D3BB5'}"></span>
       ${esc(k.nama)}
     </button>`;
   });
@@ -1186,7 +1186,7 @@ function renderMobile() {
           <div class="lay-card-price">Rp ${fmtRp(l.harga)}</div>
         </div>
         <div class="lay-card-meta">
-          <span class="cat-tag" style="background:${(k.warna || '#6366f1') + '22'};color:${k.warna || '#6366f1'}">
+          <span class="cat-tag" style="background:${(k.warna || '#2D3BB5') + '22'};color:${k.warna || '#2D3BB5'}">
             ● ${esc(k.nama)}
           </span>
           per ${esc(l.satuan)}
@@ -1229,7 +1229,7 @@ function renderAkordion() {
   const q = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
 
   el.innerHTML = visibleCats.map(k => {
-    const warna = k.warna || '#6366f1';
+    const warna = k.warna || '#2D3BB5';
     const ikon  = k.ikon  || 'category';
     const list  = (k.layanan || []).filter(l =>
       !q || l.nama.toLowerCase().includes(q)
