@@ -681,8 +681,9 @@
       </div>
 
       <div class="fg">
-        <label>Estimasi Selesai (hari)</label>
-        <input type="number" id="layEstimasi" class="form-input" value="2" min="1"/>
+        <label>Estimasi Selesai (jam)</label>
+        <input type="number" id="layEstimasi" class="form-input" value="24" min="1" placeholder="contoh: 5, 12, 24, 48"/>
+        <div class="form-hint">Contoh: 5 jam, 12 jam, 24 jam (1 hari), 48 jam (2 hari), 72 jam (3 hari)</div>
       </div>
       <div class="fg">
         <label>Deskripsi</label>
@@ -864,6 +865,23 @@ let activeFilter  = 'all';
 
 const fmtRp = n => Number(n||0).toLocaleString('id-ID');
 
+// Format estimasi jam ke teks
+function formatEstimasi(jam) {
+  if (!jam || jam <= 0) return '0 jam';
+  if (jam < 24) return jam + ' jam';
+  const hari = Math.floor(jam / 24);
+  const sisaJam = jam % 24;
+  if (sisaJam === 0) return hari + ' hari';
+  return hari + ' hari ' + sisaJam + ' jam';
+}
+
+// Ambil estimasi jam dari layanan (fallback ke estimasi_hari)
+function getEstimasiJam(l) {
+  if (l.estimasi_jam && l.estimasi_jam > 0) return l.estimasi_jam;
+  if (l.estimasi_hari && l.estimasi_hari > 0) return l.estimasi_hari * 24;
+  return 24;
+}
+
 function showToast(msg, dur=2500) {
   const el = document.getElementById('toast');
   el.textContent = msg; el.classList.add('show');
@@ -922,7 +940,7 @@ function openKategoriModal(existing = null) {
 function openLayananModal(existing = null, defaultKategoriId = null) {
   document.getElementById('layId').value        = existing?.id || '';
   document.getElementById('layNama').value      = existing?.nama || '';
-  document.getElementById('layEstimasi').value  = existing?.estimasi_hari || 2;
+  document.getElementById('layEstimasi').value  = existing?.estimasi_jam || existing?.estimasi_hari * 24 || 24;
   document.getElementById('layDeskripsi').value = existing?.deskripsi || '';
   document.getElementById('layAktif').checked   = existing?.aktif !== 0;
   document.getElementById('layModalTitle').textContent = existing ? 'Edit Layanan' : 'Tambah Layanan';
@@ -1034,7 +1052,8 @@ async function saveLayanan() {
     nama:          document.getElementById('layNama').value.trim(),
     kategori_id:   parseInt(document.getElementById('layKategori').value) || null,
     harga, satuan,
-    estimasi_hari: parseInt(document.getElementById('layEstimasi').value) || 2,
+    estimasi_jam:  parseInt(document.getElementById('layEstimasi').value) || 24,
+    estimasi_hari: Math.ceil(parseInt(document.getElementById('layEstimasi').value) / 24) || 1,
     deskripsi:     document.getElementById('layDeskripsi').value.trim(),
     aktif:         document.getElementById('layAktif').checked,
     hpp,
@@ -1196,7 +1215,7 @@ function renderMobile() {
           : `<div class="lay-card-margin"><a href="#" class="add-link" onclick="openLayananModal(${lEsc});return false">+ Isi HPP untuk lihat margin</a></div>`
         }
         <div class="lay-card-foot">
-          <div class="lay-est">📅 Est: ${l.estimasi_hari} hari</div>
+          <div class="lay-est">📅 Est: ${formatEstimasi(getEstimasiJam(l))}</div>
           <div class="lay-actions">
             <label class="toggle" title="${l.aktif ? 'Nonaktifkan' : 'Aktifkan'}">
               <input type="checkbox" ${l.aktif ? 'checked' : ''}
@@ -1262,7 +1281,7 @@ function renderAkordion() {
         <td>${esc(l.satuan)}</td>
         <td>${l.hpp ? 'Rp ' + fmtRp(l.hpp) : '-'}</td>
         <td>${mar !== null ? mar + '%' : '-'}</td>
-        <td>${l.estimasi_hari} hr</td>
+        <td>${formatEstimasi(getEstimasiJam(l))}</td>
         <td>
           <label class="toggle">
             <input type="checkbox" ${l.aktif ? 'checked' : ''}

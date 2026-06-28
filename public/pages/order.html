@@ -1207,6 +1207,24 @@ let acTimer     = null;
 // ════════════════════════════════════════════════════════
 function fmtRp(n) { return Number(n || 0).toLocaleString('id-ID'); }
 
+// Format estimasi jam ke teks
+function formatEstimasi(jam) {
+  if (!jam || jam <= 0) return '0 jam';
+  if (jam < 24) return jam + ' jam';
+  const hari = Math.floor(jam / 24);
+  const sisaJam = jam % 24;
+  if (sisaJam === 0) return hari + ' hari';
+  return hari + ' hari ' + sisaJam + ' jam';
+}
+
+// Ambil estimasi jam dari layanan (fallback ke estimasi_hari)
+function getEstimasiJam(layanan) {
+  if (!layanan) return 24;
+  if (layanan.estimasi_jam && layanan.estimasi_jam > 0) return layanan.estimasi_jam;
+  if (layanan.estimasi_hari && layanan.estimasi_hari > 0) return layanan.estimasi_hari * 24;
+  return 24;
+}
+
 async function apiFetch(url, opts = {}) {
   try {
     const r = await fetch(url, { credentials: 'include', ...opts });
@@ -1514,9 +1532,12 @@ function renderChipLayanan() {
   wrap.style.display = '';
   el.innerHTML = populer.map(l => {
     const harga = Number(l.harga || 0);
+    const estJam = getEstimasiJam(l);
+    const estTxt = formatEstimasi(estJam);
     return `<button type="button" class="chip-svc" data-id="${l.id}"
       style="padding:8px 12px;border:1.5px solid var(--blue-lt);border-radius:99px;background:#fff;color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px">
       ${escapeHtml(l.nama)} <span style="opacity:.7;font-weight:600">${harga ? 'Rp ' + fmtRp(harga) : ''}</span>
+      <span style="opacity:.5;font-size:10px">⏱ ${estTxt}</span>
     </button>`;
   }).join('');
   el.querySelectorAll('.chip-svc').forEach(btn => {
@@ -2378,7 +2399,7 @@ if (typeof esc !== 'function') {
 // UPDATE ESTIMASI SELESAI
 // ════════════════════════════════════════════════════════
 function updateEstimasiSelesai() {
-  // Ambil estimasi_hari terbesar dari semua item yang valid
+  // Ambil estimasi_jam terbesar dari semua item yang valid
   const validItems = state.items.filter(i => i.layanan_id && i.jumlah > 0);
 
   if (validItems.length === 0) {
@@ -2388,18 +2409,18 @@ function updateEstimasiSelesai() {
     return;
   }
 
-  // Cari estimasi_hari terbesar
-  let maxEstimasiHari = 0;
+  // Cari estimasi_jam terbesar
+  let maxEstimasiJam = 0;
   validItems.forEach(item => {
     const layanan = layananList.find(l => l.id === item.layanan_id);
-    if (layanan && layanan.estimasi_hari) {
-      const hari = parseInt(layanan.estimasi_hari) || 0;
-      if (hari > maxEstimasiHari) maxEstimasiHari = hari;
+    if (layanan) {
+      const jam = getEstimasiJam(layanan);
+      if (jam > maxEstimasiJam) maxEstimasiJam = jam;
     }
   });
 
-  // Jika tidak ada estimasi_hari yang valid, default 1 hari
-  if (maxEstimasiHari === 0) maxEstimasiHari = 1;
+  // Jika tidak ada estimasi yang valid, default 24 jam
+  if (maxEstimasiJam === 0) maxEstimasiJam = 24;
 
   // Tentukan waktu mulai
   let waktuMulai;
@@ -2413,10 +2434,9 @@ function updateEstimasiSelesai() {
     waktuMulai = new Date();
   }
 
-  // Hitung estimasi selesai = waktu mulai + estimasi_hari
-  // Gunakan setDate() untuk perhitungan yang benar (bukan getTime + ms)
+  // Hitung estimasi selesai = waktu mulai + estimasi_jam
   const estimasiSelesai = new Date(waktuMulai);
-  estimasiSelesai.setDate(estimasiSelesai.getDate() + maxEstimasiHari);
+  estimasiSelesai.setHours(estimasiSelesai.getHours() + maxEstimasiJam);
 
   // Set ke input tanggal selesai (format: YYYY-MM-DD)
   document.getElementById('tanggalSelesai').value = estimasiSelesai.toISOString().slice(0, 10);

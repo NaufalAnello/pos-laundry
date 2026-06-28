@@ -126,13 +126,15 @@ async function prosesImport(filePath, mimeType, semuaKategori, semuaLayanan) {
       l => l.nama.toLowerCase() === String(row.nama).toLowerCase()
     );
 
-    // Konversi estimasi: jika CSV pakai 'estimasi_jam', convert ke hari
-    let estimasiHari = 2; // default
+    // Konversi estimasi: prioritas estimasi_jam, fallback ke estimasi_hari
+    let estimasiJam = 24; // default
+    let estimasiHari = 1;
     if (row.estimasi_jam) {
-      const estimasiJam = Number(row.estimasi_jam);
+      estimasiJam = Number(row.estimasi_jam);
       estimasiHari = Math.ceil(estimasiJam / 24);
     } else if (row.estimasi_hari) {
       estimasiHari = Number(row.estimasi_hari);
+      estimasiJam = estimasiHari * 24;
     }
 
     // Siapkan data layanan
@@ -142,6 +144,7 @@ async function prosesImport(filePath, mimeType, semuaKategori, semuaLayanan) {
       kategori_nama: kategori.nama,
       harga: Number(row.harga),
       satuan: String(row.satuan).toLowerCase(),
+      estimasi_jam: estimasiJam,
       estimasi_hari: estimasiHari,
       deskripsi: row.deskripsi || row.keterangan || '',
       hpp: row.hpp ? Number(row.hpp) : 0,
