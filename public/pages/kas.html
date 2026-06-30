@@ -9,282 +9,484 @@
   <title>Buku Kas — POS Laundry</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --blue:#2D3BB5; --blue-lt:#EEF2FF;
-      --green:#10B981; --green-lt:#ECFDF5;
-      --yellow:#F59E0B; --yellow-lt:#fffbeb;
-      --red:#EF4444; --red-lt:#FEF2F2;
-      --purple:#8B5CF6; --purple-lt:#f5f3ff;
-      --gray-1:#f8fafc; --gray-2:#f1f5f9; --gray-3:#e2e8f0;
-      --gray-5:#64748b; --gray-7:#374151; --gray-9:#1E2A6E;
-      --radius:10px; --shadow:0 1px 4px rgba(0,0,0,.08);
+    body { font-family: var(--font); background: var(--bg-page); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
+
+    .page { max-width: 1200px; margin: 0 auto; padding: 0 0 100px; }
+
+    /* ── Sticky Header ─────────────────────────────────── */
+    .head {
+      position: sticky; top: 0; z-index: 20;
+      background: #fff; border-bottom: 1px solid var(--gray-3);
+      padding: 12px 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
     }
-    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-           background:var(--bg-page); color:var(--gray-9); font-size:14px; min-height:100vh; }
+    .head .ttl { font-size: 18px; font-weight: 800; color: var(--gray-9); }
+    .head .btn-add {
+      min-height: 38px; padding: 8px 14px; border-radius: 8px; border: none;
+      background: var(--primary); color: #fff; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 5px;
+      white-space: nowrap;
+    }
+    .head .btn-add:hover { opacity: .9; }
 
-    /* ── Header ── */
-    header { background:#fff; border-bottom:1px solid var(--gray-3); padding:0 20px; height:56px;
-             display:flex; align-items:center; gap:20px; position:sticky; top:0; z-index:20; box-shadow:var(--shadow); }
-    .logo  { font-size:16px; font-weight:800; color:var(--blue); white-space:nowrap; }
-    nav    { display:flex; gap:4px; flex:1; }
-    nav a  { padding:6px 14px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600; color:var(--gray-7); transition:background .15s; }
-    nav a:hover  { background:var(--gray-2); }
-    nav a.active { background:var(--blue-lt); color:var(--blue); }
-    .header-user { font-size:13px; color:var(--gray-5); display:flex; align-items:center; gap:8px; }
-    .logout-btn  { padding:5px 12px; border:1px solid var(--gray-3); border-radius:7px; background:none; font-size:13px; cursor:pointer; color:var(--gray-7); }
-    .logout-btn:hover { background:var(--gray-2); }
+    .body-wrap { padding: 12px; }
 
-    /* ── Page ── */
-    .page { max-width:1100px; margin:0 auto; padding:20px 16px; }
-    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; flex-wrap:wrap; }
-    .page-title  { font-size:20px; font-weight:800; }
+    /* ── Pill row (filter chip) ────────────────────────── */
+    .pill-row {
+      display: flex; gap: 8px; overflow-x: auto;
+      padding: 2px 0 6px; scrollbar-width: none;
+      margin-bottom: 10px;
+    }
+    .pill-row::-webkit-scrollbar { display: none; }
+    .pill {
+      flex-shrink: 0;
+      padding: 8px 14px; border-radius: 99px;
+      border: 1px solid var(--gray-3); background: #fff;
+      font-size: 12px; font-weight: 700; color: var(--gray-7);
+      cursor: pointer; white-space: nowrap; font-family: inherit;
+      min-height: 36px; transition: all .15s;
+    }
+    .pill:hover { background: var(--gray-1); }
+    .pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-    /* ── Buttons ── */
-    .btn { padding:8px 16px; border-radius:8px; border:1px solid transparent; font-size:13px;
-           font-weight:600; cursor:pointer; transition:opacity .15s; display:inline-flex; align-items:center; gap:6px; }
-    .btn:hover    { opacity:.85; }
-    .btn:disabled { opacity:.4; cursor:default; }
-    .btn-sm  { padding:5px 10px; font-size:12px; }
-    .btn-blue    { background:var(--blue);  color:#fff; }
-    .btn-green   { background:var(--green); color:#fff; }
-    .btn-red     { background:var(--red);   color:#fff; }
-    .btn-outline { background:#fff; border-color:var(--gray-3); color:var(--gray-7); }
-    .btn-ghost   { background:none; border:none; color:var(--gray-5); padding:4px 8px; }
-    .btn-ghost:hover { color:var(--gray-9); background:var(--gray-2); border-radius:6px; }
+    /* ── Summary card (gradient hero) ─────────────────── */
+    .hero {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: #fff; border-radius: 14px;
+      padding: 16px 18px; margin-bottom: 14px;
+      box-shadow: 0 4px 12px rgba(45,59,181,.18);
+    }
+    .hero-title {
+      font-size: 13px; font-weight: 700; opacity: .9;
+      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .hero-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 4px 0; font-size: 14px;
+    }
+    .hero-row .lbl { opacity: .85; }
+    .hero-row .val { font-weight: 700; }
+    .hero-row .val.in  { color: #BBF7D0; }
+    .hero-row .val.out { color: #FECACA; }
+    .hero-divider {
+      border: none; border-top: 1px dashed rgba(255,255,255,.3);
+      margin: 8px 0;
+    }
+    .hero-row.total { font-size: 16px; font-weight: 800; }
+    .hero-row.total .val { font-size: 18px; }
 
-    /* ── Stat cards ── */
-    .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
-    @media(max-width:767px) { .stats-grid { grid-template-columns:repeat(2,1fr); gap:10px; } .stats-grid > :nth-child(3){ grid-column:1 / -1 } }
-    .stat-card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3);
-                 box-shadow:var(--shadow); padding:18px 20px; display:flex; align-items:flex-start; gap:14px; }
-    .stat-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center;
-                 justify-content:center; font-size:22px; flex-shrink:0; }
-    .stat-card.purple .stat-icon { background:var(--purple-lt); }
-    .stat-card.green  .stat-icon { background:var(--green-lt);  }
-    .stat-card.red    .stat-icon { background:var(--red-lt);    }
-    .stat-label { font-size:12px; color:var(--gray-5); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
-    .stat-value { font-size:22px; font-weight:800; margin-top:2px; }
-    .stat-card.purple .stat-value { color:var(--purple); }
-    .stat-card.green  .stat-value { color:var(--green);  }
-    .stat-card.red    .stat-value { color:var(--red);    }
-    .stat-sub { font-size:12px; color:var(--gray-5); margin-top:4px; }
+    /* ── Filter jenis ──────────────────────────────────── */
+    .filter-jenis { margin-bottom: 10px; }
 
-    /* ── Main grid ── */
-    .main-grid { display:grid; grid-template-columns:1fr 320px; gap:16px; }
-    @media(max-width:1000px) { .main-grid { grid-template-columns:1fr; } }
+    /* ── List ──────────────────────────────────────────── */
+    .list-wrap { display: flex; flex-direction: column; gap: 8px; }
+    .day-label {
+      font-size: 11px; font-weight: 800; color: var(--gray-5);
+      text-transform: uppercase; letter-spacing: .4px;
+      padding: 8px 4px 2px;
+    }
+    .day-label:first-child { padding-top: 0; }
 
-    /* ── Card ── */
-    .card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3); box-shadow:var(--shadow); margin-bottom:0; }
-    .card-header { padding:14px 18px; border-bottom:1px solid var(--gray-3);
-                   display:flex; align-items:center; justify-content:space-between; }
-    .card-header h2 { font-size:14px; font-weight:700; color:var(--gray-7); }
-    .card-body  { padding:16px 18px; }
+    .kas-card {
+      background: #fff; border: 1px solid var(--gray-3); border-radius: 12px;
+      padding: 12px 14px; box-shadow: 0 1px 2px rgba(45,59,181,.04);
+      cursor: pointer; transition: background .12s;
+      position: relative;
+    }
+    .kas-card:hover { background: var(--gray-1); }
+    .kas-card.expanded { background: var(--gray-1); }
 
-    /* ── Filter/Tabs ── */
-    .filter-bar { background:#fff; border:1px solid var(--gray-3); border-radius:var(--radius);
-                  box-shadow:var(--shadow); padding:12px 16px; margin-bottom:16px;
-                  display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; }
-    .filter-group  { display:flex; flex-direction:column; gap:4px; }
-    .filter-label  { font-size:11px; font-weight:700; color:var(--gray-5); text-transform:uppercase; letter-spacing:.4px; }
-    .filter-input, .filter-select {
-      padding:7px 10px; border:1px solid var(--gray-3); border-radius:7px;
-      font-size:13px; background:#fff; outline:none; transition:border-color .15s; }
-    .filter-input:focus, .filter-select:focus { border-color:var(--blue); }
+    .kas-top {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+    }
+    .kas-left { flex: 1; min-width: 0; }
+    .kas-ket  {
+      font-size: 14px; font-weight: 700; color: var(--gray-9);
+      line-height: 1.3; overflow: hidden; text-overflow: ellipsis;
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    }
+    .kas-meta { font-size: 11px; color: var(--gray-5); margin-top: 3px; }
+    .kas-jml {
+      font-size: 15px; font-weight: 800; white-space: nowrap; text-align: right;
+    }
+    .kas-jml.masuk  { color: var(--success); }
+    .kas-jml.keluar { color: var(--danger);  }
 
-    .tabs { display:flex; gap:4px; border-bottom:2px solid var(--gray-3); margin-bottom:16px; }
-    .tab-btn { padding:8px 16px; border:none; background:none; font-size:13px; font-weight:600;
-               color:var(--gray-5); cursor:pointer; border-bottom:2px solid transparent;
-               margin-bottom:-2px; transition:color .1s; }
-    .tab-btn:hover  { color:var(--gray-9); }
-    .tab-btn.active { color:var(--blue); border-bottom-color:var(--blue); }
+    .badge-auto {
+      display: inline-block;
+      padding: 2px 8px; border-radius: 99px;
+      background: var(--primary-lt); color: var(--primary);
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .3px;
+    }
 
-    /* ── Day group ── */
-    .day-group   { margin-bottom:12px; }
-    .day-header  { display:flex; align-items:center; justify-content:space-between; padding:8px 0; }
-    .day-label   { font-size:13px; font-weight:700; color:var(--gray-7); }
-    .day-summary { font-size:12px; color:var(--gray-5); display:flex; gap:12px; }
-    .day-masuk   { color:var(--green); font-weight:600; }
-    .day-keluar  { color:var(--red);   font-weight:600; }
+    /* Expand detail */
+    .kas-detail {
+      display: none;
+      margin-top: 10px; padding-top: 10px;
+      border-top: 1px dashed var(--gray-3);
+      font-size: 12px; color: var(--gray-6);
+    }
+    .kas-card.expanded .kas-detail { display: block; }
+    .kas-detail .row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 3px 0;
+    }
+    .kas-detail .row .lbl { color: var(--gray-5); }
+    .kas-detail .row .val { color: var(--gray-9); font-weight: 600; }
+    .kas-detail .row .val a { color: var(--primary); text-decoration: none; font-weight: 700; }
 
-    .kas-item { display:flex; align-items:center; gap:12px; padding:10px 14px; background:#fff;
-                border:1px solid var(--gray-3); border-radius:8px; margin-bottom:6px; transition:background .1s; }
-    .kas-item:hover { background:var(--gray-1); }
-    .kas-dot  { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-    .kas-dot.masuk  { background:var(--green); }
-    .kas-dot.keluar { background:var(--red);   }
-    .kas-info { flex:1; min-width:0; }
-    .kas-ket  { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .kas-meta { font-size:11px; color:var(--gray-5); margin-top:2px; }
-    .kas-jml  { font-size:14px; font-weight:800; white-space:nowrap; }
-    .kas-jml.masuk  { color:var(--green); }
-    .kas-jml.keluar { color:var(--red);   }
-    .kas-actions { display:flex; gap:4px; }
+    .kas-actions {
+      display: flex; gap: 6px; margin-top: 10px;
+    }
+    .kas-actions button {
+      flex: 1; min-height: 36px; padding: 6px 10px;
+      border-radius: 8px; border: 1px solid var(--gray-3);
+      background: #fff; font-size: 12px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+      color: var(--gray-7);
+    }
+    .kas-actions .btn-edit:hover  { background: var(--primary-lt); color: var(--primary); border-color: var(--primary); }
+    .kas-actions .btn-del:hover   { background: var(--danger-lt); color: var(--danger); border-color: var(--danger); }
 
-    .empty-state { text-align:center; padding:40px; color:var(--gray-5); font-size:13px; }
+    /* ── Empty state ───────────────────────────────────── */
+    .empty {
+      text-align: center; padding: 50px 20px; color: var(--gray-5);
+      background: #fff; border-radius: 12px; border: 1px dashed var(--gray-3);
+    }
+    .empty .ic { font-size: 48px; display: block; margin-bottom: 10px; opacity: .8; }
+    .empty .ttl-em { font-size: 15px; font-weight: 700; color: var(--gray-7); margin-bottom: 12px; }
+    .empty .btn-first {
+      min-height: 40px; padding: 10px 18px; border-radius: 8px; border: none;
+      background: var(--primary); color: #fff; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+    }
 
-    /* ── Form ── */
-    .form-group { margin-bottom:14px; }
-    .form-label { display:block; font-size:12px; font-weight:700; color:var(--gray-7); margin-bottom:5px; text-transform:uppercase; letter-spacing:.4px; }
-    .form-input, .form-select {
-      width:100%; padding:9px 12px; border:1px solid var(--gray-3); border-radius:8px;
-      font-size:14px; outline:none; transition:border-color .15s; background:#fff; color:var(--gray-9); }
-    .form-input:focus, .form-select:focus { border-color:var(--blue); }
+    /* ── Load more ─────────────────────────────────────── */
+    .load-more-wrap { text-align: center; margin-top: 14px; }
+    .btn-more {
+      min-height: 38px; padding: 8px 18px; border-radius: 8px;
+      border: 1px solid var(--gray-3); background: #fff;
+      font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+      color: var(--gray-7);
+    }
+    .btn-more:hover { background: var(--gray-1); }
+    .pagination-info { text-align: center; font-size: 12px; color: var(--gray-5); margin-top: 8px; }
 
-    /* ── Jenis toggle ── */
-    .jenis-toggle { display:grid; grid-template-columns:1fr 1fr; border:1px solid var(--gray-3); border-radius:8px; overflow:hidden; }
-    .jenis-btn { padding:10px; text-align:center; font-size:13px; font-weight:700; cursor:pointer;
-                 background:#fff; border:none; transition:background .1s; }
-    .jenis-btn.masuk.active  { background:var(--green);  color:#fff; }
-    .jenis-btn.keluar.active { background:var(--red);    color:#fff; }
-    .jenis-btn:not(.active)  { color:var(--gray-5); }
+    /* ── Bottom sheet form ─────────────────────────────── */
+    .lm-bg {
+      position: fixed !important; inset: 0 !important; background: rgba(0,0,0,.5) !important;
+      z-index: 9999 !important; display: none; align-items: flex-end; justify-content: center;
+      padding: 0; overflow-y: auto;
+    }
+    .lm-bg.open { display: flex !important; }
+    .lm {
+      position: relative; background: #fff; border-radius: 16px 16px 0 0;
+      width: 100%; max-width: 100%; max-height: 92vh; overflow-y: auto;
+      box-shadow: 0 -8px 32px rgba(0,0,0,.18);
+    }
+    .lm-h {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; border-bottom: 1px solid var(--gray-3);
+      position: sticky; top: 0; background: #fff; z-index: 2;
+    }
+    .lm-h h3 { font-size: 16px; font-weight: 800; }
+    .lm-h .x { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--gray-5); }
+    .lm-b { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+    .lm-f {
+      padding: 12px 18px; border-top: 1px solid var(--gray-3);
+      display: flex; gap: 8px; position: sticky; bottom: 0; background: #fff;
+    }
+    .lm-f .btn { flex: 1; min-height: 44px; }
 
-    /* ── Toast ── */
-    #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
-             background:#111; color:#fff; padding:10px 20px; border-radius:99px;
-             font-size:13px; font-weight:600; z-index:9999; opacity:0; pointer-events:none; transition:opacity .25s; }
-    #toast.show { opacity:1; }
+    /* ── Custom date range mini popup ──────────────────── */
+    .custom-range {
+      display: none;
+      background: #fff; border: 1px solid var(--gray-3); border-radius: 12px;
+      padding: 12px; margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(45,59,181,.08);
+    }
+    .custom-range.open { display: block; }
+    .custom-range .row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;
+    }
+    .custom-range label {
+      display: block; font-size: 11px; font-weight: 700; color: var(--gray-7);
+      margin-bottom: 4px; text-transform: uppercase; letter-spacing: .3px;
+    }
+    .custom-range input {
+      width: 100%; min-height: 40px; padding: 8px 10px;
+      border: 1px solid var(--gray-3); border-radius: 8px;
+      font-size: 14px; font-family: inherit; background: #fff; color: var(--gray-9);
+      outline: none;
+    }
+    .custom-range input:focus { border-color: var(--secondary); }
+    .custom-range .actions {
+      display: flex; gap: 6px;
+    }
+    .custom-range .actions button {
+      flex: 1; min-height: 38px; padding: 8px; border-radius: 8px;
+      font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
+      border: 1px solid transparent;
+    }
+    .custom-range .btn-apply { background: var(--primary); color: #fff; }
+    .custom-range .btn-reset { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
 
-    /* ══ MOBILE kas ══ */
-    @media (max-width: 767px) {
-      .page { padding: 12px 10px 80px; }
-      body > header { display: none !important; }
-      .page-header { flex-direction: column; align-items: stretch; gap: 10px; }
-      .page-header .btn { width: 100%; min-height: 44px; }
-      .stat-card { padding: 12px; gap: 10px; }
-      .stat-icon { width: 36px; height: 36px; font-size: 18px; }
-      .stat-value { font-size: 16px; }
-      .stat-label { font-size: 10px; }
-      .filter-bar { padding: 12px; flex-direction: column; }
-      .filter-group { width: 100%; }
-      .tabs { gap: 0; overflow-x: auto; }
-      .tab-btn { flex: 1 0 auto; min-height: 44px; white-space: nowrap; }
-      .kas-item { flex-wrap: wrap; padding: 12px; }
-      .kas-info { flex: 1 1 100%; }
-      .kas-jml { font-size: 15px; }
+    /* ── Form fields ───────────────────────────────────── */
+    .fld label {
+      display: block; font-size: 12px; font-weight: 700;
+      color: var(--gray-7); margin-bottom: 5px;
+      text-transform: uppercase; letter-spacing: .3px;
+    }
+    .fld input, .fld textarea, .fld select {
+      width: 100%; padding: 11px 12px; border: 1px solid var(--gray-3);
+      border-radius: 8px; font-size: 14px; font-family: inherit;
+      background: #fff; color: var(--gray-9); outline: none;
+      min-height: 44px;
+    }
+    .fld input:focus, .fld textarea:focus, .fld select:focus {
+      border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(75,184,250,0.15);
+    }
+
+    /* ── Jenis toggle (form) ───────────────────────────── */
+    .jenis-grp {
+      display: grid; grid-template-columns: 1fr 1fr;
+      border: 1px solid var(--gray-3); border-radius: 10px; overflow: hidden;
+    }
+    .jenis-grp button {
+      padding: 12px; border: none; background: #fff;
+      font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+      color: var(--gray-5); transition: all .12s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .jenis-grp button.active.in  { background: var(--success); color: #fff; }
+    .jenis-grp button.active.out { background: var(--danger); color: #fff; }
+
+    /* ── Buttons (sheet footer) ────────────────────────── */
+    .btn {
+      padding: 11px 16px; border-radius: 8px; border: 1px solid transparent;
+      font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-outline { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
+    .btn:disabled { opacity: .5; cursor: default; }
+
+    /* ── Toast ─────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 80px; left: 50%;
+      transform: translateX(-50%) translateY(50px);
+      background: var(--gray-9); color: #fff;
+      padding: 10px 20px; border-radius: 99px;
+      font-size: 13px; font-weight: 600; z-index: 10000;
+      opacity: 0; pointer-events: none;
+      transition: transform .25s, opacity .25s;
+      max-width: 90vw; text-align: center;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Desktop only / mobile only ────────────────────── */
+    .desktop-only { display: none; }
+    .mobile-only  { display: block; }
+
+    /* ══════════════════════════════════════════════════════════
+       DESKTOP (>= 1024px) — tabel + summary card di atas
+       ══════════════════════════════════════════════════════════ */
+    @media (min-width: 1024px) {
+      .desktop-only { display: block; }
+      .mobile-only  { display: none; }
+
+      .head { padding: 16px 22px; }
+      .head .ttl { font-size: 22px; }
+      .body-wrap { padding: 20px 22px; }
+
+      .hero { padding: 20px 22px; }
+      .hero-title { font-size: 14px; }
+      .hero-row { font-size: 15px; }
+      .hero-row.total { font-size: 17px; }
+      .hero-row.total .val { font-size: 20px; }
+
+      /* Table card */
+      .table-card {
+        background: #fff; border: 1px solid var(--gray-3); border-radius: 12px;
+        overflow: hidden; box-shadow: 0 1px 3px rgba(45,59,181,.06);
+      }
+      .table-wrap { overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; min-width: 800px; }
+      thead th {
+        padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 800;
+        text-transform: uppercase; letter-spacing: .4px; color: var(--gray-5);
+        background: var(--gray-1); border-bottom: 1px solid var(--gray-3);
+      }
+      thead th.right { text-align: right; }
+      tbody tr { border-bottom: 1px solid var(--gray-3); }
+      tbody tr:last-child { border-bottom: none; }
+      tbody tr:hover { background: var(--gray-1); }
+      tbody td { padding: 11px 14px; vertical-align: middle; font-size: 13px; }
+      tbody td.right { text-align: right; font-weight: 700; }
+      tbody td.in  { color: var(--success); }
+      tbody td.out { color: var(--danger); }
+
+      .td-actions { display: flex; gap: 6px; justify-content: flex-end; }
+      .td-actions button {
+        min-width: 34px; height: 34px; padding: 0 10px; border-radius: 6px;
+        border: 1px solid var(--gray-3); background: #fff;
+        font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+        color: var(--gray-7);
+      }
+      .td-actions .btn-edit:hover { background: var(--primary-lt); color: var(--primary); border-color: var(--primary); }
+      .td-actions .btn-del:hover  { background: var(--danger-lt); color: var(--danger); border-color: var(--danger); }
+
+      /* Centered sheet on desktop */
+      .lm-bg { align-items: center; padding: 16px; }
+      .lm { max-width: 480px; border-radius: 14px; }
     }
   </style>
 </head>
 <body>
 
 <div class="page">
-  <div class="page-header">
-    <div class="page-title">Buku Kas</div>
-    <button class="btn btn-green" onclick="exportCSV()">Export CSV</button>
+  <!-- HEADER -->
+  <div class="head">
+    <div class="ttl">📒 Buku Kas</div>
+    <button class="btn-add" onclick="openSheet()">+ Tambah Transaksi</button>
   </div>
 
-  <!-- Stat cards -->
-  <div class="stats-grid">
-    <div class="stat-card purple">
-      <div class="stat-icon">💳</div>
-      <div>
-        <div class="stat-label">Saldo Total</div>
-        <div class="stat-value" id="statSaldo">—</div>
-        <div class="stat-sub">Semua waktu</div>
+  <div class="body-wrap">
+    <!-- FILTER PERIODE -->
+    <div class="pill-row" id="pillPeriode">
+      <button class="pill active" data-periode="hari"   onclick="setPeriode('hari', this)">Hari Ini</button>
+      <button class="pill"        data-periode="7hari"  onclick="setPeriode('7hari', this)">7 Hari</button>
+      <button class="pill"        data-periode="bulan"  onclick="setPeriode('bulan', this)">Bulan Ini</button>
+      <button class="pill"        data-periode="custom" onclick="setPeriode('custom', this)">Custom</button>
+    </div>
+
+    <!-- CUSTOM RANGE -->
+    <div class="custom-range" id="customRange">
+      <div class="row">
+        <div>
+          <label>Dari</label>
+          <input type="date" id="customDari"/>
+        </div>
+        <div>
+          <label>Sampai</label>
+          <input type="date" id="customSampai"/>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-reset" onclick="resetCustom()">Reset</button>
+        <button class="btn-apply" onclick="applyCustom()">Terapkan</button>
       </div>
     </div>
-    <div class="stat-card green">
-      <div class="stat-icon">📈</div>
-      <div>
-        <div class="stat-label">Masuk Bulan Ini</div>
-        <div class="stat-value" id="statMasukBulan">—</div>
-        <div class="stat-sub" id="statMasukHari">Hari ini: —</div>
+
+    <!-- SUMMARY HERO -->
+    <div class="hero">
+      <div class="hero-title">💰 Ringkasan Kas <span id="heroPeriode" style="opacity:.8;font-weight:500"></span></div>
+      <div class="hero-row">
+        <span class="lbl">Kas Masuk</span>
+        <span class="val in"  id="heroMasuk">—</span>
+      </div>
+      <div class="hero-row">
+        <span class="lbl">Kas Keluar</span>
+        <span class="val out" id="heroKeluar">—</span>
+      </div>
+      <hr class="hero-divider"/>
+      <div class="hero-row total">
+        <span class="lbl">Saldo Bersih</span>
+        <span class="val" id="heroSaldo">—</span>
       </div>
     </div>
-    <div class="stat-card red">
-      <div class="stat-icon">📉</div>
-      <div>
-        <div class="stat-label">Keluar Bulan Ini</div>
-        <div class="stat-value" id="statKeluarBulan">—</div>
-        <div class="stat-sub" id="statKeluarHari">Hari ini: —</div>
+
+    <!-- FILTER JENIS -->
+    <div class="pill-row filter-jenis" id="pillJenis">
+      <button class="pill active" data-jenis=""       onclick="setJenisFilter('', this)">Semua</button>
+      <button class="pill"        data-jenis="masuk"  onclick="setJenisFilter('masuk', this)">⬆ Masuk</button>
+      <button class="pill"        data-jenis="keluar" onclick="setJenisFilter('keluar', this)">⬇ Keluar</button>
+    </div>
+
+    <!-- MOBILE: card list -->
+    <div class="mobile-only">
+      <div class="list-wrap" id="cardList">
+        <div class="empty"><div class="ic">⏳</div><div class="ttl-em">Memuat...</div></div>
       </div>
+    </div>
+
+    <!-- DESKTOP: table -->
+    <div class="desktop-only">
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th>Keterangan</th>
+                <th>Jenis</th>
+                <th class="right">Nominal</th>
+                <th>Sumber</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--gray-5)">Memuat...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="pagination-info" id="paginationInfo" style="display:none"></div>
+    <div class="load-more-wrap" id="loadMoreWrap" style="display:none">
+      <button class="btn-more" onclick="loadMore()">Muat lebih banyak</button>
     </div>
   </div>
+</div>
 
-  <div class="main-grid">
-    <!-- Kiri: list kas -->
-    <div>
-      <!-- Filter -->
-      <div class="filter-bar">
-        <div class="filter-group">
-          <div class="filter-label">Dari</div>
-          <input type="date" id="filterDari" class="filter-input" onchange="loadKas()"/>
+<!-- ── Bottom sheet form ────────────────────────────── -->
+<div class="lm-bg" id="sheetForm">
+  <div class="lm">
+    <div class="lm-h">
+      <h3 id="sheetTitle">+ Tambah Transaksi</h3>
+      <button class="x" onclick="closeSheet()">✕</button>
+    </div>
+    <div class="lm-b">
+      <div class="fld">
+        <label>Jenis Transaksi</label>
+        <div class="jenis-grp">
+          <button type="button" id="jenisIn"  class="in active" onclick="setFormJenis('masuk')">⬆ Masuk</button>
+          <button type="button" id="jenisOut" class="out"       onclick="setFormJenis('keluar')">⬇ Keluar</button>
         </div>
-        <div class="filter-group">
-          <div class="filter-label">Sampai</div>
-          <input type="date" id="filterSampai" class="filter-input" onchange="loadKas()"/>
-        </div>
-        <div class="filter-group">
-          <div class="filter-label">Jenis</div>
-          <select id="filterJenis" class="filter-select" onchange="loadKas()">
-            <option value="">Semua</option>
-            <option value="masuk">Masuk</option>
-            <option value="keluar">Keluar</option>
-          </select>
-        </div>
-        <button class="btn btn-outline btn-sm" style="align-self:flex-end" onclick="resetFilter()">Reset</button>
       </div>
-
-      <!-- Tabs -->
-      <div class="tabs">
-        <button class="tab-btn active" onclick="setTab('semua', this)">Semua</button>
-        <button class="tab-btn" onclick="setTab('masuk', this)">Masuk</button>
-        <button class="tab-btn" onclick="setTab('keluar', this)">Keluar</button>
-        <button class="tab-btn" onclick="setTab('hari', this)">Hari Ini</button>
-        <button class="tab-btn" onclick="setTab('bulan', this)">Bulan Ini</button>
+      <div class="fld">
+        <label>Keterangan</label>
+        <input type="text" id="formKeterangan" placeholder="Mis: Beli deterjen, gaji, dll." maxlength="255"/>
       </div>
-
-      <!-- List -->
-      <div id="kasList">
-        <div class="empty-state">Memuat...</div>
+      <div class="fld">
+        <label>Nominal (Rp)</label>
+        <input type="number" id="formJumlah" placeholder="0" min="1" inputmode="numeric"/>
       </div>
-
-      <!-- Pagination info -->
-      <div id="paginationInfo" style="text-align:center;padding:12px;font-size:13px;color:var(--gray-5);display:none"></div>
-      <div id="loadMoreWrap" style="text-align:center;padding:8px;display:none">
-        <button class="btn btn-outline btn-sm" onclick="loadMore()">Muat lebih banyak</button>
+      <div class="fld">
+        <label>Tanggal</label>
+        <input type="date" id="formTanggal"/>
+      </div>
+      <div class="fld">
+        <label>Kategori</label>
+        <select id="formKategori">
+          <option value="lainnya">Lainnya</option>
+          <option value="operasional">Operasional</option>
+          <option value="bahan">Bahan/Supplies</option>
+          <option value="gaji">Gaji</option>
+          <option value="peralatan">Peralatan</option>
+          <option value="tagihan">Tagihan/Utilitas</option>
+          <option value="transaksi">Transaksi</option>
+        </select>
       </div>
     </div>
-
-    <!-- Kanan: form catat -->
-    <div>
-      <div class="card">
-        <div class="card-header"><h2>Catat Transaksi Kas</h2></div>
-        <div class="card-body">
-          <div class="form-group">
-            <div class="jenis-toggle">
-              <button class="jenis-btn masuk active" id="jenisMasuk" onclick="setJenis('masuk')">▲ Pemasukan</button>
-              <button class="jenis-btn keluar" id="jenisKeluar" onclick="setJenis('keluar')">▼ Pengeluaran</button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Tanggal *</label>
-            <input type="date" id="formTanggal" class="form-input"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Jumlah (Rp) *</label>
-            <input type="number" id="formJumlah" class="form-input" placeholder="50000" min="1"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Kategori</label>
-            <select id="formKategori" class="form-select">
-              <option value="lainnya">Lainnya</option>
-              <option value="operasional">Operasional</option>
-              <option value="bahan">Bahan/Supplies</option>
-              <option value="gaji">Gaji</option>
-              <option value="peralatan">Peralatan</option>
-              <option value="tagihan">Tagihan/Utilitas</option>
-              <option value="transaksi">Transaksi</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Keterangan</label>
-            <input type="text" id="formKeterangan" class="form-input" placeholder="Deskripsi singkat..."/>
-          </div>
-          <button class="btn btn-blue" style="width:100%" id="simpanBtn" onclick="simpanKas()">
-            Simpan
-          </button>
-        </div>
-      </div>
+    <div class="lm-f">
+      <button class="btn btn-outline" onclick="closeSheet()">Batal</button>
+      <button class="btn btn-primary" id="btnSimpan" onclick="simpanKas()">Simpan</button>
     </div>
   </div>
 </div>
@@ -292,277 +494,421 @@
 <div id="toast"></div>
 
 <script>
-const fmtRp      = n => 'Rp ' + Number(n||0).toLocaleString('id-ID');
+const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 const fmtRpShort = n => {
-  n = Number(n||0);
-  if (n >= 1000000) return 'Rp ' + (n/1000000).toFixed(1).replace('.0','') + 'jt';
-  if (n >= 1000)    return 'Rp ' + (n/1000).toFixed(0) + 'rb';
-  return 'Rp ' + n.toLocaleString('id-ID');
+  n = Number(n || 0);
+  const neg = n < 0; n = Math.abs(n);
+  let s;
+  if (n >= 1_000_000) s = 'Rp ' + (n / 1_000_000).toFixed(1).replace('.0','') + 'jt';
+  else if (n >= 1_000) s = 'Rp ' + Math.round(n / 1_000) + 'rb';
+  else s = 'Rp ' + n.toLocaleString('id-ID');
+  return neg ? '-' + s : s;
 };
-const fmtDate = s => s ? new Date(s + 'T00:00:00').toLocaleDateString('id-ID',
+const fmtDateLong = s => s ? new Date(s + 'T00:00:00').toLocaleDateString('id-ID',
   { weekday:'long', day:'numeric', month:'long', year:'numeric' }) : '—';
 const fmtDateShort = s => s ? new Date(s + 'T00:00:00').toLocaleDateString('id-ID',
   { day:'2-digit', month:'short', year:'numeric' }) : '—';
+const fmtTime = s => {
+  if (!s) return '';
+  const d = new Date(s);
+  if (isNaN(d)) return '';
+  return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+};
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-let currentJenis = 'masuk';
+// ── State ─────────────────────────────────────────────────
+let state = {
+  periode: 'hari',
+  dari: '',
+  sampai: '',
+  jenis: '',
+  jenisForm: 'masuk',
+  editId: null,
+  page: 1
+};
 let allRows = [];
-let currentPage = 1;
 const PAGE_SIZE = 50;
+let totalRows = 0;
 
-function showToast(msg, dur=2500) {
+function showToast(msg, dur = 2500) {
   const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
+  el.textContent = msg;
+  el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), dur);
 }
 
-async function logout() {
-  await fetch('/api/v1/auth/logout', { method:'POST' });
-  location.href = '/login';
-}
-
-function setJenis(j) {
-  currentJenis = j;
-  document.getElementById('jenisMasuk').classList.toggle('active', j === 'masuk');
-  document.getElementById('jenisKeluar').classList.toggle('active', j === 'keluar');
-}
-
-function setTab(tab, btn) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-
-  const today = new Date().toISOString().slice(0,10);
-  const bulanAwal = today.slice(0,7) + '-01';
-
-  const dari   = document.getElementById('filterDari');
-  const sampai = document.getElementById('filterSampai');
-  const jenis  = document.getElementById('filterJenis');
-
-  dari.value = ''; sampai.value = ''; jenis.value = '';
-
-  if (tab === 'hari')   { dari.value = today;     sampai.value = today; }
-  if (tab === 'bulan')  { dari.value = bulanAwal; sampai.value = today; }
-  if (tab === 'masuk')  { jenis.value = 'masuk';  }
-  if (tab === 'keluar') { jenis.value = 'keluar'; }
-
-  loadKas();
-}
-
-function resetFilter() {
-  document.getElementById('filterDari').value   = '';
-  document.getElementById('filterSampai').value = '';
-  document.getElementById('filterJenis').value  = '';
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector('.tab-btn').classList.add('active');
-  loadKas();
-}
-
-// ── Load ringkasan ────────────────────────────────────────────────────────────
-async function loadRingkasan() {
-  try {
-    const r = await fetch('/api/v1/kas/ringkasan');
-    const d = await r.json();
-    document.getElementById('statSaldo').textContent       = fmtRpShort(d.saldo_total);
-    document.getElementById('statMasukBulan').textContent  = fmtRpShort(d.masuk_bulan_ini);
-    document.getElementById('statKeluarBulan').textContent = fmtRpShort(d.keluar_bulan_ini);
-    document.getElementById('statMasukHari').textContent   = 'Hari ini: ' + fmtRpShort(d.masuk_hari_ini);
-    document.getElementById('statKeluarHari').textContent  = 'Hari ini: ' + fmtRpShort(d.keluar_hari_ini);
-  } catch { /* silent */ }
-}
-
-// ── Load kas list ─────────────────────────────────────────────────────────────
-async function loadKas(page = 1) {
-  currentPage = page;
-  const dari   = document.getElementById('filterDari').value;
-  const sampai = document.getElementById('filterSampai').value;
-  const jenis  = document.getElementById('filterJenis').value;
-
-  const params = new URLSearchParams({ page, limit: PAGE_SIZE });
-  if (dari)   params.set('tanggal_dari', dari);
-  if (sampai) params.set('tanggal_sampai', sampai);
-  if (jenis)  params.set('jenis', jenis);
-
-  if (page === 1) {
-    allRows = [];
-    document.getElementById('kasList').innerHTML = '<div class="empty-state">Memuat...</div>';
+// ── Periode pills ─────────────────────────────────────────
+function computePeriodeRange(p) {
+  const today = new Date();
+  const ymd = d => d.toISOString().slice(0, 10);
+  const todayStr = ymd(today);
+  if (p === 'hari')   return { dari: todayStr, sampai: todayStr, label: 'Hari Ini' };
+  if (p === '7hari') {
+    const d = new Date(today); d.setDate(d.getDate() - 6);
+    return { dari: ymd(d), sampai: todayStr, label: '7 Hari Terakhir' };
   }
+  if (p === 'bulan') {
+    const bulanAwal = todayStr.slice(0, 7) + '-01';
+    return { dari: bulanAwal, sampai: todayStr, label: 'Bulan Ini' };
+  }
+  return { dari: '', sampai: '', label: '' };
+}
+
+function setPeriode(p, btn) {
+  document.querySelectorAll('#pillPeriode .pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.periode = p;
+
+  const cr = document.getElementById('customRange');
+  if (p === 'custom') {
+    cr.classList.add('open');
+    if (!document.getElementById('customDari').value) {
+      const r = computePeriodeRange('bulan');
+      document.getElementById('customDari').value = r.dari;
+      document.getElementById('customSampai').value = r.sampai;
+    }
+    return;
+  }
+  cr.classList.remove('open');
+
+  const r = computePeriodeRange(p);
+  state.dari = r.dari;
+  state.sampai = r.sampai;
+  reload();
+}
+
+function applyCustom() {
+  const dari   = document.getElementById('customDari').value;
+  const sampai = document.getElementById('customSampai').value;
+  if (!dari || !sampai) { showToast('Tanggal wajib diisi'); return; }
+  if (dari > sampai) { showToast('Tanggal "Dari" harus ≤ "Sampai"'); return; }
+  state.dari = dari;
+  state.sampai = sampai;
+  reload();
+}
+function resetCustom() {
+  document.getElementById('customDari').value = '';
+  document.getElementById('customSampai').value = '';
+  state.dari = '';
+  state.sampai = '';
+  reload();
+}
+
+function setJenisFilter(j, btn) {
+  document.querySelectorAll('#pillJenis .pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.jenis = j;
+  reload();
+}
+
+function reload() {
+  state.page = 1;
+  loadList();
+}
+
+// ── Periode label di hero ─────────────────────────────────
+function updateHeroLabel() {
+  const el = document.getElementById('heroPeriode');
+  if (state.periode === 'custom' && state.dari && state.sampai) {
+    el.textContent = ` · ${fmtDateShort(state.dari)} – ${fmtDateShort(state.sampai)}`;
+  } else if (state.periode !== 'custom') {
+    const r = computePeriodeRange(state.periode);
+    el.textContent = r.label ? ` · ${r.label}` : '';
+  } else {
+    el.textContent = '';
+  }
+}
+
+// ── Load list + ringkasan periode ────────────────────────
+async function loadList() {
+  const isFirst = state.page === 1;
+  if (isFirst) {
+    allRows = [];
+    document.getElementById('cardList').innerHTML = '<div class="empty"><div class="ic">⏳</div><div class="ttl-em">Memuat...</div></div>';
+    document.getElementById('tableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--gray-5)">Memuat...</td></tr>';
+  }
+
+  const params = new URLSearchParams({ page: state.page, limit: PAGE_SIZE });
+  if (state.dari)   params.set('tanggal_dari', state.dari);
+  if (state.sampai) params.set('tanggal_sampai', state.sampai);
+  if (state.jenis)  params.set('jenis', state.jenis);
 
   try {
     const r = await fetch('/api/v1/kas?' + params);
     if (r.status === 401) { location.href = '/login'; return; }
     const d = await r.json();
+    allRows = isFirst ? d.data : [...allRows, ...d.data];
+    totalRows = d.meta?.total || 0;
 
-    allRows = page === 1 ? d.data : [...allRows, ...d.data];
-    renderList(allRows);
-
-    const total = d.meta?.total || 0;
-    const loaded = allRows.length;
+    renderMobile(allRows);
+    renderTable(allRows);
+    updateHeroFromList();
+    updateHeroLabel();
 
     const infoEl = document.getElementById('paginationInfo');
     const moreEl = document.getElementById('loadMoreWrap');
-
-    if (total > 0) {
+    if (totalRows > 0) {
       infoEl.style.display = 'block';
-      infoEl.textContent   = `Menampilkan ${loaded} dari ${total} entri`;
-    } else { infoEl.style.display = 'none'; }
-
-    moreEl.style.display = (loaded < total) ? 'block' : 'none';
-  } catch(e) {
+      infoEl.textContent = `Menampilkan ${allRows.length} dari ${totalRows} entri`;
+    } else {
+      infoEl.style.display = 'none';
+    }
+    moreEl.style.display = (allRows.length < totalRows) ? 'block' : 'none';
+  } catch (e) {
     console.error(e);
-    document.getElementById('kasList').innerHTML = '<div class="empty-state" style="color:var(--red)">Gagal memuat data</div>';
+    document.getElementById('cardList').innerHTML = '<div class="empty"><div class="ic">⚠️</div><div class="ttl-em">Gagal memuat data</div></div>';
+    document.getElementById('tableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--danger)">Gagal memuat data</td></tr>';
   }
 }
 
-function loadMore() { loadKas(currentPage + 1); }
+function loadMore() { state.page++; loadList(); }
 
-// ── Render list grouped by day ────────────────────────────────────────────────
-function renderList(rows) {
-  const el = document.getElementById('kasList');
+// ── Ringkasan dari hasil list (sudah ter-filter periode) ──
+function updateHeroFromList() {
+  // Untuk akurasi ringkasan periode, kalau total > rows yang dimuat,
+  // kita panggil API ringkasan-by-filter via fetch tambahan.
+  // Simpel: hitung dari rows yang ada (cukup karena PAGE_SIZE 50 untuk view harian);
+  // tapi kalau ada paging, ambil agregat dari server.
+  if (totalRows > allRows.length) {
+    fetchAgregat();
+    return;
+  }
+  let masuk = 0, keluar = 0;
+  // Hanya total yang sesuai dengan filter jenis aktif:
+  allRows.forEach(r => {
+    if (r.jenis === 'masuk')  masuk  += Number(r.jumlah);
+    if (r.jenis === 'keluar') keluar += Number(r.jumlah);
+  });
+  applyHero(masuk, keluar);
+}
+
+async function fetchAgregat() {
+  // Ambil semua entri pada rentang aktif untuk agregat akurat (limit besar).
+  const params = new URLSearchParams({ page: 1, limit: 10000 });
+  if (state.dari)   params.set('tanggal_dari', state.dari);
+  if (state.sampai) params.set('tanggal_sampai', state.sampai);
+  // sengaja TIDAK pakai filter jenis di sini → biar ringkasan total masuk+keluar tetap ditampilkan
+  try {
+    const r = await fetch('/api/v1/kas?' + params);
+    const d = await r.json();
+    let masuk = 0, keluar = 0;
+    (d.data || []).forEach(row => {
+      if (row.jenis === 'masuk')  masuk  += Number(row.jumlah);
+      if (row.jenis === 'keluar') keluar += Number(row.jumlah);
+    });
+    applyHero(masuk, keluar);
+  } catch { /* fallback ke perhitungan rows yang sudah dimuat */ }
+}
+
+function applyHero(masuk, keluar) {
+  const saldo = masuk - keluar;
+  document.getElementById('heroMasuk').textContent  = '+' + fmtRpShort(masuk);
+  document.getElementById('heroKeluar').textContent = '-' + fmtRpShort(keluar);
+  const heroSaldoEl = document.getElementById('heroSaldo');
+  heroSaldoEl.textContent = (saldo >= 0 ? '' : '-') + fmtRpShort(Math.abs(saldo));
+  heroSaldoEl.style.color = '#fff';
+}
+
+// ── Render: mobile cards ──────────────────────────────────
+function renderMobile(rows) {
+  const el = document.getElementById('cardList');
   if (!rows.length) {
-    el.innerHTML = '<div class="empty-state">Tidak ada data kas untuk filter ini</div>';
+    el.innerHTML = `
+      <div class="empty">
+        <div class="ic">📒</div>
+        <div class="ttl-em">Belum ada transaksi kas</div>
+        <button class="btn-first" onclick="openSheet()">+ Tambah Transaksi Pertama</button>
+      </div>`;
     return;
   }
 
   // Group by tanggal
   const groups = {};
   rows.forEach(r => {
-    const tgl = r.tanggal?.slice(0,10) || '?';
+    const tgl = (r.tanggal || '').slice(0, 10) || '?';
     if (!groups[tgl]) groups[tgl] = [];
     groups[tgl].push(r);
   });
 
-  el.innerHTML = Object.entries(groups).map(([tgl, items]) => {
-    const masukTotal  = items.filter(i => i.jenis === 'masuk' ).reduce((s,i) => s + Number(i.jumlah), 0);
-    const keluarTotal = items.filter(i => i.jenis === 'keluar').reduce((s,i) => s + Number(i.jumlah), 0);
-
+  const html = Object.entries(groups).map(([tgl, items]) => {
     const itemsHtml = items.map(i => {
-      const isManual = !i.transaksi_id;
-      return `<div class="kas-item">
-        <div class="kas-dot ${i.jenis}"></div>
-        <div class="kas-info">
-          <div class="kas-ket">${i.keterangan || (i.nomor_transaksi ? 'Transaksi ' + i.nomor_transaksi : '(tanpa keterangan)')}</div>
-          <div class="kas-meta">
-            ${i.kategori || '—'}
-            ${i.nomor_transaksi ? ` · <a href="/api/v1/transaksi/${i.transaksi_id}/struk" target="_blank" style="color:var(--blue)">${i.nomor_transaksi}</a>` : ''}
-            ${i.user_nama ? ' · ' + i.user_nama : ''}
+      const isAuto = !!i.transaksi_id;
+      const sign = i.jenis === 'masuk' ? '+' : '-';
+      const jenisCls = i.jenis === 'masuk' ? 'masuk' : 'keluar';
+      const ket = i.keterangan || (i.nomor_transaksi ? 'Pelunasan ' + i.nomor_transaksi : '(tanpa keterangan)');
+      const trxRow = i.nomor_transaksi
+        ? `<div class="row"><span class="lbl">No. Transaksi</span><span class="val"><a href="/api/v1/transaksi/${i.transaksi_id}/struk" target="_blank">${esc(i.nomor_transaksi)}</a></span></div>`
+        : '';
+      const userRow = i.user_nama
+        ? `<div class="row"><span class="lbl">Dicatat oleh</span><span class="val">${esc(i.user_nama)}</span></div>`
+        : '';
+      const actionsHtml = isAuto ? '' : `
+        <div class="kas-actions">
+          <button class="btn-edit" onclick="event.stopPropagation(); openEditSheet(${i.id})">✏️ Edit</button>
+          <button class="btn-del"  onclick="event.stopPropagation(); hapusKas(${i.id})">🗑️ Hapus</button>
+        </div>`;
+      const autoBadge = isAuto ? '<span class="badge-auto">Otomatis</span>' : '';
+
+      return `
+        <div class="kas-card" onclick="toggleExpand(this)">
+          <div class="kas-top">
+            <div class="kas-left">
+              <div class="kas-ket">${esc(ket)} ${autoBadge}</div>
+              <div class="kas-meta">${fmtDateShort(tgl)}${fmtTime(i.created_at) ? ', ' + fmtTime(i.created_at) : ''}</div>
+            </div>
+            <div class="kas-jml ${jenisCls}">${sign} ${fmtRp(i.jumlah)}</div>
           </div>
-        </div>
-        <div class="kas-jml ${i.jenis}">${i.jenis === 'masuk' ? '+' : '-'}${fmtRp(i.jumlah)}</div>
-        ${isManual ? `<div class="kas-actions">
-          <button class="btn-ghost" onclick="hapusKas(${i.id})" title="Hapus" style="font-size:16px;color:var(--red)">×</button>
-        </div>` : ''}
-      </div>`;
+          <div class="kas-detail">
+            <div class="row"><span class="lbl">Tanggal</span><span class="val">${fmtDateLong(tgl)}</span></div>
+            <div class="row"><span class="lbl">Kategori</span><span class="val">${esc(i.kategori || '—')}</span></div>
+            ${trxRow}
+            ${userRow}
+            ${actionsHtml}
+          </div>
+        </div>`;
     }).join('');
 
-    return `<div class="day-group">
-      <div class="day-header">
-        <div class="day-label">${fmtDate(tgl)}</div>
-        <div class="day-summary">
-          ${masukTotal  ? `<span class="day-masuk">+${fmtRpShort(masukTotal)}</span>`  : ''}
-          ${keluarTotal ? `<span class="day-keluar">-${fmtRpShort(keluarTotal)}</span>` : ''}
-        </div>
-      </div>
-      ${itemsHtml}
-    </div>`;
+    return `<div class="day-label">${fmtDateLong(tgl)}</div>${itemsHtml}`;
+  }).join('');
+
+  el.innerHTML = html;
+}
+
+function toggleExpand(el) {
+  el.classList.toggle('expanded');
+}
+
+// ── Render: desktop table ─────────────────────────────────
+function renderTable(rows) {
+  const tbody = document.getElementById('tableBody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--gray-5)">Belum ada transaksi kas</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(i => {
+    const isAuto = !!i.transaksi_id;
+    const sign = i.jenis === 'masuk' ? '+' : '-';
+    const cls  = i.jenis === 'masuk' ? 'in' : 'out';
+    const sumber = isAuto
+      ? `<a href="/api/v1/transaksi/${i.transaksi_id}/struk" target="_blank" style="color:var(--primary);text-decoration:none">${esc(i.nomor_transaksi || 'Otomatis')}</a> <span class="badge-auto">Otomatis</span>`
+      : `<span style="color:var(--gray-5)">Manual${i.user_nama ? ' · ' + esc(i.user_nama) : ''}</span>`;
+    const aksi = isAuto ? '' : `
+      <div class="td-actions">
+        <button class="btn-edit" onclick="openEditSheet(${i.id})" title="Edit">✏️</button>
+        <button class="btn-del"  onclick="hapusKas(${i.id})" title="Hapus">🗑️</button>
+      </div>`;
+    const jenisLabel = i.jenis === 'masuk'
+      ? '<span style="color:var(--success);font-weight:700">⬆ Masuk</span>'
+      : '<span style="color:var(--danger);font-weight:700">⬇ Keluar</span>';
+    return `<tr>
+      <td>${fmtDateShort(i.tanggal?.slice(0,10))}</td>
+      <td>${esc(i.keterangan || (i.nomor_transaksi ? 'Pelunasan ' + i.nomor_transaksi : '—'))}<div style="font-size:11px;color:var(--gray-5);margin-top:2px">${esc(i.kategori || '')}</div></td>
+      <td>${jenisLabel}</td>
+      <td class="right ${cls}">${sign} ${fmtRp(i.jumlah)}</td>
+      <td>${sumber}</td>
+      <td>${aksi}</td>
+    </tr>`;
   }).join('');
 }
 
-// ── Simpan kas manual ─────────────────────────────────────────────────────────
+// ── Bottom sheet ──────────────────────────────────────────
+function openSheet() {
+  state.editId = null;
+  document.getElementById('sheetTitle').textContent = '+ Tambah Transaksi';
+  setFormJenis('masuk');
+  document.getElementById('formKeterangan').value = '';
+  document.getElementById('formJumlah').value = '';
+  document.getElementById('formKategori').value = 'lainnya';
+  document.getElementById('formTanggal').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('sheetForm').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function openEditSheet(id) {
+  const row = allRows.find(r => r.id === id);
+  if (!row) return;
+  if (row.transaksi_id) { showToast('Entri otomatis tidak bisa diedit'); return; }
+  state.editId = id;
+  document.getElementById('sheetTitle').textContent = '✏️ Edit Transaksi';
+  setFormJenis(row.jenis);
+  document.getElementById('formKeterangan').value = row.keterangan || '';
+  document.getElementById('formJumlah').value = row.jumlah;
+  document.getElementById('formKategori').value = row.kategori || 'lainnya';
+  document.getElementById('formTanggal').value = (row.tanggal || '').slice(0, 10);
+  document.getElementById('sheetForm').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSheet() {
+  document.getElementById('sheetForm').classList.remove('open');
+  document.body.style.overflow = '';
+  state.editId = null;
+}
+
+document.getElementById('sheetForm').addEventListener('click', e => {
+  if (e.target.id === 'sheetForm') closeSheet();
+});
+
+function setFormJenis(j) {
+  state.jenisForm = j;
+  document.getElementById('jenisIn').classList.toggle('active', j === 'masuk');
+  document.getElementById('jenisOut').classList.toggle('active', j === 'keluar');
+}
+
+// ── Simpan / update ───────────────────────────────────────
 async function simpanKas() {
-  const tanggal   = document.getElementById('formTanggal').value;
-  const jumlah    = parseFloat(document.getElementById('formJumlah').value);
-  const kategori  = document.getElementById('formKategori').value;
+  const tanggal    = document.getElementById('formTanggal').value;
+  const jumlah     = parseFloat(document.getElementById('formJumlah').value);
+  const kategori   = document.getElementById('formKategori').value;
   const keterangan = document.getElementById('formKeterangan').value.trim();
 
-  if (!tanggal)         { showToast('Tanggal wajib diisi'); return; }
-  if (!jumlah || jumlah < 1) { showToast('Jumlah harus lebih dari 0'); return; }
+  if (!tanggal) { showToast('Tanggal wajib diisi'); return; }
+  if (!jumlah || jumlah < 1) { showToast('Nominal harus > 0'); return; }
 
-  const btn = document.getElementById('simpanBtn');
+  const btn = document.getElementById('btnSimpan');
   btn.disabled = true;
   try {
-    const r = await fetch('/api/v1/kas', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ tanggal, jenis: currentJenis, kategori, keterangan, jumlah })
+    const url    = state.editId ? `/api/v1/kas/${state.editId}` : '/api/v1/kas';
+    const method = state.editId ? 'PUT' : 'POST';
+    const r = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tanggal, jenis: state.jenisForm, kategori, keterangan, jumlah })
     });
     const d = await r.json();
-    if (!r.ok) { showToast('Gagal: ' + d.error); return; }
-    showToast(d.message);
-    document.getElementById('formJumlah').value    = '';
-    document.getElementById('formKeterangan').value = '';
-    loadKas();
-    loadRingkasan();
-  } catch { showToast('Koneksi gagal'); }
-  finally   { btn.disabled = false; }
+    if (!r.ok) { showToast('Gagal: ' + (d.error || 'tidak diketahui'), 3500); return; }
+    showToast(d.message || 'Tersimpan');
+    closeSheet();
+    reload();
+  } catch {
+    showToast('Koneksi gagal');
+  } finally {
+    btn.disabled = false;
+  }
 }
 
-// ── Hapus entri ───────────────────────────────────────────────────────────────
+// ── Hapus ─────────────────────────────────────────────────
 async function hapusKas(id) {
-  if (!confirm('Hapus entri kas ini?')) return;
+  if (!confirm('Hapus transaksi kas ini?')) return;
   try {
-    const r = await fetch(`/api/v1/kas/${id}`, { method:'DELETE' });
+    const r = await fetch(`/api/v1/kas/${id}`, { method: 'DELETE' });
     const d = await r.json();
-    if (!r.ok) { showToast('Gagal: ' + d.error, 4000); return; }
-    showToast(d.message);
-    loadKas();
-    loadRingkasan();
-  } catch { showToast('Koneksi gagal'); }
+    if (!r.ok) { showToast('Gagal: ' + (d.error || ''), 3500); return; }
+    showToast(d.message || 'Dihapus');
+    reload();
+  } catch {
+    showToast('Koneksi gagal');
+  }
 }
 
-// ── Export CSV ────────────────────────────────────────────────────────────────
-async function exportCSV() {
-  const dari   = document.getElementById('filterDari').value;
-  const sampai = document.getElementById('filterSampai').value;
-  const jenis  = document.getElementById('filterJenis').value;
-
-  showToast('Mengambil data...');
-  const params = new URLSearchParams({ page:1, limit:5000 });
-  if (dari)   params.set('tanggal_dari', dari);
-  if (sampai) params.set('tanggal_sampai', sampai);
-  if (jenis)  params.set('jenis', jenis);
-
-  try {
-    const r = await fetch('/api/v1/kas?' + params);
-    const d = await r.json();
-    const rows = d.data || [];
-
-    const headers = ['No','Tanggal','Jenis','Kategori','Keterangan','Jumlah','No. Transaksi','Dicatat Oleh'];
-    const csv = [
-      headers.join(','),
-      ...rows.map((row, i) => [
-        i+1,
-        row.tanggal,
-        row.jenis,
-        row.kategori || '',
-        csvEsc(row.keterangan || ''),
-        row.jumlah,
-        row.nomor_transaksi || '',
-        csvEsc(row.user_nama || '')
-      ].join(','))
-    ];
-
-    const blob = new Blob(['﻿' + csv.join('\n')], { type:'text/csv;charset=utf-8;' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url; a.download = `buku-kas-${new Date().toISOString().slice(0,10)}.csv`;
-    a.click(); URL.revokeObjectURL(url);
-    showToast(`Export ${rows.length} entri selesai`);
-  } catch { showToast('Gagal export'); }
-}
-
-function csvEsc(v) {
-  v = String(v||'').replace(/"/g, '""');
-  return /[,"\n]/.test(v) ? `"${v}"` : v;
-}
-
-// ── Init ──────────────────────────────────────────────────────────────────────
-fetch('/api/v1/auth/me').then(r => r.json()).then(d => {
-  if (d.user) document.getElementById('userName').textContent = d.user.nama;
-}).catch(() => {});
-
-// Set default tanggal form
-document.getElementById('formTanggal').value = new Date().toISOString().slice(0,10);
-
-loadRingkasan();
-loadKas();
+// ── Init ──────────────────────────────────────────────────
+(function init() {
+  // Default: hari ini
+  const r = computePeriodeRange('hari');
+  state.dari = r.dari;
+  state.sampai = r.sampai;
+  loadList();
+})();
 </script>
 <script src="/js/nav.js"></script>
 </body>

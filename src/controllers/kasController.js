@@ -116,6 +116,37 @@ exports.store = async (req, res) => {
   }
 };
 
+// ── PUT /api/v1/kas/:id ──────────────────────────────────────────────────────
+exports.update = async (req, res) => {
+  const { error, value } = kasSchema.validate(req.body, { abortEarly: false });
+  if (error) return res.status(400).json({ error: error.details.map(d => d.message).join(', ') });
+
+  try {
+    const entry = await db('kas').where({ id: req.params.id }).first();
+    if (!entry) return res.status(404).json({ error: 'Entri kas tidak ditemukan' });
+    if (entry.transaksi_id) {
+      return res.status(400).json({ error: 'Entri otomatis dari transaksi tidak dapat diedit' });
+    }
+
+    await db('kas').where({ id: req.params.id }).update({
+      tanggal:    value.tanggal instanceof Date
+        ? value.tanggal.toISOString().slice(0, 10)
+        : String(value.tanggal).slice(0, 10),
+      jenis:      value.jenis,
+      kategori:   value.kategori,
+      keterangan: value.keterangan || null,
+      jumlah:     value.jumlah,
+      updated_at: new Date()
+    });
+
+    const updated = await db('kas').where({ id: req.params.id }).first();
+    res.json({ message: 'Entri kas berhasil diperbarui', data: updated });
+  } catch (err) {
+    console.error('[kas:update]', err);
+    res.status(500).json({ error: 'Gagal memperbarui entri kas' });
+  }
+};
+
 // ── DELETE /api/v1/kas/:id ───────────────────────────────────────────────────
 exports.destroy = async (req, res) => {
   try {
