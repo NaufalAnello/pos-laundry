@@ -9,6 +9,9 @@ router.post('/restore', requireAdmin,
   ctrl.restore);
 router.get('/wa-mode',  ctrl.getWAMode);
 router.put('/wa-mode',  requireAdmin, ctrl.updateWAMode);
+router.get('/template/:jenis',    ctrl.getTemplate);
+router.put('/template/:jenis',    requireAdmin, ctrl.updateTemplate);
+router.delete('/template/:jenis', requireAdmin, ctrl.resetTemplate);
 router.get('/',  ctrl.getAll);
 router.put('/',  requireAdmin, ctrl.updateBulk);
 

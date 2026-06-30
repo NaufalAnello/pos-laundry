@@ -2,6 +2,7 @@ const Joi  = require('joi');
 const db   = require('../database/connection');
 const fs   = require('fs');
 const path = require('path');
+const tpl  = require('../utils/print-template');
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, '../../data/laundry.db');
 
@@ -93,6 +94,78 @@ exports.updateWAMode = async (req, res) => {
   } catch (err) {
     console.error('[pengaturan:updateWAMode]', err);
     res.status(500).json({ error: 'Gagal menyimpan mode WA' });
+  }
+};
+
+// ── GET /api/v1/pengaturan/template/:jenis ──────────────────────────────────
+// jenis = 'struk' | 'label'. Return config tersimpan, atau default kalau kosong.
+exports.getTemplate = async (req, res) => {
+  const jenis = req.params.jenis;
+  if (jenis !== 'struk' && jenis !== 'label') {
+    return res.status(400).json({ error: 'Jenis harus "struk" atau "label"' });
+  }
+  try {
+    const row = await db('pengaturan').where({ kunci: `template_${jenis}` }).first();
+    const config = row && row.nilai
+      ? tpl.parseConfig(row.nilai, jenis) || (jenis === 'label' ? tpl.DEFAULT_LABEL : tpl.DEFAULT_STRUK)
+      : (jenis === 'label' ? tpl.DEFAULT_LABEL : tpl.DEFAULT_STRUK);
+    res.json({
+      jenis,
+      tersimpan: !!(row && row.nilai),
+      config,
+      meta: {
+        labels: tpl.ELEMENT_LABELS,
+        wajib: tpl.REQUIRED_ELEMENTS,
+      },
+    });
+  } catch (err) {
+    console.error('[pengaturan:getTemplate]', err);
+    res.status(500).json({ error: 'Gagal mengambil template' });
+  }
+};
+
+// ── PUT /api/v1/pengaturan/template/:jenis ──────────────────────────────────
+exports.updateTemplate = async (req, res) => {
+  const jenis = req.params.jenis;
+  if (jenis !== 'struk' && jenis !== 'label') {
+    return res.status(400).json({ error: 'Jenis harus "struk" atau "label"' });
+  }
+  const validated = tpl.validateIncoming(req.body, jenis);
+  if (!validated.ok) return res.status(400).json({ error: validated.error });
+
+  const nilai = JSON.stringify(validated.config);
+  try {
+    const kunci = `template_${jenis}`;
+    const existing = await db('pengaturan').where({ kunci }).first();
+    if (existing) {
+      await db('pengaturan').where({ kunci }).update({ nilai, updated_at: new Date() });
+    } else {
+      await db('pengaturan').insert({
+        kunci, nilai, deskripsi: `Template cetak ${jenis}`,
+        created_at: new Date(), updated_at: new Date(),
+      });
+    }
+    res.json({ message: 'Template berhasil disimpan', jenis, config: validated.config });
+  } catch (err) {
+    console.error('[pengaturan:updateTemplate]', err);
+    res.status(500).json({ error: 'Gagal menyimpan template' });
+  }
+};
+
+// ── DELETE /api/v1/pengaturan/template/:jenis ───────────────────────────────
+// Reset ke default: cukup hapus row tersimpan supaya printer pakai default lama.
+exports.resetTemplate = async (req, res) => {
+  const jenis = req.params.jenis;
+  if (jenis !== 'struk' && jenis !== 'label') {
+    return res.status(400).json({ error: 'Jenis harus "struk" atau "label"' });
+  }
+  try {
+    await db('pengaturan').where({ kunci: `template_${jenis}` }).del();
+    const config = jenis === 'label' ? tpl.DEFAULT_LABEL : tpl.DEFAULT_STRUK;
+    res.json({ message: 'Template direset ke default', jenis, config });
+  } catch (err) {
+    console.error('[pengaturan:resetTemplate]', err);
+    res.status(500).json({ error: 'Gagal reset template' });
   }
 };
 

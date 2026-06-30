@@ -133,6 +133,43 @@
     .var-ref { background:var(--gray-1); border-radius:8px; padding:12px; font-size:12px; line-height:1.8; }
     .var-ref code { background:var(--blue-lt); color:var(--blue); padding:1px 5px; border-radius:4px; font-family:monospace; }
 
+    /* ── Template Cetak editor ── */
+    .tpl-subtabs { display:flex; gap:6px; }
+    .tpl-sub-btn {
+      padding:6px 14px; border:1px solid var(--gray-3); background:#fff; color:var(--gray-7);
+      border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;
+      min-height:32px;
+    }
+    .tpl-sub-btn.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+    .tpl-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start;
+    }
+    @media(max-width:768px){ .tpl-grid { grid-template-columns:1fr; } }
+    .tpl-list { list-style:none; padding:0; margin:0; border:1px solid var(--gray-3); border-radius:10px; overflow:hidden; background:#fff; }
+    .tpl-list li {
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; border-bottom:1px solid var(--gray-3);
+      background:#fff; transition:background .12s;
+    }
+    .tpl-list li:last-child { border-bottom:none; }
+    .tpl-list li.dragging { opacity:.4; }
+    .tpl-list li.drag-over { background:var(--blue-lt); }
+    .tpl-list li .handle {
+      cursor:grab; color:var(--gray-5); font-size:18px; user-select:none;
+      padding:4px 2px; line-height:1;
+    }
+    .tpl-list li .handle:active { cursor:grabbing; }
+    .tpl-list li .lbl { flex:1; font-size:13px; color:var(--gray-9); font-weight:600; }
+    .tpl-list li .wajib-badge { font-size:10px; font-weight:700; color:var(--gray-5); background:var(--gray-1); padding:2px 6px; border-radius:99px; }
+    .tpl-list li input[type=checkbox] { width:18px; height:18px; cursor:pointer; flex-shrink:0; }
+    .tpl-list li input[type=checkbox]:disabled { cursor:not-allowed; opacity:.6; }
+    .tpl-preview {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background:#f8fafc; color:#0f172a; border:1px solid var(--gray-3); border-radius:10px;
+      padding:12px; min-height:280px; max-height:520px; overflow:auto;
+      font-size:12px; line-height:1.45; white-space:pre; margin:0;
+    }
+
     .save-bar { display:flex; align-items:center; gap:12px; padding:14px 0; border-top:1px solid var(--gray-3); margin-top:4px; }
     .save-ok  { font-size:13px; color:var(--green); }
 
@@ -201,6 +238,7 @@
     <button class="tab active" onclick="switchTab('umum',this)">🏪 Profil Usaha</button>
     <button class="tab" onclick="switchTab('wa',this)">📱 WhatsApp</button>
     <button class="tab" onclick="switchTab('printer',this)">🖨️ Printer</button>
+    <button class="tab" onclick="switchTab('template',this)">🧾 Template Cetak</button>
     <button class="tab" onclick="switchTab('margin',this)">📊 Margin & HPP</button>
     <button class="tab" onclick="switchTab('antar-jemput',this)">🛵 Antar Jemput</button>
     <button class="tab" onclick="switchTab('master-item',this)">📋 Master Pakaian</button>
@@ -409,6 +447,46 @@
             <li>Logout dan login ulang, atau: <code style="background:var(--gray-2);padding:1px 5px;border-radius:4px">newgrp lp</code></li>
             <li>Alternatif sementara: <code style="background:var(--gray-2);padding:1px 5px;border-radius:4px">sudo chmod 666 /dev/usb/lp0</code></li>
           </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: Template Cetak ── -->
+  <div id="sec-template" class="tab-section">
+    <div class="card">
+      <div class="card-head" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <span>🧾 Template Cetak</span>
+        <div class="tpl-subtabs" role="tablist">
+          <button id="tplSubStrukBtn" class="tpl-sub-btn active" onclick="switchTplSub('struk')">Struk</button>
+          <button id="tplSubLabelBtn" class="tpl-sub-btn" onclick="switchTplSub('label')">Label</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="background:var(--blue-lt);border-radius:8px;padding:12px;font-size:12px;line-height:1.6;color:var(--gray-7)">
+          Atur elemen apa saja yang tampil dan urutannya. Geser ⠿ untuk reorder.
+          Elemen bertanda <strong>(wajib)</strong> selalu aktif.
+          Klik <strong>Simpan</strong> untuk menerapkan ke cetakan struk/label.
+        </div>
+
+        <div class="tpl-grid">
+          <div class="tpl-list-wrap">
+            <div style="font-size:12px;font-weight:700;color:var(--gray-7);margin-bottom:8px">📋 Elemen yang Ditampilkan</div>
+            <ul id="tplList" class="tpl-list">
+              <li style="padding:24px;text-align:center;color:var(--gray-5);font-size:13px">Memuat...</li>
+            </ul>
+          </div>
+          <div class="tpl-preview-wrap">
+            <div style="font-size:12px;font-weight:700;color:var(--gray-7);margin-bottom:8px">👁️ Preview Live</div>
+            <pre id="tplPreview" class="tpl-preview">Memuat preview...</pre>
+          </div>
+        </div>
+
+        <div class="save-bar" style="flex-wrap:wrap">
+          <button class="btn btn-outline" onclick="resetTpl()">↺ Reset ke Default</button>
+          <button class="btn btn-blue" onclick="saveTpl()">💾 Simpan Template</button>
+          <span class="save-ok" id="tplOk" style="display:none">✓ Tersimpan</span>
+          <span id="tplStatusLabel" style="font-size:12px;color:var(--gray-5);margin-left:auto"></span>
         </div>
       </div>
     </div>
@@ -774,6 +852,7 @@ function switchTab(id, btn) {
   if (id === 'margin')       loadMarginSummary();
   if (id === 'master-item')  loadMasterItems();
   if (id === 'antar-jemput') loadAJSettings();
+  if (id === 'template')     loadTpl();
 }
 
 // ── Antar Jemput settings ────────────────────────────────────────────────────
@@ -1379,6 +1458,432 @@ async function deleteMasterItem(id, nama) {
   } catch (err) {
     toast(err.message || 'Gagal menghapus master item', true);
   }
+}
+
+// ── Template Cetak ────────────────────────────────────────────────────────────
+const tplState = {
+  jenis: 'struk',
+  config: { elemen: [] },
+  meta: { labels: {}, wajib: [] },
+  tersimpan: false,
+  loaded: { struk: false, label: false },
+  cache: { struk: null, label: null },
+};
+
+function switchTplSub(jenis) {
+  tplState.jenis = jenis;
+  document.getElementById('tplSubStrukBtn').classList.toggle('active', jenis === 'struk');
+  document.getElementById('tplSubLabelBtn').classList.toggle('active', jenis === 'label');
+  loadTpl();
+}
+
+async function loadTpl() {
+  try {
+    const j = tplState.jenis;
+    const r = await api(`/api/v1/pengaturan/template/${j}`);
+    tplState.config    = r.config;
+    tplState.meta      = r.meta || tplState.meta;
+    tplState.tersimpan = !!r.tersimpan;
+    tplState.cache[j]  = r.config;
+    tplState.loaded[j] = true;
+    renderTplList();
+    renderTplPreview();
+    document.getElementById('tplStatusLabel').textContent =
+      r.tersimpan ? 'Pakai template tersimpan' : 'Pakai default (belum disimpan)';
+  } catch (e) {
+    toast('Gagal memuat template: ' + e.message, true);
+  }
+}
+
+function renderTplList() {
+  const ul = document.getElementById('tplList');
+  const wajib = new Set(tplState.meta.wajib || []);
+  const labels = tplState.meta.labels || {};
+  const items = (tplState.config.elemen || []).slice().sort((a,b) => a.urutan - b.urutan);
+
+  ul.innerHTML = items.map((el, idx) => {
+    const isWajib = wajib.has(el.id);
+    const checked = el.aktif ? 'checked' : '';
+    const disabled = isWajib ? 'disabled' : '';
+    const lbl = labels[el.id] || el.id;
+    return `
+      <li draggable="true" data-id="${el.id}" data-idx="${idx}">
+        <span class="handle" aria-label="Drag" title="Geser untuk urutkan">⠿</span>
+        <input type="checkbox" ${checked} ${disabled}
+               onchange="onTplToggle('${el.id}', this.checked)"/>
+        <span class="lbl">${esc(lbl)}</span>
+        ${isWajib ? '<span class="wajib-badge">wajib</span>' : ''}
+      </li>
+    `;
+  }).join('');
+
+  // Wire drag-and-drop (native HTML5)
+  let dragId = null;
+  ul.querySelectorAll('li').forEach(li => {
+    li.addEventListener('dragstart', (e) => {
+      dragId = li.dataset.id;
+      li.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', dragId); } catch {}
+    });
+    li.addEventListener('dragend', () => {
+      li.classList.remove('dragging');
+      ul.querySelectorAll('li').forEach(x => x.classList.remove('drag-over'));
+      dragId = null;
+    });
+    li.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      ul.querySelectorAll('li').forEach(x => x.classList.remove('drag-over'));
+      li.classList.add('drag-over');
+    });
+    li.addEventListener('dragleave', () => li.classList.remove('drag-over'));
+    li.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const srcId = dragId;
+      const dstId = li.dataset.id;
+      if (!srcId || srcId === dstId) return;
+      reorderTpl(srcId, dstId);
+    });
+  });
+
+  // Touch fallback — simple long-press swap via handle (mobile)
+  ul.querySelectorAll('li').forEach(li => {
+    const handle = li.querySelector('.handle');
+    if (!handle) return;
+    let startY = 0;
+    let activeLi = null;
+    handle.addEventListener('touchstart', (e) => {
+      activeLi = li;
+      startY = e.touches[0].clientY;
+      li.classList.add('dragging');
+    }, { passive: true });
+    handle.addEventListener('touchmove', (e) => {
+      if (!activeLi) return;
+      const y = e.touches[0].clientY;
+      const target = document.elementFromPoint(e.touches[0].clientX, y);
+      const overLi = target && target.closest('#tplList li');
+      ul.querySelectorAll('li').forEach(x => x.classList.remove('drag-over'));
+      if (overLi && overLi !== activeLi) overLi.classList.add('drag-over');
+    }, { passive: true });
+    handle.addEventListener('touchend', (e) => {
+      if (!activeLi) return;
+      const y = e.changedTouches[0].clientY;
+      const target = document.elementFromPoint(e.changedTouches[0].clientX, y);
+      const overLi = target && target.closest('#tplList li');
+      activeLi.classList.remove('dragging');
+      ul.querySelectorAll('li').forEach(x => x.classList.remove('drag-over'));
+      if (overLi && overLi !== activeLi) {
+        reorderTpl(activeLi.dataset.id, overLi.dataset.id);
+      }
+      activeLi = null;
+    });
+  });
+}
+
+function reorderTpl(srcId, dstId) {
+  const arr = tplState.config.elemen.slice().sort((a,b) => a.urutan - b.urutan);
+  const srcIdx = arr.findIndex(e => e.id === srcId);
+  const dstIdx = arr.findIndex(e => e.id === dstId);
+  if (srcIdx < 0 || dstIdx < 0) return;
+  const [moved] = arr.splice(srcIdx, 1);
+  arr.splice(dstIdx, 0, moved);
+  tplState.config.elemen = arr.map((e, i) => ({ ...e, urutan: i + 1 }));
+  renderTplList();
+  renderTplPreview();
+}
+
+function onTplToggle(id, aktif) {
+  const wajib = new Set(tplState.meta.wajib || []);
+  if (!aktif && wajib.has(id)) return;
+  const el = tplState.config.elemen.find(e => e.id === id);
+  if (el) {
+    el.aktif = !!aktif;
+    renderTplPreview();
+  }
+}
+
+// Data dummy untuk preview live
+const TPL_SAMPLE = {
+  pengaturan: {
+    nama_toko:    'Nala Laundry',
+    alamat_toko:  'Jl A Djelani Gg A Karim',
+    telepon_toko: '087859751490',
+    footer_struk: 'Terima kasih!',
+  },
+  transaksi: {
+    nomor_transaksi: 'LDR-20260629-001',
+    tanggal_masuk:   '2026-06-29T10:15:00+07:00',
+    tanggal_selesai: '2026-06-30T17:00:00+07:00',
+    kasir_nama:      'Esi',
+    pelanggan_nama:  'Kak Esi',
+    pelanggan_telepon: '6285624497900',
+    pelanggan_poin:  120,
+    items: [
+      { id:1, nama_layanan:'Cuci Setrika Reguler', jumlah:3, satuan:'kg', harga_satuan:7000, subtotal:21000, rincian:[] },
+      { id:2, nama_layanan:'Setrika Saja',         jumlah:1, satuan:'kg', harga_satuan:5000, subtotal:5000,  rincian:[] },
+    ],
+    biaya_tambahan: [{ keterangan:'Antar Jemput', nominal:5000 }],
+    total_harga: 26000,
+    diskon:      2000,
+    total_bayar: 29000,
+    bayar:       20000,
+    kembalian:   0,
+    metode_bayar:'tunai',
+  },
+  poinEarned: 26,
+};
+
+function renderTplPreview() {
+  const pre = document.getElementById('tplPreview');
+  if (!pre) return;
+  const jenis = tplState.jenis;
+  const elements = (tplState.config.elemen || [])
+    .filter(e => e.aktif)
+    .slice().sort((a,b) => a.urutan - b.urutan);
+  pre.textContent = (jenis === 'label'
+    ? buildLabelPreview(elements)
+    : buildStrukPreview(elements));
+}
+
+const LEBAR = 32;
+function padLR(l, r) {
+  const sp = LEBAR - l.length - r.length;
+  return l + ' '.repeat(Math.max(1, sp)) + r;
+}
+function center(s) {
+  s = String(s);
+  if (s.length >= LEBAR) return s.substring(0, LEBAR);
+  const pad = Math.floor((LEBAR - s.length) / 2);
+  return ' '.repeat(pad) + s;
+}
+function fmtRp(n) { return Number(n||0).toLocaleString('id-ID'); }
+function fmtTglJam(d) {
+  return new Date(d).toLocaleString('id-ID', { timeZone:'Asia/Makassar',
+    day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+function fmtTgl(d) {
+  return new Date(d).toLocaleDateString('id-ID', { timeZone:'Asia/Makassar',
+    weekday:'short', day:'2-digit', month:'short', year:'numeric' });
+}
+function fmtTel(n) {
+  if (!n) return '';
+  const s = String(n).trim();
+  if (s.startsWith('628')) return '08' + s.slice(3);
+  if (s.startsWith('62'))  return '0'  + s.slice(2);
+  return s;
+}
+
+const STRUK_GROUP_PV = {
+  nama_toko:'header', alamat_toko:'header', telepon_toko:'header',
+  nomor_order:'info', tanggal:'info', kasir:'info',
+  nama_pelanggan:'info', nomor_wa:'info',
+  daftar_layanan:'items', biaya_tambahan:'items',
+  diskon:'total', total:'total',
+  status_bayar:'pay',
+  estimasi_selesai:'estim',
+  footer:'footer', instruksi_ambil:'footer',
+};
+const LABEL_GROUP_PV = {
+  nama_toko:'header', alamat_toko:'header', telepon_toko:'header',
+  nomor_order:'order',
+  nama_pelanggan:'pelanggan', nomor_wa:'pelanggan',
+  tanggal:'meta', kasir:'meta', estimasi_selesai:'meta',
+  daftar_layanan:'items', biaya_tambahan:'items',
+  diskon:'total', total:'total', status_bayar:'total',
+  footer:'footer', instruksi_ambil:'footer',
+};
+
+function buildStrukPreview(elements) {
+  const { pengaturan, transaksi, poinEarned } = TPL_SAMPLE;
+  const out = [];
+  let lastGroup = null;
+  const line = () => out.push('-'.repeat(LEBAR));
+
+  for (const el of elements) {
+    const g = STRUK_GROUP_PV[el.id] || 'other';
+    if (lastGroup !== null && lastGroup !== g) line();
+
+    switch (el.id) {
+      case 'nama_toko':     out.push(center(pengaturan.nama_toko)); break;
+      case 'alamat_toko':   if (pengaturan.alamat_toko) out.push(center(pengaturan.alamat_toko)); break;
+      case 'telepon_toko':  if (pengaturan.telepon_toko) out.push(center('WA: ' + pengaturan.telepon_toko)); break;
+      case 'nomor_order':   out.push('No : ' + transaksi.nomor_transaksi); break;
+      case 'tanggal':       out.push('Tgl: ' + fmtTglJam(transaksi.tanggal_masuk)); break;
+      case 'kasir':         if (transaksi.kasir_nama) out.push('Kasir: ' + transaksi.kasir_nama); break;
+      case 'nama_pelanggan':out.push('Plg: ' + (transaksi.pelanggan_nama || 'Non-member')); break;
+      case 'nomor_wa':      if (transaksi.pelanggan_telepon) out.push('WA : ' + transaksi.pelanggan_telepon); break;
+      case 'daftar_layanan':
+        out.push('LAYANAN:');
+        (transaksi.items||[]).forEach(it => {
+          out.push(String(it.nama_layanan).substring(0,LEBAR));
+          const qty = '  ' + it.jumlah + ' ' + (it.satuan||'') + ' x Rp' + fmtRp(it.harga_satuan);
+          out.push(padLR(qty, 'Rp' + fmtRp(it.subtotal)));
+        });
+        break;
+      case 'biaya_tambahan':
+        if ((transaksi.biaya_tambahan||[]).length) {
+          out.push('Biaya Tambahan:');
+          transaksi.biaya_tambahan.forEach(bt =>
+            out.push(padLR(' ' + String(bt.keterangan).substring(0,LEBAR-10), 'Rp' + fmtRp(bt.nominal)))
+          );
+        }
+        break;
+      case 'diskon':
+        if ((transaksi.diskon||0) > 0) {
+          out.push(padLR('Subtotal', 'Rp' + fmtRp(transaksi.total_harga)));
+          out.push(padLR('Diskon',   '-Rp' + fmtRp(transaksi.diskon)));
+        }
+        break;
+      case 'total':
+        out.push(padLR('TOTAL BAYAR', 'Rp' + fmtRp(transaksi.total_bayar)));
+        break;
+      case 'status_bayar': {
+        const lunas = (transaksi.bayar||0) >= transaksi.total_bayar;
+        const status = lunas ? 'LUNAS' : ((transaksi.bayar||0) > 0 ? 'DP/CICILAN' : 'BELUM BAYAR');
+        out.push('Bayar : ' + (transaksi.metode_bayar||'tunai').toUpperCase());
+        out.push('Status: ' + status);
+        if (!lunas && (transaksi.bayar||0) > 0) {
+          out.push('Dibayar : Rp' + fmtRp(transaksi.bayar));
+          out.push('Sisa    : Rp' + fmtRp(transaksi.total_bayar - transaksi.bayar));
+        } else if (lunas) {
+          out.push('Dibayar : Rp' + fmtRp(transaksi.bayar));
+        }
+        if (poinEarned > 0) {
+          out.push(center('+' + poinEarned + ' poin didapat'));
+          if (transaksi.pelanggan_poin != null) out.push(center('Total poin: ' + transaksi.pelanggan_poin));
+        }
+        break;
+      }
+      case 'estimasi_selesai':
+        if (transaksi.tanggal_selesai) {
+          out.push(center('Estimasi selesai:'));
+          out.push(center(fmtTglJam(transaksi.tanggal_selesai)));
+        }
+        break;
+      case 'footer':        out.push(center(pengaturan.footer_struk || 'Terima kasih!')); break;
+      case 'instruksi_ambil':out.push(center('Tunjukkan struk saat ambil.')); break;
+    }
+    lastGroup = g;
+  }
+  return out.join('\n');
+}
+
+function buildLabelPreview(elements) {
+  const { pengaturan, transaksi } = TPL_SAMPLE;
+  const items = transaksi.items || [];
+  const out = [];
+  let lastGroup = null;
+
+  for (const el of elements) {
+    const g = LABEL_GROUP_PV[el.id] || 'other';
+    if (lastGroup === null) {
+      if (g === 'order' || g === 'pelanggan') out.push('='.repeat(LEBAR));
+    } else if (lastGroup !== g) {
+      if (g === 'items' || (lastGroup === 'items' && g === 'total')) out.push('-'.repeat(LEBAR));
+      else out.push('='.repeat(LEBAR));
+    }
+
+    switch (el.id) {
+      case 'nama_toko':     out.push(center(pengaturan.nama_toko)); break;
+      case 'alamat_toko':   if (pengaturan.alamat_toko) out.push(center(pengaturan.alamat_toko)); break;
+      case 'telepon_toko':  if (pengaturan.telepon_toko) out.push(center('WA: ' + pengaturan.telepon_toko)); break;
+      case 'nomor_order':   out.push('ORDER: ' + transaksi.nomor_transaksi); break;
+      case 'tanggal':       out.push('Tgl: ' + fmtTglJam(transaksi.tanggal_masuk)); break;
+      case 'kasir':         if (transaksi.kasir_nama) out.push('Kasir: ' + transaksi.kasir_nama); break;
+      case 'nama_pelanggan':out.push(transaksi.pelanggan_nama || 'Non-member'); break;
+      case 'nomor_wa': {
+        const t = fmtTel(transaksi.pelanggan_telepon);
+        if (t) out.push('WA: ' + t);
+        break;
+      }
+      case 'estimasi_selesai':
+        if (transaksi.tanggal_selesai) out.push('Estimasi: ' + fmtTgl(transaksi.tanggal_selesai));
+        break;
+      case 'daftar_layanan':
+        if (items.length === 1) {
+          out.push(String(items[0].nama_layanan).substring(0,LEBAR));
+          out.push('  ' + items[0].jumlah + ' ' + (items[0].satuan||'').trim());
+        } else {
+          items.forEach((it,i) => {
+            out.push((i+1) + '. ' + String(it.nama_layanan).substring(0,LEBAR-3));
+            out.push('   ' + it.jumlah + ' ' + (it.satuan||'').trim());
+          });
+        }
+        break;
+      case 'biaya_tambahan':
+        if ((transaksi.biaya_tambahan||[]).length) {
+          out.push('Biaya Tambahan:');
+          transaksi.biaya_tambahan.forEach(bt => {
+            const n = '  ' + String(bt.keterangan||'').substring(0,18);
+            out.push(padLR(n, 'Rp' + fmtRp(bt.nominal)));
+          });
+        }
+        break;
+      case 'diskon':
+        if ((transaksi.diskon||0) > 0) {
+          out.push(padLR('Subtotal', 'Rp' + fmtRp(transaksi.total_harga)));
+          out.push(padLR('Diskon',   '-Rp' + fmtRp(transaksi.diskon)));
+        }
+        break;
+      case 'total': out.push('Total: Rp' + fmtRp(transaksi.total_bayar)); break;
+      case 'status_bayar': {
+        const lunas = (transaksi.bayar||0) >= transaksi.total_bayar;
+        if (!lunas) {
+          if ((transaksi.bayar||0) > 0) {
+            out.push('Status: DP Rp' + fmtRp(transaksi.bayar));
+            out.push('Sisa: Rp' + fmtRp(transaksi.total_bayar - transaksi.bayar));
+          } else {
+            out.push('Status: BELUM LUNAS');
+          }
+        } else {
+          out.push('Status: LUNAS');
+        }
+        break;
+      }
+      case 'footer':         out.push(center(pengaturan.footer_struk || 'Terima kasih!')); break;
+      case 'instruksi_ambil':out.push(center('Tunjukkan label saat ambil')); break;
+    }
+    lastGroup = g;
+  }
+  if (lastGroup !== null && lastGroup !== 'footer') out.push('='.repeat(LEBAR));
+  return out.join('\n');
+}
+
+async function saveTpl() {
+  try {
+    const j = tplState.jenis;
+    const body = {
+      elemen: tplState.config.elemen.map(e => ({
+        id: e.id, aktif: !!e.aktif, urutan: e.urutan
+      })),
+    };
+    const r = await api(`/api/v1/pengaturan/template/${j}`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    });
+    tplState.config = r.config;
+    tplState.tersimpan = true;
+    document.getElementById('tplStatusLabel').textContent = 'Pakai template tersimpan';
+    showOk('tplOk');
+    toast('Template ' + j + ' disimpan');
+    renderTplList();
+    renderTplPreview();
+  } catch (e) { toast(e.message, true); }
+}
+
+async function resetTpl() {
+  if (!confirm('Reset template ke default? Semua perubahan tersimpan akan hilang.')) return;
+  try {
+    const j = tplState.jenis;
+    const r = await api(`/api/v1/pengaturan/template/${j}`, { method: 'DELETE' });
+    tplState.config = r.config;
+    tplState.tersimpan = false;
+    document.getElementById('tplStatusLabel').textContent = 'Pakai default (belum disimpan)';
+    renderTplList();
+    renderTplPreview();
+    toast('Template ' + j + ' direset ke default');
+  } catch (e) { toast(e.message, true); }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
