@@ -106,8 +106,11 @@
     .empty-row td { text-align:center; padding:32px; color:var(--gray-5); }
 
     .role-badge { display:inline-flex; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; text-transform:uppercase; }
-    .role-admin { background:#fef3c7; color:#92400e; }
-    .role-kasir  { background:#C7D2FE; color:#1E2A8A; }
+    .role-owner    { background:#fef3c7; color:#92400e; }
+    .role-karyawan { background:#C7D2FE; color:#1E2A8A; }
+    /* Legacy aliases — untuk data lama yang belum ter-migrasi (tidak seharusnya muncul) */
+    .role-admin    { background:#fef3c7; color:#92400e; }
+    .role-kasir    { background:#C7D2FE; color:#1E2A8A; }
     .role-operator { background:#D1FAE5; color:#166534; }
 
     /* ── Modal ── */
@@ -758,9 +761,8 @@
         <div class="field">
           <label>Role</label>
           <select id="uRole">
-            <option value="kasir">Kasir</option>
-            <option value="operator">Operator</option>
-            <option value="admin">Admin</option>
+            <option value="karyawan">Karyawan — akses operasional harian</option>
+            <option value="owner">Owner — akses penuh (laporan, keuangan, pengaturan)</option>
           </select>
         </div>
       </div>
@@ -1086,11 +1088,12 @@ async function loadUsers() {
       tb.innerHTML = '<tr class="empty-row"><td colspan="5">Belum ada user</td></tr>';
       return;
     }
+    const roleLabel = r => r === 'owner' ? '👑 Owner' : (r === 'karyawan' ? '👥 Karyawan' : r);
     tb.innerHTML = data.map(u => `
       <tr>
         <td style="font-weight:600">${esc(u.nama)}</td>
         <td style="font-family:monospace;color:var(--gray-5)">${esc(u.username)}</td>
-        <td><span class="role-badge role-${u.role}">${u.role}</span></td>
+        <td><span class="role-badge role-${esc(u.role)}">${roleLabel(u.role)}</span></td>
         <td>${u.aktif ? '<span style="color:var(--green);font-weight:600">✓ Aktif</span>' : '<span style="color:var(--red)">✗ Nonaktif</span>'}</td>
         <td style="white-space:nowrap">
           <button class="btn btn-outline btn-sm" onclick="openEditUser(${u.id})">Edit</button>
@@ -1107,7 +1110,7 @@ function openAddUser() {
   document.getElementById('uNama').value      = '';
   document.getElementById('uUsername').value  = '';
   document.getElementById('uPassword').value  = '';
-  document.getElementById('uRole').value      = 'kasir';
+  document.getElementById('uRole').value      = 'karyawan';
   document.getElementById('uPwHint').textContent = '';
   document.getElementById('uAktifWrap').style.display = 'none';
   document.getElementById('uErr').textContent = '';

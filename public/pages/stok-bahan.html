@@ -243,7 +243,7 @@
 <div class="page">
   <div class="head">
     <div class="ttl">📦 Stok Bahan</div>
-    <button class="btn-add" onclick="openFormBahan()">+ Tambah Bahan</button>
+    <button class="btn-add owner-only" onclick="openFormBahan()">+ Tambah Bahan</button>
   </div>
 
   <div class="body-wrap">
@@ -497,11 +497,13 @@ function renderCards(list) {
       </div>`;
     return;
   }
+  const owner = typeof window.isOwner === 'function' ? window.isOwner() : false;
   el.innerHTML = list.map(b => {
     const st = statusOf(b);
     const rasioTxt = Number(b.rasio_pemakaian) > 0
       ? `Rasio: ${fmtNum(b.rasio_pemakaian)} ${esc(b.satuan)} per ${b.satuan_rasio === 'per_kg' ? 'kg cucian' : 'pcs layanan'}`
       : '<span style="color:var(--gray-5)">Belum ada rasio pemakaian</span>';
+    // RBAC: koreksi + edit bahan → owner-only. Karyawan cuma bisa restock + lihat mutasi.
     return `
       <div class="bahan-card ${st === 'low' ? 'low' : ''} ${st === 'critical' ? 'critical' : ''}">
         <div class="bahan-body">
@@ -512,9 +514,9 @@ function renderCards(list) {
         </div>
         <div class="bahan-actions">
           <button class="btn-restock" onclick="openFormRestock(${b.id})">+ Restock</button>
-          <button class="btn-koreksi" onclick="openFormKoreksi(${b.id})">✏️ Koreksi</button>
+          ${owner ? `<button class="btn-koreksi" onclick="openFormKoreksi(${b.id})">✏️ Koreksi</button>` : ''}
           <button class="btn-ic" onclick="openMutasiSheet(${b.id})" title="Riwayat mutasi">📋</button>
-          <button class="btn-ic" onclick="openFormBahan(${b.id})" title="Edit bahan">⚙️</button>
+          ${owner ? `<button class="btn-ic" onclick="openFormBahan(${b.id})" title="Edit bahan">⚙️</button>` : ''}
         </div>
       </div>`;
   }).join('');
@@ -526,6 +528,7 @@ function renderTable(list) {
     el.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:60px 20px;color:var(--gray-5)">Belum ada bahan baku tercatat</td></tr>';
     return;
   }
+  const owner = typeof window.isOwner === 'function' ? window.isOwner() : false;
   el.innerHTML = list.map(b => {
     const st = statusOf(b);
     const rasio = Number(b.rasio_pemakaian) > 0
@@ -545,10 +548,10 @@ function renderTable(list) {
         <td>
           <div class="td-actions">
             <button style="background:var(--success);color:#fff" onclick="openFormRestock(${b.id})">+ Restock</button>
-            <button style="background:var(--warning);color:#fff" onclick="openFormKoreksi(${b.id})">Koreksi</button>
+            ${owner ? `<button style="background:var(--warning);color:#fff" onclick="openFormKoreksi(${b.id})">Koreksi</button>` : ''}
             <button style="background:#fff;border:1px solid var(--gray-3);color:var(--gray-7)" onclick="openMutasiSheet(${b.id})">📋</button>
-            <button style="background:var(--primary);color:#fff" onclick="openFormBahan(${b.id})">Edit</button>
-            <button style="background:#fff;border:1px solid var(--danger);color:var(--danger)" onclick="hapusBahan(${b.id})">Hapus</button>
+            ${owner ? `<button style="background:var(--primary);color:#fff" onclick="openFormBahan(${b.id})">Edit</button>` : ''}
+            ${owner ? `<button style="background:#fff;border:1px solid var(--danger);color:var(--danger)" onclick="hapusBahan(${b.id})">Hapus</button>` : ''}
           </div>
         </td>
       </tr>`;
@@ -789,6 +792,10 @@ function renderMutasi(list, satuan) {
 
 /* ── Init ────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', loadList);
+// Re-render setelah role diketahui → tombol owner-only muncul untuk owner
+window.addEventListener('pos:role-loaded', () => {
+  if (BAHAN_LIST.length) { renderCards(BAHAN_LIST); renderTable(BAHAN_LIST); }
+});
 </script>
 
 <script src="/js/nav.js"></script>

@@ -1,6 +1,10 @@
 const express = require('express');
 const router  = express.Router();
 const ctrl    = require('../controllers/kasController');
+const { requireOwner } = require('../middleware/role');
+
+// Buku Kas — transaksi keuangan operasional, khusus owner
+router.use(requireOwner);
 
 // ringkasan sebelum /:id
 router.get('/ringkasan', ctrl.ringkasan);

@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const aiController = require('../controllers/aiController');
+const { requireOwner } = require('../middleware/role');
+
+// AI Insight / Chat — analitik bisnis sensitif, khusus owner
+router.use(requireOwner);
 
 // POST /api/v1/ai/chat - Chat dengan AI Assistant
 router.post('/chat', aiController.chat);

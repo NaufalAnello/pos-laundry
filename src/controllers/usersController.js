@@ -4,18 +4,19 @@ const bcrypt = require('bcryptjs');
 
 const SALT = 12;
 
+// RBAC: dua role — owner (full access) dan karyawan (operasional harian)
 const createSchema = Joi.object({
   nama:     Joi.string().max(100).required(),
   username: Joi.string().alphanum().min(3).max(50).required(),
   password: Joi.string().min(6).required(),
-  role:     Joi.string().valid('admin', 'kasir', 'operator').default('kasir')
+  role:     Joi.string().valid('owner', 'karyawan').default('karyawan')
 });
 
 const updateSchema = Joi.object({
   nama:     Joi.string().max(100),
   username: Joi.string().alphanum().min(3).max(50),
   password: Joi.string().min(6).allow('', null),
-  role:     Joi.string().valid('admin', 'kasir', 'operator'),
+  role:     Joi.string().valid('owner', 'karyawan'),
   aktif:    Joi.boolean()
 }).min(1);
 
@@ -65,6 +66,19 @@ exports.update = async (req, res) => {
     // Cannot deactivate yourself
     if ('aktif' in value && !value.aktif && Number(req.params.id) === req.session?.user?.id) {
       return res.status(400).json({ error: 'Tidak dapat menonaktifkan akun Anda sendiri' });
+    }
+
+    // Cegah owner demote diri sendiri jadi karyawan → bisa terlock dari sistem
+    if (value.role === 'karyawan' && Number(req.params.id) === req.session?.user?.id) {
+      return res.status(400).json({ error: 'Tidak dapat menurunkan role akun Anda sendiri' });
+    }
+
+    // Cegah menghapus owner terakhir (safety net)
+    if (value.role === 'karyawan' && user.role === 'owner') {
+      const ownerCount = await db('users').where({ role: 'owner', aktif: true }).count('id as c').first();
+      if (Number(ownerCount?.c) <= 1) {
+        return res.status(400).json({ error: 'Minimal harus ada 1 owner aktif di sistem' });
+      }
     }
 
     // Username uniqueness check

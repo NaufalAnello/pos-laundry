@@ -130,6 +130,15 @@ app.use('/api/v1/stok-bahan', stokBahanRoutes);
 
 // ── Web page routes ────────────────────────────────────────────────────────────
 
+// Halaman owner-only: laporan, kas, layanan, promo, poin, ai-insight,
+// pengaturan. Backend API sudah pakai requireOwner (403); guard ini
+// mencegah karyawan melihat halaman kosong tanpa data.
+const gateOwnerPage = (req, res, next) => {
+  if (!req.session?.userId) return res.redirect('/login');
+  if (req.session?.user?.role !== 'owner') return res.redirect('/');
+  next();
+};
+
 // Halaman login
 app.get('/login', (req, res) => {
   if (req.session?.userId) return res.redirect('/');
@@ -171,27 +180,23 @@ app.get('/order/detail', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/pages/detail-order.html'));
 });
 
-// Layanan & Kategori
-app.get('/layanan', (req, res) => {
-  if (!req.session?.userId) return res.redirect('/login');
+// Layanan & Kategori (owner-only)
+app.get('/layanan', gateOwnerPage, (req, res) => {
   res.sendFile(path.join(__dirname, '../public/pages/layanan.html'));
 });
 
-// Buku Kas
-app.get('/kas', (req, res) => {
-  if (!req.session?.userId) return res.redirect('/login');
+// Buku Kas (owner-only)
+app.get('/kas', gateOwnerPage, (req, res) => {
   res.sendFile(path.join(__dirname, '../public/pages/kas.html'));
 });
 
-// Promo
-app.get('/promo', (req, res) => {
-  if (!req.session?.userId) return res.redirect('/login');
+// Promo (owner-only)
+app.get('/promo', gateOwnerPage, (req, res) => {
   res.sendFile(path.join(__dirname, '../public/pages/promo.html'));
 });
 
-// Poin Pelanggan
-app.get('/poin', (req, res) => {
-  if (!req.session?.userId) return res.redirect('/login');
+// Poin Pelanggan (owner-only)
+app.get('/poin', gateOwnerPage, (req, res) => {
   res.sendFile(path.join(__dirname, '../public/pages/poin.html'));
 });
 
@@ -201,9 +206,8 @@ app.get('/pelanggan', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/pages/pelanggan.html'));
 });
 
-// Laporan
-app.get('/laporan', (req, res) => {
-  if (!req.session?.userId) return res.redirect('/login');
+// Laporan (owner-only)
+app.get('/laporan', gateOwnerPage, (req, res) => {
   res.sendFile(path.join(__dirname, '../public/pages/laporan.html'));
 });
 
@@ -219,9 +223,8 @@ app.get('/wa-center', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/pages/wa-center.html'));
 });
 
-// Pengaturan
-app.get('/pengaturan', (req, res) => {
-  if (!req.session?.userId) return res.redirect('/login');
+// Pengaturan (owner-only)
+app.get('/pengaturan', gateOwnerPage, (req, res) => {
   res.sendFile(path.join(__dirname, '../public/pages/pengaturan.html'));
 });
 
@@ -231,9 +234,8 @@ app.get('/deposit', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/pages/deposit.html'));
 });
 
-// AI Insight
-app.get('/ai-insight', (req, res) => {
-  if (!req.session?.userId) return res.redirect('/login');
+// AI Insight (owner-only)
+app.get('/ai-insight', gateOwnerPage, (req, res) => {
   res.sendFile(path.join(__dirname, '../public/pages/ai-insight.html'));
 });
 

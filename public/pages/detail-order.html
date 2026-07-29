@@ -1012,7 +1012,7 @@ function renderActions() {
   if (['pending','proses'].includes(o.status)) {
     danger.push(`<button class="btn btn-batal" onclick="batalOrder()" style="min-height:38px">❌ Batalkan Order</button>`);
   }
-  if (currentUser?.role === 'admin') {
+  if (currentUser?.role === 'owner') {
     danger.push(`<button class="btn btn-hapus" onclick="openModalHapus()" style="min-height:38px">🗑️ Hapus Permanen</button>`);
   }
   document.getElementById('dangerActionsDesktop').innerHTML = danger.join('');

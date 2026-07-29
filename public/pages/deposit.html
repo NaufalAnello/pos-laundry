@@ -759,7 +759,10 @@ function renderMutasi(rows) {
     if (m.operator_nama) meta.push('oleh ' + esc(m.operator_nama));
 
     let aksi = '';
-    if (jenis === 'topup' && !isCanceled) {
+    // RBAC: batalkan topup adalah aksi owner-only (mempengaruhi kas & saldo).
+    // Karyawan tidak akan pernah melihat tombol Batalkan.
+    const canCancelTopup = typeof window.isOwner === 'function' ? window.isOwner() : false;
+    if (jenis === 'topup' && !isCanceled && canCancelTopup) {
       const diffDays = Math.floor((Date.now() - new Date(m.created_at).getTime()) / 86400000);
       const saldoCukup = currentPelanggan && currentPelanggan.saldo >= nominal;
       if (diffDays <= 7 && saldoCukup) {

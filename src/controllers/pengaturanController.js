@@ -7,10 +7,21 @@ const tpl  = require('../utils/print-template');
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, '../../data/laundry.db');
 
 // ── GET /api/v1/pengaturan ────────────────────────────────────────────────────
+// Endpoint dipakai lintas-halaman (dashboard, order, wa) — GET tetap terbuka
+// untuk karyawan supaya halaman-halaman itu tidak error. Tapi kunci sensitif
+// (API key AI, dll.) di-strip untuk non-owner agar tidak bocor.
+const SENSITIVE_KEYS = ['deepseek_api_key'];
+
 exports.getAll = async (req, res) => {
   try {
     const rows = await db('pengaturan').orderBy('kunci');
-    res.json({ data: Object.fromEntries(rows.map(r => [r.kunci, r.nilai ?? ''])) });
+    const isOwner = req.session?.user?.role === 'owner';
+    const data = Object.fromEntries(
+      rows
+        .filter(r => isOwner || !SENSITIVE_KEYS.includes(r.kunci))
+        .map(r => [r.kunci, r.nilai ?? ''])
+    );
+    res.json({ data });
   } catch (err) {
     console.error('[pengaturan:getAll]', err);
     res.status(500).json({ error: 'Gagal mengambil pengaturan' });

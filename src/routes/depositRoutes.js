@@ -5,6 +5,7 @@ const depositModel  = require('../models/deposit.model');
 const pelangganModel = require('../models/pelangganModel');
 const waService     = require('../services/wa.service');
 const db            = require('../database/connection');
+const { requireOwner } = require('../middleware/role');
 
 // ── GET /api/v1/deposit/ringkasan ────────────────────────────────────────────
 router.get('/ringkasan', async (req, res) => {
@@ -218,7 +219,8 @@ router.get('/mutasi/export', async (req, res) => {
 });
 
 // ── POST /api/v1/deposit/:pelangganId/batalkan-topup ─────────────────────────
-router.post('/:pelangganId/batalkan-topup', async (req, res) => {
+// Owner-only — pembatalan topup mempengaruhi saldo & kas, tidak boleh oleh karyawan.
+router.post('/:pelangganId/batalkan-topup', requireOwner, async (req, res) => {
   const { error, value } = Joi.object({
     mutasi_id: Joi.number().integer().positive().required()
   }).validate(req.body);
