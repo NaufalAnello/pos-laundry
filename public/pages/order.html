@@ -584,6 +584,11 @@
       border-color: var(--blue); background: var(--blue-lt); color: var(--blue);
     }
     .pay-method-icon { font-size: 20px; display: block; margin-bottom: 3px; }
+    .pay-method-saldo {
+      font-size: 10px; font-weight: 700; margin-top: 2px; display: block;
+    }
+    .pay-method-saldo.positive { color: var(--green); }
+    .pay-method-saldo.zero { color: var(--gray-5); }
     .pay-method-btn-dp {
       flex: 1; min-width: 80px; padding: 9px 8px;
       border: 1.5px solid var(--gray-3); border-radius: 8px;
@@ -594,6 +599,11 @@
     .pay-method-btn-dp.active {
       border-color: var(--yellow); background: var(--yellow-lt); color: var(--yellow);
     }
+    .pay-method-btn-dp .pay-method-saldo {
+      font-size: 10px; font-weight: 700; margin-top: 2px; display: block;
+    }
+    .pay-method-btn-dp .pay-method-saldo.positive { color: var(--green); }
+    .pay-method-btn-dp .pay-method-saldo.zero { color: var(--gray-5); }
 
     /* ── Payment tabs ── */
     .payment-tab-btn {
@@ -972,6 +982,7 @@
               </button>
               <button class="pay-method-btn" data-method="deposit">
                 <span class="pay-method-icon">💳</span>Deposit
+                <span class="pay-method-saldo zero" id="depositSaldoBtnFull">—</span>
               </button>
             </div>
           </div>
@@ -1046,6 +1057,7 @@
               </button>
               <button class="pay-method-btn-dp" data-method-dp="deposit">
                 <span class="pay-method-icon">💳</span>Deposit
+                <span class="pay-method-saldo zero" id="depositSaldoBtnDp">—</span>
               </button>
             </div>
           </div>
@@ -2144,6 +2156,36 @@ document.querySelectorAll('.pay-method-btn[data-kk]').forEach(btn => {
 
 document.getElementById('kekuranganInput')?.addEventListener('input', updatePaymentPreview);
 
+// ── updateDepositButtonSaldo: tampilkan saldo di tombol deposit ─────────────
+function updateDepositButtonSaldo() {
+  const saldo = state.depositSaldo || 0;
+  const hasPelanggan = !!state.pelanggan;
+
+  // Update tombol deposit di tab "Bayar Sekarang"
+  const btnFull = document.getElementById('depositSaldoBtnFull');
+  if (btnFull) {
+    if (!hasPelanggan) {
+      btnFull.textContent = '—';
+      btnFull.className = 'pay-method-saldo zero';
+    } else {
+      btnFull.textContent = `Rp ${fmtRp(saldo)}`;
+      btnFull.className = saldo > 0 ? 'pay-method-saldo positive' : 'pay-method-saldo zero';
+    }
+  }
+
+  // Update tombol deposit di tab "DP"
+  const btnDp = document.getElementById('depositSaldoBtnDp');
+  if (btnDp) {
+    if (!hasPelanggan) {
+      btnDp.textContent = '—';
+      btnDp.className = 'pay-method-saldo zero';
+    } else {
+      btnDp.textContent = `Rp ${fmtRp(saldo)}`;
+      btnDp.className = saldo > 0 ? 'pay-method-saldo positive' : 'pay-method-saldo zero';
+    }
+  }
+}
+
 // ── updateDepositPanel: tampilkan status saldo & preview di mode deposit ────
 function updateDepositPanel() {
   const isDeposit = state.metodeBayar === 'deposit';
@@ -2160,6 +2202,9 @@ function updateDepositPanel() {
     btnDeposit.style.opacity = state.pelanggan ? '1' : '0.45';
     btnDeposit.title = state.pelanggan ? '' : 'Pilih pelanggan terlebih dahulu';
   }
+
+  // Update tampilan saldo di tombol deposit
+  updateDepositButtonSaldo();
 
   if (!isDeposit) return;
 

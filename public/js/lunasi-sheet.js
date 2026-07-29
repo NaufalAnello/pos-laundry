@@ -52,8 +52,10 @@
 .ls-method-btn .ic { font-size:20px; }
 .ls-method-btn.active { border-color:#2563eb; background:#eff6ff; color:#2563eb; }
 .ls-method-btn:disabled { opacity:.45; cursor:not-allowed; }
-.ls-method-btn .saldo { font-size:10px; font-weight:600; color:#64748b; margin-top:2px; }
+.ls-method-btn .saldo { font-size:10px; font-weight:600; color:#64748b; margin-top:2px; display:block; }
+.ls-method-btn .saldo.positive { color:#10b981; }
 .ls-method-btn.active .saldo { color:#2563eb; }
+.ls-method-btn.active .saldo.positive { color:#10b981; }
 .ls-input {
   width:100%; padding:12px 14px; font-size:18px; font-weight:700;
   border:2px solid #e2e8f0; border-radius:10px; outline:none;
@@ -222,6 +224,7 @@
       depositSaldo = 0;
       $('lsBtnDeposit').disabled = true;
       $('lsDepositSaldo').textContent = '—';
+      $('lsDepositSaldo').className = 'saldo';
       return;
     }
     try {
@@ -229,13 +232,15 @@
       if (!r.ok) throw new Error();
       const d = await r.json();
       depositSaldo = Number(d?.data?.saldo || 0);
-      $('lsDepositSaldo').textContent = fmtRp(depositSaldo);
+      $('lsDepositSaldo').textContent = `Rp ${fmtRp(depositSaldo)}`;
+      $('lsDepositSaldo').className = depositSaldo > 0 ? 'saldo positive' : 'saldo';
       const sisa = Math.max(0, Math.round(Number(ctx.total) - Number(ctx.dibayar || 0)));
       $('lsBtnDeposit').disabled = depositSaldo < sisa;
     } catch {
       depositSaldo = 0;
       $('lsBtnDeposit').disabled = true;
       $('lsDepositSaldo').textContent = '—';
+      $('lsDepositSaldo').className = 'saldo';
     }
   }
 
