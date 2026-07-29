@@ -78,6 +78,11 @@ const buildNota = async (transaksi, mode = 'regular') => {
   const s = await getSettings();
   const poinEarned = await getPoinEarned(transaksi.id);
 
+  // Hitung sisa tagihan (untuk order DP/belum lunas)
+  const totalBayar = Number(transaksi.total_bayar || 0);
+  const bayar = Number(transaksi.bayar || 0);
+  const sisaTagihan = Math.max(0, Math.round(totalBayar - bayar));
+
   const vars = {
     nama:            transaksi.pelanggan_nama || 'Pelanggan',
     nomor:           transaksi.nomor_transaksi,
@@ -89,6 +94,10 @@ const buildNota = async (transaksi, mode = 'regular') => {
     total:           fmtRp(transaksi.total_bayar),
     bayar:           fmtRp(transaksi.bayar),
     kembalian:       fmtRp(transaksi.kembalian),
+    sisa_tagihan:    fmtRp(sisaTagihan),
+    sisa_tagihan_block: sisaTagihan > 0
+      ? `⚠️ *Sisa Tagihan: Rp ${fmtRp(sisaTagihan)}* (bayar saat ambil)`
+      : '',
     poin_dapat:      poinEarned,
     poin_total:      transaksi.pelanggan_poin ?? '—',
     nama_toko:       s.nama_toko    || 'Laundry',

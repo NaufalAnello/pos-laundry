@@ -27,6 +27,7 @@ Terima kasih telah mempercayakan laundry Anda kepada kami! 🧺
 💰 *Total Bayar: Rp {total}*
 💳 Bayar      : Rp {bayar}
 💵 Kembalian  : Rp {kembalian}
+{sisa_tagihan_block}
 
 ⭐ Poin didapat : +{poin_dapat} poin
 💎 Total poin  : {poin_total} poin
