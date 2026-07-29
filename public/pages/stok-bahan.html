@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="/css/design-system.css"/>
+  <link rel="stylesheet" href="/css/layout.css"/>
+  <link rel="stylesheet" href="/css/responsive.css"/>
+  <title>Stok Bahan — POS Laundry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg-page); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
+
+    .page { max-width: 1200px; margin: 0 auto; padding: 0 0 100px; }
+
+    /* ── Header ─────────────────────────────────── */
+    .head {
+      position: sticky; top: 0; z-index: 20;
+      background: #fff; border-bottom: 1px solid var(--gray-3);
+      padding: 12px 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .head .ttl { font-size: 18px; font-weight: 800; color: var(--gray-9); }
+    .btn-add {
+      background: var(--primary); color: #fff; border: none;
+      padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 13px;
+      font-family: inherit; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+
+    .body-wrap { padding: 14px 12px; }
+
+    /* ── Alert banner ──────────────────────────── */
+    .alert-banner {
+      background: #FFFBEB; border: 1px solid #FDE68A; border-left: 4px solid var(--warning);
+      border-radius: 10px; padding: 12px 14px; margin-bottom: 12px;
+    }
+    .alert-banner.danger { background: var(--danger-lt); border-color: #fca5a5; border-left-color: var(--danger); }
+    .alert-banner .ttl { font-weight: 800; color: var(--warning); font-size: 13px; margin-bottom: 6px; }
+    .alert-banner.danger .ttl { color: var(--danger); }
+    .alert-banner .ttl.danger { color: var(--danger); }
+    .alert-banner ul { list-style: none; padding: 0; margin: 0; }
+    .alert-banner li { font-size: 12px; color: var(--gray-7); padding: 2px 0; }
+    .alert-banner li b { color: var(--gray-9); }
+
+    /* ── Cards ─────────────────────────────────── */
+    .bahan-card {
+      background: #fff; border-radius: 12px; border: 1px solid var(--gray-3);
+      box-shadow: var(--shadow-sm); margin-bottom: 10px; overflow: hidden;
+    }
+    .bahan-card.low { border-color: #FDE68A; }
+    .bahan-card.critical { border-color: #fca5a5; }
+    .bahan-body { padding: 12px 14px; }
+    .bahan-nama { font-size: 15px; font-weight: 800; color: var(--gray-9); margin-bottom: 4px; }
+    .bahan-stok { font-size: 14px; font-weight: 700; color: var(--success); margin-bottom: 2px; }
+    .bahan-stok.zero { color: var(--gray-5); }
+    .bahan-stok.low { color: var(--warning); }
+    .bahan-stok.critical { color: var(--danger); }
+    .bahan-rasio { font-size: 12px; color: var(--gray-5); }
+    .bahan-warn {
+      font-size: 12px; color: var(--warning); font-weight: 700; margin-top: 6px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .bahan-warn.critical { color: var(--danger); }
+    .bahan-actions {
+      display: flex; gap: 6px; padding: 10px 14px;
+      border-top: 1px solid var(--gray-3); background: var(--gray-1);
+    }
+    .bahan-actions button {
+      flex: 1; min-height: 36px; padding: 6px 8px;
+      border-radius: 8px; border: 1px solid var(--gray-3); background: #fff;
+      font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
+      color: var(--gray-7);
+      display: inline-flex; align-items: center; justify-content: center; gap: 3px;
+    }
+    .bahan-actions .btn-restock { background: var(--success); color: #fff; border-color: var(--success); }
+    .bahan-actions .btn-koreksi { background: var(--warning); color: #fff; border-color: var(--warning); }
+    .bahan-actions .btn-edit { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .bahan-actions .btn-ic { flex: 0 0 auto; min-width: 40px; }
+
+    /* ── Empty ─────────────────────────────────── */
+    .empty {
+      text-align: center; padding: 60px 20px; color: var(--gray-5);
+      background: #fff; border-radius: 12px; border: 1px dashed var(--gray-3);
+    }
+    .empty .ic { font-size: 56px; display: block; margin-bottom: 10px; opacity: .8; }
+    .empty .ttl-em { font-size: 15px; font-weight: 700; color: var(--gray-7); margin-bottom: 4px; }
+    .empty .sub { font-size: 12px; margin-bottom: 14px; }
+
+    /* ── Toast ─────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: var(--gray-9); color: #fff; padding: 10px 20px; border-radius: 99px;
+      font-size: 13px; font-weight: 600; z-index: 99999;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    #toast.show { opacity: 1; }
+    #toast.err { background: var(--danger); }
+
+    /* ── Bottom sheet form ─────────────────────── */
+    .lm-bg {
+      position: fixed !important; inset: 0 !important; background: rgba(0,0,0,.5) !important;
+      z-index: 9999 !important; display: none; align-items: flex-end; justify-content: center;
+      padding: 0; overflow-y: auto;
+    }
+    .lm-bg.open { display: flex !important; }
+    .lm {
+      position: relative; background: #fff; border-radius: 16px 16px 0 0;
+      width: 100%; max-width: 100%; max-height: 92vh; overflow-y: auto;
+      box-shadow: 0 -8px 32px rgba(0,0,0,.18);
+    }
+    .lm-h {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; border-bottom: 1px solid var(--gray-3);
+      position: sticky; top: 0; background: #fff; z-index: 2;
+    }
+    .lm-h h3 { font-size: 16px; font-weight: 800; }
+    .lm-h .x { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--gray-5); }
+    .lm-b { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+    .lm-f {
+      padding: 12px 18px; border-top: 1px solid var(--gray-3); display: flex; gap: 8px;
+      position: sticky; bottom: 0; background: #fff;
+    }
+    .lm-f .btn { flex: 1; min-height: 44px; }
+
+    .fld label { display: block; font-size: 12px; font-weight: 700; color: var(--gray-7); margin-bottom: 5px; }
+    .fld input, .fld select {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--gray-3);
+      border-radius: 8px; font-size: 14px; font-family: inherit;
+      background: #fff; color: var(--gray-9); outline: none;
+    }
+    .fld input:focus, .fld select:focus { border-color: var(--primary); }
+    .fld small { font-size: 11px; color: var(--gray-5); margin-top: 3px; display: block; }
+
+    .field-row {
+      display: grid; grid-template-columns: 2fr 1fr; gap: 8px;
+    }
+
+    .info-box {
+      background: var(--gray-1); border-radius: 8px; padding: 12px;
+    }
+    .info-box .row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 4px 0; font-size: 13px;
+    }
+    .info-box .row .lbl { color: var(--gray-5); }
+    .info-box .row .val { font-weight: 700; color: var(--gray-9); }
+
+    .preview-box {
+      background: var(--success-lt); border: 1.5px solid #86efac;
+      border-radius: 8px; padding: 12px 14px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-weight: 700; color: var(--success);
+    }
+    .preview-box.warn { background: #FFFBEB; border-color: #FDE68A; color: var(--warning); }
+    .preview-box.danger { background: var(--danger-lt); border-color: #fca5a5; color: var(--danger); }
+
+    .btn {
+      padding: 10px 16px; border-radius: 8px; border: 1px solid transparent;
+      font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+      text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-warning { background: var(--warning); color: #fff; }
+    .btn-outline { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
+    .btn-danger  { background: var(--danger); color: #fff; }
+    .btn:disabled { opacity: .5; cursor: default; }
+
+    /* ── Mutasi timeline ───────────────────────── */
+    .mutasi-item {
+      background: #fff; border: 1px solid var(--gray-3); border-radius: 10px;
+      padding: 10px 12px; margin-bottom: 8px;
+      display: flex; gap: 10px;
+    }
+    .mutasi-dot {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 800; font-size: 14px; flex-shrink: 0;
+    }
+    .mt-masuk    { background: var(--success); }
+    .mt-keluar   { background: var(--danger); }
+    .mt-koreksi  { background: var(--warning); }
+    .mutasi-info { flex: 1; min-width: 0; }
+    .mutasi-line1 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+    .mutasi-jenis { font-size: 13px; font-weight: 800; color: var(--gray-9); }
+    .mutasi-jml { font-size: 13px; font-weight: 800; white-space: nowrap; }
+    .mutasi-jml.plus  { color: var(--success); }
+    .mutasi-jml.minus { color: var(--danger); }
+    .mutasi-meta { font-size: 11px; color: var(--gray-5); margin-top: 3px; line-height: 1.4; word-break: break-word; }
+    .mutasi-saldo { font-size: 11px; color: var(--gray-5); margin-top: 3px; }
+
+    /* ── Desktop ═══ */
+    .desktop-only { display: none; }
+    .mobile-only { display: block; }
+
+    @media (min-width: 1024px) {
+      .desktop-only { display: block; }
+      .mobile-only { display: none; }
+      .body-wrap { padding: 20px; }
+      .head { padding: 16px 20px; }
+      .head .ttl { font-size: 22px; }
+
+      .table-card {
+        background: #fff; border: 1px solid var(--gray-3); border-radius: 12px;
+        overflow: hidden; box-shadow: var(--shadow-sm);
+      }
+      .table-wrap { overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; min-width: 800px; }
+      thead th {
+        padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 800;
+        text-transform: uppercase; letter-spacing: .4px; color: var(--gray-5);
+        background: var(--gray-1); border-bottom: 1px solid var(--gray-3);
+      }
+      tbody tr { border-bottom: 1px solid var(--gray-3); }
+      tbody tr:last-child { border-bottom: none; }
+      tbody tr:hover { background: var(--gray-1); }
+      tbody tr.low { background: #FFFBEB; }
+      tbody tr.critical { background: var(--danger-lt); }
+      tbody td { padding: 12px 14px; vertical-align: middle; font-size: 13px; }
+      .td-actions { display: flex; gap: 6px; justify-content: flex-end; }
+      .td-actions button {
+        padding: 6px 10px; border-radius: 6px; border: 1px solid transparent;
+        font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit;
+      }
+      .status-pill {
+        display: inline-block; padding: 3px 10px; border-radius: 999px;
+        font-size: 11px; font-weight: 700;
+      }
+      .status-pill.ok    { background: var(--success-lt); color: var(--success); }
+      .status-pill.low   { background: #FFFBEB; color: var(--warning); }
+      .status-pill.crit  { background: var(--danger-lt); color: var(--danger); }
+
+      .lm-bg { align-items: center; padding: 16px; }
+      .lm { max-width: 520px; border-radius: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div class="head">
+    <div class="ttl">📦 Stok Bahan</div>
+    <button class="btn-add" onclick="openFormBahan()">+ Tambah Bahan</button>
+  </div>
+
+  <div class="body-wrap">
+    <div id="alertBanner"></div>
+
+    <!-- MOBILE -->
+    <div class="mobile-only" id="cardList">
+      <div style="text-align:center;color:var(--gray-5);padding:30px">Memuat...</div>
+    </div>
+
+    <!-- DESKTOP -->
+    <div class="desktop-only">
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nama Bahan</th>
+                <th style="text-align:right">Stok</th>
+                <th>Satuan</th>
+                <th>Rasio</th>
+                <th style="text-align:right">Batas Min</th>
+                <th>Status</th>
+                <th style="text-align:right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--gray-5)">Memuat...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Form Tambah/Edit Bahan ─────────────────── -->
+<div class="lm-bg" id="formBahanBg">
+  <div class="lm">
+    <div class="lm-h">
+      <h3 id="formBahanTitle">➕ Tambah Bahan Baru</h3>
+      <button class="x" onclick="closeFormBahan()">✕</button>
+    </div>
+    <div class="lm-b">
+      <input type="hidden" id="fbId"/>
+      <div class="fld">
+        <label>Nama bahan *</label>
+        <input type="text" id="fbNama" placeholder="Contoh: Deterjen Cair"/>
+      </div>
+      <div class="field-row">
+        <div class="fld">
+          <label>Stok awal</label>
+          <input type="number" id="fbStok" min="0" step="0.01" placeholder="0"/>
+          <small id="fbStokHint">Hanya untuk bahan baru</small>
+        </div>
+        <div class="fld">
+          <label>Satuan *</label>
+          <select id="fbSatuan">
+            <option value="ml">ml</option>
+            <option value="liter">liter</option>
+            <option value="gram">gram</option>
+            <option value="kg">kg</option>
+            <option value="pcs">pcs</option>
+          </select>
+        </div>
+      </div>
+      <div class="fld">
+        <label>Batas minimum (alert)</label>
+        <input type="number" id="fbMin" min="0" step="0.01" placeholder="0"/>
+        <small>Alert muncul jika stok di bawah nilai ini. 0 = nonaktif.</small>
+      </div>
+      <div class="field-row">
+        <div class="fld">
+          <label>Rasio pemakaian</label>
+          <input type="number" id="fbRasio" min="0" step="0.0001" placeholder="0"/>
+          <small id="fbRasioHint">Jumlah bahan per satu satuan layanan</small>
+        </div>
+        <div class="fld">
+          <label>Per</label>
+          <select id="fbSatuanRasio">
+            <option value="per_kg">kg cucian</option>
+            <option value="per_pcs">pcs layanan</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="lm-f">
+      <button class="btn btn-outline" onclick="closeFormBahan()">Batal</button>
+      <button class="btn btn-primary" id="btnSimpanBahan" onclick="submitBahan()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Form Restock ──────────────────────────── -->
+<div class="lm-bg" id="formRestockBg">
+  <div class="lm">
+    <div class="lm-h">
+      <h3>➕ Restock Bahan</h3>
+      <button class="x" onclick="closeFormRestock()">✕</button>
+    </div>
+    <div class="lm-b">
+      <input type="hidden" id="rsId"/>
+      <div class="info-box">
+        <div class="row">
+          <span class="lbl">Bahan</span>
+          <span class="val" id="rsNama">—</span>
+        </div>
+        <div class="row">
+          <span class="lbl">Stok sekarang</span>
+          <span class="val" id="rsStokSekarang">—</span>
+        </div>
+      </div>
+      <div class="fld">
+        <label>Tambah stok *</label>
+        <input type="number" id="rsJumlah" min="0" step="0.01" placeholder="0" oninput="updateRestockPreview()"/>
+      </div>
+      <div class="fld">
+        <label>Keterangan</label>
+        <input type="text" id="rsKet" placeholder="Contoh: Beli di toko ABC"/>
+      </div>
+      <div class="preview-box" id="rsPreview" style="display:none">
+        <span>Stok setelah restock</span>
+        <span id="rsStokBaru">—</span>
+      </div>
+    </div>
+    <div class="lm-f">
+      <button class="btn btn-outline" onclick="closeFormRestock()">Batal</button>
+      <button class="btn btn-success" id="btnSimpanRestock" onclick="submitRestock()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Form Koreksi ──────────────────────────── -->
+<div class="lm-bg" id="formKoreksiBg">
+  <div class="lm">
+    <div class="lm-h">
+      <h3>✏️ Koreksi Stok</h3>
+      <button class="x" onclick="closeFormKoreksi()">✕</button>
+    </div>
+    <div class="lm-b">
+      <input type="hidden" id="krId"/>
+      <div class="info-box">
+        <div class="row">
+          <span class="lbl">Bahan</span>
+          <span class="val" id="krNama">—</span>
+        </div>
+        <div class="row">
+          <span class="lbl">Stok tercatat sistem</span>
+          <span class="val" id="krStokSekarang">—</span>
+        </div>
+      </div>
+      <div class="fld">
+        <label>Stok sebenarnya (hasil opname) *</label>
+        <input type="number" id="krStokBaru" min="0" step="0.01" placeholder="0" oninput="updateKoreksiPreview()"/>
+      </div>
+      <div class="fld">
+        <label>Keterangan</label>
+        <input type="text" id="krKet" placeholder="Contoh: Stok opname bulanan"/>
+      </div>
+      <div class="preview-box" id="krPreview" style="display:none">
+        <span id="krPreviewLabel">Selisih</span>
+        <span id="krSelisih">—</span>
+      </div>
+    </div>
+    <div class="lm-f">
+      <button class="btn btn-outline" onclick="closeFormKoreksi()">Batal</button>
+      <button class="btn btn-warning" id="btnSimpanKoreksi" onclick="submitKoreksi()">Simpan Koreksi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Mutasi Sheet ──────────────────────────── -->
+<div class="lm-bg" id="mutasiBg">
+  <div class="lm">
+    <div class="lm-h">
+      <h3 id="mutasiTitle">📋 Riwayat Mutasi</h3>
+      <button class="x" onclick="closeMutasiSheet()">✕</button>
+    </div>
+    <div class="lm-b" id="mutasiBody">
+      <div style="text-align:center;color:var(--gray-5);padding:30px">Memuat...</div>
+    </div>
+    <div class="lm-f">
+      <button class="btn btn-outline" onclick="closeMutasiSheet()" style="flex:1">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const fmtNum = n => Number(n || 0).toLocaleString('id-ID', { maximumFractionDigits: 2 });
+const fmtDateTime = s => s ? new Date(s).toLocaleString('id-ID', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+let BAHAN_LIST = [];
+
+function showToast(msg, isErr) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.toggle('err', !!isErr);
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+/* ── Load list ────────────────────────────────── */
+async function loadList() {
+  try {
+    const r = await fetch('/api/v1/stok-bahan', { credentials: 'include' });
+    if (r.status === 401) { location.href = '/login'; return; }
+    const d = await r.json();
+    BAHAN_LIST = d.data || [];
+    renderAlert(d.menipis || []);
+    renderCards(BAHAN_LIST);
+    renderTable(BAHAN_LIST);
+  } catch (err) {
+    console.error(err);
+    showToast('Gagal memuat data', true);
+  }
+}
+
+function renderAlert(list) {
+  const el = document.getElementById('alertBanner');
+  if (!list.length) { el.innerHTML = ''; return; }
+  const danger = list.some(b => Number(b.stok_sekarang) <= 0);
+  el.innerHTML = `
+    <div class="alert-banner ${danger ? 'danger' : ''}">
+      <div class="ttl">⚠️ ${list.length} bahan stoknya menipis!</div>
+      <ul>
+        ${list.map(b => `<li>• <b>${esc(b.nama)}</b>: ${fmtNum(b.stok_sekarang)} ${esc(b.satuan)} <span style="color:var(--gray-5)">(min ${fmtNum(b.batas_minimum)})</span></li>`).join('')}
+      </ul>
+    </div>`;
+}
+
+function statusOf(b) {
+  const min = Number(b.batas_minimum);
+  const stok = Number(b.stok_sekarang);
+  if (stok <= 0) return 'critical';
+  if (min > 0 && stok < min) return 'low';
+  return 'ok';
+}
+
+function renderCards(list) {
+  const el = document.getElementById('cardList');
+  if (!list.length) {
+    el.innerHTML = `
+      <div class="empty">
+        <span class="ic">📦</span>
+        <div class="ttl-em">Belum ada bahan baku tercatat</div>
+        <div class="sub">Tambahkan bahan untuk mulai tracking stok</div>
+        <button class="btn btn-primary" onclick="openFormBahan()">+ Tambah Bahan Pertama</button>
+      </div>`;
+    return;
+  }
+  el.innerHTML = list.map(b => {
+    const st = statusOf(b);
+    const rasioTxt = Number(b.rasio_pemakaian) > 0
+      ? `Rasio: ${fmtNum(b.rasio_pemakaian)} ${esc(b.satuan)} per ${b.satuan_rasio === 'per_kg' ? 'kg cucian' : 'pcs layanan'}`
+      : '<span style="color:var(--gray-5)">Belum ada rasio pemakaian</span>';
+    return `
+      <div class="bahan-card ${st === 'low' ? 'low' : ''} ${st === 'critical' ? 'critical' : ''}">
+        <div class="bahan-body">
+          <div class="bahan-nama">${esc(b.nama)}</div>
+          <div class="bahan-stok ${st === 'ok' ? '' : st}">Stok: ${fmtNum(b.stok_sekarang)} ${esc(b.satuan)}</div>
+          <div class="bahan-rasio">${rasioTxt}</div>
+          ${b.di_bawah_batas ? `<div class="bahan-warn ${st === 'critical' ? 'critical' : ''}">⚠️ Di bawah batas (min ${fmtNum(b.batas_minimum)} ${esc(b.satuan)})</div>` : ''}
+        </div>
+        <div class="bahan-actions">
+          <button class="btn-restock" onclick="openFormRestock(${b.id})">+ Restock</button>
+          <button class="btn-koreksi" onclick="openFormKoreksi(${b.id})">✏️ Koreksi</button>
+          <button class="btn-ic" onclick="openMutasiSheet(${b.id})" title="Riwayat mutasi">📋</button>
+          <button class="btn-ic" onclick="openFormBahan(${b.id})" title="Edit bahan">⚙️</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderTable(list) {
+  const el = document.getElementById('tableBody');
+  if (!list.length) {
+    el.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:60px 20px;color:var(--gray-5)">Belum ada bahan baku tercatat</td></tr>';
+    return;
+  }
+  el.innerHTML = list.map(b => {
+    const st = statusOf(b);
+    const rasio = Number(b.rasio_pemakaian) > 0
+      ? `${fmtNum(b.rasio_pemakaian)} ${esc(b.satuan)}/${b.satuan_rasio === 'per_kg' ? 'kg' : 'pcs'}`
+      : '<span style="color:var(--gray-5)">—</span>';
+    const pill = st === 'critical' ? '<span class="status-pill crit">Kosong</span>'
+              : st === 'low'      ? '<span class="status-pill low">Menipis</span>'
+              : '<span class="status-pill ok">Aman</span>';
+    return `
+      <tr class="${st === 'low' ? 'low' : ''} ${st === 'critical' ? 'critical' : ''}">
+        <td><b>${esc(b.nama)}</b></td>
+        <td style="text-align:right"><b>${fmtNum(b.stok_sekarang)}</b></td>
+        <td>${esc(b.satuan)}</td>
+        <td>${rasio}</td>
+        <td style="text-align:right">${Number(b.batas_minimum) > 0 ? fmtNum(b.batas_minimum) : '—'}</td>
+        <td>${pill}</td>
+        <td>
+          <div class="td-actions">
+            <button style="background:var(--success);color:#fff" onclick="openFormRestock(${b.id})">+ Restock</button>
+            <button style="background:var(--warning);color:#fff" onclick="openFormKoreksi(${b.id})">Koreksi</button>
+            <button style="background:#fff;border:1px solid var(--gray-3);color:var(--gray-7)" onclick="openMutasiSheet(${b.id})">📋</button>
+            <button style="background:var(--primary);color:#fff" onclick="openFormBahan(${b.id})">Edit</button>
+            <button style="background:#fff;border:1px solid var(--danger);color:var(--danger)" onclick="hapusBahan(${b.id})">Hapus</button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+/* ── Form Bahan (add/edit) ────────────────────── */
+function openFormBahan(id) {
+  const bahan = id ? BAHAN_LIST.find(b => b.id === id) : null;
+  document.getElementById('formBahanTitle').textContent = bahan ? '✏️ Edit Bahan' : '➕ Tambah Bahan Baru';
+  document.getElementById('fbId').value = bahan?.id || '';
+  document.getElementById('fbNama').value = bahan?.nama || '';
+  document.getElementById('fbSatuan').value = bahan?.satuan || 'ml';
+  document.getElementById('fbStok').value = bahan ? bahan.stok_sekarang : '';
+  document.getElementById('fbStok').disabled = !!bahan;
+  document.getElementById('fbStokHint').textContent = bahan
+    ? 'Untuk mengubah stok, gunakan tombol Restock atau Koreksi'
+    : 'Stok pertama yang tercatat';
+  document.getElementById('fbMin').value = bahan?.batas_minimum || '';
+  document.getElementById('fbRasio').value = bahan?.rasio_pemakaian || '';
+  document.getElementById('fbSatuanRasio').value = bahan?.satuan_rasio || 'per_kg';
+  document.getElementById('formBahanBg').classList.add('open');
+}
+function closeFormBahan() { document.getElementById('formBahanBg').classList.remove('open'); }
+
+async function submitBahan() {
+  const id      = document.getElementById('fbId').value;
+  const nama    = document.getElementById('fbNama').value.trim();
+  const satuan  = document.getElementById('fbSatuan').value;
+  const stok    = Number(document.getElementById('fbStok').value) || 0;
+  const min     = Number(document.getElementById('fbMin').value) || 0;
+  const rasio   = Number(document.getElementById('fbRasio').value) || 0;
+  const sRasio  = document.getElementById('fbSatuanRasio').value;
+
+  if (!nama) return showToast('Nama bahan wajib diisi', true);
+
+  const btn = document.getElementById('btnSimpanBahan');
+  btn.disabled = true;
+  try {
+    const body = id
+      ? { nama, satuan, batas_minimum: min, rasio_pemakaian: rasio, satuan_rasio: sRasio }
+      : { nama, satuan, stok_sekarang: stok, batas_minimum: min, rasio_pemakaian: rasio, satuan_rasio: sRasio };
+    const r = await fetch(id ? `/api/v1/stok-bahan/${id}` : '/api/v1/stok-bahan', {
+      method: id ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Gagal simpan');
+    showToast(id ? 'Bahan diperbarui' : 'Bahan ditambahkan');
+    closeFormBahan();
+    await loadList();
+  } catch (err) {
+    showToast(err.message, true);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function hapusBahan(id) {
+  const b = BAHAN_LIST.find(x => x.id === id);
+  if (!b) return;
+  if (!confirm(`Nonaktifkan bahan "${b.nama}"? Data mutasi tetap tersimpan.`)) return;
+  try {
+    const r = await fetch(`/api/v1/stok-bahan/${id}`, { method: 'DELETE', credentials: 'include' });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Gagal nonaktifkan');
+    showToast('Bahan dinonaktifkan');
+    await loadList();
+  } catch (err) {
+    showToast(err.message, true);
+  }
+}
+
+/* ── Restock ─────────────────────────────────── */
+function openFormRestock(id) {
+  const b = BAHAN_LIST.find(x => x.id === id);
+  if (!b) return;
+  document.getElementById('rsId').value = b.id;
+  document.getElementById('rsNama').textContent = b.nama;
+  document.getElementById('rsStokSekarang').textContent = fmtNum(b.stok_sekarang) + ' ' + b.satuan;
+  document.getElementById('rsJumlah').value = '';
+  document.getElementById('rsKet').value = '';
+  document.getElementById('rsPreview').style.display = 'none';
+  document.getElementById('formRestockBg').classList.add('open');
+}
+function closeFormRestock() { document.getElementById('formRestockBg').classList.remove('open'); }
+
+function updateRestockPreview() {
+  const id = document.getElementById('rsId').value;
+  const b  = BAHAN_LIST.find(x => x.id === Number(id));
+  const jml = Number(document.getElementById('rsJumlah').value) || 0;
+  const box = document.getElementById('rsPreview');
+  if (!b || jml <= 0) { box.style.display = 'none'; return; }
+  box.style.display = '';
+  document.getElementById('rsStokBaru').textContent = fmtNum(Number(b.stok_sekarang) + jml) + ' ' + b.satuan;
+}
+
+async function submitRestock() {
+  const id = document.getElementById('rsId').value;
+  const jml = Number(document.getElementById('rsJumlah').value) || 0;
+  const ket = document.getElementById('rsKet').value.trim();
+  if (jml <= 0) return showToast('Jumlah harus lebih dari 0', true);
+
+  const btn = document.getElementById('btnSimpanRestock');
+  btn.disabled = true;
+  try {
+    const r = await fetch(`/api/v1/stok-bahan/${id}/tambah`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ jumlah: jml, keterangan: ket })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Gagal restock');
+    showToast('Stok berhasil ditambah');
+    closeFormRestock();
+    await loadList();
+  } catch (err) {
+    showToast(err.message, true);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ── Koreksi ─────────────────────────────────── */
+function openFormKoreksi(id) {
+  const b = BAHAN_LIST.find(x => x.id === id);
+  if (!b) return;
+  document.getElementById('krId').value = b.id;
+  document.getElementById('krNama').textContent = b.nama;
+  document.getElementById('krStokSekarang').textContent = fmtNum(b.stok_sekarang) + ' ' + b.satuan;
+  document.getElementById('krStokBaru').value = '';
+  document.getElementById('krKet').value = '';
+  document.getElementById('krPreview').style.display = 'none';
+  document.getElementById('formKoreksiBg').classList.add('open');
+}
+function closeFormKoreksi() { document.getElementById('formKoreksiBg').classList.remove('open'); }
+
+function updateKoreksiPreview() {
+  const id = document.getElementById('krId').value;
+  const b  = BAHAN_LIST.find(x => x.id === Number(id));
+  const val = document.getElementById('krStokBaru').value;
+  const box = document.getElementById('krPreview');
+  if (!b || val === '') { box.style.display = 'none'; return; }
+  const stokBaru = Number(val);
+  const selisih  = stokBaru - Number(b.stok_sekarang);
+  box.style.display = '';
+  box.className = 'preview-box ' + (selisih === 0 ? '' : (selisih > 0 ? '' : 'danger'));
+  document.getElementById('krPreviewLabel').textContent = 'Selisih';
+  const tanda = selisih > 0 ? '+' : '';
+  document.getElementById('krSelisih').textContent = tanda + fmtNum(selisih) + ' ' + b.satuan;
+}
+
+async function submitKoreksi() {
+  const id = document.getElementById('krId').value;
+  const val = document.getElementById('krStokBaru').value;
+  const ket = document.getElementById('krKet').value.trim();
+  if (val === '' || Number(val) < 0) return showToast('Stok baru tidak valid', true);
+
+  const btn = document.getElementById('btnSimpanKoreksi');
+  btn.disabled = true;
+  try {
+    const r = await fetch(`/api/v1/stok-bahan/${id}/koreksi`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ stok_baru: Number(val), keterangan: ket })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Gagal koreksi');
+    showToast('Stok berhasil dikoreksi');
+    closeFormKoreksi();
+    await loadList();
+  } catch (err) {
+    showToast(err.message, true);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ── Mutasi Sheet ────────────────────────────── */
+async function openMutasiSheet(id) {
+  const b = BAHAN_LIST.find(x => x.id === id);
+  document.getElementById('mutasiTitle').textContent = b ? `📋 Mutasi ${b.nama}` : '📋 Riwayat Mutasi';
+  document.getElementById('mutasiBody').innerHTML = '<div style="text-align:center;color:var(--gray-5);padding:30px">Memuat...</div>';
+  document.getElementById('mutasiBg').classList.add('open');
+  try {
+    const r = await fetch(`/api/v1/stok-bahan/${id}/mutasi?limit=100`, { credentials: 'include' });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Gagal memuat mutasi');
+    renderMutasi(d.data || [], b?.satuan || '');
+  } catch (err) {
+    document.getElementById('mutasiBody').innerHTML = `<div class="empty">${esc(err.message)}</div>`;
+  }
+}
+function closeMutasiSheet() { document.getElementById('mutasiBg').classList.remove('open'); }
+
+function renderMutasi(list, satuan) {
+  const el = document.getElementById('mutasiBody');
+  if (!list.length) {
+    el.innerHTML = '<div style="text-align:center;color:var(--gray-5);padding:30px">Belum ada mutasi</div>';
+    return;
+  }
+  el.innerHTML = list.map(m => {
+    const jenis = m.jenis;
+    let label, dotClass, sign;
+    if (jenis === 'masuk') { label = 'Restock'; dotClass = 'mt-masuk'; sign = '+'; }
+    else if (jenis === 'keluar_otomatis') { label = 'Pemakaian order'; dotClass = 'mt-keluar'; sign = '−'; }
+    else if (jenis === 'keluar_manual') { label = 'Keluar manual'; dotClass = 'mt-keluar'; sign = '−'; }
+    else if (jenis === 'koreksi') { label = 'Koreksi'; dotClass = 'mt-koreksi'; sign = Number(m.jumlah) >= 0 ? '+' : ''; }
+    else { label = jenis; dotClass = 'mt-koreksi'; sign = ''; }
+
+    const jml = Number(m.jumlah);
+    const jmlAbs = Math.abs(jml);
+    const cls = jml >= 0 ? 'plus' : 'minus';
+
+    const meta = [];
+    if (m.nomor_transaksi) meta.push(`Order ${esc(m.nomor_transaksi)}`);
+    if (m.keterangan)      meta.push(esc(m.keterangan));
+    if (m.operator_nama)   meta.push(`oleh ${esc(m.operator_nama)}`);
+
+    return `
+      <div class="mutasi-item">
+        <div class="mutasi-dot ${dotClass}">${sign || '·'}</div>
+        <div class="mutasi-info">
+          <div class="mutasi-line1">
+            <span class="mutasi-jenis">${label}</span>
+            <span class="mutasi-jml ${cls}">${sign}${fmtNum(jmlAbs)} ${esc(satuan)}</span>
+          </div>
+          <div class="mutasi-meta">${fmtDateTime(m.created_at)}${meta.length ? ' • ' + meta.join(' • ') : ''}</div>
+          <div class="mutasi-saldo">Stok: ${fmtNum(m.stok_sebelum)} → <b>${fmtNum(m.stok_sesudah)}</b> ${esc(satuan)}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* ── Init ────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', loadList);
+</script>
+
+<script src="/js/nav.js"></script>
+</body>
+</html>

@@ -126,11 +126,18 @@ exports.index = async (req, res) => {
         .orderBy('nama')
         .select('id', 'nama', 'diskon_persen', 'diskon_nominal', 'berlaku_sampai'),
 
-      // stok_hampir_habis
-      db('stok_bahan')
-        .whereRaw('stok_saat_ini <= stok_minimum')
-        .orderBy('stok_saat_ini', 'asc')
-        .select('id', 'nama', 'satuan', 'stok_saat_ini', 'stok_minimum'),
+      // stok_hampir_habis — bahan baku yang stoknya di bawah batas minimum
+      // Bungkus try/catch supaya dashboard tetap load kalau migration belum jalan
+      (async () => {
+        try {
+          return await db('bahan_baku')
+            .where('aktif', 1)
+            .where('batas_minimum', '>', 0)
+            .whereRaw('stok_sekarang < batas_minimum')
+            .orderBy('stok_sekarang', 'asc')
+            .select('id', 'nama', 'satuan', 'stok_sekarang', 'batas_minimum');
+        } catch { return []; }
+      })(),
 
       // deposit stats
       (async () => {

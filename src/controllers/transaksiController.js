@@ -7,6 +7,7 @@ const pelangganModel  = require('../models/pelangganModel');
 const svc             = require('../services/transaksiService');
 const depositModel    = require('../models/deposit.model');
 const riwayatBayarModel = require('../models/riwayatBayarModel');
+const stokBahanService  = require('../services/stokBahan.service');
 
 // ── Validation schemas ───────────────────────────────────────────────────────
 const rincianItemSchema = Joi.object({
@@ -266,6 +267,14 @@ exports.store = async (req, res) => {
 
     const transaksiId = await transaksiModel.create(transaksiData, resolvedItems);
     const created = await transaksiModel.findById(transaksiId);
+
+    // Kurangi stok bahan otomatis (non-blocking: kegagalan hitung stok tidak
+    // boleh menggagalkan pembuatan order — hanya di-log).
+    try {
+      await stokBahanService.kurangiStokOtomatis(transaksiId, resolvedItems);
+    } catch (e) {
+      console.error('[transaksi:store] kurangiStokOtomatis error:', e.message);
+    }
 
     // Jika order AJ dengan jarak baru untuk pelanggan terdaftar yang belum punya
     // data jarak, simpan ke profil pelanggan supaya order berikutnya tidak

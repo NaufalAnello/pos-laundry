@@ -26,6 +26,7 @@ const aiRoutes          = require('./routes/aiRoutes');
 const masterItemRoutes  = require('./routes/masterItemRoutes');
 const antarJemputRoutes = require('./routes/antarJemputRoutes');
 const reservasiJemputRoutes = require('./routes/reservasiJemputRoutes');
+const stokBahanRoutes   = require('./routes/stokBahanRoutes');
 
 const app = express();
 
@@ -123,6 +124,9 @@ app.use('/api/v1/antar-jemput', antarJemputRoutes);
 
 // Reservasi Jemput (jadwal penjemputan)
 app.use('/api/v1/reservasi-jemput', reservasiJemputRoutes);
+
+// Stok Bahan Baku
+app.use('/api/v1/stok-bahan', stokBahanRoutes);
 
 // ── Web page routes ────────────────────────────────────────────────────────────
 
@@ -243,6 +247,12 @@ app.get('/antar-jemput', (req, res) => {
 app.get('/reservasi-jemput', (req, res) => {
   if (!req.session?.userId) return res.redirect('/login');
   res.sendFile(path.join(__dirname, '../public/pages/reservasi-jemput.html'));
+});
+
+// Stok Bahan Baku
+app.get('/stok-bahan', (req, res) => {
+  if (!req.session?.userId) return res.redirect('/login');
+  res.sendFile(path.join(__dirname, '../public/pages/stok-bahan.html'));
 });
 
 // Semua route web lain → redirect ke dashboard

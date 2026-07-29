@@ -58,6 +58,7 @@
       group: 'Master',
       items: [
         { href: '/layanan',    icon: '🧺', label: 'Layanan'    },
+        { href: '/stok-bahan', icon: '📦', label: 'Stok Bahan' },
         { href: '/ai-insight', icon: '🤖', label: 'AI Insight'  },
         { href: '/pengaturan', icon: '⚙️', label: 'Pengaturan' },
       ]
@@ -84,6 +85,7 @@
     { href: '/wa-center',  icon: '💬', label: 'Pusat WA'   },
     { href: '/laporan',    icon: '📊', label: 'Laporan'    },
     { href: '/layanan',    icon: '🧺', label: 'Layanan'    },
+    { href: '/stok-bahan', icon: '📦', label: 'Stok Bahan' },
     { href: '/ai-insight', icon: '🤖', label: 'AI Insight'  },
     { href: '/pengaturan', icon: '⚙️', label: 'Pengaturan' },
   ];

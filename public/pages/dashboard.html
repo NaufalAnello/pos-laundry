@@ -390,6 +390,15 @@
           <div class="aj-widget" id="rjWidget"></div>
         </div>
 
+        <!-- WIDGET STOK MENIPIS (mobile + desktop, tampil hanya jika ada) -->
+        <div class="section" id="stokMenipisSection" style="display:none">
+          <div class="section-head">
+            <h2>📦 Stok Menipis <span id="stokMenipisCount" style="color:var(--danger)"></span></h2>
+            <a href="/stok-bahan">Lihat Stok Bahan →</a>
+          </div>
+          <div class="chart-card" id="stokMenipisBody"></div>
+        </div>
+
         <!-- GRAFIK (laptop only) -->
         <div class="section desktop-only">
           <div class="section-head"><h2>📊 Omset 7 Hari</h2></div>
@@ -738,6 +747,29 @@ function renderPromo(list) {
   }).join('');
 }
 
+function renderStokMenipis(list) {
+  const section = document.getElementById('stokMenipisSection');
+  const body    = document.getElementById('stokMenipisBody');
+  const count   = document.getElementById('stokMenipisCount');
+  if (!list || !list.length) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  count.textContent = `(${list.length})`;
+  const fmt = n => Number(n || 0).toLocaleString('id-ID', { maximumFractionDigits: 2 });
+  body.innerHTML = list.slice(0, 6).map(b => {
+    const stok = Number(b.stok_sekarang);
+    const min  = Number(b.batas_minimum);
+    const cls  = stok <= 0 ? 'var(--danger)' : 'var(--warning)';
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--gray-3)">
+        <div>
+          <div style="font-weight:700;font-size:13px">${escHtml(b.nama)}</div>
+          <div style="font-size:11px;color:var(--gray-5)">min ${fmt(min)} ${escHtml(b.satuan)}</div>
+        </div>
+        <div style="font-size:14px;font-weight:800;color:${cls}">${fmt(stok)} ${escHtml(b.satuan)}</div>
+      </div>`;
+  }).join('') + (list.length > 6 ? `<div style="text-align:center;padding-top:8px;font-size:11px;color:var(--gray-5)">dan ${list.length - 6} bahan lainnya…</div>` : '');
+}
+
 function renderDeposit(d) {
   const el = document.getElementById('depositBody');
   if (!d) { el.innerHTML = '<div class="empty">Tidak ada data deposit</div>'; return; }
@@ -815,6 +847,9 @@ async function loadDashboard() {
     renderAntrian(d.antrian_aktif || []);
     renderSelesaiHariIni(d.selesai_hari_ini || []);
     renderLewatWaktu(d.lewat_waktu || []);
+
+    // Stok bahan menipis (mobile + desktop)
+    renderStokMenipis(d.stok_hampir_habis || []);
 
     // Desktop widgets
     renderChart(d.bar_chart_7hari || []);
