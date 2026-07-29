@@ -180,20 +180,24 @@ exports.store = async (req, res) => {
       const saldoRow = await depositModel.getSaldo(pelanggan.id);
       const saldo    = Number(saldoRow.saldo);
 
-      if (saldo >= totalBayar) {
-        // Saldo cukup — bayar penuh dengan deposit
-        bayarFinal = totalBayar;
+      // Tentukan nominal yang diminta: DP mode → value.bayar, bayar penuh → totalBayar
+      const isDpMode = value.payment_mode === 'dp' || value.is_dp;
+      const nominalDiminta = isDpMode ? value.bayar : totalBayar;
+
+      if (saldo >= nominalDiminta) {
+        // Saldo cukup untuk nominal yang diminta
+        bayarFinal = nominalDiminta;
         kembalian  = 0;
       } else if (value.metode_kekurangan && value.bayar_kekurangan != null) {
         // Saldo tidak cukup — bayar sebagian deposit, sebagian metode lain
         // bayarFinal = deposit (saldo) + kekurangan
         bayarFinal  = saldo + Number(value.bayar_kekurangan);
-        kembalian   = Math.max(0, bayarFinal - totalBayar);
+        kembalian   = Math.max(0, bayarFinal - nominalDiminta);
         // Simpan info agar bisa dicatat di struk
         metodeBayar = 'deposit';
       } else {
         // Saldo tidak cukup tanpa kekurangan — tolak
-        const kekurangan = totalBayar - saldo;
+        const kekurangan = nominalDiminta - saldo;
         return res.status(400).json({
           error:       `Saldo tidak cukup (Rp ${saldo.toLocaleString('id-ID')}). Kekurangan Rp ${kekurangan.toLocaleString('id-ID')}`,
           saldo,
