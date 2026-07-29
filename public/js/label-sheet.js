@@ -74,8 +74,7 @@
     document.head.appendChild(s);
   }
 
-  let currentOrderId = null;
-  let currentItems = [];
+  // Hapus shared mutable state untuk mencegah race condition
   let sheet = null;
   let overlay = null;
 
@@ -138,37 +137,40 @@
       if (overlay) overlay.remove();
       sheet = null;
       overlay = null;
-      currentOrderId = null;
-      currentItems = [];
     }, 200);
   }
 
   async function openSheet(orderId) {
-    currentOrderId = orderId;
+    // Capture orderId secara lokal untuk closure ini (immutable per invocation)
+    const localOrderId = orderId;
 
     try {
-      const r = await fetch(`/api/v1/transaksi/${orderId}/detail`, { credentials: 'include' });
+      const r = await fetch(`/api/v1/transaksi/${localOrderId}/detail`, { credentials: 'include' });
       if (!r.ok) throw new Error('Gagal memuat data');
       const response = await r.json();
       const data = response.data || response;
 
-      currentItems = data.items || [];
+      const items = data.items || [];
 
       // 1 layanan → langsung cetak tanpa sheet
-      if (currentItems.length <= 1) {
-        if (currentItems.length === 0) {
+      if (items.length <= 1) {
+        if (items.length === 0) {
           if (window.showToast) window.showToast('Tidak ada layanan');
           return;
         }
-        await cetakLabel([currentItems[0].id]);
+        // Pass orderId eksplisit, tidak baca dari global state
+        await cetakLabel(localOrderId, [items[0].id]);
         return;
       }
 
       // 2+ layanan → tampilkan sheet pilihan
       createSheet();
+      // Simpan orderId di dataset sheet untuk dibaca saat submit
+      sheet.dataset.orderId = localOrderId;
       const orderInfo = `${data.nomor_transaksi} · ${data.pelanggan_nama || 'Non-member'}`;
       document.getElementById('labelOrderInfo').textContent = orderInfo;
-      renderItems();
+      // Pass items sebagai parameter, bukan set global state
+      renderItems(items, localOrderId);
 
       setTimeout(() => {
         overlay.classList.add('open');
@@ -180,7 +182,7 @@
     }
   }
 
-  function renderItems() {
+  function renderItems(items, orderId) {
     const escHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
     let html = `
@@ -190,7 +192,7 @@
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;" id="itemCheckboxes">
     `;
 
-    currentItems.forEach((item, idx) => {
+    items.forEach((item, idx) => {
       const label = `${item.nama_layanan} ${item.jumlah} ${item.satuan || ''}`;
       html += `
         <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--gray-1);border-radius:8px;cursor:pointer;user-select:none;">
@@ -239,15 +241,25 @@
       return;
     }
 
+    // Baca orderId dari dataset sheet (disimpan saat openSheet dipanggil)
+    const orderId = sheet?.dataset?.orderId;
+    if (!orderId) {
+      if (window.showToast) window.showToast('Error: Order ID tidak ditemukan');
+      return;
+    }
+
     closeSheet();
-    await cetakLabel(layananIds);
+    // Pass orderId eksplisit ke cetakLabel
+    await cetakLabel(orderId, layananIds);
   };
 
-  async function cetakLabel(layananIds) {
+  async function cetakLabel(orderId, layananIds) {
+    // TIDAK BOLEH ada referensi ke currentOrderId - semua data harus dari parameter
     if (window.showToast) window.showToast('Mencetak label...');
 
     try {
-      const r = await fetch(`/api/v1/transaksi/${currentOrderId}/label`, {
+      // Gunakan orderId dari parameter, bukan dari global state
+      const r = await fetch(`/api/v1/transaksi/${orderId}/label`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
