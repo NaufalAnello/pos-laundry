@@ -77,6 +77,8 @@
   // Hapus shared mutable state untuk mencegah race condition
   let sheet = null;
   let overlay = null;
+  // Cooldown lock: cegah cetak label ganda sebelum proses sebelumnya selesai
+  let isPrinting = false;
 
   function createSheet() {
     if (sheet) return;
@@ -141,6 +143,12 @@
   }
 
   async function openSheet(orderId) {
+    // Cooldown check: cegah proses baru jika masih ada yang berjalan
+    if (isPrinting) {
+      if (window.showToast) window.showToast('⏳ Tunggu, masih memproses label sebelumnya...');
+      return;
+    }
+
     // Capture orderId secara lokal untuk closure ini (immutable per invocation)
     const localOrderId = orderId;
 
@@ -159,11 +167,14 @@
           return;
         }
         // Pass orderId eksplisit, tidak baca dari global state
+        // cetakLabel akan set isPrinting dan reset setelah selesai
         await cetakLabel(localOrderId, [items[0].id]);
         return;
       }
 
       // 2+ layanan → tampilkan sheet pilihan
+      // TIDAK set isPrinting = true di sini, karena belum cetak
+      // isPrinting akan di-set saat submitLabelSheet → cetakLabel dipanggil
       createSheet();
       // Simpan orderId di dataset sheet untuk dibaca saat submit
       sheet.dataset.orderId = localOrderId;
@@ -255,9 +266,13 @@
 
   async function cetakLabel(orderId, layananIds) {
     // TIDAK BOLEH ada referensi ke currentOrderId - semua data harus dari parameter
-    if (window.showToast) window.showToast('Mencetak label...');
+
+    // Set lock saat mulai proses cetak
+    isPrinting = true;
 
     try {
+      if (window.showToast) window.showToast('Mencetak label...');
+
       // Gunakan orderId dari parameter, bukan dari global state
       const r = await fetch(`/api/v1/transaksi/${orderId}/label`, {
         method: 'POST',
@@ -276,6 +291,9 @@
     } catch (err) {
       console.error(err);
       if (window.showToast) window.showToast('Koneksi gagal');
+    } finally {
+      // Pastikan lock selalu di-reset, apapun yang terjadi (sukses/gagal/error)
+      isPrinting = false;
     }
   }
 
