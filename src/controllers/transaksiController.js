@@ -471,7 +471,7 @@ exports.lunasi = async (req, res) => {
 
     const total = Number(t.total_bayar);
     const dibayar = Number(t.total_dibayar || t.bayar || 0);
-    const sisa = Math.max(0, total - dibayar);
+    const sisa = Math.max(0, Math.round(total - dibayar));
 
     if (sisa === 0) {
       return res.status(400).json({ error: 'Order sudah lunas' });

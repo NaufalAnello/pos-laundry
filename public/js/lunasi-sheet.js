@@ -169,7 +169,7 @@
 
   function updateKembalian() {
     if (!ctx) return;
-    const sisa = Math.max(0, Number(ctx.total) - Number(ctx.dibayar || 0));
+    const sisa = Math.max(0, Math.round(Number(ctx.total) - Number(ctx.dibayar || 0)));
     const nominal = Number($('lsNominal').value) || 0;
     const kembalian = nominal - sisa;
 
@@ -191,7 +191,7 @@
     });
     // Untuk deposit: auto-fill nominal = sisa, sembunyikan quick noms
     if (m === 'deposit') {
-      const sisa = Math.max(0, Number(ctx.total) - Number(ctx.dibayar || 0));
+      const sisa = Math.max(0, Math.round(Number(ctx.total) - Number(ctx.dibayar || 0)));
       $('lsNominal').value = sisa;
       $('lsNominal').disabled = true;
       $('lsQuickNoms').style.display = 'none';
@@ -204,7 +204,7 @@
 
   function renderQuickNoms(sisa) {
     const noms = [
-      sisa,
+      Math.round(sisa),
       Math.ceil(sisa / 1000) * 1000,
       Math.ceil(sisa / 5000) * 5000,
       Math.ceil(sisa / 10000) * 10000,
@@ -230,7 +230,7 @@
       const d = await r.json();
       depositSaldo = Number(d?.data?.saldo || 0);
       $('lsDepositSaldo').textContent = fmtRp(depositSaldo);
-      const sisa = Math.max(0, Number(ctx.total) - Number(ctx.dibayar || 0));
+      const sisa = Math.max(0, Math.round(Number(ctx.total) - Number(ctx.dibayar || 0)));
       $('lsBtnDeposit').disabled = depositSaldo < sisa;
     } catch {
       depositSaldo = 0;
@@ -242,7 +242,7 @@
   /* ── Open / close ─────────────────────────────────────── */
   window.openLunasiSheet = (data) => {
     ctx = Object.assign({ dibayar: 0 }, data);
-    const sisa = Math.max(0, Number(ctx.total) - Number(ctx.dibayar || 0));
+    const sisa = Math.max(0, Math.round(Number(ctx.total) - Number(ctx.dibayar || 0)));
     if (sisa <= 0) {
       alert('Order sudah lunas');
       return;
