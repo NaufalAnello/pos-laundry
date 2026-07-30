@@ -166,7 +166,7 @@
     .btn-success { background: var(--success); color: #fff; }
     .btn-warning { background: var(--warning); color: #fff; }
     .btn-outline { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
-    .btn-danger  { background: var(--danger); color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
     .btn:disabled { opacity: .5; cursor: default; }
 
     /* ── Mutasi timeline ───────────────────────── */
@@ -180,14 +180,14 @@
       display: flex; align-items: center; justify-content: center;
       color: #fff; font-weight: 800; font-size: 14px; flex-shrink: 0;
     }
-    .mt-masuk    { background: var(--success); }
-    .mt-keluar   { background: var(--danger); }
-    .mt-koreksi  { background: var(--warning); }
+    .mt-masuk { background: var(--success); }
+    .mt-keluar { background: var(--danger); }
+    .mt-koreksi { background: var(--warning); }
     .mutasi-info { flex: 1; min-width: 0; }
     .mutasi-line1 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
     .mutasi-jenis { font-size: 13px; font-weight: 800; color: var(--gray-9); }
     .mutasi-jml { font-size: 13px; font-weight: 800; white-space: nowrap; }
-    .mutasi-jml.plus  { color: var(--success); }
+    .mutasi-jml.plus { color: var(--success); }
     .mutasi-jml.minus { color: var(--danger); }
     .mutasi-meta { font-size: 11px; color: var(--gray-5); margin-top: 3px; line-height: 1.4; word-break: break-word; }
     .mutasi-saldo { font-size: 11px; color: var(--gray-5); margin-top: 3px; }
@@ -229,9 +229,9 @@
         display: inline-block; padding: 3px 10px; border-radius: 999px;
         font-size: 11px; font-weight: 700;
       }
-      .status-pill.ok    { background: var(--success-lt); color: var(--success); }
-      .status-pill.low   { background: #FFFBEB; color: var(--warning); }
-      .status-pill.crit  { background: var(--danger-lt); color: var(--danger); }
+      .status-pill.ok { background: var(--success-lt); color: var(--success); }
+      .status-pill.low { background: #FFFBEB; color: var(--warning); }
+      .status-pill.crit { background: var(--danger-lt); color: var(--danger); }
 
       .lm-bg { align-items: center; padding: 16px; }
       .lm { max-width: 520px; border-radius: 14px; }
@@ -242,7 +242,7 @@
 
 <div class="page">
   <div class="head">
-    <div class="ttl">📦 Stok Bahan</div>
+    <div class="ttl">Stok Bahan</div>
     <button class="btn-add owner-only" onclick="openFormBahan()">+ Tambah Bahan</button>
   </div>
 
@@ -284,8 +284,8 @@
 <div class="lm-bg" id="formBahanBg">
   <div class="lm">
     <div class="lm-h">
-      <h3 id="formBahanTitle">➕ Tambah Bahan Baru</h3>
-      <button class="x" onclick="closeFormBahan()">✕</button>
+      <h3 id="formBahanTitle">+ Tambah Bahan Baru</h3>
+      <button class="x" onclick="closeFormBahan()">×</button>
     </div>
     <div class="lm-b">
       <input type="hidden" id="fbId"/>
@@ -341,8 +341,8 @@
 <div class="lm-bg" id="formRestockBg">
   <div class="lm">
     <div class="lm-h">
-      <h3>➕ Restock Bahan</h3>
-      <button class="x" onclick="closeFormRestock()">✕</button>
+      <h3>+ Restock Bahan</h3>
+      <button class="x" onclick="closeFormRestock()">×</button>
     </div>
     <div class="lm-b">
       <input type="hidden" id="rsId"/>
@@ -380,8 +380,8 @@
 <div class="lm-bg" id="formKoreksiBg">
   <div class="lm">
     <div class="lm-h">
-      <h3>✏️ Koreksi Stok</h3>
-      <button class="x" onclick="closeFormKoreksi()">✕</button>
+      <h3> Koreksi Stok</h3>
+      <button class="x" onclick="closeFormKoreksi()">×</button>
     </div>
     <div class="lm-b">
       <input type="hidden" id="krId"/>
@@ -419,8 +419,8 @@
 <div class="lm-bg" id="mutasiBg">
   <div class="lm">
     <div class="lm-h">
-      <h3 id="mutasiTitle">📋 Riwayat Mutasi</h3>
-      <button class="x" onclick="closeMutasiSheet()">✕</button>
+      <h3 id="mutasiTitle">Riwayat Mutasi</h3>
+      <button class="x" onclick="closeMutasiSheet()">×</button>
     </div>
     <div class="lm-b" id="mutasiBody">
       <div style="text-align:center;color:var(--gray-5);padding:30px">Memuat...</div>
@@ -470,7 +470,7 @@ function renderAlert(list) {
   const danger = list.some(b => Number(b.stok_sekarang) <= 0);
   el.innerHTML = `
     <div class="alert-banner ${danger ? 'danger' : ''}">
-      <div class="ttl">⚠️ ${list.length} bahan stoknya menipis!</div>
+      <div class="ttl">${list.length} bahan stoknya menipis!</div>
       <ul>
         ${list.map(b => `<li>• <b>${esc(b.nama)}</b>: ${fmtNum(b.stok_sekarang)} ${esc(b.satuan)} <span style="color:var(--gray-5)">(min ${fmtNum(b.batas_minimum)})</span></li>`).join('')}
       </ul>
@@ -490,7 +490,7 @@ function renderCards(list) {
   if (!list.length) {
     el.innerHTML = `
       <div class="empty">
-        <span class="ic">📦</span>
+        <span class="ic"></span>
         <div class="ttl-em">Belum ada bahan baku tercatat</div>
         <div class="sub">Tambahkan bahan untuk mulai tracking stok</div>
         <button class="btn btn-primary" onclick="openFormBahan()">+ Tambah Bahan Pertama</button>
@@ -510,13 +510,13 @@ function renderCards(list) {
           <div class="bahan-nama">${esc(b.nama)}</div>
           <div class="bahan-stok ${st === 'ok' ? '' : st}">Stok: ${fmtNum(b.stok_sekarang)} ${esc(b.satuan)}</div>
           <div class="bahan-rasio">${rasioTxt}</div>
-          ${b.di_bawah_batas ? `<div class="bahan-warn ${st === 'critical' ? 'critical' : ''}">⚠️ Di bawah batas (min ${fmtNum(b.batas_minimum)} ${esc(b.satuan)})</div>` : ''}
+          ${b.di_bawah_batas ? `<div class="bahan-warn ${st === 'critical' ? 'critical' : ''}">Di bawah batas (min ${fmtNum(b.batas_minimum)} ${esc(b.satuan)})</div>` : ''}
         </div>
         <div class="bahan-actions">
           <button class="btn-restock" onclick="openFormRestock(${b.id})">+ Restock</button>
-          ${owner ? `<button class="btn-koreksi" onclick="openFormKoreksi(${b.id})">✏️ Koreksi</button>` : ''}
-          <button class="btn-ic" onclick="openMutasiSheet(${b.id})" title="Riwayat mutasi">📋</button>
-          ${owner ? `<button class="btn-ic" onclick="openFormBahan(${b.id})" title="Edit bahan">⚙️</button>` : ''}
+          ${owner ? `<button class="btn-koreksi" onclick="openFormKoreksi(${b.id})"> Koreksi</button>` : ''}
+          <button class="btn-ic" onclick="openMutasiSheet(${b.id})" title="Riwayat mutasi">Riwayat</button>
+          ${owner ? `<button class="btn-ic" onclick="openFormBahan(${b.id})" title="Edit bahan">Edit</button>` : ''}
         </div>
       </div>`;
   }).join('');
@@ -535,7 +535,7 @@ function renderTable(list) {
       ? `${fmtNum(b.rasio_pemakaian)} ${esc(b.satuan)}/${b.satuan_rasio === 'per_kg' ? 'kg' : 'pcs'}`
       : '<span style="color:var(--gray-5)">—</span>';
     const pill = st === 'critical' ? '<span class="status-pill crit">Kosong</span>'
-              : st === 'low'      ? '<span class="status-pill low">Menipis</span>'
+              : st === 'low' ? '<span class="status-pill low">Menipis</span>'
               : '<span class="status-pill ok">Aman</span>';
     return `
       <tr class="${st === 'low' ? 'low' : ''} ${st === 'critical' ? 'critical' : ''}">
@@ -549,7 +549,7 @@ function renderTable(list) {
           <div class="td-actions">
             <button style="background:var(--success);color:#fff" onclick="openFormRestock(${b.id})">+ Restock</button>
             ${owner ? `<button style="background:var(--warning);color:#fff" onclick="openFormKoreksi(${b.id})">Koreksi</button>` : ''}
-            <button style="background:#fff;border:1px solid var(--gray-3);color:var(--gray-7)" onclick="openMutasiSheet(${b.id})">📋</button>
+            <button style="background:#fff;border:1px solid var(--gray-3);color:var(--gray-7)" onclick="openMutasiSheet(${b.id})">Riwayat</button>
             ${owner ? `<button style="background:var(--primary);color:#fff" onclick="openFormBahan(${b.id})">Edit</button>` : ''}
             ${owner ? `<button style="background:#fff;border:1px solid var(--danger);color:var(--danger)" onclick="hapusBahan(${b.id})">Hapus</button>` : ''}
           </div>
@@ -561,7 +561,7 @@ function renderTable(list) {
 /* ── Form Bahan (add/edit) ────────────────────── */
 function openFormBahan(id) {
   const bahan = id ? BAHAN_LIST.find(b => b.id === id) : null;
-  document.getElementById('formBahanTitle').textContent = bahan ? '✏️ Edit Bahan' : '➕ Tambah Bahan Baru';
+  document.getElementById('formBahanTitle').textContent = bahan ? 'Edit Bahan' : '+ Tambah Bahan Baru';
   document.getElementById('fbId').value = bahan?.id || '';
   document.getElementById('fbNama').value = bahan?.nama || '';
   document.getElementById('fbSatuan').value = bahan?.satuan || 'ml';
@@ -578,13 +578,13 @@ function openFormBahan(id) {
 function closeFormBahan() { document.getElementById('formBahanBg').classList.remove('open'); }
 
 async function submitBahan() {
-  const id      = document.getElementById('fbId').value;
-  const nama    = document.getElementById('fbNama').value.trim();
-  const satuan  = document.getElementById('fbSatuan').value;
-  const stok    = Number(document.getElementById('fbStok').value) || 0;
-  const min     = Number(document.getElementById('fbMin').value) || 0;
-  const rasio   = Number(document.getElementById('fbRasio').value) || 0;
-  const sRasio  = document.getElementById('fbSatuanRasio').value;
+  const id = document.getElementById('fbId').value;
+  const nama = document.getElementById('fbNama').value.trim();
+  const satuan = document.getElementById('fbSatuan').value;
+  const stok = Number(document.getElementById('fbStok').value) || 0;
+  const min = Number(document.getElementById('fbMin').value) || 0;
+  const rasio = Number(document.getElementById('fbRasio').value) || 0;
+  const sRasio = document.getElementById('fbSatuanRasio').value;
 
   if (!nama) return showToast('Nama bahan wajib diisi', true);
 
@@ -643,7 +643,7 @@ function closeFormRestock() { document.getElementById('formRestockBg').classList
 
 function updateRestockPreview() {
   const id = document.getElementById('rsId').value;
-  const b  = BAHAN_LIST.find(x => x.id === Number(id));
+  const b = BAHAN_LIST.find(x => x.id === Number(id));
   const jml = Number(document.getElementById('rsJumlah').value) || 0;
   const box = document.getElementById('rsPreview');
   if (!b || jml <= 0) { box.style.display = 'none'; return; }
@@ -694,12 +694,12 @@ function closeFormKoreksi() { document.getElementById('formKoreksiBg').classList
 
 function updateKoreksiPreview() {
   const id = document.getElementById('krId').value;
-  const b  = BAHAN_LIST.find(x => x.id === Number(id));
+  const b = BAHAN_LIST.find(x => x.id === Number(id));
   const val = document.getElementById('krStokBaru').value;
   const box = document.getElementById('krPreview');
   if (!b || val === '') { box.style.display = 'none'; return; }
   const stokBaru = Number(val);
-  const selisih  = stokBaru - Number(b.stok_sekarang);
+  const selisih = stokBaru - Number(b.stok_sekarang);
   box.style.display = '';
   box.className = 'preview-box ' + (selisih === 0 ? '' : (selisih > 0 ? '' : 'danger'));
   document.getElementById('krPreviewLabel').textContent = 'Selisih';
@@ -737,7 +737,7 @@ async function submitKoreksi() {
 /* ── Mutasi Sheet ────────────────────────────── */
 async function openMutasiSheet(id) {
   const b = BAHAN_LIST.find(x => x.id === id);
-  document.getElementById('mutasiTitle').textContent = b ? `📋 Mutasi ${b.nama}` : '📋 Riwayat Mutasi';
+  document.getElementById('mutasiTitle').textContent = b ? `Mutasi ${b.nama}` : 'Riwayat Mutasi';
   document.getElementById('mutasiBody').innerHTML = '<div style="text-align:center;color:var(--gray-5);padding:30px">Memuat...</div>';
   document.getElementById('mutasiBg').classList.add('open');
   try {
@@ -772,8 +772,8 @@ function renderMutasi(list, satuan) {
 
     const meta = [];
     if (m.nomor_transaksi) meta.push(`Order ${esc(m.nomor_transaksi)}`);
-    if (m.keterangan)      meta.push(esc(m.keterangan));
-    if (m.operator_nama)   meta.push(`oleh ${esc(m.operator_nama)}`);
+    if (m.keterangan) meta.push(esc(m.keterangan));
+    if (m.operator_nama) meta.push(`oleh ${esc(m.operator_nama)}`);
 
     return `
       <div class="mutasi-item">

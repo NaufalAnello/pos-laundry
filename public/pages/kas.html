@@ -68,7 +68,7 @@
     }
     .hero-row .lbl { opacity: .85; }
     .hero-row .val { font-weight: 700; }
-    .hero-row .val.in  { color: #BBF7D0; }
+    .hero-row .val.in { color: #BBF7D0; }
     .hero-row .val.out { color: #FECACA; }
     .hero-divider {
       border: none; border-top: 1px dashed rgba(255,255,255,.3);
@@ -102,7 +102,7 @@
       display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
     }
     .kas-left { flex: 1; min-width: 0; }
-    .kas-ket  {
+    .kas-ket {
       font-size: 14px; font-weight: 700; color: var(--gray-9);
       line-height: 1.3; overflow: hidden; text-overflow: ellipsis;
       display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
@@ -111,8 +111,8 @@
     .kas-jml {
       font-size: 15px; font-weight: 800; white-space: nowrap; text-align: right;
     }
-    .kas-jml.masuk  { color: var(--success); }
-    .kas-jml.keluar { color: var(--danger);  }
+    .kas-jml.masuk { color: var(--success); }
+    .kas-jml.keluar { color: var(--danger); }
 
     .badge-auto {
       display: inline-block;
@@ -149,8 +149,8 @@
       display: inline-flex; align-items: center; justify-content: center; gap: 4px;
       color: var(--gray-7);
     }
-    .kas-actions .btn-edit:hover  { background: var(--primary-lt); color: var(--primary); border-color: var(--primary); }
-    .kas-actions .btn-del:hover   { background: var(--danger-lt); color: var(--danger); border-color: var(--danger); }
+    .kas-actions .btn-edit:hover { background: var(--primary-lt); color: var(--primary); border-color: var(--primary); }
+    .kas-actions .btn-del:hover { background: var(--danger-lt); color: var(--danger); border-color: var(--danger); }
 
     /* ── Empty state ───────────────────────────────────── */
     .empty {
@@ -262,7 +262,7 @@
       color: var(--gray-5); transition: all .12s;
       display: inline-flex; align-items: center; justify-content: center; gap: 5px;
     }
-    .jenis-grp button.active.in  { background: var(--success); color: #fff; }
+    .jenis-grp button.active.in { background: var(--success); color: #fff; }
     .jenis-grp button.active.out { background: var(--danger); color: #fff; }
 
     /* ── Buttons (sheet footer) ────────────────────────── */
@@ -290,14 +290,14 @@
 
     /* ── Desktop only / mobile only ────────────────────── */
     .desktop-only { display: none; }
-    .mobile-only  { display: block; }
+    .mobile-only { display: block; }
 
     /* ══════════════════════════════════════════════════════════
        DESKTOP (>= 1024px) — tabel + summary card di atas
        ══════════════════════════════════════════════════════════ */
     @media (min-width: 1024px) {
       .desktop-only { display: block; }
-      .mobile-only  { display: none; }
+      .mobile-only { display: none; }
 
       .head { padding: 16px 22px; }
       .head .ttl { font-size: 22px; }
@@ -327,7 +327,7 @@
       tbody tr:hover { background: var(--gray-1); }
       tbody td { padding: 11px 14px; vertical-align: middle; font-size: 13px; }
       tbody td.right { text-align: right; font-weight: 700; }
-      tbody td.in  { color: var(--success); }
+      tbody td.in { color: var(--success); }
       tbody td.out { color: var(--danger); }
 
       .td-actions { display: flex; gap: 6px; justify-content: flex-end; }
@@ -338,7 +338,7 @@
         color: var(--gray-7);
       }
       .td-actions .btn-edit:hover { background: var(--primary-lt); color: var(--primary); border-color: var(--primary); }
-      .td-actions .btn-del:hover  { background: var(--danger-lt); color: var(--danger); border-color: var(--danger); }
+      .td-actions .btn-del:hover { background: var(--danger-lt); color: var(--danger); border-color: var(--danger); }
 
       /* Centered sheet on desktop */
       .lm-bg { align-items: center; padding: 16px; }
@@ -351,17 +351,17 @@
 <div class="page">
   <!-- HEADER -->
   <div class="head">
-    <div class="ttl">📒 Buku Kas</div>
+    <div class="ttl"> Buku Kas</div>
     <button class="btn-add" onclick="openSheet()">+ Tambah Transaksi</button>
   </div>
 
   <div class="body-wrap">
     <!-- FILTER PERIODE -->
     <div class="pill-row" id="pillPeriode">
-      <button class="pill active" data-periode="hari"   onclick="setPeriode('hari', this)">Hari Ini</button>
-      <button class="pill"        data-periode="7hari"  onclick="setPeriode('7hari', this)">7 Hari</button>
-      <button class="pill"        data-periode="bulan"  onclick="setPeriode('bulan', this)">Bulan Ini</button>
-      <button class="pill"        data-periode="custom" onclick="setPeriode('custom', this)">Custom</button>
+      <button class="pill active" data-periode="hari" onclick="setPeriode('hari', this)">Hari Ini</button>
+      <button class="pill" data-periode="7hari" onclick="setPeriode('7hari', this)">7 Hari</button>
+      <button class="pill" data-periode="bulan" onclick="setPeriode('bulan', this)">Bulan Ini</button>
+      <button class="pill" data-periode="custom" onclick="setPeriode('custom', this)">Custom</button>
     </div>
 
     <!-- CUSTOM RANGE -->
@@ -384,10 +384,10 @@
 
     <!-- SUMMARY HERO -->
     <div class="hero">
-      <div class="hero-title">💰 Ringkasan Kas <span id="heroPeriode" style="opacity:.8;font-weight:500"></span></div>
+      <div class="hero-title">Ringkasan Kas <span id="heroPeriode" style="opacity:.8;font-weight:500"></span></div>
       <div class="hero-row">
         <span class="lbl">Kas Masuk</span>
-        <span class="val in"  id="heroMasuk">—</span>
+        <span class="val in" id="heroMasuk">—</span>
       </div>
       <div class="hero-row">
         <span class="lbl">Kas Keluar</span>
@@ -402,9 +402,9 @@
 
     <!-- FILTER JENIS -->
     <div class="pill-row filter-jenis" id="pillJenis">
-      <button class="pill active" data-jenis=""       onclick="setJenisFilter('', this)">Semua</button>
-      <button class="pill"        data-jenis="masuk"  onclick="setJenisFilter('masuk', this)">⬆ Masuk</button>
-      <button class="pill"        data-jenis="keluar" onclick="setJenisFilter('keluar', this)">⬇ Keluar</button>
+      <button class="pill active" data-jenis="" onclick="setJenisFilter('', this)">Semua</button>
+      <button class="pill" data-jenis="masuk" onclick="setJenisFilter('masuk', this)">Masuk</button>
+      <button class="pill" data-jenis="keluar" onclick="setJenisFilter('keluar', this)">Keluar</button>
     </div>
 
     <!-- MOBILE: card list -->
@@ -449,14 +449,14 @@
   <div class="lm">
     <div class="lm-h">
       <h3 id="sheetTitle">+ Tambah Transaksi</h3>
-      <button class="x" onclick="closeSheet()">✕</button>
+      <button class="x" onclick="closeSheet()">×</button>
     </div>
     <div class="lm-b">
       <div class="fld">
         <label>Jenis Transaksi</label>
         <div class="jenis-grp">
-          <button type="button" id="jenisIn"  class="in active" onclick="setFormJenis('masuk')">⬆ Masuk</button>
-          <button type="button" id="jenisOut" class="out"       onclick="setFormJenis('keluar')">⬇ Keluar</button>
+          <button type="button" id="jenisIn" class="in active" onclick="setFormJenis('masuk')">Masuk</button>
+          <button type="button" id="jenisOut" class="out" onclick="setFormJenis('keluar')">Keluar</button>
         </div>
       </div>
       <div class="fld">
@@ -542,7 +542,7 @@ function computePeriodeRange(p) {
   const today = new Date();
   const ymd = d => d.toISOString().slice(0, 10);
   const todayStr = ymd(today);
-  if (p === 'hari')   return { dari: todayStr, sampai: todayStr, label: 'Hari Ini' };
+  if (p === 'hari') return { dari: todayStr, sampai: todayStr, label: 'Hari Ini' };
   if (p === '7hari') {
     const d = new Date(today); d.setDate(d.getDate() - 6);
     return { dari: ymd(d), sampai: todayStr, label: '7 Hari Terakhir' };
@@ -578,7 +578,7 @@ function setPeriode(p, btn) {
 }
 
 function applyCustom() {
-  const dari   = document.getElementById('customDari').value;
+  const dari = document.getElementById('customDari').value;
   const sampai = document.getElementById('customSampai').value;
   if (!dari || !sampai) { showToast('Tanggal wajib diisi'); return; }
   if (dari > sampai) { showToast('Tanggal "Dari" harus ≤ "Sampai"'); return; }
@@ -629,9 +629,9 @@ async function loadList() {
   }
 
   const params = new URLSearchParams({ page: state.page, limit: PAGE_SIZE });
-  if (state.dari)   params.set('tanggal_dari', state.dari);
+  if (state.dari) params.set('tanggal_dari', state.dari);
   if (state.sampai) params.set('tanggal_sampai', state.sampai);
-  if (state.jenis)  params.set('jenis', state.jenis);
+  if (state.jenis) params.set('jenis', state.jenis);
 
   try {
     const r = await fetch('/api/v1/kas?' + params);
@@ -656,7 +656,7 @@ async function loadList() {
     moreEl.style.display = (allRows.length < totalRows) ? 'block' : 'none';
   } catch (e) {
     console.error(e);
-    document.getElementById('cardList').innerHTML = '<div class="empty"><div class="ic">⚠️</div><div class="ttl-em">Gagal memuat data</div></div>';
+    document.getElementById('cardList').innerHTML = '<div class="empty"><div class="ic"></div><div class="ttl-em">Gagal memuat data</div></div>';
     document.getElementById('tableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--danger)">Gagal memuat data</td></tr>';
   }
 }
@@ -676,7 +676,7 @@ function updateHeroFromList() {
   let masuk = 0, keluar = 0;
   // Hanya total yang sesuai dengan filter jenis aktif:
   allRows.forEach(r => {
-    if (r.jenis === 'masuk')  masuk  += Number(r.jumlah);
+    if (r.jenis === 'masuk') masuk += Number(r.jumlah);
     if (r.jenis === 'keluar') keluar += Number(r.jumlah);
   });
   applyHero(masuk, keluar);
@@ -685,7 +685,7 @@ function updateHeroFromList() {
 async function fetchAgregat() {
   // Ambil semua entri pada rentang aktif untuk agregat akurat (limit besar).
   const params = new URLSearchParams({ page: 1, limit: 10000 });
-  if (state.dari)   params.set('tanggal_dari', state.dari);
+  if (state.dari) params.set('tanggal_dari', state.dari);
   if (state.sampai) params.set('tanggal_sampai', state.sampai);
   // sengaja TIDAK pakai filter jenis di sini → biar ringkasan total masuk+keluar tetap ditampilkan
   try {
@@ -693,7 +693,7 @@ async function fetchAgregat() {
     const d = await r.json();
     let masuk = 0, keluar = 0;
     (d.data || []).forEach(row => {
-      if (row.jenis === 'masuk')  masuk  += Number(row.jumlah);
+      if (row.jenis === 'masuk') masuk += Number(row.jumlah);
       if (row.jenis === 'keluar') keluar += Number(row.jumlah);
     });
     applyHero(masuk, keluar);
@@ -702,7 +702,7 @@ async function fetchAgregat() {
 
 function applyHero(masuk, keluar) {
   const saldo = masuk - keluar;
-  document.getElementById('heroMasuk').textContent  = '+' + fmtRpShort(masuk);
+  document.getElementById('heroMasuk').textContent = '+' + fmtRpShort(masuk);
   document.getElementById('heroKeluar').textContent = '-' + fmtRpShort(keluar);
   const heroSaldoEl = document.getElementById('heroSaldo');
   heroSaldoEl.textContent = (saldo >= 0 ? '' : '-') + fmtRpShort(Math.abs(saldo));
@@ -715,7 +715,7 @@ function renderMobile(rows) {
   if (!rows.length) {
     el.innerHTML = `
       <div class="empty">
-        <div class="ic">📒</div>
+        <div class="ic"></div>
         <div class="ttl-em">Belum ada transaksi kas</div>
         <button class="btn-first" onclick="openSheet()">+ Tambah Transaksi Pertama</button>
       </div>`;
@@ -744,8 +744,8 @@ function renderMobile(rows) {
         : '';
       const actionsHtml = isAuto ? '' : `
         <div class="kas-actions">
-          <button class="btn-edit" onclick="event.stopPropagation(); openEditSheet(${i.id})">✏️ Edit</button>
-          <button class="btn-del"  onclick="event.stopPropagation(); hapusKas(${i.id})">🗑️ Hapus</button>
+          <button class="btn-edit" onclick="event.stopPropagation(); openEditSheet(${i.id})">Edit</button>
+          <button class="btn-del" onclick="event.stopPropagation(); hapusKas(${i.id})">Hapus</button>
         </div>`;
       const autoBadge = isAuto ? '<span class="badge-auto">Otomatis</span>' : '';
 
@@ -788,18 +788,18 @@ function renderTable(rows) {
   tbody.innerHTML = rows.map(i => {
     const isAuto = !!i.transaksi_id;
     const sign = i.jenis === 'masuk' ? '+' : '-';
-    const cls  = i.jenis === 'masuk' ? 'in' : 'out';
+    const cls = i.jenis === 'masuk' ? 'in' : 'out';
     const sumber = isAuto
       ? `<a href="/api/v1/transaksi/${i.transaksi_id}/struk" target="_blank" style="color:var(--primary);text-decoration:none">${esc(i.nomor_transaksi || 'Otomatis')}</a> <span class="badge-auto">Otomatis</span>`
       : `<span style="color:var(--gray-5)">Manual${i.user_nama ? ' · ' + esc(i.user_nama) : ''}</span>`;
     const aksi = isAuto ? '' : `
       <div class="td-actions">
-        <button class="btn-edit" onclick="openEditSheet(${i.id})" title="Edit">✏️</button>
-        <button class="btn-del"  onclick="hapusKas(${i.id})" title="Hapus">🗑️</button>
+        <button class="btn-edit" onclick="openEditSheet(${i.id})" title="Edit">Edit</button>
+        <button class="btn-del" onclick="hapusKas(${i.id})" title="Hapus">Hapus</button>
       </div>`;
     const jenisLabel = i.jenis === 'masuk'
-      ? '<span style="color:var(--success);font-weight:700">⬆ Masuk</span>'
-      : '<span style="color:var(--danger);font-weight:700">⬇ Keluar</span>';
+      ? '<span style="color:var(--success);font-weight:700">Masuk</span>'
+      : '<span style="color:var(--danger);font-weight:700">Keluar</span>';
     return `<tr>
       <td>${fmtDateShort(i.tanggal?.slice(0,10))}</td>
       <td>${esc(i.keterangan || (i.nomor_transaksi ? 'Pelunasan ' + i.nomor_transaksi : '—'))}<div style="font-size:11px;color:var(--gray-5);margin-top:2px">${esc(i.kategori || '')}</div></td>
@@ -829,7 +829,7 @@ function openEditSheet(id) {
   if (!row) return;
   if (row.transaksi_id) { showToast('Entri otomatis tidak bisa diedit'); return; }
   state.editId = id;
-  document.getElementById('sheetTitle').textContent = '✏️ Edit Transaksi';
+  document.getElementById('sheetTitle').textContent = 'Edit Transaksi';
   setFormJenis(row.jenis);
   document.getElementById('formKeterangan').value = row.keterangan || '';
   document.getElementById('formJumlah').value = row.jumlah;
@@ -857,9 +857,9 @@ function setFormJenis(j) {
 
 // ── Simpan / update ───────────────────────────────────────
 async function simpanKas() {
-  const tanggal    = document.getElementById('formTanggal').value;
-  const jumlah     = parseFloat(document.getElementById('formJumlah').value);
-  const kategori   = document.getElementById('formKategori').value;
+  const tanggal = document.getElementById('formTanggal').value;
+  const jumlah = parseFloat(document.getElementById('formJumlah').value);
+  const kategori = document.getElementById('formKategori').value;
   const keterangan = document.getElementById('formKeterangan').value.trim();
 
   if (!tanggal) { showToast('Tanggal wajib diisi'); return; }
@@ -868,7 +868,7 @@ async function simpanKas() {
   const btn = document.getElementById('btnSimpan');
   btn.disabled = true;
   try {
-    const url    = state.editId ? `/api/v1/kas/${state.editId}` : '/api/v1/kas';
+    const url = state.editId ? `/api/v1/kas/${state.editId}` : '/api/v1/kas';
     const method = state.editId ? 'PUT' : 'POST';
     const r = await fetch(url, {
       method,

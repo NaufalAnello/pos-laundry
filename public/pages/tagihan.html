@@ -105,7 +105,7 @@
     }
     .tg-search input:focus { border-color: var(--primary); }
     .tg-search::before {
-      content: '🔍';
+      content: '';
       position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
       font-size: 16px; pointer-events: none;
     }
@@ -175,8 +175,8 @@
       font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .3px;
     }
     .tg-badge.belum { background: var(--danger-lt); color: var(--danger); }
-    .tg-badge.dp    { background: var(--warning-lt); color: var(--warning); }
-    .tg-badge.lama  { background: var(--danger); color: #fff; }
+    .tg-badge.dp { background: var(--warning-lt); color: var(--warning); }
+    .tg-badge.lama { background: var(--danger); color: #fff; }
 
     .tg-actions {
       display: flex; gap: 6px; padding: 0 14px 12px;
@@ -190,7 +190,7 @@
     }
     .tg-act:active { transform: scale(.98); }
     .tg-act.lunasi { background: var(--success); color: #fff; }
-    .tg-act.wa     { background: #25d366; color: #fff; }
+    .tg-act.wa { background: #25d366; color: #fff; }
     .tg-act.detail {
       background: #fff; border-color: var(--gray-3); color: var(--gray-6);
       flex: 0 0 44px; min-width: 44px; padding: 0;
@@ -232,7 +232,7 @@
        ══════════════════════════════════════════════════════ */
     @media (min-width: 1024px) {
       .desktop-only { display: block; }
-      .mobile-only  { display: none !important; }
+      .mobile-only { display: none !important; }
 
       .body-wrap { padding: 20px; }
 
@@ -286,14 +286,14 @@
 <div class="page">
   <div class="tg-head">
     <a class="tg-back" href="/" title="Kembali">←</a>
-    <div class="tg-title">💰 Tagihan</div>
+    <div class="tg-title">Tagihan</div>
   </div>
 
   <div class="body-wrap">
     <!-- Summary -->
     <div class="sum-card" id="sumCard">
       <div>
-        <div class="sum-lbl">💰 Total Tagihan</div>
+        <div class="sum-lbl">Total Tagihan</div>
         <div class="sum-amt" id="sumAmt">Rp 0</div>
         <div class="sum-sub" id="sumSub">— order belum lunas</div>
         <div class="sum-breakdown" id="sumBreakdown" style="display:none">
@@ -360,7 +360,7 @@ const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 const fmtRpShort = n => {
   n = Number(n || 0);
   if (n >= 1_000_000) return 'Rp ' + (n / 1_000_000).toFixed(1).replace('.0','') + 'jt';
-  if (n >= 1_000)     return 'Rp ' + Math.round(n / 1_000) + 'rb';
+  if (n >= 1_000) return 'Rp ' + Math.round(n / 1_000) + 'rb';
   return 'Rp ' + n.toLocaleString('id-ID');
 };
 const fmtDate = s => s ? new Date(s).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '—';
@@ -409,13 +409,13 @@ function waPayload(t) {
 function applyFilter(data, key) {
   if (key === 'semua') return data;
   if (key === 'belum') return data.filter(t => tipeTagihan(t) === 'belum');
-  if (key === 'dp')    return data.filter(t => tipeTagihan(t) === 'dp');
+  if (key === 'dp') return data.filter(t => tipeTagihan(t) === 'dp');
   return data;
 }
 
 function applySort(data, key) {
   const arr = [...data];
-  if (key === 'terbaru')  return arr.sort((a, b) => new Date(b.tanggal_masuk) - new Date(a.tanggal_masuk));
+  if (key === 'terbaru') return arr.sort((a, b) => new Date(b.tanggal_masuk) - new Date(a.tanggal_masuk));
   if (key === 'terbesar') return arr.sort((a, b) => sisa(b) - sisa(a));
   return arr.sort((a, b) => new Date(a.tanggal_masuk) - new Date(b.tanggal_masuk));
 }
@@ -423,10 +423,10 @@ function applySort(data, key) {
 /* ── Update pill counts + summary ────────────────────── */
 function updateSummary() {
   const belumList = applyFilter(allData, 'belum');
-  const dpList    = applyFilter(allData, 'dp');
+  const dpList = applyFilter(allData, 'dp');
   document.getElementById('cntSemua').textContent = allData.length;
   document.getElementById('cntBelum').textContent = belumList.length;
-  document.getElementById('cntDp').textContent    = dpList.length;
+  document.getElementById('cntDp').textContent = dpList.length;
 
   const totalSisa = allData.reduce((s, t) => s + sisa(t), 0);
   const sumCard = document.getElementById('sumCard');
@@ -436,7 +436,7 @@ function updateSummary() {
 
   if (!allData.length) {
     sumCard.classList.add('empty');
-    sumAmt.textContent = '✓ Lunas';
+    sumAmt.textContent = 'Lunas';
     sumSub.textContent = 'Tidak ada tagihan';
     sumBreakdown.style.display = 'none';
     return;
@@ -446,7 +446,7 @@ function updateSummary() {
   sumSub.textContent = `${allData.length} order belum lunas`;
   sumBreakdown.style.display = 'flex';
   document.getElementById('sumBelum').textContent = `${belumList.length} Belum Bayar`;
-  document.getElementById('sumDp').textContent    = `${dpList.length} DP`;
+  document.getElementById('sumDp').textContent = `${dpList.length} DP`;
 }
 
 /* ── Render ──────────────────────────────────────────── */
@@ -484,7 +484,7 @@ function renderCardList(rows) {
           Masuk: ${fmtDate(t.tanggal_masuk)} · ${hari > 0 ? `<span class="${urgent ? 'urgent' : ''}">${hari} hari lalu</span>` : 'hari ini'}
         </div>
         <div class="tg-badges">
-          <span class="tg-badge dp">💰 DP</span>
+          <span class="tg-badge dp">DP</span>
           ${hari >= 7 ? `<span class="tg-badge lama">> 7 hari</span>` : ''}
         </div>`;
     } else {
@@ -500,7 +500,7 @@ function renderCardList(rows) {
           Masuk: ${fmtDate(t.tanggal_masuk)} · ${hari > 0 ? `<span class="${urgent ? 'urgent' : ''}">${hari} hari lalu</span>` : 'hari ini'}
         </div>
         <div class="tg-badges">
-          <span class="tg-badge belum">💰 BELUM BAYAR</span>
+          <span class="tg-badge belum">BELUM BAYAR</span>
           ${hari >= 7 ? `<span class="tg-badge lama">> 7 hari</span>` : ''}
         </div>`;
     }
@@ -511,8 +511,8 @@ function renderCardList(rows) {
         ${body}
       </div>
       <div class="tg-actions">
-        <button class="tg-act lunasi" onclick='event.stopPropagation();openLunasiSheet(${pl})'>💰 ${tipe === 'dp' ? 'Lunasi Sisa' : 'Lunasi'}</button>
-        ${tel ? `<button class="tg-act wa" onclick='event.stopPropagation();openWaSheet(${wp})'>💬 Tagih WA</button>` : ''}
+        <button class="tg-act lunasi" onclick='event.stopPropagation();openLunasiSheet(${pl})'>${tipe === 'dp' ? 'Lunasi Sisa' : 'Lunasi'}</button>
+        ${tel ? `<button class="tg-act wa" onclick='event.stopPropagation();openWaSheet(${wp})'>Tagih WA</button>` : ''}
         <a class="tg-act detail" href="/order/detail?id=${t.id}" onclick='event.stopPropagation()' title="Detail">›</a>
       </div>
     </div>`;
@@ -554,8 +554,8 @@ function renderTable(rows) {
       <td style="white-space:nowrap;font-weight:800;color:${tipe === 'dp' ? 'var(--warning)' : 'var(--danger)'}">${fmtRp(s)}</td>
       <td>
         <div class="td-actions">
-          <button class="tg-act lunasi" onclick='event.stopPropagation();openLunasiSheet(${pl})'>💰 ${tipe === 'dp' ? 'Lunasi Sisa' : 'Lunasi'}</button>
-          ${tel ? `<button class="tg-act wa" onclick='event.stopPropagation();openWaSheet(${wp})'>💬 Tagih</button>` : ''}
+          <button class="tg-act lunasi" onclick='event.stopPropagation();openLunasiSheet(${pl})'>${tipe === 'dp' ? 'Lunasi Sisa' : 'Lunasi'}</button>
+          ${tel ? `<button class="tg-act wa" onclick='event.stopPropagation();openWaSheet(${wp})'>Tagih</button>` : ''}
           <a class="tg-act detail" href="/order/detail?id=${t.id}" onclick='event.stopPropagation()' title="Detail">›</a>
         </div>
       </td>
@@ -567,7 +567,7 @@ function emptyHtml(inline) {
   if (allData.length === 0) {
     return `
       <div class="tg-empty" ${inline ? 'style="border:none;border-radius:0"' : ''}>
-        <span class="ic">✅</span>
+        <span class="ic"></span>
         <h3>Semua tagihan sudah lunas!</h3>
         <p>Tidak ada yang perlu ditagih.</p>
       </div>`;
@@ -575,7 +575,7 @@ function emptyHtml(inline) {
   // Ada data tapi filter/search tidak match
   return `
     <div class="tg-empty" ${inline ? 'style="border:none;border-radius:0"' : ''}>
-      <span class="ic">🔍</span>
+      <span class="ic"></span>
       <h3 style="color:var(--gray-7)">Tidak ada yang cocok</h3>
       <p>Coba ganti filter atau pencarian.</p>
     </div>`;
@@ -618,7 +618,7 @@ async function loadData() {
   } catch {
     document.getElementById('infoBar').textContent = 'Gagal memuat data';
     document.getElementById('cardList').innerHTML =
-      `<div class="tg-empty"><span class="ic">⚠️</span><h3 style="color:var(--danger)">Gagal memuat</h3><p>Periksa koneksi dan coba lagi.</p></div>`;
+      `<div class="tg-empty"><span class="ic"></span><h3 style="color:var(--danger)">Gagal memuat</h3><p>Periksa koneksi dan coba lagi.</p></div>`;
   }
 }
 
@@ -651,7 +651,7 @@ document.getElementById('searchInput').addEventListener('input', e => {
 
 /* ── Reload setelah pelunasan ───────────────────────── */
 window.addEventListener('lunasi:done', () => {
-  showToast('✓ Pembayaran tersimpan');
+  showToast('Pembayaran tersimpan');
   loadData();
 });
 

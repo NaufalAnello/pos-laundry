@@ -24,25 +24,25 @@
 
     header { background:#fff; border-bottom:1px solid var(--gray-3); padding:0 20px; height:56px;
              display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:20; box-shadow:var(--shadow); }
-    .logo  { font-size:16px; font-weight:800; color:var(--blue); white-space:nowrap; }
-    nav    { display:flex; gap:4px; flex:1; overflow-x:auto; }
-    nav a  { padding:6px 12px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;
+    .logo { font-size:16px; font-weight:800; color:var(--blue); white-space:nowrap; }
+    nav { display:flex; gap:4px; flex:1; overflow-x:auto; }
+    nav a { padding:6px 12px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;
              color:var(--gray-7); transition:background .15s; white-space:nowrap; }
-    nav a:hover  { background:var(--gray-2); }
+    nav a:hover { background:var(--gray-2); }
     nav a.active { background:var(--blue-lt); color:var(--blue); }
     .header-user { font-size:13px; color:var(--gray-5); display:flex; align-items:center; gap:8px; white-space:nowrap; }
-    .logout-btn  { padding:5px 12px; border:1px solid var(--gray-3); border-radius:7px; background:none; font-size:13px; cursor:pointer; color:var(--gray-7); }
+    .logout-btn { padding:5px 12px; border:1px solid var(--gray-3); border-radius:7px; background:none; font-size:13px; cursor:pointer; color:var(--gray-7); }
     .logout-btn:hover { background:var(--gray-2); }
 
     .page { max-width:980px; margin:0 auto; padding:20px 16px; }
     .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; flex-wrap:wrap; }
-    .page-title  { font-size:20px; font-weight:800; }
+    .page-title { font-size:20px; font-weight:800; }
 
     .btn { padding:9px 18px; border-radius:8px; border:1px solid transparent; font-size:13px;
            font-weight:600; cursor:pointer; transition:opacity .15s; display:inline-flex; align-items:center; gap:6px; }
-    .btn:hover    { opacity:.85; }
+    .btn:hover { opacity:.85; }
     .btn:disabled { opacity:.4; cursor:default; }
-    .btn-blue    { background:var(--blue);   color:#fff; }
+    .btn-blue { background:var(--blue); color:#fff; }
     .btn-outline { background:#fff; border-color:var(--gray-3); color:var(--gray-7); }
 
     .card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3); box-shadow:var(--shadow); margin-bottom:16px; }
@@ -107,7 +107,7 @@
     .ai-rekomendasi { background:var(--purple-lt); border:1px solid #ddd6fe; padding:14px;
                       border-radius:8px; font-size:13px; line-height:1.7; color:var(--gray-9);
                       white-space:pre-wrap; }
-    .ai-rekomendasi::before { content:'💡 '; }
+    .ai-rekomendasi::before { content:''; }
 
     .loading { text-align:center; padding:40px; color:var(--gray-5); }
     .error { text-align:center; padding:40px; color:var(--red); }
@@ -128,8 +128,8 @@
 
 <div class="page">
   <div class="page-header">
-    <div class="page-title">🤖 AI Insight</div>
-    <button class="btn btn-blue" onclick="refreshInsight()">🔄 Refresh Insight</button>
+    <div class="page-title">AI Insight</div>
+    <button class="btn btn-blue" onclick="refreshInsight()"> Refresh Insight</button>
   </div>
 
   <div id="loadingState" class="loading">
@@ -139,14 +139,14 @@
   <div id="errorState" class="error" style="display:none">
     <div id="errorMsg"></div>
     <button class="btn btn-outline" onclick="location.href='/pengaturan'" style="margin-top:12px">
-      ⚙️ Ke Pengaturan AI
+      Ke Pengaturan AI
     </button>
   </div>
 
   <div id="insightContent" style="display:none">
     <!-- Ringkasan Hari Ini -->
     <div class="card">
-      <div class="card-head">📊 Ringkasan Bisnis Hari Ini</div>
+      <div class="card-head">Ringkasan Bisnis Hari Ini</div>
       <div class="card-body">
         <div class="insight-summary" id="ringkasanHariIni"></div>
       </div>
@@ -154,23 +154,23 @@
 
     <!-- Insight Tren -->
     <div class="card">
-      <div class="card-head">📈 Insight Tren (30 Hari Terakhir)</div>
+      <div class="card-head">Insight Tren (30 Hari Terakhir)</div>
       <div class="card-body">
         <div class="tren-grid">
           <div class="tren-item">
-            <h4>🗓️ Hari Tersibuk</h4>
+            <h4> Hari Tersibuk</h4>
             <div class="value" id="hariTersibuk"></div>
           </div>
           <div class="tren-item">
-            <h4>📈 Layanan Tren Naik</h4>
+            <h4>Layanan Tren Naik</h4>
             <ul id="layananTrenNaik"></ul>
           </div>
           <div class="tren-item">
-            <h4>📉 Layanan Tren Turun</h4>
+            <h4>Layanan Tren Turun</h4>
             <ul id="layananTrenTurun"></ul>
           </div>
           <div class="tren-item">
-            <h4>👥 Pelanggan Meningkat</h4>
+            <h4>Pelanggan Meningkat</h4>
             <ul id="pelangganMeningkat"></ul>
           </div>
         </div>
@@ -179,7 +179,7 @@
 
     <!-- Peringatan & Rekomendasi -->
     <div class="card">
-      <div class="card-head">⚠️ Peringatan & Rekomendasi</div>
+      <div class="card-head">Peringatan & Rekomendasi</div>
       <div class="card-body">
         <div class="warning-list" id="warningList"></div>
       </div>
@@ -187,7 +187,7 @@
 
     <!-- Prediksi Hari & Jam Tersibuk -->
     <div class="card" id="prediksiSibukCard">
-      <div class="card-head">📅 Prediksi Hari & Jam Tersibuk</div>
+      <div class="card-head">Prediksi Hari & Jam Tersibuk</div>
       <div class="card-body">
         <div id="prediksiSibukLoading" class="loading" style="padding:20px">
           ⏳ Menganalisis pola 90 hari terakhir...
@@ -197,22 +197,22 @@
           <!-- Ringkasan -->
           <div class="ringkasan-grid">
             <div class="ringkasan-card">
-              <h4>🔥 Hari Tersibuk</h4>
+              <h4> Hari Tersibuk</h4>
               <div class="value" id="psHariNama">-</div>
               <div class="sub" id="psHariRata">-</div>
             </div>
             <div class="ringkasan-card">
-              <h4>🕐 Jam Tersibuk</h4>
+              <h4>Jam Tersibuk</h4>
               <div class="value" id="psJamLabel">-</div>
               <div class="sub" id="psJamRata">-</div>
             </div>
             <div class="ringkasan-card">
-              <h4>📈 Tren 4 Minggu Terakhir</h4>
+              <h4>Tren 4 Minggu Terakhir</h4>
               <div class="value" id="psTrenValue">-</div>
               <div class="sub">vs 4 minggu sebelumnya</div>
             </div>
             <div class="ringkasan-card">
-              <h4>🧺 Layanan di Hari Sibuk</h4>
+              <h4>Layanan di Hari Sibuk</h4>
               <div class="value" id="psLayananHariSibuk" style="font-size:13px;line-height:1.4">-</div>
             </div>
           </div>
@@ -242,14 +242,14 @@
 
     <!-- Prediksi -->
     <div class="card">
-      <div class="card-head">🔮 Prediksi</div>
+      <div class="card-head"> Prediksi</div>
       <div class="card-body">
         <div class="prediksi-box">
-          <h4>💰 Estimasi Pendapatan Minggu Depan</h4>
+          <h4>Estimasi Pendapatan Minggu Depan</h4>
           <div class="value" id="prediksiPendapatan"></div>
         </div>
         <div>
-          <h4 style="font-size:13px;font-weight:700;color:var(--gray-5);margin-bottom:8px">🔥 Layanan yang Kemungkinan Ramai</h4>
+          <h4 style="font-size:13px;font-weight:700;color:var(--gray-5);margin-bottom:8px"> Layanan yang Kemungkinan Ramai</h4>
           <ul id="layananRamai" style="list-style:none;font-size:13px;line-height:1.8"></ul>
         </div>
       </div>
@@ -332,7 +332,7 @@ async function loadInsight() {
         </div>
       `).join('');
     } else {
-      warningList.innerHTML = '<div style="color:var(--gray-5);text-align:center">Semua baik-baik saja! ✓</div>';
+      warningList.innerHTML = '<div style="color:var(--gray-5);text-align:center">Semua baik-baik saja! </div>';
     }
 
     // Prediksi
@@ -377,12 +377,12 @@ function escHtml(s) {
 
 async function loadPrediksiSibuk() {
   const loadingEl = document.getElementById('prediksiSibukLoading');
-  const errorEl   = document.getElementById('prediksiSibukError');
-  const bodyEl    = document.getElementById('prediksiSibukBody');
+  const errorEl = document.getElementById('prediksiSibukError');
+  const bodyEl = document.getElementById('prediksiSibukBody');
 
   loadingEl.style.display = 'block';
-  errorEl.style.display   = 'none';
-  bodyEl.style.display    = 'none';
+  errorEl.style.display = 'none';
+  bodyEl.style.display = 'none';
 
   try {
     const d = await api('/api/v1/ai/prediksi-sibuk');
@@ -420,24 +420,24 @@ async function loadPrediksiSibuk() {
     document.getElementById('psRekomendasi').textContent = d.rekomendasi_ai || '-';
 
     loadingEl.style.display = 'none';
-    bodyEl.style.display    = 'block';
+    bodyEl.style.display = 'block';
   } catch (e) {
     console.error('Error prediksi sibuk:', e);
     loadingEl.style.display = 'none';
-    errorEl.style.display   = 'block';
-    errorEl.textContent     = 'Gagal memuat prediksi: ' + e.message;
+    errorEl.style.display = 'block';
+    errorEl.textContent = 'Gagal memuat prediksi: ' + e.message;
   }
 }
 
 function renderBarChart(barId, labelId, items, labelFn) {
-  const barEl   = document.getElementById(barId);
+  const barEl = document.getElementById(barId);
   const labelEl = document.getElementById(labelId);
   if (!items || !items.length) {
-    barEl.innerHTML   = '';
+    barEl.innerHTML = '';
     labelEl.innerHTML = '';
     return;
   }
-  const max  = Math.max(...items.map(i => i.rata_rata), 0.001);
+  const max = Math.max(...items.map(i => i.rata_rata), 0.001);
   const peak = items.reduce((m, i) => i.rata_rata > m.rata_rata ? i : m, items[0]);
 
   barEl.innerHTML = items.map(i => {

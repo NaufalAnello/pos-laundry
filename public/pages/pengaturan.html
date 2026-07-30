@@ -25,26 +25,26 @@
 
     header { background:#fff; border-bottom:1px solid var(--gray-3); padding:0 20px; height:56px;
              display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:20; box-shadow:var(--shadow); }
-    .logo  { font-size:16px; font-weight:800; color:var(--blue); white-space:nowrap; }
-    nav    { display:flex; gap:4px; flex:1; overflow-x:auto; }
-    nav a  { padding:6px 12px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;
+    .logo { font-size:16px; font-weight:800; color:var(--blue); white-space:nowrap; }
+    nav { display:flex; gap:4px; flex:1; overflow-x:auto; }
+    nav a { padding:6px 12px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;
              color:var(--gray-7); transition:background .15s; white-space:nowrap; }
-    nav a:hover  { background:var(--gray-2); }
+    nav a:hover { background:var(--gray-2); }
     nav a.active { background:var(--blue-lt); color:var(--blue); }
     .header-user { font-size:13px; color:var(--gray-5); display:flex; align-items:center; gap:8px; white-space:nowrap; }
-    .logout-btn  { padding:5px 12px; border:1px solid var(--gray-3); border-radius:7px; background:none; font-size:13px; cursor:pointer; color:var(--gray-7); }
+    .logout-btn { padding:5px 12px; border:1px solid var(--gray-3); border-radius:7px; background:none; font-size:13px; cursor:pointer; color:var(--gray-7); }
     .logout-btn:hover { background:var(--gray-2); }
 
     .page { max-width:880px; margin:0 auto; padding:20px 16px; }
     .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; flex-wrap:wrap; }
-    .page-title  { font-size:20px; font-weight:800; }
+    .page-title { font-size:20px; font-weight:800; }
 
     /* ── Tabs ── */
     .tabs { display:flex; gap:4px; border-bottom:2px solid var(--gray-3); margin-bottom:20px; }
-    .tab  { padding:10px 18px; border-radius:8px 8px 0 0; font-size:13px; font-weight:700;
+    .tab { padding:10px 18px; border-radius:8px 8px 0 0; font-size:13px; font-weight:700;
             cursor:pointer; color:var(--gray-5); border:none; background:none; transition:all .15s;
             position:relative; bottom:-2px; border-bottom:2px solid transparent; }
-    .tab:hover  { color:var(--gray-9); background:var(--gray-1); }
+    .tab:hover { color:var(--gray-9); background:var(--gray-1); }
     .tab.active { color:var(--blue); border-bottom-color:var(--blue); background:#fff; }
     .tab-section { display:none; }
     .tab-section.active { display:block; }
@@ -71,15 +71,15 @@
     /* ── Buttons ── */
     .btn { padding:9px 18px; border-radius:8px; border:1px solid transparent; font-size:13px;
            font-weight:600; cursor:pointer; transition:opacity .15s; display:inline-flex; align-items:center; gap:6px; }
-    .btn:hover    { opacity:.85; }
+    .btn:hover { opacity:.85; }
     .btn:disabled { opacity:.4; cursor:default; }
-    .btn-sm  { padding:5px 10px; font-size:12px; }
-    .btn-blue    { background:var(--blue);   color:#fff; }
-    .btn-green   { background:var(--green); color:#fff; }
+    .btn-sm { padding:5px 10px; font-size:12px; }
+    .btn-blue { background:var(--blue); color:#fff; }
+    .btn-green { background:var(--green); color:#fff; }
     .btn-green:disabled { background:var(--gray-3); color:var(--gray-5); }
-    .btn-red     { background:var(--red);   color:#fff; }
+    .btn-red { background:var(--red); color:#fff; }
     .btn-outline { background:#fff; border-color:var(--gray-3); color:var(--gray-7); }
-    .btn-ghost   { background:none; border:none; color:var(--gray-5); padding:4px 8px; cursor:pointer; font-size:12px; }
+    .btn-ghost { background:none; border:none; color:var(--gray-5); padding:4px 8px; cursor:pointer; font-size:12px; }
     .btn-ghost:hover { background:var(--gray-2); border-radius:6px; }
 
     /* ── Toggle ── */
@@ -106,11 +106,11 @@
     .empty-row td { text-align:center; padding:32px; color:var(--gray-5); }
 
     .role-badge { display:inline-flex; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; text-transform:uppercase; }
-    .role-owner    { background:#fef3c7; color:#92400e; }
+    .role-owner { background:#fef3c7; color:#92400e; }
     .role-karyawan { background:#C7D2FE; color:#1E2A8A; }
     /* Legacy aliases — untuk data lama yang belum ter-migrasi (tidak seharusnya muncul) */
-    .role-admin    { background:#fef3c7; color:#92400e; }
-    .role-kasir    { background:#C7D2FE; color:#1E2A8A; }
+    .role-admin { background:#fef3c7; color:#92400e; }
+    .role-kasir { background:#C7D2FE; color:#1E2A8A; }
     .role-operator { background:#D1FAE5; color:#166534; }
 
     /* ── Modal ── */
@@ -174,13 +174,13 @@
     }
 
     .save-bar { display:flex; align-items:center; gap:12px; padding:14px 0; border-top:1px solid var(--gray-3); margin-top:4px; }
-    .save-ok  { font-size:13px; color:var(--green); }
+    .save-ok { font-size:13px; color:var(--green); }
 
     .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
              background:#1E2A6E; color:#fff; padding:10px 20px; border-radius:8px;
              font-size:13px; font-weight:600; z-index:99; transition:transform .3s; white-space:nowrap; }
     .toast.show { transform:translateX(-50%) translateY(0); }
-    .toast.err  { background:var(--red); }
+    .toast.err { background:var(--red); }
 
     /* ══ MOBILE pengaturan ══ */
     @media (max-width: 767px) {
@@ -234,26 +234,26 @@
 
 <div class="page">
   <div class="page-header">
-    <div class="page-title">⚙️ Pengaturan</div>
+    <div class="page-title">Pengaturan</div>
   </div>
 
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('umum',this)">🏪 Profil Usaha</button>
-    <button class="tab" onclick="switchTab('wa',this)">📱 WhatsApp</button>
-    <button class="tab" onclick="switchTab('printer',this)">🖨️ Printer</button>
-    <button class="tab" onclick="switchTab('template',this)">🧾 Template Cetak</button>
-    <button class="tab" onclick="switchTab('margin',this)">📊 Margin & HPP</button>
-    <button class="tab" onclick="switchTab('antar-jemput',this)">🛵 Antar Jemput</button>
-    <button class="tab" onclick="switchTab('master-item',this)">📋 Master Pakaian</button>
-    <button class="tab" onclick="switchTab('ai',this)">🤖 AI Assistant</button>
-    <button class="tab" onclick="switchTab('user',this)">👤 Manajemen User</button>
-    <button class="tab" onclick="switchTab('backup',this)">💾 Backup & Restore</button>
+    <button class="tab active" onclick="switchTab('umum',this)"> Profil Usaha</button>
+    <button class="tab" onclick="switchTab('wa',this)">WhatsApp</button>
+    <button class="tab" onclick="switchTab('printer',this)">Printer</button>
+    <button class="tab" onclick="switchTab('template',this)"> Template Cetak</button>
+    <button class="tab" onclick="switchTab('margin',this)">Margin & HPP</button>
+    <button class="tab" onclick="switchTab('antar-jemput',this)">Antar Jemput</button>
+    <button class="tab" onclick="switchTab('master-item',this)">Master Pakaian</button>
+    <button class="tab" onclick="switchTab('ai',this)">AI Assistant</button>
+    <button class="tab" onclick="switchTab('user',this)">Manajemen User</button>
+    <button class="tab" onclick="switchTab('backup',this)"> Backup & Restore</button>
   </div>
 
   <!-- ── TAB: Umum ── -->
   <div id="sec-umum" class="tab-section active">
     <div class="card">
-      <div class="card-head">🏪 Profil Usaha</div>
+      <div class="card-head"> Profil Usaha</div>
       <div class="card-body">
         <div class="form-row">
           <div class="field"><label>Nama Toko *</label><input id="sNamaToko" type="text" placeholder="Nama Laundry"/></div>
@@ -274,8 +274,8 @@
         </div>
         <div class="field"><label>Footer Struk</label><input id="sFooter" type="text" placeholder="Terima kasih!"/></div>
         <div class="save-bar">
-          <button class="btn btn-blue" onclick="saveUmum()">💾 Simpan Pengaturan</button>
-          <span class="save-ok" id="umumOk" style="display:none">✓ Tersimpan</span>
+          <button class="btn btn-blue" onclick="saveUmum()"> Simpan Pengaturan</button>
+          <span class="save-ok" id="umumOk" style="display:none">Tersimpan</span>
         </div>
       </div>
     </div>
@@ -286,7 +286,7 @@
 
     <!-- Mode Pengiriman Default -->
     <div class="card">
-      <div class="card-head">📲 Mode Pengiriman Default</div>
+      <div class="card-head"> Mode Pengiriman Default</div>
       <div class="card-body" style="gap:12px">
         <div style="display:flex;flex-direction:column;gap:10px">
           <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--gray-3);border-radius:8px"
@@ -294,7 +294,7 @@
             <input type="radio" name="waModeDefault" id="rModeRegular" value="regular"
                    onchange="onWAModeChange()" style="margin-top:2px;flex-shrink:0"/>
             <div>
-              <div style="font-size:13px;font-weight:600">💬 WhatsApp Biasa</div>
+              <div style="font-size:13px;font-weight:600">WhatsApp Biasa</div>
               <div style="font-size:12px;color:var(--gray-5);margin-top:2px">Membuka via wa.me — kompatibel dengan semua perangkat</div>
             </div>
           </label>
@@ -303,21 +303,21 @@
             <input type="radio" name="waModeDefault" id="rModeBusiness" value="business"
                    onchange="onWAModeChange()" style="margin-top:2px;flex-shrink:0"/>
             <div>
-              <div style="font-size:13px;font-weight:600">💼 WhatsApp Business</div>
+              <div style="font-size:13px;font-weight:600"> WhatsApp Business</div>
               <div style="font-size:12px;color:var(--gray-5);margin-top:2px">Membuka via api.whatsapp.com — terbuka jika WA Business terinstall di perangkat</div>
             </div>
           </label>
         </div>
         <div class="save-bar">
-          <button class="btn btn-blue" onclick="saveWAMode()">💾 Simpan Mode WA</button>
-          <span class="save-ok" id="waModeOk" style="display:none">✓ Tersimpan</span>
+          <button class="btn btn-blue" onclick="saveWAMode()"> Simpan Mode WA</button>
+          <span class="save-ok" id="waModeOk" style="display:none">Tersimpan</span>
         </div>
       </div>
     </div>
 
     <!-- Toggle otomasi -->
     <div class="card">
-      <div class="card-head">🔔 Otomasi Notifikasi</div>
+      <div class="card-head">Otomasi Notifikasi</div>
       <div class="card-body" style="padding:0 20px">
         <div class="toggle-row">
           <div class="toggle-info">
@@ -350,7 +350,7 @@
     <!-- Templates -->
     <div class="card">
       <div class="card-head">
-        📝 Template Pesan
+        Template Pesan
         <div class="var-ref" style="font-size:11px;padding:6px 10px">
           Variabel: <code>{nama}</code> <code>{nomor}</code> <code>{tanggal_masuk}</code> <code>{tanggal_selesai}</code>
           <code>{items}</code> <code>{subtotal}</code> <code>{diskon}</code> <code>{total}</code>
@@ -372,8 +372,8 @@
           <textarea id="tplNotif" rows="6"></textarea>
         </div>
         <div class="save-bar">
-          <button class="btn btn-blue" onclick="saveWA()">💾 Simpan Pengaturan WA</button>
-          <span class="save-ok" id="waOk" style="display:none">✓ Tersimpan</span>
+          <button class="btn btn-blue" onclick="saveWA()"> Simpan Pengaturan WA</button>
+          <span class="save-ok" id="waOk" style="display:none">Tersimpan</span>
         </div>
       </div>
     </div>
@@ -385,7 +385,7 @@
     <!-- Status printer -->
     <div class="card">
       <div class="card-head">
-        🖨️ Status Printer Thermal
+        Status Printer Thermal
         <button class="btn btn-outline btn-sm" onclick="cekPrinter()">↻ Cek Ulang</button>
       </div>
       <div class="card-body" style="gap:12px">
@@ -397,14 +397,14 @@
           </div>
         </div>
         <button class="btn btn-green" id="testPrintBtn" onclick="testPrint()" disabled>
-          🖨️ Test Print
+          Test Print
         </button>
       </div>
     </div>
 
     <!-- Konfigurasi -->
     <div class="card">
-      <div class="card-head">⚙️ Konfigurasi Printer</div>
+      <div class="card-head">Konfigurasi Printer</div>
       <div class="card-body">
         <div class="field">
           <label>Port Printer (USB)</label>
@@ -432,15 +432,15 @@
           </div>
         </div>
         <div class="save-bar">
-          <button class="btn btn-blue" onclick="savePrinterSettings()">💾 Simpan Pengaturan Printer</button>
-          <span class="save-ok" id="printerOk" style="display:none">✓ Tersimpan</span>
+          <button class="btn btn-blue" onclick="savePrinterSettings()"> Simpan Pengaturan Printer</button>
+          <span class="save-ok" id="printerOk" style="display:none">Tersimpan</span>
         </div>
       </div>
     </div>
 
     <!-- Panduan akses USB Linux -->
     <div class="card">
-      <div class="card-head">📋 Panduan Akses USB di Linux</div>
+      <div class="card-head">Panduan Akses USB di Linux</div>
       <div class="card-body" style="gap:8px">
         <div style="font-size:12px;line-height:1.7;color:var(--gray-7)">
           <p>Jika muncul error <code style="background:var(--gray-2);padding:1px 5px;border-radius:4px">EACCES: permission denied</code> saat cetak:</p>
@@ -459,7 +459,7 @@
   <div id="sec-template" class="tab-section">
     <div class="card">
       <div class="card-head" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-        <span>🧾 Template Cetak</span>
+        <span> Template Cetak</span>
         <div class="tpl-subtabs" role="tablist">
           <button id="tplSubStrukBtn" class="tpl-sub-btn active" onclick="switchTplSub('struk')">Struk</button>
           <button id="tplSubLabelBtn" class="tpl-sub-btn" onclick="switchTplSub('label')">Label</button>
@@ -474,21 +474,21 @@
 
         <div class="tpl-grid">
           <div class="tpl-list-wrap">
-            <div style="font-size:12px;font-weight:700;color:var(--gray-7);margin-bottom:8px">📋 Elemen yang Ditampilkan</div>
+            <div style="font-size:12px;font-weight:700;color:var(--gray-7);margin-bottom:8px">Elemen yang Ditampilkan</div>
             <ul id="tplList" class="tpl-list">
               <li style="padding:24px;text-align:center;color:var(--gray-5);font-size:13px">Memuat...</li>
             </ul>
           </div>
           <div class="tpl-preview-wrap">
-            <div style="font-size:12px;font-weight:700;color:var(--gray-7);margin-bottom:8px">👁️ Preview Live</div>
+            <div style="font-size:12px;font-weight:700;color:var(--gray-7);margin-bottom:8px"> Preview Live</div>
             <pre id="tplPreview" class="tpl-preview">Memuat preview...</pre>
           </div>
         </div>
 
         <div class="save-bar" style="flex-wrap:wrap">
           <button class="btn btn-outline" onclick="resetTpl()">↺ Reset ke Default</button>
-          <button class="btn btn-blue" onclick="saveTpl()">💾 Simpan Template</button>
-          <span class="save-ok" id="tplOk" style="display:none">✓ Tersimpan</span>
+          <button class="btn btn-blue" onclick="saveTpl()"> Simpan Template</button>
+          <span class="save-ok" id="tplOk" style="display:none">Tersimpan</span>
           <span id="tplStatusLabel" style="font-size:12px;color:var(--gray-5);margin-left:auto"></span>
         </div>
       </div>
@@ -498,7 +498,7 @@
   <!-- ── TAB: Margin & HPP ── -->
   <div id="sec-margin" class="tab-section">
     <div class="card">
-      <div class="card-head">📊 Pengaturan Margin & HPP</div>
+      <div class="card-head">Pengaturan Margin & HPP</div>
       <div class="card-body">
         <div class="form-group">
           <label class="form-label">Pembulatan Harga Otomatis</label>
@@ -521,11 +521,11 @@
           </label>
           <span style="font-size:13px;font-weight:600">Tampilkan info margin di daftar layanan</span>
         </div>
-        <button class="btn btn-blue" onclick="saveMarginSettings()">💾 Simpan Pengaturan Margin</button>
+        <button class="btn btn-blue" onclick="saveMarginSettings()"> Simpan Pengaturan Margin</button>
       </div>
     </div>
     <div class="card" style="margin-top:12px">
-      <div class="card-head">📈 Ringkasan HPP Layanan</div>
+      <div class="card-head">Ringkasan HPP Layanan</div>
       <div class="card-body" id="marginSummaryBody">
         <div style="color:var(--gray-5);text-align:center;padding:16px">Memuat...</div>
       </div>
@@ -535,7 +535,7 @@
   <!-- ── TAB: Antar Jemput ── -->
   <div id="sec-antar-jemput" class="tab-section">
     <div class="card">
-      <div class="card-head">🛵 Parameter Kalkulator Antar Jemput</div>
+      <div class="card-head">Parameter Kalkulator Antar Jemput</div>
       <div class="card-body">
         <div class="form-group">
           <label class="form-label">Harga Pertalite saat ini (Rp/liter)</label>
@@ -560,12 +560,12 @@
         </div>
 
         <div style="background:var(--yellow-lt);border:1px solid #fde68a;border-radius:8px;padding:12px;font-size:12px;line-height:1.6;color:var(--gray-7)">
-          ⚠️ <strong>Catatan:</strong> Mengubah pengaturan ini <strong>tidak akan</strong> mengubah data rute yang sudah disimpan sebelumnya. Data lama tetap menggunakan parameter saat rute tersebut dibuat (historical pricing).
+          <strong>Catatan:</strong> Mengubah pengaturan ini <strong>tidak akan</strong> mengubah data rute yang sudah disimpan sebelumnya. Data lama tetap menggunakan parameter saat rute tersebut dibuat (historical pricing).
         </div>
 
         <div class="save-bar" style="margin-top:8px">
-          <button class="btn btn-blue" onclick="saveAJSettings()">💾 Simpan Pengaturan AJ</button>
-          <span class="save-ok" id="ajOk" style="display:none">✓ Tersimpan</span>
+          <button class="btn btn-blue" onclick="saveAJSettings()"> Simpan Pengaturan AJ</button>
+          <span class="save-ok" id="ajOk" style="display:none">Tersimpan</span>
         </div>
       </div>
     </div>
@@ -575,7 +575,7 @@
   <div id="sec-master-item" class="tab-section">
     <div class="card">
       <div class="card-head" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>📋 Master Pakaian</span>
+        <span>Master Pakaian</span>
         <button class="btn btn-sm btn-blue" onclick="openMasterItemModal()">+ Tambah Pakaian</button>
       </div>
       <div class="card-body" style="padding:0;">
@@ -591,7 +591,7 @@
             <tbody id="masterItemTableBody">
               <tr>
                 <td colspan="3" style="text-align:center;padding:40px;color:var(--gray-5);">
-                  <div style="font-size:40px;margin-bottom:10px;">📦</div>
+                  <div style="font-size:40px;margin-bottom:10px;"></div>
                   Memuat data...
                 </td>
               </tr>
@@ -605,7 +605,7 @@
   <!-- ── TAB: AI Assistant ── -->
   <div id="sec-ai" class="tab-section">
     <div class="card">
-      <div class="card-head">🤖 AI Assistant dengan DeepSeek</div>
+      <div class="card-head">AI Assistant dengan DeepSeek</div>
       <div class="card-body">
 
         <!-- Toggle AI -->
@@ -646,15 +646,15 @@
         <!-- Test Connection -->
         <div style="display:flex;gap:8px;align-items:center">
           <button class="btn btn-outline" onclick="testAIConnection()" id="btnTestAI">
-            🔌 Test Koneksi
+             Test Koneksi
           </button>
           <span id="aiTestResult" style="font-size:12px"></span>
         </div>
 
         <!-- Save -->
         <div class="save-bar">
-          <button class="btn btn-blue" onclick="saveAISettings()">💾 Simpan Pengaturan AI</button>
-          <span class="save-ok" id="aiOk" style="display:none">✓ Tersimpan</span>
+          <button class="btn btn-blue" onclick="saveAISettings()"> Simpan Pengaturan AI</button>
+          <span class="save-ok" id="aiOk" style="display:none">Tersimpan</span>
         </div>
 
       </div>
@@ -666,14 +666,14 @@
       <div class="card-body" style="gap:8px">
         <p style="font-size:13px;line-height:1.6">
           <strong>1. AI Chat di Dashboard</strong><br/>
-          Klik tombol <strong>[🤖 Tanya AI]</strong> di dashboard untuk bertanya tentang data bisnis.
+          Klik tombol <strong>[Tanya AI]</strong> di dashboard untuk bertanya tentang data bisnis.
         </p>
         <p style="font-size:13px;line-height:1.6">
           <strong>2. AI Insight (Analitik Otomatis)</strong><br/>
-          Akses menu <strong>[🤖 AI Insight]</strong> untuk melihat analisis tren dan rekomendasi bisnis otomatis.
+          Akses menu <strong>[AI Insight]</strong> untuk melihat analisis tren dan rekomendasi bisnis otomatis.
         </p>
         <p style="font-size:13px;line-height:1.6;color:var(--gray-5)">
-          💡 Cache insight akan diperbarui setiap 1 jam untuk menghemat biaya API.
+          Cache insight akan diperbarui setiap 1 jam untuk menghemat biaya API.
         </p>
       </div>
     </div>
@@ -683,7 +683,7 @@
   <div id="sec-user" class="tab-section">
     <div class="card">
       <div class="card-head">
-        👤 Manajemen User
+        Manajemen User
         <button class="btn btn-blue btn-sm" onclick="openAddUser()">+ Tambah User</button>
       </div>
       <table>
@@ -709,7 +709,7 @@
   <!-- ── TAB: Backup ── -->
   <div id="sec-backup" class="tab-section">
     <div class="card">
-      <div class="card-head">💾 Backup & Restore Database</div>
+      <div class="card-head"> Backup & Restore Database</div>
       <div class="card-body">
         <div class="backup-grid">
           <div class="backup-card">
@@ -729,7 +729,7 @@
           </div>
         </div>
         <div style="background:var(--yellow-lt);border:1px solid #fde68a;border-radius:8px;padding:14px;margin-top:16px;font-size:13px">
-          <strong>⚠️ Perhatian Restore:</strong><br/>
+          <strong>Perhatian Restore:</strong><br/>
           1. Download backup terbaru sebelum restore.<br/>
           2. Upload file .db backup yang valid.<br/>
           3. Setelah upload berhasil, hentikan server dan rename file <code>laundry.db.restore</code> ke <code>laundry.db</code>.<br/>
@@ -745,7 +745,7 @@
   <div class="modal">
     <div class="modal-head">
       <h3 id="userModalTitle">Tambah User</h3>
-      <button class="btn-ghost" onclick="closeUserModal()">✕</button>
+      <button class="btn-ghost" onclick="closeUserModal()">×</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="uEditId"/>
@@ -785,7 +785,7 @@
   <div class="modal">
     <div class="modal-head">
       <h3 id="masterItemModalTitle">Tambah Master Pakaian</h3>
-      <button class="btn-ghost" onclick="closeMasterItemModal()">✕</button>
+      <button class="btn-ghost" onclick="closeMasterItemModal()">×</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="miEditId"/>
@@ -817,8 +817,8 @@
 <script>
 // ── State ─────────────────────────────────────────────────────────────────────
 let settings = {};
-let myRole   = '';
-let myId     = 0;
+let myRole = '';
+let myId = 0;
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 (async () => {
@@ -826,7 +826,7 @@ let myId     = 0;
     const d = await api('/api/v1/auth/me');
     document.getElementById('userName').textContent = d.user?.nama || '–';
     myRole = d.user?.role || '';
-    myId   = d.user?.id   || 0;
+    myId = d.user?.id || 0;
   } catch {}
   await loadSettings();
 })();
@@ -849,23 +849,23 @@ function switchTab(id, btn) {
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
   btn.classList.add('active');
-  if (id === 'user')         loadUsers();
-  if (id === 'printer')      cekPrinter();
-  if (id === 'margin')       loadMarginSummary();
-  if (id === 'master-item')  loadMasterItems();
+  if (id === 'user') loadUsers();
+  if (id === 'printer') cekPrinter();
+  if (id === 'margin') loadMarginSummary();
+  if (id === 'master-item') loadMasterItems();
   if (id === 'antar-jemput') loadAJSettings();
-  if (id === 'template')     loadTpl();
+  if (id === 'template') loadTpl();
 }
 
 // ── Antar Jemput settings ────────────────────────────────────────────────────
 async function loadAJSettings() {
   try {
     const { data } = await api('/api/v1/antar-jemput/settings');
-    document.getElementById('ajHargaBBM').value  = data.aj_harga_bbm;
-    document.getElementById('ajKonsumsi').value  = data.aj_konsumsi_bbm;
-    document.getElementById('ajBiayaAus').value  = data.aj_biaya_aus;
+    document.getElementById('ajHargaBBM').value = data.aj_harga_bbm;
+    document.getElementById('ajKonsumsi').value = data.aj_konsumsi_bbm;
+    document.getElementById('ajBiayaAus').value = data.aj_biaya_aus;
     document.getElementById('ajKecepatan').value = data.aj_kecepatan;
-    document.getElementById('ajJamKerja').value  = data.aj_jam_kerja;
+    document.getElementById('ajJamKerja').value = data.aj_jam_kerja;
     document.getElementById('ajUpdatedAt').textContent = data.updated_at
       ? new Date(data.updated_at).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' })
       : '–';
@@ -877,11 +877,11 @@ async function saveAJSettings() {
     await api('/api/v1/antar-jemput/settings', {
       method: 'PUT',
       body: JSON.stringify({
-        aj_harga_bbm:    Number(document.getElementById('ajHargaBBM').value),
+        aj_harga_bbm: Number(document.getElementById('ajHargaBBM').value),
         aj_konsumsi_bbm: Number(document.getElementById('ajKonsumsi').value),
-        aj_biaya_aus:    Number(document.getElementById('ajBiayaAus').value),
-        aj_kecepatan:    Number(document.getElementById('ajKecepatan').value),
-        aj_jam_kerja:    Number(document.getElementById('ajJamKerja').value),
+        aj_biaya_aus: Number(document.getElementById('ajBiayaAus').value),
+        aj_kecepatan: Number(document.getElementById('ajKecepatan').value),
+        aj_jam_kerja: Number(document.getElementById('ajJamKerja').value),
       })
     });
     showOk('ajOk');
@@ -897,21 +897,21 @@ async function loadSettings() {
     settings = data;
 
     // Umum
-    document.getElementById('sNamaToko').value    = data.nama_toko        || '';
+    document.getElementById('sNamaToko').value = data.nama_toko || '';
     // Konversi 628xxx → 08xxx untuk tampilan
     let telepon = data.telepon_toko || '';
     if (telepon.startsWith('62')) telepon = '0' + telepon.slice(2);
-    document.getElementById('sTelepon').value     = telepon;
-    document.getElementById('sAlamat').value      = data.alamat_toko      || '';
-    document.getElementById('sEmail').value       = data.email_toko       || '';
-    document.getElementById('sJam').value         = data.jam_operasional  || '';
-    document.getElementById('sFooter').value      = data.footer_struk     || '';
+    document.getElementById('sTelepon').value = telepon;
+    document.getElementById('sAlamat').value = data.alamat_toko || '';
+    document.getElementById('sEmail').value = data.email_toko || '';
+    document.getElementById('sJam').value = data.jam_operasional || '';
+    document.getElementById('sFooter').value = data.footer_struk || '';
     const lebar = data.struk_lebar || '80mm';
-    document.getElementById('sStrukLebar').value  = lebar;
+    document.getElementById('sStrukLebar').value = lebar;
 
     // WA toggles
-    document.getElementById('tAutoNota').checked  = data.wa_auto_nota    === 'true';
-    document.getElementById('tAutoNotif').checked = data.wa_auto_notif   === 'true';
+    document.getElementById('tAutoNota').checked = data.wa_auto_nota === 'true';
+    document.getElementById('tAutoNotif').checked = data.wa_auto_notif === 'true';
     document.getElementById('tReminderHari').value = data.wa_reminder_hari || '3';
 
     // WA mode default
@@ -926,13 +926,13 @@ async function loadSettings() {
     if (ptSel) [...ptSel.options].forEach(o => { if (o.value === pt) o.selected = true; });
 
     // WA templates
-    document.getElementById('tplNota').value    = data.wa_template_nota           || '';
-    document.getElementById('tplTagihan').value = data.wa_template_tagihan        || '';
-    document.getElementById('tplNotif').value   = data.wa_template_notif_selesai  || '';
+    document.getElementById('tplNota').value = data.wa_template_nota || '';
+    document.getElementById('tplTagihan').value = data.wa_template_tagihan || '';
+    document.getElementById('tplNotif').value = data.wa_template_notif_selesai || '';
 
     // Margin settings
     document.getElementById('marginPembulatan').value = data.margin_pembulatan || 'ratusan';
-    document.getElementById('marginDefault').value    = data.margin_default_persen || '40';
+    document.getElementById('marginDefault').value = data.margin_default_persen || '40';
     document.getElementById('marginTampilkan').checked = data.margin_tampilkan_info !== '0';
 
     // AI settings
@@ -960,13 +960,13 @@ async function saveUmum() {
     await api('/api/v1/pengaturan', {
       method: 'PUT',
       body: JSON.stringify({
-        nama_toko:       document.getElementById('sNamaToko').value.trim(),
-        telepon_toko:    telepon,
-        alamat_toko:     document.getElementById('sAlamat').value.trim(),
-        email_toko:      document.getElementById('sEmail').value.trim(),
+        nama_toko: document.getElementById('sNamaToko').value.trim(),
+        telepon_toko: telepon,
+        alamat_toko: document.getElementById('sAlamat').value.trim(),
+        email_toko: document.getElementById('sEmail').value.trim(),
         jam_operasional: document.getElementById('sJam').value.trim(),
-        footer_struk:    document.getElementById('sFooter').value.trim(),
-        struk_lebar:     document.getElementById('sStrukLebar').value
+        footer_struk: document.getElementById('sFooter').value.trim(),
+        struk_lebar: document.getElementById('sStrukLebar').value
       })
     });
     showOk('umumOk');
@@ -981,7 +981,7 @@ function onWAModeChange() {
 }
 
 function highlightWAMode(mode) {
-  document.getElementById('modeRegularLabel').style.borderColor  = mode === 'regular'  ? 'var(--wa)' : 'var(--gray-3)';
+  document.getElementById('modeRegularLabel').style.borderColor = mode === 'regular' ? 'var(--wa)' : 'var(--gray-3)';
   document.getElementById('modeBusinessLabel').style.borderColor = mode === 'business' ? 'var(--wa)' : 'var(--gray-3)';
 }
 
@@ -997,10 +997,10 @@ async function saveWAMode() {
 
 // ── Printer ───────────────────────────────────────────────────────────────────
 async function cekPrinter() {
-  const dot  = document.getElementById('printerStatusDot');
-  const txt  = document.getElementById('printerStatusTxt');
+  const dot = document.getElementById('printerStatusDot');
+  const txt = document.getElementById('printerStatusTxt');
   const port = document.getElementById('printerStatusPort');
-  const btn  = document.getElementById('testPrintBtn');
+  const btn = document.getElementById('testPrintBtn');
   if (!dot) return; // tab belum dirender
 
   dot.style.background = '#94a3b8';
@@ -1035,7 +1035,7 @@ async function testPrint() {
   } catch (e) {
     toast(e.message, true);
   } finally {
-    btn.textContent = '🖨️ Test Print';
+    btn.textContent = 'Test Print';
     cekPrinter();
   }
 }
@@ -1060,12 +1060,12 @@ async function saveWA() {
     await api('/api/v1/pengaturan', {
       method: 'PUT',
       body: JSON.stringify({
-        wa_auto_nota:               document.getElementById('tAutoNota').checked  ? 'true' : 'false',
-        wa_auto_notif:              document.getElementById('tAutoNotif').checked ? 'true' : 'false',
-        wa_reminder_hari:           document.getElementById('tReminderHari').value || '3',
-        wa_template_nota:           document.getElementById('tplNota').value,
-        wa_template_tagihan:        document.getElementById('tplTagihan').value,
-        wa_template_notif_selesai:  document.getElementById('tplNotif').value
+        wa_auto_nota: document.getElementById('tAutoNota').checked ? 'true' : 'false',
+        wa_auto_notif: document.getElementById('tAutoNotif').checked ? 'true' : 'false',
+        wa_reminder_hari: document.getElementById('tReminderHari').value || '3',
+        wa_template_nota: document.getElementById('tplNota').value,
+        wa_template_tagihan: document.getElementById('tplTagihan').value,
+        wa_template_notif_selesai: document.getElementById('tplNotif').value
       })
     });
     showOk('waOk');
@@ -1088,13 +1088,13 @@ async function loadUsers() {
       tb.innerHTML = '<tr class="empty-row"><td colspan="5">Belum ada user</td></tr>';
       return;
     }
-    const roleLabel = r => r === 'owner' ? '👑 Owner' : (r === 'karyawan' ? '👥 Karyawan' : r);
+    const roleLabel = r => r === 'owner' ? 'Owner' : (r === 'karyawan' ? 'Karyawan' : r);
     tb.innerHTML = data.map(u => `
       <tr>
         <td style="font-weight:600">${esc(u.nama)}</td>
         <td style="font-family:monospace;color:var(--gray-5)">${esc(u.username)}</td>
         <td><span class="role-badge role-${esc(u.role)}">${roleLabel(u.role)}</span></td>
-        <td>${u.aktif ? '<span style="color:var(--green);font-weight:600">✓ Aktif</span>' : '<span style="color:var(--red)">✗ Nonaktif</span>'}</td>
+        <td>${u.aktif ? '<span style="color:var(--green);font-weight:600">Aktif</span>' : '<span style="color:var(--red)"> Nonaktif</span>'}</td>
         <td style="white-space:nowrap">
           <button class="btn btn-outline btn-sm" onclick="openEditUser(${u.id})">Edit</button>
           ${u.id !== myId ? `<button class="btn btn-ghost btn-sm" onclick="toggleUser(${u.id},${u.aktif})">${u.aktif ? 'Nonaktifkan' : 'Aktifkan'}</button>` : ''}
@@ -1107,10 +1107,10 @@ async function loadUsers() {
 function openAddUser() {
   document.getElementById('uEditId').value = '';
   document.getElementById('userModalTitle').textContent = 'Tambah User';
-  document.getElementById('uNama').value      = '';
-  document.getElementById('uUsername').value  = '';
-  document.getElementById('uPassword').value  = '';
-  document.getElementById('uRole').value      = 'karyawan';
+  document.getElementById('uNama').value = '';
+  document.getElementById('uUsername').value = '';
+  document.getElementById('uPassword').value = '';
+  document.getElementById('uRole').value = 'karyawan';
   document.getElementById('uPwHint').textContent = '';
   document.getElementById('uAktifWrap').style.display = 'none';
   document.getElementById('uErr').textContent = '';
@@ -1124,15 +1124,15 @@ async function openEditUser(id) {
     const u = data.find(x => x.id === id);
     if (!u) return;
 
-    document.getElementById('uEditId').value   = u.id;
+    document.getElementById('uEditId').value = u.id;
     document.getElementById('userModalTitle').textContent = 'Edit User';
-    document.getElementById('uNama').value      = u.nama;
-    document.getElementById('uUsername').value  = u.username;
-    document.getElementById('uPassword').value  = '';
-    document.getElementById('uRole').value      = u.role;
+    document.getElementById('uNama').value = u.nama;
+    document.getElementById('uUsername').value = u.username;
+    document.getElementById('uPassword').value = '';
+    document.getElementById('uRole').value = u.role;
     document.getElementById('uPwHint').textContent = '(kosongkan jika tidak ubah)';
     document.getElementById('uAktifWrap').style.display = 'block';
-    document.getElementById('uAktif').checked  = u.aktif;
+    document.getElementById('uAktif').checked = u.aktif;
     document.getElementById('uErr').textContent = '';
     document.getElementById('userModal').classList.add('open');
   } catch (e) { toast(e.message, true); }
@@ -1141,11 +1141,11 @@ async function openEditUser(id) {
 function closeUserModal() { document.getElementById('userModal').classList.remove('open'); }
 
 async function saveUser() {
-  const id   = document.getElementById('uEditId').value;
+  const id = document.getElementById('uEditId').value;
   const body = {
-    nama:     document.getElementById('uNama').value.trim(),
+    nama: document.getElementById('uNama').value.trim(),
     username: document.getElementById('uUsername').value.trim(),
-    role:     document.getElementById('uRole').value
+    role: document.getElementById('uRole').value
   };
   const pw = document.getElementById('uPassword').value;
   if (pw) body.password = pw;
@@ -1213,7 +1213,7 @@ async function uploadRestore() {
     });
     const j = await r.json();
     if (!r.ok) throw new Error(j.error);
-    alert('✅ ' + j.message + '\n\n' + (j.note || ''));
+    alert(' ' + j.message + '\n\n' + (j.note || ''));
     toast('File backup berhasil diupload');
   } catch (e) { toast(e.message, true); }
 }
@@ -1224,9 +1224,9 @@ async function saveMarginSettings() {
     await api('/api/v1/pengaturan', {
       method: 'PUT',
       body: JSON.stringify({
-        margin_pembulatan:      document.getElementById('marginPembulatan').value,
-        margin_default_persen:  document.getElementById('marginDefault').value || '40',
-        margin_tampilkan_info:  document.getElementById('marginTampilkan').checked ? '1' : '0',
+        margin_pembulatan: document.getElementById('marginPembulatan').value,
+        margin_default_persen: document.getElementById('marginDefault').value || '40',
+        margin_tampilkan_info: document.getElementById('marginTampilkan').checked ? '1' : '0',
       })
     });
     toast('Pengaturan margin disimpan');
@@ -1320,16 +1320,16 @@ async function testAIConnection() {
       body: JSON.stringify({ apiKey, apiUrl, model })
     });
 
-    result.textContent = '✓ ' + res.message;
+    result.textContent = '' + res.message;
     result.style.color = 'var(--green)';
     toast('Koneksi berhasil!');
   } catch (e) {
-    result.textContent = '✗ ' + e.message;
+    result.textContent = ' ' + e.message;
     result.style.color = 'var(--red)';
     toast('Koneksi gagal: ' + e.message, true);
   } finally {
     btn.disabled = false;
-    btn.textContent = '🔌 Test Koneksi';
+    btn.textContent = ' Test Koneksi';
   }
 }
 
@@ -1354,7 +1354,7 @@ function renderMasterItemsTable() {
     tbody.innerHTML = `
       <tr>
         <td colspan="3" style="text-align:center;padding:40px;color:var(--gray-5);">
-          <div style="font-size:40px;margin-bottom:10px;">📦</div>
+          <div style="font-size:40px;margin-bottom:10px;"></div>
           Belum ada master pakaian.<br/>
           <button class="btn btn-sm btn-blue" onclick="openMasterItemModal()" style="margin-top:12px;">+ Tambah Pakaian Pertama</button>
         </td>
@@ -1484,10 +1484,10 @@ async function loadTpl() {
   try {
     const j = tplState.jenis;
     const r = await api(`/api/v1/pengaturan/template/${j}`);
-    tplState.config    = r.config;
-    tplState.meta      = r.meta || tplState.meta;
+    tplState.config = r.config;
+    tplState.meta = r.meta || tplState.meta;
     tplState.tersimpan = !!r.tersimpan;
-    tplState.cache[j]  = r.config;
+    tplState.cache[j] = r.config;
     tplState.loaded[j] = true;
     renderTplList();
     renderTplPreview();
@@ -1609,29 +1609,29 @@ function onTplToggle(id, aktif) {
 // Data dummy untuk preview live
 const TPL_SAMPLE = {
   pengaturan: {
-    nama_toko:    'Nala Laundry',
-    alamat_toko:  'Jl A Djelani Gg A Karim',
+    nama_toko: 'Nala Laundry',
+    alamat_toko: 'Jl A Djelani Gg A Karim',
     telepon_toko: '087859751490',
     footer_struk: 'Terima kasih!',
   },
   transaksi: {
     nomor_transaksi: 'LDR-20260629-001',
-    tanggal_masuk:   '2026-06-29T10:15:00+07:00',
+    tanggal_masuk: '2026-06-29T10:15:00+07:00',
     tanggal_selesai: '2026-06-30T17:00:00+07:00',
-    kasir_nama:      'Esi',
-    pelanggan_nama:  'Kak Esi',
+    kasir_nama: 'Esi',
+    pelanggan_nama: 'Kak Esi',
     pelanggan_telepon: '6285624497900',
-    pelanggan_poin:  120,
+    pelanggan_poin: 120,
     items: [
       { id:1, nama_layanan:'Cuci Setrika Reguler', jumlah:3, satuan:'kg', harga_satuan:7000, subtotal:21000, rincian:[] },
-      { id:2, nama_layanan:'Setrika Saja',         jumlah:1, satuan:'kg', harga_satuan:5000, subtotal:5000,  rincian:[] },
+      { id:2, nama_layanan:'Setrika Saja', jumlah:1, satuan:'kg', harga_satuan:5000, subtotal:5000, rincian:[] },
     ],
     biaya_tambahan: [{ keterangan:'Antar Jemput', nominal:5000 }],
     total_harga: 26000,
-    diskon:      2000,
+    diskon: 2000,
     total_bayar: 29000,
-    bayar:       20000,
-    kembalian:   0,
+    bayar: 20000,
+    kembalian: 0,
     metode_bayar:'tunai',
   },
   poinEarned: 26,
@@ -1673,7 +1673,7 @@ function fmtTel(n) {
   if (!n) return '';
   const s = String(n).trim();
   if (s.startsWith('628')) return '08' + s.slice(3);
-  if (s.startsWith('62'))  return '0'  + s.slice(2);
+  if (s.startsWith('62')) return '0' + s.slice(2);
   return s;
 }
 
@@ -1708,19 +1708,19 @@ function buildStrukPreview(elements) {
     if (lastGroup !== null && lastGroup !== g) line();
 
     switch (el.id) {
-      case 'nama_toko':     out.push(center(pengaturan.nama_toko)); break;
-      case 'alamat_toko':   if (pengaturan.alamat_toko) out.push(center(pengaturan.alamat_toko)); break;
-      case 'telepon_toko':  if (pengaturan.telepon_toko) out.push(center('WA: ' + pengaturan.telepon_toko)); break;
-      case 'nomor_order':   out.push('No : ' + transaksi.nomor_transaksi); break;
-      case 'tanggal':       out.push('Tgl: ' + fmtTglJam(transaksi.tanggal_masuk)); break;
-      case 'kasir':         if (transaksi.kasir_nama) out.push('Kasir: ' + transaksi.kasir_nama); break;
+      case 'nama_toko': out.push(center(pengaturan.nama_toko)); break;
+      case 'alamat_toko': if (pengaturan.alamat_toko) out.push(center(pengaturan.alamat_toko)); break;
+      case 'telepon_toko': if (pengaturan.telepon_toko) out.push(center('WA: ' + pengaturan.telepon_toko)); break;
+      case 'nomor_order': out.push('No : ' + transaksi.nomor_transaksi); break;
+      case 'tanggal': out.push('Tgl: ' + fmtTglJam(transaksi.tanggal_masuk)); break;
+      case 'kasir': if (transaksi.kasir_nama) out.push('Kasir: ' + transaksi.kasir_nama); break;
       case 'nama_pelanggan':out.push('Plg: ' + (transaksi.pelanggan_nama || 'Non-member')); break;
-      case 'nomor_wa':      if (transaksi.pelanggan_telepon) out.push('WA : ' + transaksi.pelanggan_telepon); break;
+      case 'nomor_wa': if (transaksi.pelanggan_telepon) out.push('WA : ' + transaksi.pelanggan_telepon); break;
       case 'daftar_layanan':
         out.push('LAYANAN:');
         (transaksi.items||[]).forEach(it => {
           out.push(String(it.nama_layanan).substring(0,LEBAR));
-          const qty = '  ' + it.jumlah + ' ' + (it.satuan||'') + ' x Rp' + fmtRp(it.harga_satuan);
+          const qty = ' ' + it.jumlah + ' ' + (it.satuan||'') + ' x Rp' + fmtRp(it.harga_satuan);
           out.push(padLR(qty, 'Rp' + fmtRp(it.subtotal)));
         });
         break;
@@ -1735,7 +1735,7 @@ function buildStrukPreview(elements) {
       case 'diskon':
         if ((transaksi.diskon||0) > 0) {
           out.push(padLR('Subtotal', 'Rp' + fmtRp(transaksi.total_harga)));
-          out.push(padLR('Diskon',   '-Rp' + fmtRp(transaksi.diskon)));
+          out.push(padLR('Diskon', '-Rp' + fmtRp(transaksi.diskon)));
         }
         break;
       case 'total':
@@ -1748,7 +1748,7 @@ function buildStrukPreview(elements) {
         out.push('Status: ' + status);
         if (!lunas && (transaksi.bayar||0) > 0) {
           out.push('Dibayar : Rp' + fmtRp(transaksi.bayar));
-          out.push('Sisa    : Rp' + fmtRp(transaksi.total_bayar - transaksi.bayar));
+          out.push('Sisa : Rp' + fmtRp(transaksi.total_bayar - transaksi.bayar));
         } else if (lunas) {
           out.push('Dibayar : Rp' + fmtRp(transaksi.bayar));
         }
@@ -1764,7 +1764,7 @@ function buildStrukPreview(elements) {
           out.push(center(fmtTglJam(transaksi.tanggal_selesai)));
         }
         break;
-      case 'footer':        out.push(center(pengaturan.footer_struk || 'Terima kasih!')); break;
+      case 'footer': out.push(center(pengaturan.footer_struk || 'Terima kasih!')); break;
       case 'instruksi_ambil':out.push(center('Tunjukkan struk saat ambil.')); break;
     }
     lastGroup = g;
@@ -1788,12 +1788,12 @@ function buildLabelPreview(elements) {
     }
 
     switch (el.id) {
-      case 'nama_toko':     out.push(center(pengaturan.nama_toko)); break;
-      case 'alamat_toko':   if (pengaturan.alamat_toko) out.push(center(pengaturan.alamat_toko)); break;
-      case 'telepon_toko':  if (pengaturan.telepon_toko) out.push(center('WA: ' + pengaturan.telepon_toko)); break;
-      case 'nomor_order':   out.push('ORDER: ' + transaksi.nomor_transaksi); break;
-      case 'tanggal':       out.push('Tgl: ' + fmtTglJam(transaksi.tanggal_masuk)); break;
-      case 'kasir':         if (transaksi.kasir_nama) out.push('Kasir: ' + transaksi.kasir_nama); break;
+      case 'nama_toko': out.push(center(pengaturan.nama_toko)); break;
+      case 'alamat_toko': if (pengaturan.alamat_toko) out.push(center(pengaturan.alamat_toko)); break;
+      case 'telepon_toko': if (pengaturan.telepon_toko) out.push(center('WA: ' + pengaturan.telepon_toko)); break;
+      case 'nomor_order': out.push('ORDER: ' + transaksi.nomor_transaksi); break;
+      case 'tanggal': out.push('Tgl: ' + fmtTglJam(transaksi.tanggal_masuk)); break;
+      case 'kasir': if (transaksi.kasir_nama) out.push('Kasir: ' + transaksi.kasir_nama); break;
       case 'nama_pelanggan':out.push(transaksi.pelanggan_nama || 'Non-member'); break;
       case 'nomor_wa': {
         const t = fmtTel(transaksi.pelanggan_telepon);
@@ -1806,11 +1806,11 @@ function buildLabelPreview(elements) {
       case 'daftar_layanan':
         if (items.length === 1) {
           out.push(String(items[0].nama_layanan).substring(0,LEBAR));
-          out.push('  ' + items[0].jumlah + ' ' + (items[0].satuan||'').trim());
+          out.push(' ' + items[0].jumlah + ' ' + (items[0].satuan||'').trim());
         } else {
           items.forEach((it,i) => {
             out.push((i+1) + '. ' + String(it.nama_layanan).substring(0,LEBAR-3));
-            out.push('   ' + it.jumlah + ' ' + (it.satuan||'').trim());
+            out.push(' ' + it.jumlah + ' ' + (it.satuan||'').trim());
           });
         }
         break;
@@ -1818,7 +1818,7 @@ function buildLabelPreview(elements) {
         if ((transaksi.biaya_tambahan||[]).length) {
           out.push('Biaya Tambahan:');
           transaksi.biaya_tambahan.forEach(bt => {
-            const n = '  ' + String(bt.keterangan||'').substring(0,18);
+            const n = ' ' + String(bt.keterangan||'').substring(0,18);
             out.push(padLR(n, 'Rp' + fmtRp(bt.nominal)));
           });
         }
@@ -1826,7 +1826,7 @@ function buildLabelPreview(elements) {
       case 'diskon':
         if ((transaksi.diskon||0) > 0) {
           out.push(padLR('Subtotal', 'Rp' + fmtRp(transaksi.total_harga)));
-          out.push(padLR('Diskon',   '-Rp' + fmtRp(transaksi.diskon)));
+          out.push(padLR('Diskon', '-Rp' + fmtRp(transaksi.diskon)));
         }
         break;
       case 'total': out.push('Total: Rp' + fmtRp(transaksi.total_bayar)); break;
@@ -1844,7 +1844,7 @@ function buildLabelPreview(elements) {
         }
         break;
       }
-      case 'footer':         out.push(center(pengaturan.footer_struk || 'Terima kasih!')); break;
+      case 'footer': out.push(center(pengaturan.footer_struk || 'Terima kasih!')); break;
       case 'instruksi_ambil':out.push(center('Tunjukkan label saat ambil')); break;
     }
     lastGroup = g;
@@ -1897,7 +1897,7 @@ function esc(s) {
 function toast(msg, err = false) {
   const el = document.getElementById('toast');
   el.textContent = msg;
-  el.className   = 'toast show' + (err ? ' err' : '');
+  el.className = 'toast show' + (err ? ' err' : '');
   setTimeout(() => el.classList.remove('show'), 3500);
 }
 </script>

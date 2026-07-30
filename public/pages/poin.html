@@ -25,36 +25,36 @@
 
     header { background:#fff; border-bottom:1px solid var(--gray-3); padding:0 20px; height:56px;
              display:flex; align-items:center; gap:20px; position:sticky; top:0; z-index:20; box-shadow:var(--shadow); }
-    .logo  { font-size:16px; font-weight:800; color:var(--blue); white-space:nowrap; }
-    nav    { display:flex; gap:4px; flex:1; overflow-x:auto; }
-    nav a  { padding:6px 14px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;
+    .logo { font-size:16px; font-weight:800; color:var(--blue); white-space:nowrap; }
+    nav { display:flex; gap:4px; flex:1; overflow-x:auto; }
+    nav a { padding:6px 14px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;
              color:var(--gray-7); white-space:nowrap; transition:background .15s; }
-    nav a:hover  { background:var(--gray-2); }
+    nav a:hover { background:var(--gray-2); }
     nav a.active { background:var(--blue-lt); color:var(--blue); }
     .header-user { font-size:13px; color:var(--gray-5); display:flex; align-items:center; gap:8px; flex-shrink:0; }
-    .logout-btn  { padding:5px 12px; border:1px solid var(--gray-3); border-radius:7px; background:none; font-size:13px; cursor:pointer; color:var(--gray-7); }
+    .logout-btn { padding:5px 12px; border:1px solid var(--gray-3); border-radius:7px; background:none; font-size:13px; cursor:pointer; color:var(--gray-7); }
     .logout-btn:hover { background:var(--gray-2); }
 
     .page { max-width:1200px; margin:0 auto; padding:20px 16px; }
     .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; flex-wrap:wrap; }
-    .page-title  { font-size:20px; font-weight:800; }
+    .page-title { font-size:20px; font-weight:800; }
 
     /* ── Page tabs ── */
-    .page-tabs  { display:flex; gap:0; border-bottom:2px solid var(--gray-3); margin-bottom:20px; }
-    .page-tab   { padding:10px 20px; border:none; background:none; font-size:14px; font-weight:700;
+    .page-tabs { display:flex; gap:0; border-bottom:2px solid var(--gray-3); margin-bottom:20px; }
+    .page-tab { padding:10px 20px; border:none; background:none; font-size:14px; font-weight:700;
                   color:var(--gray-5); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:color .1s; }
-    .page-tab:hover  { color:var(--gray-9); }
+    .page-tab:hover { color:var(--gray-9); }
     .page-tab.active { color:var(--blue); border-bottom-color:var(--blue); }
 
     /* ── Buttons ── */
     .btn { padding:8px 16px; border-radius:8px; border:1px solid transparent; font-size:13px;
            font-weight:600; cursor:pointer; transition:opacity .15s; display:inline-flex; align-items:center; gap:6px; }
-    .btn:hover    { opacity:.85; }
+    .btn:hover { opacity:.85; }
     .btn:disabled { opacity:.4; cursor:default; }
-    .btn-sm  { padding:5px 10px; font-size:12px; }
-    .btn-blue    { background:var(--blue);  color:#fff; }
-    .btn-green   { background:var(--green); color:#fff; }
-    .btn-red     { background:var(--red);   color:#fff; }
+    .btn-sm { padding:5px 10px; font-size:12px; }
+    .btn-blue { background:var(--blue); color:#fff; }
+    .btn-green { background:var(--green); color:#fff; }
+    .btn-red { background:var(--red); color:#fff; }
     .btn-outline { background:#fff; border-color:var(--gray-3); color:var(--gray-7); }
 
     /* ── Level cards ── */
@@ -63,18 +63,18 @@
     .level-card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3);
                   box-shadow:var(--shadow); padding:16px 18px; position:relative; overflow:hidden; }
     .level-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; }
-    .level-card.bronze::before   { background:var(--bronze); }
-    .level-card.silver::before   { background:#9ca3af; }
-    .level-card.gold::before     { background:var(--yellow); }
+    .level-card.bronze::before { background:var(--bronze); }
+    .level-card.silver::before { background:#9ca3af; }
+    .level-card.gold::before { background:var(--yellow); }
     .level-card.platinum::before { background:var(--purple); }
-    .level-label  { font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
-    .level-card.bronze   .level-label { color:var(--bronze); }
-    .level-card.silver   .level-label { color:#6b7280; }
-    .level-card.gold     .level-label { color:var(--yellow); }
+    .level-label { font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+    .level-card.bronze .level-label { color:var(--bronze); }
+    .level-card.silver .level-label { color:#6b7280; }
+    .level-card.gold .level-label { color:var(--yellow); }
     .level-card.platinum .level-label { color:var(--purple); }
     .level-count { font-size:28px; font-weight:900; color:var(--gray-9); }
-    .level-sub   { font-size:11px; color:var(--gray-5); margin-top:2px; }
-    .level-icon  { position:absolute; right:14px; top:14px; font-size:24px; opacity:.15; }
+    .level-sub { font-size:11px; color:var(--gray-5); margin-top:2px; }
+    .level-icon { position:absolute; right:14px; top:14px; font-size:24px; opacity:.15; }
 
     /* ── Filter bar ── */
     .filter-bar { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
@@ -84,7 +84,7 @@
 
     /* ── Table ── */
     .table-card { background:#fff; border:1px solid var(--gray-3); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
-    .table-wrap  { overflow-x:auto; }
+    .table-wrap { overflow-x:auto; }
     table { width:100%; border-collapse:collapse; min-width:600px; }
     thead th { padding:10px 16px; text-align:left; font-size:11px; font-weight:700;
                text-transform:uppercase; letter-spacing:.4px; color:var(--gray-5);
@@ -97,14 +97,14 @@
     /* Level badge */
     .lvl-badge { display:inline-block; padding:3px 10px; border-radius:99px; font-size:11px; font-weight:800;
                  text-transform:uppercase; letter-spacing:.4px; }
-    .lvl-Bronze   { background:var(--bronze-lt); color:var(--bronze); }
-    .lvl-Silver   { background:var(--gray-2);   color:#6b7280; }
-    .lvl-Gold     { background:var(--yellow-lt); color:var(--yellow); }
+    .lvl-Bronze { background:var(--bronze-lt); color:var(--bronze); }
+    .lvl-Silver { background:var(--gray-2); color:#6b7280; }
+    .lvl-Gold { background:var(--yellow-lt); color:var(--yellow); }
     .lvl-Platinum { background:var(--purple-lt); color:var(--purple); }
 
     /* Progress bar */
     .progress-wrap { height:8px; background:var(--gray-3); border-radius:99px; overflow:hidden; margin:4px 0; }
-    .progress-bar  { height:100%; border-radius:99px; transition:width .4s; }
+    .progress-bar { height:100%; border-radius:99px; transition:width .4s; }
 
     /* ── Modal ── */
     .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:100;
@@ -114,8 +114,8 @@
                     box-shadow:-8px 0 40px rgba(0,0,0,.15); display:flex; flex-direction:column; }
     .panel-header { padding:18px 22px; border-bottom:1px solid var(--gray-3);
                     display:flex; align-items:center; gap:12px; position:sticky; top:0; background:#fff; z-index:1; }
-    .panel-close  { background:none; border:none; font-size:22px; cursor:pointer; color:var(--gray-5); margin-left:auto; }
-    .panel-body   { padding:20px 22px; flex:1; }
+    .panel-close { background:none; border:none; font-size:22px; cursor:pointer; color:var(--gray-5); margin-left:auto; }
+    .panel-body { padding:20px 22px; flex:1; }
     .panel-section { margin-bottom:20px; }
     .panel-section h3 { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.5px;
                          color:var(--gray-5); margin-bottom:10px; }
@@ -136,16 +136,16 @@
     .rw-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
     .rw-dot.tambah { background:var(--green); }
     .rw-dot.kurang { background:var(--red); }
-    .rw-ket  { flex:1; font-size:12px; }
-    .rw-trx  { font-size:11px; color:var(--blue); }
-    .rw-jml  { font-size:13px; font-weight:800; white-space:nowrap; }
+    .rw-ket { flex:1; font-size:12px; }
+    .rw-trx { font-size:11px; color:var(--blue); }
+    .rw-jml { font-size:13px; font-weight:800; white-space:nowrap; }
     .rw-jml.tambah { color:var(--green); }
     .rw-jml.kurang { color:var(--red); }
     .rw-date { font-size:10px; color:var(--gray-5); }
 
     /* Sesuaikan form */
     .adj-form { background:var(--gray-1); border-radius:8px; padding:14px; }
-    .adj-row  { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .adj-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
     .form-input { width:100%; padding:8px 10px; border:1px solid var(--gray-3); border-radius:7px;
                   font-size:13px; outline:none; background:#fff; transition:border-color .15s; }
     .form-input:focus { border-color:var(--blue); }
@@ -164,14 +164,14 @@
     .s-input { width:100%; padding:9px 12px; border:1px solid var(--gray-3); border-radius:8px;
                font-size:14px; outline:none; background:#fff; transition:border-color .15s; }
     .s-input:focus { border-color:var(--blue); }
-    .s-hint  { font-size:11px; color:var(--gray-5); margin-top:4px; }
+    .s-hint { font-size:11px; color:var(--gray-5); margin-top:4px; }
 
     /* Level preview */
     .level-preview { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px; }
     .lv-item { border-radius:8px; padding:10px; text-align:center; font-size:12px; font-weight:700; }
-    .lv-item.bronze   { background:var(--bronze-lt); color:var(--bronze); }
-    .lv-item.silver   { background:var(--gray-2);   color:#6b7280; }
-    .lv-item.gold     { background:var(--yellow-lt); color:var(--yellow); }
+    .lv-item.bronze { background:var(--bronze-lt); color:var(--bronze); }
+    .lv-item.silver { background:var(--gray-2); color:#6b7280; }
+    .lv-item.gold { background:var(--yellow-lt); color:var(--yellow); }
     .lv-item.platinum { background:var(--purple-lt); color:var(--purple); }
 
     /* Toast */
@@ -225,7 +225,7 @@
   <!-- Page tabs -->
   <div class="page-tabs">
     <button class="page-tab active" onclick="switchTab('pelanggan', this)">Pelanggan & Poin</button>
-    <button class="page-tab"        onclick="switchTab('pengaturan', this)">Pengaturan Poin</button>
+    <button class="page-tab" onclick="switchTab('pengaturan', this)">Pengaturan Poin</button>
   </div>
 
   <!-- ── Tab: Pelanggan ── -->
@@ -233,25 +233,25 @@
     <!-- Level cards -->
     <div class="level-grid">
       <div class="level-card bronze">
-        <div class="level-icon">🥉</div>
+        <div class="level-icon"></div>
         <div class="level-label">Bronze</div>
         <div class="level-count" id="lvlBronze">—</div>
         <div class="level-sub">pelanggan</div>
       </div>
       <div class="level-card silver">
-        <div class="level-icon">🥈</div>
+        <div class="level-icon"></div>
         <div class="level-label">Silver</div>
         <div class="level-count" id="lvlSilver">—</div>
         <div class="level-sub">pelanggan</div>
       </div>
       <div class="level-card gold">
-        <div class="level-icon">🥇</div>
+        <div class="level-icon"></div>
         <div class="level-label">Gold</div>
         <div class="level-count" id="lvlGold">—</div>
         <div class="level-sub">pelanggan</div>
       </div>
       <div class="level-card platinum">
-        <div class="level-icon">💎</div>
+        <div class="level-icon"></div>
         <div class="level-label">Platinum</div>
         <div class="level-count" id="lvlPlatinum">—</div>
         <div class="level-sub">pelanggan</div>
@@ -320,19 +320,19 @@
         <h3>Batas Level Poin</h3>
         <div class="settings-row">
           <div class="settings-field">
-            <label class="s-label" style="color:#6b7280">🥈 Silver mulai dari</label>
+            <label class="s-label" style="color:#6b7280"> Silver mulai dari</label>
             <input type="number" id="s-silverMin" class="s-input" min="1"/>
             <div class="s-hint">poin untuk naik ke Silver</div>
           </div>
           <div class="settings-field">
-            <label class="s-label" style="color:var(--yellow)">🥇 Gold mulai dari</label>
+            <label class="s-label" style="color:var(--yellow)"> Gold mulai dari</label>
             <input type="number" id="s-goldMin" class="s-input" min="1"/>
             <div class="s-hint">poin untuk naik ke Gold</div>
           </div>
         </div>
         <div class="settings-row">
           <div class="settings-field">
-            <label class="s-label" style="color:var(--purple)">💎 Platinum mulai dari</label>
+            <label class="s-label" style="color:var(--purple)"> Platinum mulai dari</label>
             <input type="number" id="s-platinumMin" class="s-input" min="1"/>
             <div class="s-hint">poin untuk naik ke Platinum</div>
           </div>
@@ -341,10 +341,10 @@
         <!-- Level preview -->
         <div style="margin-top:6px;font-size:12px;color:var(--gray-5);margin-bottom:6px">Preview level berdasarkan nilai di atas:</div>
         <div class="level-preview">
-          <div class="lv-item bronze">🥉 Bronze<br/><span id="prev-bronze">0 – ?</span></div>
-          <div class="lv-item silver">🥈 Silver<br/><span id="prev-silver">500 – ?</span></div>
-          <div class="lv-item gold">🥇 Gold<br/><span id="prev-gold">2000 – ?</span></div>
-          <div class="lv-item platinum">💎 Platinum<br/><span id="prev-platinum">5000+</span></div>
+          <div class="lv-item bronze"> Bronze<br/><span id="prev-bronze">0 – ?</span></div>
+          <div class="lv-item silver"> Silver<br/><span id="prev-silver">500 – ?</span></div>
+          <div class="lv-item gold"> Gold<br/><span id="prev-gold">2000 – ?</span></div>
+          <div class="lv-item platinum"> Platinum<br/><span id="prev-platinum">5000+</span></div>
         </div>
       </div>
 
@@ -438,19 +438,19 @@
 <div id="toast"></div>
 
 <script>
-const fmtRp  = n => 'Rp ' + Number(n||0).toLocaleString('id-ID');
+const fmtRp = n => 'Rp ' + Number(n||0).toLocaleString('id-ID');
 const fmtRpShort = n => {
   n = Number(n||0);
   if (n >= 1000000) return 'Rp '+(n/1000000).toFixed(1).replace('.0','')+'jt';
-  if (n >= 1000)    return 'Rp '+(n/1000).toFixed(0)+'rb';
+  if (n >= 1000) return 'Rp '+(n/1000).toFixed(0)+'rb';
   return 'Rp '+n.toLocaleString('id-ID');
 };
 const fmtDate = s => s ? new Date(s).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
 
-let debTimer    = null;
+let debTimer = null;
 let currentPage = 1;
-let allLoaded   = false;
-let settings    = {};
+let allLoaded = false;
+let settings = {};
 let currentPelangganId = null;
 
 function showToast(msg, dur=2500) {
@@ -464,7 +464,7 @@ async function logout() { await fetch('/api/v1/auth/logout',{method:'POST'}); lo
 function switchTab(tab, btn) {
   document.querySelectorAll('.page-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('tab-pelanggan').style.display  = tab === 'pelanggan'  ? '' : 'none';
+  document.getElementById('tab-pelanggan').style.display = tab === 'pelanggan' ? '' : 'none';
   document.getElementById('tab-pengaturan').style.display = tab === 'pengaturan' ? '' : 'none';
   if (tab === 'pengaturan') loadPengaturan();
 }
@@ -472,16 +472,16 @@ function switchTab(tab, btn) {
 // ── Level helpers ─────────────────────────────────────────────────────────────
 function getLevelInfo(poin) {
   const s = settings;
-  if (poin >= (s.level_platinum_min||5000)) return { label:'Platinum', color:'#8B5CF6', bg:'var(--purple-lt)', next:null,      nextMin:null };
-  if (poin >= (s.level_gold_min    ||2000)) return { label:'Gold',     color:'#F59E0B', bg:'var(--yellow-lt)', next:'Platinum', nextMin:s.level_platinum_min||5000 };
-  if (poin >= (s.level_silver_min  || 500)) return { label:'Silver',   color:'#6b7280', bg:'var(--gray-2)',    next:'Gold',     nextMin:s.level_gold_min||2000 };
-  return                                           { label:'Bronze',   color:'#92400e', bg:'var(--bronze-lt)', next:'Silver',   nextMin:s.level_silver_min||500 };
+  if (poin >= (s.level_platinum_min||5000)) return { label:'Platinum', color:'#8B5CF6', bg:'var(--purple-lt)', next:null, nextMin:null };
+  if (poin >= (s.level_gold_min ||2000)) return { label:'Gold', color:'#F59E0B', bg:'var(--yellow-lt)', next:'Platinum', nextMin:s.level_platinum_min||5000 };
+  if (poin >= (s.level_silver_min || 500)) return { label:'Silver', color:'#6b7280', bg:'var(--gray-2)', next:'Gold', nextMin:s.level_gold_min||2000 };
+  return { label:'Bronze', color:'#92400e', bg:'var(--bronze-lt)', next:'Silver', nextMin:s.level_silver_min||500 };
 }
 
 function prevMin(label) {
-  if (label === 'Platinum') return settings.level_gold_min    || 2000;
-  if (label === 'Gold')     return settings.level_silver_min  || 500;
-  if (label === 'Silver')   return 0;
+  if (label === 'Platinum') return settings.level_gold_min || 2000;
+  if (label === 'Gold') return settings.level_silver_min || 500;
+  if (label === 'Silver') return 0;
   return 0;
 }
 
@@ -511,16 +511,16 @@ async function loadPelanggan(page = 1) {
 
     if (d.stats) {
       settings = d.stats.settings;
-      document.getElementById('lvlBronze').textContent   = d.stats.level_stats.Bronze   || 0;
-      document.getElementById('lvlSilver').textContent   = d.stats.level_stats.Silver   || 0;
-      document.getElementById('lvlGold').textContent     = d.stats.level_stats.Gold     || 0;
+      document.getElementById('lvlBronze').textContent = d.stats.level_stats.Bronze || 0;
+      document.getElementById('lvlSilver').textContent = d.stats.level_stats.Silver || 0;
+      document.getElementById('lvlGold').textContent = d.stats.level_stats.Gold || 0;
       document.getElementById('lvlPlatinum').textContent = d.stats.level_stats.Platinum || 0;
-      document.getElementById('totalInfo').textContent   =
+      document.getElementById('totalInfo').textContent =
         `${d.stats.total_pelanggan} pelanggan · ${Number(d.stats.total_poin_beredar).toLocaleString('id-ID')} poin beredar`;
     }
 
     const tbody = document.getElementById('pelangganBody');
-    const rows  = d.data || [];
+    const rows = d.data || [];
 
     if (page === 1 && !rows.length) {
       tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--gray-5)">Belum ada data pelanggan</td></tr>';
@@ -528,9 +528,9 @@ async function loadPelanggan(page = 1) {
     }
 
     const html = rows.map(p => {
-      const lvl  = getLevelInfo(p.total_poin);
+      const lvl = getLevelInfo(p.total_poin);
       const nMin = prevMin(lvl.label);
-      const pct  = lvl.next
+      const pct = lvl.next
         ? Math.min(100, Math.round((p.total_poin - nMin) / ((lvl.nextMin || 1) - nMin) * 100))
         : 100;
       return `<tr onclick="openDetail(${p.id})">
@@ -550,9 +550,9 @@ async function loadPelanggan(page = 1) {
     if (page === 1) tbody.innerHTML = html;
     else tbody.innerHTML += html;
 
-    const total  = d.meta?.total || 0;
+    const total = d.meta?.total || 0;
     const loaded = page * 30;
-    allLoaded    = loaded >= total;
+    allLoaded = loaded >= total;
     document.getElementById('loadMoreWrap').style.display = allLoaded ? 'none' : 'block';
   } catch(e) {
     console.error(e);
@@ -578,30 +578,30 @@ async function openDetail(id) {
     avatar.textContent = initials;
     avatar.style.background = lvl.color;
 
-    document.getElementById('panelNama').textContent    = p.nama;
+    document.getElementById('panelNama').textContent = p.nama;
     document.getElementById('panelTelepon').textContent = p.telepon || '—';
-    document.getElementById('panelPoin').textContent    = Number(p.total_poin).toLocaleString('id-ID') + ' poin';
+    document.getElementById('panelPoin').textContent = Number(p.total_poin).toLocaleString('id-ID') + ' poin';
 
     const badge = document.getElementById('panelLevelBadge');
     badge.innerHTML = `<span class="lvl-badge lvl-${lvl.label}">${lvl.label}</span>`;
 
     if (lvl.next) {
       const nMin = prevMin(lvl.label);
-      const pct  = Math.min(100, Math.round((p.total_poin - nMin) / ((lvl.nextMin||1) - nMin) * 100));
+      const pct = Math.min(100, Math.round((p.total_poin - nMin) / ((lvl.nextMin||1) - nMin) * 100));
       document.getElementById('panelProgressWrap').style.display = '';
-      document.getElementById('panelProgressBar').style.width    = pct + '%';
+      document.getElementById('panelProgressBar').style.width = pct + '%';
       document.getElementById('panelProgressBar').style.background = lvl.color;
       document.getElementById('panelProgMin').textContent = nMin + ' poin';
       document.getElementById('panelProgMax').textContent = (lvl.nextMin||0) + ' poin';
       document.getElementById('panelNextLevel').textContent = `${pct}% menuju ${lvl.next} (butuh ${((lvl.nextMin||0) - p.total_poin).toLocaleString('id-ID')} poin lagi)`;
     } else {
       document.getElementById('panelProgressWrap').style.display = 'none';
-      document.getElementById('panelNextLevel').textContent = 'Level tertinggi 🏆';
+      document.getElementById('panelNextLevel').textContent = 'Level tertinggi ';
     }
 
     document.getElementById('panelTrxCount').textContent = Number(p.jumlah_transaksi).toLocaleString('id-ID');
-    document.getElementById('panelBelanja').textContent  = fmtRpShort(p.total_belanja);
-    document.getElementById('panelLastTrx').textContent  = p.transaksi_terakhir ? fmtDate(p.transaksi_terakhir) : '—';
+    document.getElementById('panelBelanja').textContent = fmtRpShort(p.total_belanja);
+    document.getElementById('panelLastTrx').textContent = p.transaksi_terakhir ? fmtDate(p.transaksi_terakhir) : '—';
 
     // Riwayat
     const riwayat = p.riwayat || [];
@@ -622,7 +622,7 @@ async function openDetail(id) {
 
     // Reset adj form
     document.getElementById('adjDelta').value = '';
-    document.getElementById('adjKet').value   = '';
+    document.getElementById('adjKet').value = '';
   } catch(e) {
     console.error(e);
     document.getElementById('panelRiwayat').innerHTML = '<div style="text-align:center;color:var(--red);padding:20px">Gagal memuat</div>';
@@ -641,9 +641,9 @@ document.getElementById('detailModal').addEventListener('click', e => {
 // ── Sesuaikan poin ────────────────────────────────────────────────────────────
 async function sesuaikanPoin() {
   const delta = parseInt(document.getElementById('adjDelta').value);
-  const ket   = document.getElementById('adjKet').value.trim();
+  const ket = document.getElementById('adjKet').value.trim();
   if (!delta || delta === 0) { showToast('Masukkan delta poin (positif/negatif)'); return; }
-  if (!currentPelangganId)   { showToast('Pilih pelanggan terlebih dahulu'); return; }
+  if (!currentPelangganId) { showToast('Pilih pelanggan terlebih dahulu'); return; }
 
   try {
     const r = await fetch(`/api/v1/poin/pelanggan/${currentPelangganId}/sesuaikan`, {
@@ -665,28 +665,28 @@ async function loadPengaturan() {
     const d = await r.json();
     const s = d.data;
     settings = s;
-    document.getElementById('s-perNominal').value   = s.poin_per_nominal   || 10000;
-    document.getElementById('s-nilaiPoin').value    = s.nilai_tukar_poin   || 100;
-    document.getElementById('s-minRedeem').value    = s.min_poin_redeem    || 100;
-    document.getElementById('s-silverMin').value    = s.level_silver_min   || 500;
-    document.getElementById('s-goldMin').value      = s.level_gold_min     || 2000;
-    document.getElementById('s-platinumMin').value  = s.level_platinum_min || 5000;
+    document.getElementById('s-perNominal').value = s.poin_per_nominal || 10000;
+    document.getElementById('s-nilaiPoin').value = s.nilai_tukar_poin || 100;
+    document.getElementById('s-minRedeem').value = s.min_poin_redeem || 100;
+    document.getElementById('s-silverMin').value = s.level_silver_min || 500;
+    document.getElementById('s-goldMin').value = s.level_gold_min || 2000;
+    document.getElementById('s-platinumMin').value = s.level_platinum_min || 5000;
     updateSettingHints();
   } catch(e) { console.error(e); }
 }
 
 function updateSettingHints() {
   const pN = parseInt(document.getElementById('s-perNominal').value) || 10000;
-  const nP = parseInt(document.getElementById('s-nilaiPoin').value)  || 100;
-  const sM = parseInt(document.getElementById('s-silverMin').value)  || 500;
-  const gM = parseInt(document.getElementById('s-goldMin').value)    || 2000;
+  const nP = parseInt(document.getElementById('s-nilaiPoin').value) || 100;
+  const sM = parseInt(document.getElementById('s-silverMin').value) || 500;
+  const gM = parseInt(document.getElementById('s-goldMin').value) || 2000;
   const pM = parseInt(document.getElementById('s-platinumMin').value)|| 5000;
   document.getElementById('hint-perNominal').textContent = pN.toLocaleString('id-ID');
-  document.getElementById('hint-nilaiPoin').textContent  = nP.toLocaleString('id-ID');
-  document.getElementById('prev-bronze').textContent     = `0 – ${(sM-1).toLocaleString('id-ID')}`;
-  document.getElementById('prev-silver').textContent     = `${sM.toLocaleString('id-ID')} – ${(gM-1).toLocaleString('id-ID')}`;
-  document.getElementById('prev-gold').textContent       = `${gM.toLocaleString('id-ID')} – ${(pM-1).toLocaleString('id-ID')}`;
-  document.getElementById('prev-platinum').textContent   = `${pM.toLocaleString('id-ID')}+`;
+  document.getElementById('hint-nilaiPoin').textContent = nP.toLocaleString('id-ID');
+  document.getElementById('prev-bronze').textContent = `0 – ${(sM-1).toLocaleString('id-ID')}`;
+  document.getElementById('prev-silver').textContent = `${sM.toLocaleString('id-ID')} – ${(gM-1).toLocaleString('id-ID')}`;
+  document.getElementById('prev-gold').textContent = `${gM.toLocaleString('id-ID')} – ${(pM-1).toLocaleString('id-ID')}`;
+  document.getElementById('prev-platinum').textContent = `${pM.toLocaleString('id-ID')}+`;
 }
 
 ['s-perNominal','s-nilaiPoin','s-silverMin','s-goldMin','s-platinumMin'].forEach(id => {
@@ -695,11 +695,11 @@ function updateSettingHints() {
 
 async function savePengaturan() {
   const body = {
-    poin_per_nominal:   parseInt(document.getElementById('s-perNominal').value)  || 0,
-    nilai_tukar_poin:   parseInt(document.getElementById('s-nilaiPoin').value)   || 0,
-    min_poin_redeem:    parseInt(document.getElementById('s-minRedeem').value)   || 0,
-    level_silver_min:   parseInt(document.getElementById('s-silverMin').value)   || 0,
-    level_gold_min:     parseInt(document.getElementById('s-goldMin').value)     || 0,
+    poin_per_nominal: parseInt(document.getElementById('s-perNominal').value) || 0,
+    nilai_tukar_poin: parseInt(document.getElementById('s-nilaiPoin').value) || 0,
+    min_poin_redeem: parseInt(document.getElementById('s-minRedeem').value) || 0,
+    level_silver_min: parseInt(document.getElementById('s-silverMin').value) || 0,
+    level_gold_min: parseInt(document.getElementById('s-goldMin').value) || 0,
     level_platinum_min: parseInt(document.getElementById('s-platinumMin').value) || 0
   };
 
@@ -714,7 +714,7 @@ async function savePengaturan() {
     settings = d.data;
     showToast('Pengaturan poin berhasil disimpan');
   } catch { showToast('Koneksi gagal'); }
-  finally   { btn.disabled = false; }
+  finally { btn.disabled = false; }
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────

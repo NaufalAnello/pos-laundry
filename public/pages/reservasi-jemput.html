@@ -159,7 +159,7 @@
   <main>
     <div class="pg-head">
       <div>
-        <h1>📅 Jadwal Penjemputan</h1>
+        <h1>Jadwal Penjemputan</h1>
         <div class="sub" id="subInfo">Memuat...</div>
       </div>
       <button class="btn-add" onclick="openForm()">＋ Tambah</button>
@@ -189,7 +189,7 @@
         <div class="field">
           <label>Pelanggan *</label>
           <div id="plSelectedWrap"></div>
-          <input type="text" id="plSearch" placeholder="🔍 Cari nama atau no. telepon..." oninput="onSearchPelanggan()" autocomplete="off"/>
+          <input type="text" id="plSearch" placeholder="Cari nama atau no. telepon..." oninput="onSearchPelanggan()" autocomplete="off"/>
           <div class="pl-result" id="plResult"></div>
         </div>
         <div class="row2">
@@ -291,7 +291,7 @@ async function load() {
     state.items = d.data || [];
     render();
   } catch (e) {
-    listEl.innerHTML = `<div class="empty"><span class="ic">⚠️</span><div class="ttl">Gagal memuat</div>${esc(e.message)}</div>`;
+    listEl.innerHTML = `<div class="empty"><span class="ic"></span><div class="ttl">Gagal memuat</div>${esc(e.message)}</div>`;
   }
 }
 
@@ -303,7 +303,7 @@ function render() {
   if (items.length === 0) {
     listEl.innerHTML = `
       <div class="empty">
-        <span class="ic">📅</span>
+        <span class="ic"></span>
         <div class="ttl">Tidak ada jadwal penjemputan</div>
         <button class="btn-add" style="margin-top:14px" onclick="openForm()">＋ Tambah Jadwal Jemput</button>
       </div>`;
@@ -318,23 +318,23 @@ function render() {
       <div class="card ${status}">
         <div class="c-row1">
           <div>
-            <div class="c-date">📅 ${esc(fmtTanggal(r.tanggal_jemput))}</div>
+            <div class="c-date">${esc(fmtTanggal(r.tanggal_jemput))}</div>
             <div class="c-jam">⏰ ${esc(r.jam_jemput || '--:--')}</div>
           </div>
         </div>
         <div class="c-nama">${esc(r.pelanggan_nama || '-')}</div>
-        ${r.pelanggan_telepon ? `<div class="c-meta">📱 ${esc(r.pelanggan_telepon)}</div>` : ''}
-        ${alamat ? `<div class="c-meta">📍 ${esc(alamat)}</div>` : ''}
-        ${r.catatan ? `<div class="c-catatan">📝 ${esc(r.catatan)}</div>` : ''}
+        ${r.pelanggan_telepon ? `<div class="c-meta">${esc(r.pelanggan_telepon)}</div>` : ''}
+        ${alamat ? `<div class="c-meta">${esc(alamat)}</div>` : ''}
+        ${r.catatan ? `<div class="c-catatan">${esc(r.catatan)}</div>` : ''}
         <div class="c-status ${status}">● ${status.toUpperCase()}</div>
-        ${r.nomor_transaksi ? `<div class="c-meta" style="margin-top:4px">🧾 <a href="/order/detail?id=${r.transaksi_id}" style="color:var(--primary)">${esc(r.nomor_transaksi)}</a></div>` : ''}
+        ${r.nomor_transaksi ? `<div class="c-meta" style="margin-top:4px"> <a href="/order/detail?id=${r.transaksi_id}" style="color:var(--primary)">${esc(r.nomor_transaksi)}</a></div>` : ''}
         ${isOpen ? `
         <div class="c-act">
-          <button class="btn-ok" onclick="markSelesai(${r.id}, ${r.pelanggan_id || 'null'})">✓ Selesai</button>
-          <button class="btn-edit" onclick="openForm(${r.id})">✏️ Edit</button>
-          <button class="btn-del" onclick="batalkan(${r.id})">🗑️</button>
+          <button class="btn-ok" onclick="markSelesai(${r.id}, ${r.pelanggan_id || 'null'})">Selesai</button>
+          <button class="btn-edit" onclick="openForm(${r.id})">Edit</button>
+          <button class="btn-del" onclick="batalkan(${r.id})">Hapus</button>
         </div>` : ''}
-        ${r.alasan_batal ? `<div class="c-meta" style="margin-top:6px;color:var(--danger)">❌ ${esc(r.alasan_batal)}</div>` : ''}
+        ${r.alasan_batal ? `<div class="c-meta" style="margin-top:6px;color:var(--danger)"> ${esc(r.alasan_batal)}</div>` : ''}
       </div>`;
   }).join('');
 }

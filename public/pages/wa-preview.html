@@ -7,18 +7,18 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --wa-green:    #25d366;
-      --wa-dk:       #128c7e;
-      --wa-bg:       #e5ddd5;
-      --wa-bubble:   #dcf8c6;
-      --wa-header:   #075e54;
-      --blue:        #2D3BB5;
-      --gray-2:      #f1f5f9;
-      --gray-3:      #e2e8f0;
-      --gray-5:      #64748b;
-      --gray-7:      #374151;
-      --gray-9:      #1E2A6E;
-      --radius:      10px;
+      --wa-green: #25d366;
+      --wa-dk: #128c7e;
+      --wa-bg: #e5ddd5;
+      --wa-bubble: #dcf8c6;
+      --wa-header: #075e54;
+      --blue: #2D3BB5;
+      --gray-2: #f1f5f9;
+      --gray-3: #e2e8f0;
+      --gray-5: #64748b;
+      --gray-7: #374151;
+      --gray-9: #1E2A6E;
+      --radius: 10px;
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -87,7 +87,7 @@
       display: flex; align-items: center; justify-content: center;
       font-weight: 700; font-size: 16px; flex-shrink: 0;
     }
-    .recipient-name  { font-weight: 700; font-size: 14px; color: #065f46; }
+    .recipient-name { font-weight: 700; font-size: 14px; color: #065f46; }
     .recipient-phone { font-size: 12px; color: var(--gray-5); margin-top: 2px; }
 
     /* ── Edit area ── */
@@ -163,8 +163,8 @@
       display: flex; align-items: center; justify-content: center;
       font-weight: 700; font-size: 14px; flex-shrink: 0;
     }
-    .phone-name  { font-size: 14px; font-weight: 600; }
-    .phone-sub   { font-size: 11px; opacity: .8; margin-top: 1px; }
+    .phone-name { font-size: 14px; font-weight: 600; }
+    .phone-sub { font-size: 11px; opacity: .8; margin-top: 1px; }
     .phone-icons { margin-left: auto; display: flex; gap: 14px;
                    font-size: 16px; opacity: .8; }
 
@@ -218,9 +218,9 @@
     .log-item:last-child { border-bottom: none; }
     .log-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .log-status.terkirim { background: var(--wa-green); }
-    .log-status.pending  { background: #f59e0b; }
-    .log-status.gagal    { background: #ef4444; }
-    .log-meta  { font-size: 11px; color: var(--gray-5); margin-top: 2px; }
+    .log-status.pending { background: #f59e0b; }
+    .log-status.gagal { background: #ef4444; }
+    .log-meta { font-size: 11px; color: var(--gray-5); margin-top: 2px; }
 
     /* ── WA Mode Toggle ── */
     .wa-mode-card { background:#fff; border-radius:var(--radius); box-shadow:0 1px 4px rgba(0,0,0,.08);
@@ -261,7 +261,7 @@
     }
     #toast.show { transform: translateY(0); opacity: 1; }
     #toast.success { background: var(--wa-dk); }
-    #toast.error   { background: #EF4444; }
+    #toast.error { background: #EF4444; }
 
     .empty-log { text-align: center; color: var(--gray-5); font-size: 13px; padding: 20px 0; }
   </style>
@@ -282,12 +282,12 @@
 
     <!-- Tipe pesan -->
     <div class="card">
-      <div class="card-header"><h2>📨 Jenis Pesan</h2></div>
+      <div class="card-header"><h2> Jenis Pesan</h2></div>
       <div class="card-body">
         <div class="type-tabs">
-          <button class="type-tab active" data-type="nota">📋 Nota Order</button>
-          <button class="type-tab" data-type="tagihan">💰 Tagihan</button>
-          <button class="type-tab" data-type="notif">✅ Selesai</button>
+          <button class="type-tab active" data-type="nota">Nota Order</button>
+          <button class="type-tab" data-type="tagihan">Tagihan</button>
+          <button class="type-tab" data-type="notif"> Selesai</button>
         </div>
 
         <!-- Info penerima -->
@@ -307,14 +307,14 @@
         <div class="actions">
           <div class="wa-send-btn-wrap">
             <button class="btn btn-wa" id="sendBtn" disabled>
-              <span>📲</span> Buka WhatsApp & Kirim
+              <span></span> Buka WhatsApp & Kirim
             </button>
           </div>
           <button class="btn btn-copy" id="copyBtn">
-            <span>📋</span> Salin Teks
+            <span></span> Salin Teks
           </button>
           <button class="btn btn-log" id="logBtn" disabled>
-            <span>📝</span> Tandai Terkirim (Log)
+            <span></span> Tandai Terkirim (Log)
           </button>
         </div>
       </div>
@@ -323,7 +323,7 @@
     <!-- Log WA untuk transaksi ini -->
     <div class="card">
       <div class="card-header">
-        <h2>📜 Riwayat WA</h2>
+        <h2> Riwayat WA</h2>
         <button onclick="loadLog()" style="font-size:12px;color:var(--blue);background:none;border:none;cursor:pointer">Refresh</button>
       </div>
       <div class="card-body" id="logContainer">
@@ -335,13 +335,13 @@
   <!-- ══ PANEL KANAN: Phone Mockup ══ -->
   <div>
     <div class="card">
-      <div class="card-header"><h2>📱 Preview Tampilan WA</h2></div>
+      <div class="card-header"><h2>Preview Tampilan WA</h2></div>
       <div class="card-body" style="padding:12px">
         <div class="phone-mockup">
           <!-- Phone status bar -->
           <div style="background:#111;color:#fff;font-size:10px;padding:4px 14px;display:flex;justify-content:space-between">
             <span id="phoneClock">12:00</span>
-            <span>📶 🔋</span>
+            <span> </span>
           </div>
           <!-- WA header -->
           <div class="phone-header">
@@ -350,7 +350,7 @@
               <div class="phone-name" id="mockName">Pelanggan</div>
               <div class="phone-sub" id="mockPhone">+62...</div>
             </div>
-            <div class="phone-icons">📞 ⋮</div>
+            <div class="phone-icons">⋮</div>
           </div>
           <!-- Chat body -->
           <div class="phone-body" id="phoneChatBody">
@@ -363,7 +363,7 @@
             <div style="flex:1;background:#fff;border-radius:20px;padding:8px 12px;font-size:12px;color:#999">
               Ketik pesan...
             </div>
-            <div style="width:36px;height:36px;background:var(--wa-green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px">🎤</div>
+            <div style="width:36px;height:36px;background:var(--wa-green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px"></div>
           </div>
         </div>
       </div>
@@ -375,10 +375,10 @@
         <div class="wa-mode-label">Kirim via:</div>
         <div class="wa-mode-btns">
           <button class="wa-mode-btn" id="modeRegularBtn" onclick="setWAMode('regular')">
-            💬 WhatsApp Biasa
+            WhatsApp Biasa
           </button>
           <button class="wa-mode-btn active" id="modeBusinessBtn" onclick="setWAMode('business')">
-            💼 WhatsApp Business
+             WhatsApp Business
           </button>
         </div>
         <div class="wa-mode-note">WA Business terbuka jika terinstall di perangkat</div>
@@ -387,7 +387,7 @@
 
     <!-- Info transaksi singkat -->
     <div class="card">
-      <div class="card-header"><h2>🧾 Info Transaksi</h2></div>
+      <div class="card-header"><h2> Info Transaksi</h2></div>
       <div class="card-body" id="txInfo">
         <div class="loading-shimmer"></div>
         <div class="loading-shimmer" style="width:70%;margin-top:8px"></div>
@@ -401,16 +401,16 @@
 // ════════════════════════════════════════
 // STATE
 // ════════════════════════════════════════
-const params       = new URLSearchParams(window.location.search);
-const transaksiId  = params.get('id');
-const initType     = params.get('type') || 'nota';
+const params = new URLSearchParams(window.location.search);
+const transaksiId = params.get('id');
+const initType = params.get('type') || 'nota';
 
-let currentType    = initType;
-let currentUrl     = null;
-let currentPhone   = null;
-let transaksiData  = null;
-let cache          = {};   // type → { url, teks, telepon, pelanggan }
-let waMode         = 'business';
+let currentType = initType;
+let currentUrl = null;
+let currentPhone = null;
+let transaksiData = null;
+let cache = {}; // type → { url, teks, telepon, pelanggan }
+let waMode = 'business';
 
 // ════════════════════════════════════════
 // HELPERS
@@ -511,7 +511,7 @@ async function loadWAContent(type) {
   const editor = document.getElementById('msgEditor');
   editor.value = 'Memuat pesan...';
   document.getElementById('sendBtn').disabled = true;
-  document.getElementById('logBtn').disabled  = true;
+  document.getElementById('logBtn').disabled = true;
   document.getElementById('phoneChatBody').innerHTML =
     '<div class="loading-shimmer" style="width:80%;align-self:flex-end"></div>' +
     '<div class="loading-shimmer" style="width:60%;align-self:flex-end;margin-top:8px"></div>';
@@ -524,7 +524,7 @@ async function loadWAContent(type) {
   const res = await apiFetch(`/api/v1/transaksi/${transaksiId}/wa/${type}`);
   if (!res) return;
   if (res.error) {
-    editor.value = '⚠️ ' + res.error;
+    editor.value = '' + res.error;
     document.getElementById('phoneChatBody').innerHTML =
       `<div style="text-align:center;color:#999;font-size:12px;padding:20px">${res.error}</div>`;
     return;
@@ -535,7 +535,7 @@ async function loadWAContent(type) {
 }
 
 function applyWAContent({ url, teks, telepon, pelanggan }) {
-  currentUrl   = url;
+  currentUrl = url;
   currentPhone = telepon;
 
   // Editor
@@ -545,19 +545,19 @@ function applyWAContent({ url, teks, telepon, pelanggan }) {
 
   // Recipient info
   document.getElementById('recipientAvatar').textContent = (pelanggan || '?').charAt(0).toUpperCase();
-  document.getElementById('recipientName').textContent   = pelanggan || '—';
-  document.getElementById('recipientPhone').textContent  = telepon ? `📱 ${telepon}` : '—';
+  document.getElementById('recipientName').textContent = pelanggan || '—';
+  document.getElementById('recipientPhone').textContent = telepon ? `${telepon}` : '—';
 
   // Phone mockup header
   document.getElementById('mockAvatar').textContent = (pelanggan || '?').charAt(0).toUpperCase();
-  document.getElementById('mockName').textContent   = pelanggan || '—';
-  document.getElementById('mockPhone').textContent  = telepon   || '—';
+  document.getElementById('mockName').textContent = pelanggan || '—';
+  document.getElementById('mockPhone').textContent = telepon || '—';
 
   // Render bubble
   renderBubble(teks);
 
   document.getElementById('sendBtn').disabled = !url;
-  document.getElementById('logBtn').disabled  = false;
+  document.getElementById('logBtn').disabled = false;
 }
 
 // ════════════════════════════════════════
@@ -569,7 +569,7 @@ function renderBubble(teks) {
     <div class="wa-bubble-wrap">
       <div class="wa-bubble">
         ${renderWAText(teks)}
-        <div class="wa-time">${nowTime()} <span class="wa-check">✓✓</span></div>
+        <div class="wa-time">${nowTime()} <span class="wa-check"></span></div>
       </div>
     </div>`;
 }
@@ -623,23 +623,23 @@ document.getElementById('copyBtn').addEventListener('click', async () => {
 
 // Log terkirim
 document.getElementById('logBtn').addEventListener('click', async () => {
-  const teks  = document.getElementById('msgEditor').value.trim();
+  const teks = document.getElementById('msgEditor').value.trim();
   const phone = currentPhone;
   if (!teks || !phone) return;
 
   const res = await apiFetch('/api/v1/wa/log', {
-    method:  'POST',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({
-      telepon:      phone,
-      pesan:        teks,
+    body: JSON.stringify({
+      telepon: phone,
+      pesan: teks,
       transaksi_id: parseInt(transaksiId),
-      status:       'terkirim',
-      wa_mode:      waMode
+      status: 'terkirim',
+      wa_mode: waMode
     })
   });
   if (res?.id) {
-    showToast('✓ WA dicatat sebagai terkirim', 'success');
+    showToast('WA dicatat sebagai terkirim', 'success');
     loadLog();
   } else {
     showToast('Gagal mencatat log', 'error');
@@ -710,7 +710,7 @@ function formatPhone(telepon) {
   if (!telepon) return '';
   const clean = telepon.replace(/\D/g, '');
   if (clean.startsWith('62')) return clean;
-  if (clean.startsWith('0'))  return '62' + clean.slice(1);
+  if (clean.startsWith('0')) return '62' + clean.slice(1);
   return '62' + clean;
 }
 </script>

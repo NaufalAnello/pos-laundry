@@ -29,7 +29,7 @@
     }
     .search-wrap input:focus { border-color: var(--primary); background: #fff; }
     .search-wrap::before {
-      content: '🔍'; position: absolute; left: 12px; top: 50%;
+      content: ''; position: absolute; left: 12px; top: 50%;
       transform: translateY(-50%); font-size: 14px;
     }
 
@@ -163,17 +163,17 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 14px; flex-shrink: 0; color: #fff; font-weight: 800;
     }
-    .mt-topup     { background: var(--success); }
-    .mt-bayar     { background: var(--danger); }
+    .mt-topup { background: var(--success); }
+    .mt-bayar { background: var(--danger); }
     .mt-kelebihan { background: var(--success); }
-    .mt-refund    { background: var(--warning); }
+    .mt-refund { background: var(--warning); }
     .mutasi-info { flex: 1; min-width: 0; }
     .mutasi-line1 {
       display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
     }
     .mutasi-jenis { font-size: 13px; font-weight: 800; color: var(--gray-9); }
     .mutasi-nominal { font-size: 14px; font-weight: 800; white-space: nowrap; }
-    .mutasi-nominal.plus  { color: var(--success); }
+    .mutasi-nominal.plus { color: var(--success); }
     .mutasi-nominal.minus { color: var(--danger); }
     .mutasi-meta { font-size: 11px; color: var(--gray-5); margin-top: 3px; line-height: 1.4; word-break: break-word; }
     .mutasi-saldo { font-size: 11px; color: var(--gray-5); margin-top: 4px; }
@@ -257,7 +257,7 @@
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-success { background: var(--success); color: #fff; }
     .btn-outline { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
-    .btn-danger  { background: var(--danger); color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
     .btn:disabled { opacity: .5; cursor: default; }
 
     /* ══ DESKTOP (>= 1024px) ══ */
@@ -304,7 +304,7 @@
 <div class="page">
   <!-- HEADER -->
   <div class="head">
-    <div class="ttl">💳 Deposit Pelanggan</div>
+    <div class="ttl">Deposit Pelanggan</div>
     <div class="search-wrap">
       <input type="text" id="searchInput" placeholder="Cari nama pelanggan..." oninput="onSearch()"/>
     </div>
@@ -382,8 +382,8 @@
 <div class="lm-bg" id="modalTopup">
   <div class="lm">
     <div class="lm-h">
-      <h3>💰 Topup Saldo Deposit</h3>
-      <button class="x" onclick="closeModalTopup()">✕</button>
+      <h3>Topup Saldo Deposit</h3>
+      <button class="x" onclick="closeModalTopup()">×</button>
     </div>
     <div class="lm-b">
       <div class="info-box">
@@ -406,9 +406,9 @@
       <div>
         <label style="display:block;font-size:12px;font-weight:700;color:var(--gray-7);margin-bottom:6px">Metode Pembayaran</label>
         <div class="toggle-grp" id="topupMetodeGrp">
-          <button class="metode-btn active" data-metode="tunai" onclick="setTopupMetode('tunai')">💵 Tunai</button>
-          <button class="metode-btn" data-metode="transfer" onclick="setTopupMetode('transfer')">🏦 Transfer</button>
-          <button class="metode-btn" data-metode="qris" onclick="setTopupMetode('qris')">📱 QRIS</button>
+          <button class="metode-btn active" data-metode="tunai" onclick="setTopupMetode('tunai')">Tunai</button>
+          <button class="metode-btn" data-metode="transfer" onclick="setTopupMetode('transfer')">Transfer</button>
+          <button class="metode-btn" data-metode="qris" onclick="setTopupMetode('qris')">QRIS</button>
         </div>
       </div>
 
@@ -419,7 +419,7 @@
     </div>
     <div class="lm-f">
       <button class="btn btn-outline" onclick="closeModalTopup()">Batal</button>
-      <button class="btn btn-success" id="btnSimpanTopup" onclick="submitTopup()">💰 Simpan Topup</button>
+      <button class="btn btn-success" id="btnSimpanTopup" onclick="submitTopup()">Simpan Topup</button>
     </div>
   </div>
 </div>
@@ -428,8 +428,8 @@
 <div class="lm-bg" id="modalBatal">
   <div class="lm">
     <div class="lm-h">
-      <h3 style="color:var(--danger)">⚠️ Batalkan Topup</h3>
-      <button class="x" onclick="closeModalBatal()">✕</button>
+      <h3 style="color:var(--danger)">Batalkan Topup</h3>
+      <button class="x" onclick="closeModalBatal()">×</button>
     </div>
     <div class="lm-b">
       <div class="info-box">
@@ -456,7 +456,7 @@
       </div>
 
       <div id="batalValidasi" style="display:none" class="preview-box danger">
-        ⚠ Saldo tidak mencukupi untuk membatalkan topup
+        Saldo tidak mencukupi untuk membatalkan topup
       </div>
 
       <div style="font-size:12px;color:var(--gray-5);line-height:1.5">
@@ -556,7 +556,7 @@ async function loadDeposit(page = 1) {
   } catch (e) {
     console.error(e);
     document.getElementById('cardList').innerHTML =
-      `<div class="empty"><span class="ic">⚠️</span><div class="ttl-em">Gagal memuat data</div></div>`;
+      `<div class="empty"><span class="ic"></span><div class="ttl-em">Gagal memuat data</div></div>`;
   }
 }
 
@@ -566,7 +566,7 @@ function renderCards(rows) {
     const q = document.getElementById('searchInput').value.trim();
     el.innerHTML = `
       <div class="empty">
-        <span class="ic">${q ? '🔍' : '💳'}</span>
+        <span class="ic">${q ? '' : ''}</span>
         <div class="ttl-em">${q ? 'Tidak ada pelanggan yang cocok' : 'Belum ada data deposit'}</div>
         <div class="sub">${q ? 'Coba kata kunci lain' : 'Topup deposit pertama dari halaman pelanggan'}</div>
       </div>`;
@@ -584,11 +584,11 @@ function renderCards(rows) {
       <div class="avatar" style="background:${col}">${esc(ini)}</div>
       <div class="cust-info">
         <div class="cust-nama">${esc(p.nama)}</div>
-        ${tel ? `<div class="cust-tel">📱 ${esc(tel)}</div>` : ''}
+        ${tel ? `<div class="cust-tel">${esc(tel)}</div>` : ''}
         <div class="cust-saldo ${saldoClass}">Saldo: ${fmtRp(saldo)}</div>
         <div class="cust-actions">
           <button class="btn-topup" onclick="openModalTopup(${p.id}, '${namaEsc.replace(/'/g, "\\'")}', ${saldo})">+ Topup</button>
-          <button class="btn-mutasi" onclick="openMutasiPanel(${p.id}, '${namaEsc.replace(/'/g, "\\'")}')">📋 Mutasi</button>
+          <button class="btn-mutasi" onclick="openMutasiPanel(${p.id}, '${namaEsc.replace(/'/g, "\\'")}')">Mutasi</button>
         </div>
       </div>
     </div>`;
@@ -621,7 +621,7 @@ function renderTable(rows) {
       <td style="color:var(--gray-5);font-size:12px">${fmtDate(p.saldo_updated_at)}</td>
       <td class="td-actions">
         <button class="btn-topup" onclick="openModalTopup(${p.id}, '${namaEsc.replace(/'/g, "\\'")}', ${saldo})">+ Topup</button>
-        <button class="btn-mutasi" onclick="openMutasiPanel(${p.id}, '${namaEsc.replace(/'/g, "\\'")}')">📋 Mutasi</button>
+        <button class="btn-mutasi" onclick="openMutasiPanel(${p.id}, '${namaEsc.replace(/'/g, "\\'")}')">Mutasi</button>
       </td>
     </tr>`;
   }).join('');
@@ -695,14 +695,14 @@ async function submitTopup() {
     });
     const d = await r.json();
     if (!r.ok) { showToast('Gagal: ' + (d.error || 'Error'), true); return; }
-    showToast('✓ Topup berhasil');
+    showToast('Topup berhasil');
     closeModalTopup();
     loadDeposit(currentPage);
     if (currentPelanggan?.id === topupTarget.id) loadMutasi(currentPelanggan.id);
   } catch { showToast('Koneksi gagal', true); }
   finally {
     btn.disabled = false;
-    btn.textContent = '💰 Simpan Topup';
+    btn.textContent = 'Simpan Topup';
   }
 }
 
@@ -735,7 +735,7 @@ function renderMutasi(rows) {
   if (!rows.length) {
     el.innerHTML = `
       <div class="empty" style="background:transparent;border:none">
-        <span class="ic">📭</span>
+        <span class="ic"></span>
         <div class="ttl-em">Belum ada mutasi</div>
         <div class="sub">Topup atau bayar order akan muncul di sini</div>
       </div>`;
@@ -767,7 +767,7 @@ function renderMutasi(rows) {
       const saldoCukup = currentPelanggan && currentPelanggan.saldo >= nominal;
       if (diffDays <= 7 && saldoCukup) {
         const ctx = JSON.stringify({ mutasiId: m.id, nominal, tanggal: m.created_at }).replace(/'/g, "&#39;");
-        aksi = `<div class="mutasi-actions"><button onclick='openModalBatal(${ctx})'>🗑️ Batalkan</button></div>`;
+        aksi = `<div class="mutasi-actions"><button onclick='openModalBatal(${ctx})'> Batalkan</button></div>`;
       } else if (diffDays > 7) {
         aksi = `<div style="margin-top:6px;font-size:11px;color:var(--gray-5)">Tidak bisa dibatalkan — lebih dari 7 hari</div>`;
       } else if (!saldoCukup) {
@@ -849,7 +849,7 @@ async function submitBatalTopup() {
     });
     const d = await r.json();
     if (!r.ok) { showToast('Gagal: ' + (d.error || 'Error'), true); return; }
-    showToast('✓ Topup berhasil dibatalkan');
+    showToast('Topup berhasil dibatalkan');
     closeModalBatal();
     await loadMutasi(currentPelanggan.id);
     loadDeposit(currentPage);

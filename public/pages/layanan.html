@@ -90,7 +90,7 @@
     }
     .search-wrap input:focus { border-color: var(--primary); }
     .search-wrap::before {
-      content: '🔍'; position: absolute; left: 12px; top: 50%;
+      content: ''; position: absolute; left: 12px; top: 50%;
       transform: translateY(-50%); font-size: 14px;
     }
 
@@ -283,7 +283,7 @@
     }
     @keyframes lmUp {
       from { transform: translateY(20px); opacity: .6; }
-      to   { transform: translateY(0); opacity: 1; }
+      to { transform: translateY(0); opacity: 1; }
     }
     .lm-h {
       padding: 14px 18px;
@@ -391,7 +391,7 @@
     .margin-preview .lbl { color: var(--gray-5); width: 50%; }
     .margin-preview .val { font-weight: 700; text-align: right; }
     .margin-preview .val.green { color: var(--success); }
-    .margin-preview .val.big   { font-size: 14px; color: var(--primary); }
+    .margin-preview .val.big { font-size: 14px; color: var(--primary); }
 
     /* Inline harga edit */
     .harga-display {
@@ -445,9 +445,9 @@
       display: flex; justify-content: space-between; align-items: center;
       cursor: pointer; user-select: none;
     }
-    .preview-header.green  { background: var(--success-lt); color: var(--success); }
+    .preview-header.green { background: var(--success-lt); color: var(--success); }
     .preview-header.yellow { background: var(--warning-lt); color: var(--warning); }
-    .preview-header.red    { background: var(--danger-lt); color: var(--danger); }
+    .preview-header.red { background: var(--danger-lt); color: var(--danger); }
     .preview-body { max-height: 300px; overflow-y: auto; display: none; }
     .preview-section.open .preview-body { display: block; }
     .preview-table { width: 100%; border-collapse: collapse; font-size: 12px; }
@@ -483,10 +483,10 @@
     .result-card {
       padding: 14px 10px; border-radius: 10px; text-align: center;
     }
-    .result-card.green  { background: var(--success-lt); }
-    .result-card.blue   { background: var(--primary-lt); }
+    .result-card.green { background: var(--success-lt); }
+    .result-card.blue { background: var(--primary-lt); }
     .result-card.yellow { background: var(--warning-lt); }
-    .result-card.red    { background: var(--danger-lt); }
+    .result-card.red { background: var(--danger-lt); }
     .result-num { font-size: 26px; font-weight: 800; margin-bottom: 4px; }
     .result-label { font-size: 12px; font-weight: 600; color: var(--gray-7); }
 
@@ -514,8 +514,8 @@
 <div class="pg-head">
   <div class="pg-head-row">
     <div class="pg-title">Layanan Laundry</div>
-    <button class="ico-btn" onclick="openImportModal()" title="Import">📥</button>
-    <button class="ico-btn" onclick="exportLayanan('xlsx')" title="Export">📤</button>
+    <button class="ico-btn" onclick="openImportModal()" title="Import">Import</button>
+    <button class="ico-btn" onclick="exportLayanan('xlsx')" title="Export">Export</button>
     <button class="ico-btn primary" onclick="openKategoriModal()" title="Tambah Kategori">＋</button>
   </div>
 </div>
@@ -699,7 +699,7 @@
     </div>
     <div class="lm-f">
       <button class="btn btn-outline" onclick="closeModal('layModal')">Batal</button>
-      <button class="btn btn-primary" id="laySaveBtn" onclick="saveLayanan()">💾 Simpan</button>
+      <button class="btn btn-primary" id="laySaveBtn" onclick="saveLayanan()"> Simpan</button>
     </div>
   </div>
 </div>
@@ -716,13 +716,13 @@
       <div id="uploadStep">
         <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFileSelect(event)"/>
         <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
-          <div class="upload-icon">📁</div>
+          <div class="upload-icon"></div>
           <div class="upload-text">Klik untuk pilih file atau drag & drop</div>
           <div class="upload-hint">Format: CSV atau Excel (.xlsx, .xls) • Maks 5MB</div>
         </div>
         <div class="template-links">
-          <a href="/api/v1/layanan/template?format=xlsx" class="template-link">📥 Template Excel</a>
-          <a href="/api/v1/layanan/template?format=csv" class="template-link">📥 Template CSV</a>
+          <a href="/api/v1/layanan/template?format=xlsx" class="template-link">Template Excel</a>
+          <a href="/api/v1/layanan/template?format=csv" class="template-link">Template CSV</a>
         </div>
       </div>
 
@@ -730,7 +730,7 @@
       <div id="previewStep" style="display:none">
         <div class="preview-section open" id="sectionBaru" style="display:none">
           <div class="preview-header green" onclick="togglePreviewSection('sectionBaru')">
-            <span>✓ Layanan Baru (<span id="countBaru">0</span> item)</span>
+            <span>Layanan Baru (<span id="countBaru">0</span> item)</span>
             <span>▼</span>
           </div>
           <div class="preview-body">
@@ -745,7 +745,7 @@
 
         <div class="preview-section open" id="sectionDuplikat" style="display:none">
           <div class="preview-header yellow" onclick="togglePreviewSection('sectionDuplikat')">
-            <span>⚠ Duplikat (<span id="countDuplikat">0</span> item)</span>
+            <span>Duplikat (<span id="countDuplikat">0</span> item)</span>
             <div class="bulk-actions" onclick="event.stopPropagation()">
               <a onclick="setSemuaDuplikat('skip')">Skip Semua</a>
               <span>•</span>
@@ -764,7 +764,7 @@
 
         <div class="preview-section open" id="sectionError" style="display:none">
           <div class="preview-header red" onclick="togglePreviewSection('sectionError')">
-            <span>✗ Error (<span id="countError">0</span> item)</span>
+            <span> Error (<span id="countError">0</span> item)</span>
             <span>▼</span>
           </div>
           <div class="preview-body">
@@ -789,7 +789,7 @@
       <!-- Step 3 -->
       <div id="resultStep" style="display:none">
         <div style="text-align:center;margin-bottom:20px">
-          <div style="font-size:48px;margin-bottom:8px">✓</div>
+          <div style="font-size:48px;margin-bottom:8px"></div>
           <div style="font-size:16px;font-weight:700;margin-bottom:4px">Import Selesai</div>
           <div style="font-size:12px;color:var(--gray-5)">Data layanan berhasil diimport</div>
         </div>
@@ -815,8 +815,8 @@
     </div>
     <div class="lm-f">
       <button class="btn btn-outline" onclick="closeImportModal()">Batal</button>
-      <button class="btn btn-primary" id="btnJalankanImport" style="display:none" onclick="jalankanImport()">✓ Jalankan Import</button>
-      <button class="btn btn-primary" id="btnSelesai" style="display:none" onclick="selesaiImport()">✓ Selesai</button>
+      <button class="btn btn-primary" id="btnJalankanImport" style="display:none" onclick="jalankanImport()">Jalankan Import</button>
+      <button class="btn btn-primary" id="btnSelesai" style="display:none" onclick="selesaiImport()">Selesai</button>
     </div>
   </div>
 </div>
@@ -858,10 +858,10 @@ const COLORS = [
   '#475569','#0f172a'
 ];
 
-let selectedIcon  = 'category';
+let selectedIcon = 'category';
 let selectedColor = '#2D3BB5';
-let catData       = [];
-let activeFilter  = 'all';
+let catData = [];
+let activeFilter = 'all';
 
 const fmtRp = n => Number(n||0).toLocaleString('id-ID');
 
@@ -924,12 +924,12 @@ function selectColor(val) {
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
 function openKategoriModal(existing = null) {
-  selectedIcon  = existing?.ikon  || 'category';
+  selectedIcon = existing?.ikon || 'category';
   selectedColor = existing?.warna || '#2D3BB5';
-  document.getElementById('katId').value        = existing?.id || '';
-  document.getElementById('katNama').value      = existing?.nama || '';
+  document.getElementById('katId').value = existing?.id || '';
+  document.getElementById('katNama').value = existing?.nama || '';
   document.getElementById('katDeskripsi').value = existing?.deskripsi || '';
-  document.getElementById('katAktif').checked   = existing?.aktif !== 0;
+  document.getElementById('katAktif').checked = existing?.aktif !== 0;
   document.getElementById('katModalTitle').textContent = existing ? 'Edit Kategori' : 'Tambah Kategori';
   buildIconPicker();
   buildColorPalette();
@@ -938,11 +938,11 @@ function openKategoriModal(existing = null) {
 }
 
 function openLayananModal(existing = null, defaultKategoriId = null) {
-  document.getElementById('layId').value        = existing?.id || '';
-  document.getElementById('layNama').value      = existing?.nama || '';
-  document.getElementById('layEstimasi').value  = existing?.estimasi_jam || existing?.estimasi_hari * 24 || 24;
+  document.getElementById('layId').value = existing?.id || '';
+  document.getElementById('layNama').value = existing?.nama || '';
+  document.getElementById('layEstimasi').value = existing?.estimasi_jam || existing?.estimasi_hari * 24 || 24;
   document.getElementById('layDeskripsi').value = existing?.deskripsi || '';
-  document.getElementById('layAktif').checked   = existing?.aktif !== 0;
+  document.getElementById('layAktif').checked = existing?.aktif !== 0;
   document.getElementById('layModalTitle').textContent = existing ? 'Edit Layanan' : 'Tambah Layanan';
 
   const sel = document.getElementById('layKategori');
@@ -955,15 +955,15 @@ function openLayananModal(existing = null, defaultKategoriId = null) {
   setHargaMode(isAuto ? 'auto' : 'manual');
 
   if (isAuto) {
-    document.getElementById('layHppAuto').value    = existing?.hpp || '';
+    document.getElementById('layHppAuto').value = existing?.hpp || '';
     document.getElementById('layMarginAuto').value = existing?.margin_persen || '';
     document.getElementById('laySatuanAuto').value = existing?.satuan || 'kg';
     document.getElementById('satuanLabelAuto').textContent = existing?.satuan || 'unit';
   } else {
-    document.getElementById('layHarga').value         = existing?.harga || '';
-    document.getElementById('laySatuan').value        = existing?.satuan || 'kg';
-    document.getElementById('layHppManual').value     = existing?.hpp || '';
-    document.getElementById('layMarginManual').value  = existing?.margin_persen || '';
+    document.getElementById('layHarga').value = existing?.harga || '';
+    document.getElementById('laySatuan').value = existing?.satuan || 'kg';
+    document.getElementById('layHppManual').value = existing?.hpp || '';
+    document.getElementById('layMarginManual').value = existing?.margin_persen || '';
   }
   updateMarginPreview();
   document.getElementById('layModal').classList.add('open');
@@ -972,29 +972,29 @@ function openLayananModal(existing = null, defaultKategoriId = null) {
 function setHargaMode(mode) {
   const isAuto = mode === 'auto';
   document.getElementById('hargaModeManual').style.display = isAuto ? 'none' : '';
-  document.getElementById('hargaModeAuto').style.display   = isAuto ? '' : 'none';
+  document.getElementById('hargaModeAuto').style.display = isAuto ? '' : 'none';
   document.getElementById('modeBtnManual').classList.toggle('active', !isAuto);
-  document.getElementById('modeBtnAuto').classList.toggle('active',  isAuto);
+  document.getElementById('modeBtnAuto').classList.toggle('active', isAuto);
 }
 
 function updateMarginPreview() {
   const isAuto = document.getElementById('hargaModeAuto').style.display !== 'none';
   if (isAuto) {
-    const hpp    = parseFloat(document.getElementById('layHppAuto').value) || 0;
+    const hpp = parseFloat(document.getElementById('layHppAuto').value) || 0;
     const margin = parseFloat(document.getElementById('layMarginAuto').value) || 0;
     if (hpp > 0 && margin > 0 && margin < 100) {
       const hargaSebelumBulatkan = hpp / (1 - margin / 100);
-      const harga      = Math.ceil(hargaSebelumBulatkan / 100) * 100;
-      const untung     = harga - hpp;
-      document.getElementById('pvHpp').textContent           = 'Rp ' + fmtRp(hpp);
+      const harga = Math.ceil(hargaSebelumBulatkan / 100) * 100;
+      const untung = harga - hpp;
+      document.getElementById('pvHpp').textContent = 'Rp ' + fmtRp(hpp);
       document.getElementById('pvMarginNominal').textContent = '+ Rp ' + fmtRp(Math.round(untung));
-      document.getElementById('pvHargaJual').textContent     = 'Rp ' + fmtRp(harga);
-      document.getElementById('pvUntung').textContent        = 'Rp ' + fmtRp(untung);
+      document.getElementById('pvHargaJual').textContent = 'Rp ' + fmtRp(harga);
+      document.getElementById('pvUntung').textContent = 'Rp ' + fmtRp(untung);
     }
   } else {
-    const hpp   = parseFloat(document.getElementById('layHppManual').value) || 0;
+    const hpp = parseFloat(document.getElementById('layHppManual').value) || 0;
     const harga = parseFloat(document.getElementById('layHarga').value) || 0;
-    const prev  = document.getElementById('marginPreviewManual');
+    const prev = document.getElementById('marginPreviewManual');
     if (hpp > 0 && harga > 0) {
       const margin = ((harga - hpp) / harga * 100).toFixed(1);
       const untung = harga - hpp;
@@ -1008,19 +1008,19 @@ function updateMarginPreview() {
 
 // ── Save / API calls ──────────────────────────────────────────────────────────
 async function saveKategori() {
-  const id   = document.getElementById('katId').value;
+  const id = document.getElementById('katId').value;
   const body = {
-    nama:      document.getElementById('katNama').value.trim(),
+    nama: document.getElementById('katNama').value.trim(),
     deskripsi: document.getElementById('katDeskripsi').value.trim(),
-    ikon:      selectedIcon,
-    warna:     selectedColor,
-    aktif:     document.getElementById('katAktif').checked
+    ikon: selectedIcon,
+    warna: selectedColor,
+    aktif: document.getElementById('katAktif').checked
   };
   if (!body.nama) { showToast('Nama kategori wajib diisi'); return; }
   const btn = document.getElementById('katSaveBtn');
   btn.disabled = true;
   try {
-    const url    = id ? `/api/v1/kategori-layanan/${id}` : '/api/v1/kategori-layanan';
+    const url = id ? `/api/v1/kategori-layanan/${id}` : '/api/v1/kategori-layanan';
     const method = id ? 'PUT' : 'POST';
     const r = await fetch(url, { method, credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
     const d = await r.json();
@@ -1033,7 +1033,7 @@ async function saveKategori() {
 }
 
 async function saveLayanan() {
-  const id     = document.getElementById('layId').value;
+  const id = document.getElementById('layId').value;
   const isAuto = document.getElementById('hargaModeAuto').style.display !== 'none';
   const hpp = parseFloat(isAuto
     ? document.getElementById('layHppAuto').value
@@ -1044,29 +1044,29 @@ async function saveLayanan() {
   const satuan = isAuto
     ? document.getElementById('laySatuanAuto').value
     : document.getElementById('laySatuan').value;
-  const harga  = isAuto
+  const harga = isAuto
     ? Math.ceil(hpp / (1 - marginPersen / 100) / 100) * 100
     : parseFloat(document.getElementById('layHarga').value) || 0;
 
   const body = {
-    nama:          document.getElementById('layNama').value.trim(),
-    kategori_id:   parseInt(document.getElementById('layKategori').value) || null,
+    nama: document.getElementById('layNama').value.trim(),
+    kategori_id: parseInt(document.getElementById('layKategori').value) || null,
     harga, satuan,
-    estimasi_jam:  parseInt(document.getElementById('layEstimasi').value) || 24,
+    estimasi_jam: parseInt(document.getElementById('layEstimasi').value) || 24,
     estimasi_hari: Math.ceil(parseInt(document.getElementById('layEstimasi').value) / 24) || 1,
-    deskripsi:     document.getElementById('layDeskripsi').value.trim(),
-    aktif:         document.getElementById('layAktif').checked,
+    deskripsi: document.getElementById('layDeskripsi').value.trim(),
+    aktif: document.getElementById('layAktif').checked,
     hpp,
     margin_persen: marginPersen,
-    harga_auto:    isAuto ? 1 : 0
+    harga_auto: isAuto ? 1 : 0
   };
-  if (!body.nama)  { showToast('Nama layanan wajib diisi'); return; }
+  if (!body.nama) { showToast('Nama layanan wajib diisi'); return; }
   if (!body.harga) { showToast('Harga wajib diisi'); return; }
 
   const btn = document.getElementById('laySaveBtn');
   btn.disabled = true;
   try {
-    const url    = id ? `/api/v1/layanan/${id}` : '/api/v1/layanan';
+    const url = id ? `/api/v1/layanan/${id}` : '/api/v1/layanan';
     const method = id ? 'PUT' : 'POST';
     const r = await fetch(url, { method, credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
     const d = await r.json();
@@ -1175,10 +1175,10 @@ function getFilteredLayanan() {
 
 function renderMobile() {
   const list = getFilteredLayanan();
-  const el   = document.getElementById('layList');
+  const el = document.getElementById('layList');
   if (!list.length) {
     el.innerHTML = `<div class="empty">
-      <div class="ico">📂</div>
+      <div class="ico"></div>
       <div class="ttl">Tidak ada layanan</div>
       <div class="sub">${
         document.getElementById('searchInput').value
@@ -1189,12 +1189,12 @@ function renderMobile() {
     return;
   }
   el.innerHTML = list.map(l => {
-    const k       = l._kat;
-    const hpp     = Number(l.hpp || 0);
-    const untung  = hpp > 0 ? l.harga - hpp : null;
-    const mar     = hpp > 0 ? ((l.harga - hpp) / l.harga * 100).toFixed(0) : null;
-    const off     = !l.aktif;
-    const lEsc    = JSON.stringify(l).replace(/"/g,'&quot;');
+    const k = l._kat;
+    const hpp = Number(l.hpp || 0);
+    const untung = hpp > 0 ? l.harga - hpp : null;
+    const mar = hpp > 0 ? ((l.harga - hpp) / l.harga * 100).toFixed(0) : null;
+    const off = !l.aktif;
+    const lEsc = JSON.stringify(l).replace(/"/g,'&quot;');
     const nameEsc = (l.nama || '').replace(/'/g,"\\'");
     return `
       <div class="lay-card ${off ? 'off' : ''}">
@@ -1215,15 +1215,15 @@ function renderMobile() {
           : `<div class="lay-card-margin"><a href="#" class="add-link" onclick="openLayananModal(${lEsc});return false">+ Isi HPP untuk lihat margin</a></div>`
         }
         <div class="lay-card-foot">
-          <div class="lay-est">📅 Est: ${formatEstimasi(getEstimasiJam(l))}</div>
+          <div class="lay-est">Est: ${formatEstimasi(getEstimasiJam(l))}</div>
           <div class="lay-actions">
             <label class="toggle" title="${l.aktif ? 'Nonaktifkan' : 'Aktifkan'}">
               <input type="checkbox" ${l.aktif ? 'checked' : ''}
                 onchange="toggleLayanan(${l.id}, ${!!l.aktif}, this)"/>
               <span class="slider"></span>
             </label>
-            <button class="btn btn-sm btn-outline" onclick='openLayananModal(${JSON.stringify(l)})'>✏️</button>
-            <button class="btn-ghost" onclick="deleteLayanan(${l.id}, '${nameEsc}')">🗑️</button>
+            <button class="btn btn-sm btn-outline" onclick='openLayananModal(${JSON.stringify(l)})'>Edit</button>
+            <button class="btn-ghost" onclick="deleteLayanan(${l.id}, '${nameEsc}')">Hapus</button>
           </div>
         </div>
       </div>
@@ -1239,7 +1239,7 @@ function renderAkordion() {
   );
   if (!visibleCats.length) {
     el.innerHTML = `<div class="empty">
-      <div class="ico">📂</div>
+      <div class="ico"></div>
       <div class="ttl">Belum ada kategori</div>
       <div class="sub">Klik "+" di header untuk menambah kategori baru.</div>
     </div>`;
@@ -1249,16 +1249,16 @@ function renderAkordion() {
 
   el.innerHTML = visibleCats.map(k => {
     const warna = k.warna || '#2D3BB5';
-    const ikon  = k.ikon  || 'category';
-    const list  = (k.layanan || []).filter(l =>
+    const ikon = k.ikon || 'category';
+    const list = (k.layanan || []).filter(l =>
       !q || l.nama.toLowerCase().includes(q)
     );
 
     const layananRows = list.map(l => {
-      const hpp     = Number(l.hpp || 0);
-      const untung  = hpp > 0 ? l.harga - hpp : null;
-      const mar     = hpp > 0 ? ((l.harga - hpp) / l.harga * 100).toFixed(0) : null;
-      const lEsc    = JSON.stringify(l).replace(/"/g,'&quot;');
+      const hpp = Number(l.hpp || 0);
+      const untung = hpp > 0 ? l.harga - hpp : null;
+      const mar = hpp > 0 ? ((l.harga - hpp) / l.harga * 100).toFixed(0) : null;
+      const lEsc = JSON.stringify(l).replace(/"/g,'&quot;');
       const nameEsc = (l.nama || '').replace(/'/g,"\\'");
       const marginInfo = hpp > 0
         ? `<div class="margin-info">HPP Rp${fmtRp(hpp)} · <span class="isi">Margin ${mar}% · Untung Rp${fmtRp(untung)}/unit</span></div>`
@@ -1275,7 +1275,7 @@ function renderAkordion() {
             <input type="number" class="harga-inp" value="${l.harga}" min="0"
                    onkeydown="if(event.key==='Enter') saveHarga(${l.id},this); if(event.key==='Escape') hideHargaInput(${l.id});"
                    onblur="hideHargaInput(${l.id})"/>
-            <button class="btn btn-sm btn-primary" onmousedown="event.preventDefault(); saveHarga(${l.id}, document.querySelector('#harga-wrap-${l.id} input'))">✓</button>
+            <button class="btn btn-sm btn-primary" onmousedown="event.preventDefault(); saveHarga(${l.id}, document.querySelector('#harga-wrap-${l.id} input'))">Simpan</button>
           </div>
         </td>
         <td>${esc(l.satuan)}</td>
@@ -1291,8 +1291,8 @@ function renderAkordion() {
         </td>
         <td>
           <div class="td-actions">
-            <button class="btn btn-sm btn-outline" onclick='openLayananModal(${JSON.stringify(l)})'>✏️</button>
-            <button class="btn-ghost" onclick="deleteLayanan(${l.id}, '${nameEsc}')">🗑️</button>
+            <button class="btn btn-sm btn-outline" onclick='openLayananModal(${JSON.stringify(l)})'>Edit</button>
+            <button class="btn-ghost" onclick="deleteLayanan(${l.id}, '${nameEsc}')">Hapus</button>
           </div>
         </td>
       </tr>`;
@@ -1317,8 +1317,8 @@ function renderAkordion() {
           <button class="btn btn-sm btn-primary" onclick="openLayananModal(null, ${k.id})">＋ Layanan</button>
           <button class="btn btn-sm btn-outline" onclick='openKategoriModal(${JSON.stringify({
             id:k.id, nama:k.nama, deskripsi:k.deskripsi, ikon:k.ikon, warna:k.warna, aktif:k.aktif
-          })})'>✏️</button>
-          <button class="btn-ghost" onclick="deleteKategori(${k.id}, '${(k.nama || '').replace(/'/g,"\\'")}')">🗑️</button>
+          })})'>Edit</button>
+          <button class="btn-ghost" onclick="deleteKategori(${k.id}, '${(k.nama || '').replace(/'/g,"\\'")}')">Hapus</button>
         </div>
         <span class="cat-chevron">▼</span>
       </div>
@@ -1361,7 +1361,7 @@ async function loadLayanan() {
   } catch(e) {
     console.error(e);
     document.getElementById('layList').innerHTML =
-      `<div class="empty"><div class="ico">⚠️</div><div class="ttl" style="color:var(--danger)">Gagal memuat data</div></div>`;
+      `<div class="empty"><div class="ico"></div><div class="ttl" style="color:var(--danger)">Gagal memuat data</div></div>`;
   }
 }
 

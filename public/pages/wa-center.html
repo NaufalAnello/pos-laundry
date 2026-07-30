@@ -161,9 +161,9 @@
       display: inline-block;
     }
     .tag-status.pending .dot { background: var(--warning); }
-    .tag-status.proses  .dot { background: var(--primary); }
+    .tag-status.proses .dot { background: var(--primary); }
     .tag-status.selesai .dot { background: var(--success); }
-    .tag-status.lewat   .dot { background: var(--danger); }
+    .tag-status.lewat .dot { background: var(--danger); }
     .btn {
       padding: 8px 14px; border-radius: 8px;
       border: 1px solid transparent;
@@ -356,7 +356,7 @@
     }
     @keyframes lmUp {
       from { transform: translateY(20px); opacity: .6; }
-      to   { transform: translateY(0); opacity: 1; }
+      to { transform: translateY(0); opacity: 1; }
     }
     .lm-h {
       background: var(--wa); color: #fff;
@@ -436,24 +436,24 @@
 <!-- ── Sticky Header ── -->
 <div class="pg-head">
   <div class="pg-head-row">
-    <div class="pg-title">📱 Pusat WhatsApp</div>
+    <div class="pg-title">Pusat WhatsApp</div>
   </div>
   <div class="wa-mode" role="group" aria-label="Mode WhatsApp">
-    <button class="wa-mode-btn" id="waModeRegular" onclick="setWAMode('regular')">💬 WA Biasa</button>
-    <button class="wa-mode-btn active" id="waModeBusiness" onclick="setWAMode('business')">💼 WA Business</button>
+    <button class="wa-mode-btn" id="waModeRegular" onclick="setWAMode('regular')">WA Biasa</button>
+    <button class="wa-mode-btn active" id="waModeBusiness" onclick="setWAMode('business')"> WA Business</button>
   </div>
 </div>
 
 <!-- ── Tab bar (mobile) ── -->
 <div class="tab-bar mobile-only" id="tabBar">
   <button class="tab-btn active" data-tab="tagihan" onclick="switchTab('tagihan')">
-    💰 Tagihan
+    Tagihan
   </button>
   <button class="tab-btn" data-tab="broadcast" onclick="switchTab('broadcast')">
-    📢 Broadcast
+    Broadcast
   </button>
   <button class="tab-btn" data-tab="riwayat" onclick="switchTab('riwayat')">
-    📋 Riwayat
+    Riwayat
   </button>
 </div>
 
@@ -462,15 +462,15 @@
 
     <!-- Desktop tabs -->
     <div class="tab-bar tab-bar-desktop desktop-only">
-      <button class="tab-btn active" data-tab="tagihan" onclick="switchTab('tagihan')">💰 Tagihan Belum Lunas</button>
-      <button class="tab-btn" data-tab="broadcast" onclick="switchTab('broadcast')">📢 Broadcast</button>
+      <button class="tab-btn active" data-tab="tagihan" onclick="switchTab('tagihan')">Tagihan Belum Lunas</button>
+      <button class="tab-btn" data-tab="broadcast" onclick="switchTab('broadcast')">Broadcast</button>
     </div>
 
     <!-- ── TAB: Tagihan ── -->
     <div class="tab-sec active" id="sec-tagihan">
       <div class="card" style="margin-bottom:14px">
         <div class="card-head">
-          💸 Order Belum Lunas
+          Order Belum Lunas
           <button class="btn btn-outline btn-sm" onclick="loadTagihan()">↻ Refresh</button>
         </div>
         <div class="card-body" id="tagihanBody">
@@ -485,16 +485,16 @@
     <!-- ── TAB: Broadcast ── -->
     <div class="tab-sec" id="sec-broadcast">
       <div class="card" style="margin-bottom:14px">
-        <div class="card-head">📢 Broadcast Pesan WA</div>
+        <div class="card-head">Broadcast Pesan WA</div>
         <div class="card-body">
           <!-- Template pills -->
           <div class="fg">
             <label>Template</label>
             <div class="bc-tpl-row">
-              <button class="bc-tpl active" data-tpl="custom" onclick="setTemplate('custom')">✏️ Custom</button>
-              <button class="bc-tpl" data-tpl="promo" onclick="setTemplate('promo')">🎉 Promo</button>
+              <button class="bc-tpl active" data-tpl="custom" onclick="setTemplate('custom')"> Custom</button>
+              <button class="bc-tpl" data-tpl="promo" onclick="setTemplate('promo')">Promo</button>
               <button class="bc-tpl" data-tpl="pengingat" onclick="setTemplate('pengingat')">⏰ Pengingat</button>
-              <button class="bc-tpl" data-tpl="ucapan" onclick="setTemplate('ucapan')">💌 Ucapan</button>
+              <button class="bc-tpl" data-tpl="ucapan" onclick="setTemplate('ucapan')"> Ucapan</button>
             </div>
           </div>
 
@@ -507,9 +507,9 @@ Variabel: {nama}, {poin}, {level}"
               oninput="updatePreview()"></textarea>
             <div class="var-chips">
               <span style="font-size:11px;color:var(--gray-5);align-self:center">Sisipkan:</span>
-              <button class="var-chip" onclick="insertVar('{nama}')">📛 nama</button>
-              <button class="var-chip" onclick="insertVar('{poin}')">⭐ poin</button>
-              <button class="var-chip" onclick="insertVar('{level}')">🏅 level</button>
+              <button class="var-chip" onclick="insertVar('{nama}')"> nama</button>
+              <button class="var-chip" onclick="insertVar('{poin}')">poin</button>
+              <button class="var-chip" onclick="insertVar('{level}')"> level</button>
             </div>
           </div>
 
@@ -518,10 +518,10 @@ Variabel: {nama}, {poin}, {level}"
             <label>Pilih Penerima</label>
             <div class="filter-chips" id="bcFilterChips">
               <button class="filter-chip active" data-f="all" onclick="setBcFilter('all')">Semua</button>
-              <button class="filter-chip" data-f="bronze" onclick="setBcFilter('bronze')">🥉 Bronze</button>
-              <button class="filter-chip" data-f="silver" onclick="setBcFilter('silver')">🥈 Silver</button>
-              <button class="filter-chip" data-f="gold" onclick="setBcFilter('gold')">🥇 Gold</button>
-              <button class="filter-chip" data-f="platinum" onclick="setBcFilter('platinum')">💎 Platinum</button>
+              <button class="filter-chip" data-f="bronze" onclick="setBcFilter('bronze')"> Bronze</button>
+              <button class="filter-chip" data-f="silver" onclick="setBcFilter('silver')"> Silver</button>
+              <button class="filter-chip" data-f="gold" onclick="setBcFilter('gold')"> Gold</button>
+              <button class="filter-chip" data-f="platinum" onclick="setBcFilter('platinum')"> Platinum</button>
             </div>
             <div id="bcCountWrap" style="font-size:12px;color:var(--gray-5);margin-top:8px">Menghitung target...</div>
           </div>
@@ -534,7 +534,7 @@ Variabel: {nama}, {poin}, {level}"
           </div>
 
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn btn-wa btn-block" onclick="startBroadcast()" style="flex:1">📤 Kirim Broadcast</button>
+            <button class="btn btn-wa btn-block" onclick="startBroadcast()" style="flex:1">Kirim Broadcast</button>
             <button class="btn btn-outline btn-sm" onclick="loadBcCount()">↻</button>
           </div>
         </div>
@@ -545,7 +545,7 @@ Variabel: {nama}, {poin}, {level}"
     <div class="tab-sec mobile-only" id="sec-riwayat">
       <div class="card">
         <div class="card-head">
-          📋 Riwayat WA
+          Riwayat WA
           <button class="btn btn-outline btn-sm" onclick="loadLog(1)">↻</button>
         </div>
         <div class="tl" id="logBodyMobile">
@@ -566,7 +566,7 @@ Variabel: {nama}, {poin}, {level}"
   <div class="right-col">
     <div class="card">
       <div class="card-head">
-        📋 Riwayat WA
+        Riwayat WA
         <button class="btn btn-outline btn-sm" onclick="loadLog(1)">↻</button>
       </div>
       <div class="tl" id="logBodyDesktop">
@@ -587,7 +587,7 @@ Variabel: {nama}, {poin}, {level}"
 <div class="lm-bg" id="stepperModal">
   <div class="lm">
     <div class="lm-h">
-      <h3>📢 Broadcast Pesan</h3>
+      <h3>Broadcast Pesan</h3>
       <div class="lm-progress">
         <div class="lm-progress-bar" id="stepperBar"></div>
       </div>
@@ -601,7 +601,7 @@ Variabel: {nama}, {poin}, {level}"
       <div style="font-size:13px;color:var(--gray-5)" id="stepCounter"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-outline btn-sm" onclick="stepperSkip()">Lewati</button>
-        <button class="btn btn-wa" id="stepSendBtn" onclick="stepperSend()">📱 Kirim WA</button>
+        <button class="btn btn-wa" id="stepSendBtn" onclick="stepperSend()">Kirim WA</button>
         <button class="btn btn-ghost btn-sm" onclick="stepperClose()">Tutup</button>
       </div>
     </div>
@@ -614,7 +614,7 @@ Variabel: {nama}, {poin}, {level}"
 // ── Templates ─────────────────────────────────────────────────────────────────
 const TEMPLATES = {
   custom: '',
-  promo: `Halo {nama}! 🎉
+  promo: `Halo {nama}! 
 
 Ada promo spesial untukmu di Nala Laundry minggu ini:
 - Cuci kiloan diskon 20%
@@ -630,22 +630,22 @@ Kami mengingatkan bahwa orderan Anda di Nala Laundry sudah siap diambil. Mohon d
 
 Terima kasih,
 Nala Laundry`,
-  ucapan: `Halo {nama}! 💌
+  ucapan: `Halo {nama}! 
 
 Terima kasih sudah jadi pelanggan setia kami. Saldo poin Anda saat ini: {poin} (level {level}).
 
-Selalu kami siap melayani cucian Anda 🙌
+Selalu kami siap melayani cucian Anda 
 
 Salam,
 Nala Laundry`
 };
 
 // ── State ─────────────────────────────────────────────────────────────────────
-let logPage  = 1, logTotal = 1;
-let bcData   = [];
-let stepIdx  = 0;
-let bcMsg    = '';
-let waMode   = 'business';
+let logPage = 1, logTotal = 1;
+let bcData = [];
+let stepIdx = 0;
+let bcMsg = '';
+let waMode = 'business';
 let bcFilter = 'all';
 
 // ── Tab switching ─────────────────────────────────────────────────────────────
@@ -668,7 +668,7 @@ function setWAMode(mode) {
 function buildWAUrl(telepon, teks, mode) {
   const clean = String(telepon).replace(/\D/g, '');
   const phone = clean.startsWith('62') ? clean
-              : clean.startsWith('0')  ? '62' + clean.slice(1)
+              : clean.startsWith('0') ? '62' + clean.slice(1)
               : '62' + clean;
   const enc = encodeURIComponent(teks);
   return mode === 'business'
@@ -701,7 +701,7 @@ async function loadTagihan() {
     const el = document.getElementById('tagihanBody');
     if (!data.length) {
       el.innerHTML = `<div class="empty">
-        <div class="ico">🎉</div>
+        <div class="ico"></div>
         <div class="ttl">Semua tagihan sudah lunas!</div>
         <div class="sub">Tidak ada order yang perlu ditagih.</div>
       </div>`;
@@ -720,7 +720,7 @@ async function loadTagihan() {
           <div class="tag-row1">
             <div class="tag-nama">${esc(r.pelanggan_nama || 'Tanpa Nama')}</div>
             ${r.pelanggan_telepon
-              ? `<a class="tag-phone" href="https://wa.me/${esc(r.pelanggan_telepon)}" target="_blank">📱 ${esc(r.pelanggan_telepon)}</a>`
+              ? `<a class="tag-phone" href="https://wa.me/${esc(r.pelanggan_telepon)}" target="_blank">${esc(r.pelanggan_telepon)}</a>`
               : '<span class="tag-phone">—</span>'}
           </div>
           <div class="tag-row2">
@@ -733,14 +733,14 @@ async function loadTagihan() {
             <span>·</span>
             <span>${ageTxt}</span>
           </div>
-          <button class="btn btn-wa btn-block" onclick="kirimTagihanWA(${r.id})">💬 Kirim Tagihan WA</button>
+          <button class="btn btn-wa btn-block" onclick="kirimTagihanWA(${r.id})">Kirim Tagihan WA</button>
         </div>
       `;
     }).join('') + `</div>`;
   } catch (e) {
     toast(e.message, true);
     document.getElementById('tagihanBody').innerHTML = `<div class="empty">
-      <div class="ico">⚠️</div>
+      <div class="ico"></div>
       <div class="ttl" style="color:var(--danger)">Gagal memuat tagihan</div>
     </div>`;
   }
@@ -790,7 +790,7 @@ async function loadBcCount() {
       body: JSON.stringify({ pesan: 'x', level_filter: bcFilter })
     });
     document.getElementById('bcCountWrap').textContent =
-      `✅ ${total} pelanggan akan menerima pesan`;
+      ` ${total} pelanggan akan menerima pesan`;
   } catch {
     document.getElementById('bcCountWrap').textContent = '—';
   }
@@ -831,8 +831,8 @@ async function startBroadcast() {
       body: JSON.stringify({ pesan, level_filter: bcFilter, mode: waMode })
     });
     if (!res.data?.length) { toast('Tidak ada target broadcast', true); return; }
-    bcData  = res.data;
-    bcMsg   = pesan;
+    bcData = res.data;
+    bcMsg = pesan;
     stepIdx = 0;
     document.getElementById('stepperModal').classList.add('open');
     updateStepper();
@@ -851,11 +851,11 @@ function updateStepper() {
     .replace(/\{nama\}/g, p.nama || '')
     .replace(/\{poin\}/g, p.total_poin || 0)
     .replace(/\{level\}/g, getLevel(p.total_poin || 0));
-  document.getElementById('stepName').textContent    = p.nama;
-  document.getElementById('stepPhone').textContent   = '📱 ' + p.telepon;
-  document.getElementById('stepMsg').textContent     = resolved;
+  document.getElementById('stepName').textContent = p.nama;
+  document.getElementById('stepPhone').textContent = '' + p.telepon;
+  document.getElementById('stepMsg').textContent = resolved;
   document.getElementById('stepCounter').textContent = `${stepIdx + 1} / ${bcData.length}`;
-  document.getElementById('stepperBar').style.width  = ((stepIdx / bcData.length) * 100) + '%';
+  document.getElementById('stepperBar').style.width = ((stepIdx / bcData.length) * 100) + '%';
   bcData[stepIdx]._resolved = resolved;
 }
 
@@ -876,7 +876,7 @@ function stepperSend() {
   loadLog(1);
 }
 
-function stepperSkip()  { stepIdx++; updateStepper(); }
+function stepperSkip() { stepIdx++; updateStepper(); }
 function stepperClose() {
   document.getElementById('stepperModal').classList.remove('open');
   bcData = []; stepIdx = 0;
@@ -892,7 +892,7 @@ async function loadLog(p) {
       const el = document.getElementById(containerId);
       if (!items.length) {
         el.innerHTML = `<div class="empty">
-          <div class="ico">📭</div>
+          <div class="ico"></div>
           <div class="ttl">Belum ada riwayat WA</div>
           <div class="sub">Pesan yang dikirim akan muncul di sini.</div>
         </div>`;
@@ -926,7 +926,7 @@ async function loadLog(p) {
       document.getElementById(pagBtnsId).innerHTML = pbtns;
     };
 
-    renderTl('logBodyMobile',  'logPagBarMobile',  'logPagInfoMobile',  'logPagBtnsMobile');
+    renderTl('logBodyMobile', 'logPagBarMobile', 'logPagInfoMobile', 'logPagBtnsMobile');
     renderTl('logBodyDesktop', 'logPagBarDesktop', 'logPagInfoDesktop', 'logPagBtnsDesktop');
   } catch (e) { toast(e.message, true); }
 }
@@ -935,7 +935,7 @@ async function loadLog(p) {
 function getLevel(poin) {
   if (poin >= 5000) return 'Platinum';
   if (poin >= 2000) return 'Gold';
-  if (poin >= 500)  return 'Silver';
+  if (poin >= 500) return 'Silver';
   return 'Bronze';
 }
 function rupiah(n) { return 'Rp ' + Number(n||0).toLocaleString('id-ID'); }

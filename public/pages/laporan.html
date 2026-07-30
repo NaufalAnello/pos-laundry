@@ -25,28 +25,28 @@
 
     header { background:#fff; border-bottom:1px solid var(--gray-3); padding:0 20px; height:56px;
              display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:20; box-shadow:var(--shadow); }
-    .logo  { font-size:16px; font-weight:800; color:var(--blue); white-space:nowrap; }
-    nav    { display:flex; gap:4px; flex:1; overflow-x:auto; }
-    nav a  { padding:6px 12px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;
+    .logo { font-size:16px; font-weight:800; color:var(--blue); white-space:nowrap; }
+    nav { display:flex; gap:4px; flex:1; overflow-x:auto; }
+    nav a { padding:6px 12px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;
              color:var(--gray-7); transition:background .15s; white-space:nowrap; }
-    nav a:hover  { background:var(--gray-2); }
+    nav a:hover { background:var(--gray-2); }
     nav a.active { background:var(--blue-lt); color:var(--blue); }
     .header-user { font-size:13px; color:var(--gray-5); display:flex; align-items:center; gap:8px; white-space:nowrap; }
-    .logout-btn  { padding:5px 12px; border:1px solid var(--gray-3); border-radius:7px; background:none;
+    .logout-btn { padding:5px 12px; border:1px solid var(--gray-3); border-radius:7px; background:none;
                    font-size:13px; cursor:pointer; color:var(--gray-7); }
     .logout-btn:hover { background:var(--gray-2); }
 
     .page { max-width:1100px; margin:0 auto; padding:20px 16px; }
     .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; flex-wrap:wrap; }
-    .page-title  { font-size:20px; font-weight:800; }
+    .page-title { font-size:20px; font-weight:800; }
 
     .btn { padding:8px 16px; border-radius:8px; border:1px solid transparent; font-size:13px;
            font-weight:600; cursor:pointer; transition:opacity .15s; display:inline-flex; align-items:center; gap:6px; }
-    .btn:hover    { opacity:.85; }
+    .btn:hover { opacity:.85; }
     .btn:disabled { opacity:.4; cursor:default; }
-    .btn-sm  { padding:5px 10px; font-size:12px; }
-    .btn-blue    { background:var(--blue);  color:#fff; }
-    .btn-green   { background:var(--green); color:#fff; }
+    .btn-sm { padding:5px 10px; font-size:12px; }
+    .btn-blue { background:var(--blue); color:#fff; }
+    .btn-green { background:var(--green); color:#fff; }
     .btn-outline { background:#fff; border-color:var(--gray-3); color:var(--gray-7); }
 
     /* ── Filter bar ── */
@@ -58,7 +58,7 @@
                                    font-size:13px; cursor:pointer; }
     .filter-bar input[type=date]:focus { outline:none; border-color:var(--blue); }
     .preset-btns { display:flex; gap:6px; flex-wrap:wrap; }
-    .preset-btn  { padding:5px 12px; border:1px solid var(--gray-3); border-radius:20px; background:#fff;
+    .preset-btn { padding:5px 12px; border:1px solid var(--gray-3); border-radius:20px; background:#fff;
                    font-size:12px; font-weight:600; cursor:pointer; color:var(--gray-7); transition:all .15s; }
     .preset-btn:hover, .preset-btn.active { background:var(--blue-lt); border-color:var(--blue); color:var(--blue); }
     .sep { color:var(--gray-3); }
@@ -66,13 +66,13 @@
     /* ── Stat cards ── */
     .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
     @media(max-width:1023px) { .stats-grid { grid-template-columns:repeat(3,1fr); } }
-    @media(max-width:767px)  { .stats-grid { grid-template-columns:1fr 1fr; gap:10px; } }
-    @media(max-width:480px)  { .stats-grid { grid-template-columns:1fr 1fr; } }
+    @media(max-width:767px) { .stats-grid { grid-template-columns:1fr 1fr; gap:10px; } }
+    @media(max-width:480px) { .stats-grid { grid-template-columns:1fr 1fr; } }
     .stat-card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3);
                  box-shadow:var(--shadow); padding:18px 20px; }
     .stat-label { font-size:11px; font-weight:700; color:var(--gray-5); text-transform:uppercase; letter-spacing:.4px; margin-bottom:6px; }
-    .stat-val   { font-size:24px; font-weight:800; }
-    .stat-sub   { font-size:12px; color:var(--gray-5); margin-top:4px; }
+    .stat-val { font-size:24px; font-weight:800; }
+    .stat-sub { font-size:12px; color:var(--gray-5); margin-top:4px; }
 
     /* ── Chart & content ── */
     .card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3); box-shadow:var(--shadow); }
@@ -105,26 +105,26 @@
     .lr-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--gray-3); font-size:14px; }
     .lr-row:last-child { border-bottom:none; }
     .lr-total { font-weight:800; font-size:15px; }
-    .laba    { color:var(--green); }
-    .rugi    { color:var(--red);   }
+    .laba { color:var(--green); }
+    .rugi { color:var(--red); }
 
     /* badges/info row */
     .info-chips { display:flex; gap:10px; flex-wrap:wrap; }
     .chip { background:var(--gray-1); border:1px solid var(--gray-3); border-radius:8px; padding:10px 14px; flex:1; min-width:130px; }
-    .chip .cv  { font-size:18px; font-weight:800; margin-bottom:2px; }
-    .chip .cl  { font-size:11px; color:var(--gray-5); }
+    .chip .cv { font-size:18px; font-weight:800; margin-bottom:2px; }
+    .chip .cl { font-size:11px; color:var(--gray-5); }
 
     /* status badges */
     .badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:999px;
              font-size:11px; font-weight:700; text-transform:capitalize; }
-    .badge-pending  { background:#fef9c3; color:#92400e; }
-    .badge-proses   { background:#C7D2FE; color:#1E2A8A; }
-    .badge-selesai  { background:#D1FAE5; color:#166534; }
-    .badge-diambil  { background:#ECFDF5; color:#059669; }
-    .badge-batal    { background:#fee2e2; color:#991b1b; }
-    .badge-gold     { background:#fef3c7; color:#92400e; }
-    .badge-silver   { background:#e5e7eb; color:#374151; }
-    .badge-bronze   { background:#fed7aa; color:#9a3412; }
+    .badge-pending { background:#fef9c3; color:#92400e; }
+    .badge-proses { background:#C7D2FE; color:#1E2A8A; }
+    .badge-selesai { background:#D1FAE5; color:#166534; }
+    .badge-diambil { background:#ECFDF5; color:#059669; }
+    .badge-batal { background:#fee2e2; color:#991b1b; }
+    .badge-gold { background:#fef3c7; color:#92400e; }
+    .badge-silver { background:#e5e7eb; color:#374151; }
+    .badge-bronze { background:#fed7aa; color:#9a3412; }
 
     /* row clickable */
     .row-clickable { cursor:pointer; transition:background .15s; }
@@ -135,7 +135,7 @@
 
     /* tabs */
     .tabs { display:flex; gap:4px; border-bottom:2px solid var(--gray-3); margin-bottom:20px; overflow-x:auto; }
-    .tab  { padding:10px 18px; border:none; background:none; font-size:14px; font-weight:600;
+    .tab { padding:10px 18px; border:none; background:none; font-size:14px; font-weight:600;
             color:var(--gray-5); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px;
             transition:all .15s; white-space:nowrap; }
     .tab:hover { color:var(--gray-7); background:var(--gray-1); }
@@ -147,7 +147,7 @@
              background:#1E2A6E; color:#fff; padding:10px 20px; border-radius:8px;
              font-size:13px; font-weight:600; z-index:99; transition:transform .3s; white-space:nowrap; }
     .toast.show { transform:translateX(-50%) translateY(0); }
-    .toast.err  { background:var(--red); }
+    .toast.err { background:var(--red); }
 
     /* ── Mobile-card list (render dipakai bareng table — table di-hide di HP) ── */
     .rep-list { display: flex; flex-direction: column; gap: 10px; }
@@ -158,7 +158,7 @@
     }
     .rep-item-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
     .rep-item-title { font-weight:700; font-size:14px; color:var(--gray-9); flex:1; }
-    .rep-item-sub  { font-size:12px; color:var(--gray-5); }
+    .rep-item-sub { font-size:12px; color:var(--gray-5); }
     .rep-item-meta { display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:13px; }
     .rep-item-omset { font-weight:700; color:var(--blue); }
     .rep-rank {
@@ -166,7 +166,7 @@
       background:var(--blue-lt); color:var(--blue); font-weight:800; font-size:12px;
       display:inline-flex; align-items:center; justify-content:center;
     }
-    .rep-rank.gold   { background:#fef3c7; color:#92400e; }
+    .rep-rank.gold { background:#fef3c7; color:#92400e; }
     .rep-rank.silver { background:#e5e7eb; color:#374151; }
     .rep-rank.bronze { background:#fed7aa; color:#9a3412; }
 
@@ -226,7 +226,7 @@
       .stat-card { padding: 12px; }
       .stat-val { font-size: 18px; }
       .stat-label { font-size: 10px; }
-      .stat-sub  { font-size: 11px; }
+      .stat-sub { font-size: 11px; }
 
       /* Chart — lebih tinggi supaya kebaca di HP */
       .chart-wrap { height: 220px; }
@@ -236,7 +236,7 @@
 
       /* Tukar tabel <→ card list */
       .rep-table-wrap { display: none !important; }
-      .rep-list-wrap  { display: block !important; }
+      .rep-list-wrap { display: block !important; }
 
       /* card-body lebih ramping di HP */
       .card-body { padding: 14px; }
@@ -254,22 +254,22 @@
 <div class="page">
   <div class="page-header">
     <div class="page-title">Laporan Bisnis</div>
-    <button class="btn btn-green" id="exportBtn" onclick="exportCsv()">⬇ Export CSV</button>
+    <button class="btn btn-green" id="exportBtn" onclick="exportCsv()">Export CSV</button>
   </div>
 
   <!-- Tabs -->
   <div class="tabs">
     <button class="tab active" onclick="switchTab('ringkasan', event)">
-      <span class="hide-mobile">📊 Ringkasan</span><span class="show-mobile">📊 Ringkasan</span>
+      <span class="hide-mobile">Ringkasan</span><span class="show-mobile">Ringkasan</span>
     </button>
     <button class="tab" onclick="switchTab('layanan', event)">
-      <span class="hide-mobile">📦 Laporan Layanan</span><span class="show-mobile">🧺 Layanan</span>
+      <span class="hide-mobile">Laporan Layanan</span><span class="show-mobile">Layanan</span>
     </button>
     <button class="tab" onclick="switchTab('pelanggan', event)">
-      <span class="hide-mobile">👥 Laporan Pelanggan</span><span class="show-mobile">👥 Pelanggan</span>
+      <span class="hide-mobile">Laporan Pelanggan</span><span class="show-mobile">Pelanggan</span>
     </button>
     <button class="tab" onclick="switchTab('antar-jemput', event)">
-      <span class="hide-mobile">🛵 Antar Jemput</span><span class="show-mobile">🛵 AJ</span>
+      <span class="hide-mobile">Antar Jemput</span><span class="show-mobile">AJ</span>
     </button>
   </div>
 
@@ -340,7 +340,7 @@
   <!-- Bar chart -->
   <div class="card" style="margin-bottom:16px">
     <div class="card-head">
-      <span>📈 Omset Harian</span>
+      <span>Omset Harian</span>
       <span id="chartPeriode" style="font-size:12px;font-weight:400;color:var(--gray-5)"></span>
     </div>
     <div class="card-body">
@@ -353,7 +353,7 @@
   <!-- Distribusi & Laba Rugi -->
   <div class="grid-2">
     <div class="card">
-      <div class="card-head">🏆 Top Layanan</div>
+      <div class="card-head">Top Layanan</div>
       <div class="rep-list-wrap" id="distribusiCardList">
         <div class="card-body"><div class="loading">Memuat…</div></div>
       </div>
@@ -362,7 +362,7 @@
       </div>
     </div>
     <div class="card">
-      <div class="card-head">💰 Laba Rugi (Kas)</div>
+      <div class="card-head">Laba Rugi (Kas)</div>
       <div class="card-body" id="labaRugiBody">
         <div class="loading">Memuat…</div>
       </div>
@@ -372,13 +372,13 @@
   <!-- Status + Poin/Promo -->
   <div class="grid-2">
     <div class="card">
-      <div class="card-head">📊 Status Transaksi</div>
+      <div class="card-head">Status Transaksi</div>
       <div class="card-body" id="statusBody">
         <div class="loading">Memuat…</div>
       </div>
     </div>
     <div class="card">
-      <div class="card-head">🎁 Ringkasan Poin & Promo</div>
+      <div class="card-head">Ringkasan Poin & Promo</div>
       <div class="card-body" id="poinPromoBody">
         <div class="loading">Memuat…</div>
       </div>
@@ -388,7 +388,7 @@
   <!-- Deposit section -->
   <div class="card" style="margin-top:14px;">
     <div class="card-head" style="display:flex;justify-content:space-between;align-items:center;">
-      <span>💳 Deposit Pelanggan</span>
+      <span>Deposit Pelanggan</span>
       <a href="/deposit" style="font-size:12px;color:var(--blue);text-decoration:none;font-weight:600;">Kelola Deposit →</a>
     </div>
     <div class="card-body" id="depositLaporanBody">
@@ -398,7 +398,7 @@
 
   <!-- Profitabilitas section -->
   <div class="card" style="margin-top:14px;" id="profitCard">
-    <div class="card-head">📊 Profitabilitas Layanan <span style="font-size:11px;font-weight:400;color:var(--gray-5)">berdasarkan HPP yang diisi</span></div>
+    <div class="card-head">Profitabilitas Layanan <span style="font-size:11px;font-weight:400;color:var(--gray-5)">berdasarkan HPP yang diisi</span></div>
     <div class="rep-list-wrap card-body" id="profitCardList">
       <div class="loading">Memuat…</div>
     </div>
@@ -436,7 +436,7 @@
 
     <!-- Grafik Top 10 -->
     <div class="card" style="margin-bottom:16px">
-      <div class="card-head">📊 Top 10 Layanan Berdasarkan Omset</div>
+      <div class="card-head">Top 10 Layanan Berdasarkan Omset</div>
       <div class="card-body">
         <div class="chart-wrap">
           <canvas id="layananChart"></canvas>
@@ -447,10 +447,10 @@
     <!-- Tabel Laporan Layanan -->
     <div class="card">
       <div class="card-head" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-        <span>📦 Detail Laporan Layanan</span>
+        <span>Detail Laporan Layanan</span>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-sm btn-outline" onclick="exportLayananCsv()">⬇ CSV</button>
-          <button class="btn btn-sm btn-green" onclick="exportLayananExcel()">⬇ Excel</button>
+          <button class="btn btn-sm btn-outline" onclick="exportLayananCsv()">CSV</button>
+          <button class="btn btn-sm btn-green" onclick="exportLayananExcel()">Excel</button>
         </div>
       </div>
       <!-- Mobile: card list -->
@@ -493,10 +493,10 @@
     <!-- Tabel Laporan Pelanggan -->
     <div class="card">
       <div class="card-head" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-        <span>👥 Ringkasan per Pelanggan</span>
+        <span>Ringkasan per Pelanggan</span>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-sm btn-outline" onclick="exportPelangganCsv()">⬇ CSV</button>
-          <button class="btn btn-sm btn-green" onclick="exportPelangganExcel()">⬇ Excel</button>
+          <button class="btn btn-sm btn-outline" onclick="exportPelangganCsv()">CSV</button>
+          <button class="btn btn-sm btn-green" onclick="exportPelangganExcel()">Excel</button>
         </div>
       </div>
       <!-- Mobile: card list -->
@@ -552,7 +552,7 @@
     <!-- Tabel Detail AJ -->
     <div class="card">
       <div class="card-head">
-        <span>🛵 Detail Rute Antar Jemput</span>
+        <span>Detail Rute Antar Jemput</span>
       </div>
       <!-- Mobile: card list -->
       <div class="rep-list-wrap" id="ajCardList">
@@ -590,13 +590,13 @@ let chart = null;
 let layananChart = null;
 let activeTab = 'ringkasan';
 const today = () => new Date().toISOString().slice(0, 10);
-const fmt   = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '–';
+const fmt = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '–';
 const rupiah = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 // Compact rupiah: Rp 1.5jt / Rp 250rb (untuk ruang sempit di HP)
 const rupiahCompact = (n) => {
   const v = Number(n || 0);
   if (v >= 1_000_000) return 'Rp ' + (v/1_000_000).toFixed(v >= 10_000_000 ? 0 : 1) + 'jt';
-  if (v >= 1_000)     return 'Rp ' + Math.round(v/1_000) + 'rb';
+  if (v >= 1_000) return 'Rp ' + Math.round(v/1_000) + 'rb';
   return 'Rp ' + v.toLocaleString('id-ID');
 };
 // Format nomor telepon: 628xxx → 08xxx untuk tampilan UI
@@ -604,7 +604,7 @@ function formatTelepon(nomor) {
   if (!nomor) return '-';
   let n = nomor.toString().trim();
   if (n.startsWith('628')) return '0' + n.slice(2);
-  if (n.startsWith('62'))  return '0' + n.slice(2);
+  if (n.startsWith('62')) return '0' + n.slice(2);
   return n;
 }
 
@@ -650,7 +650,7 @@ function switchTab(tabName, ev) {
   // Update export button
   const exportBtn = document.getElementById('exportBtn');
   if (tabName === 'ringkasan') {
-    exportBtn.textContent = '⬇ Export CSV';
+    exportBtn.textContent = 'Export CSV';
     exportBtn.onclick = exportCsv;
     exportBtn.style.display = 'inline-flex';
   } else {
@@ -694,14 +694,14 @@ function setPreset(key, ev) {
   const t = new Date();
   let start, end = today();
 
-  if (key === 'today')  { start = end; }
-  else if (key === 'week')  { const d = new Date(t); d.setDate(d.getDate()-6); start = d.toISOString().slice(0,10); }
+  if (key === 'today') { start = end; }
+  else if (key === 'week') { const d = new Date(t); d.setDate(d.getDate()-6); start = d.toISOString().slice(0,10); }
   else if (key === 'month') { start = end.slice(0,7) + '-01'; }
   else if (key === 'last3') { const d = new Date(t); d.setMonth(d.getMonth()-3); start = d.toISOString().slice(0,10); }
-  else if (key === 'year')  { start = end.slice(0,4) + '-01-01'; }
+  else if (key === 'year') { start = end.slice(0,4) + '-01-01'; }
 
   document.getElementById('dateStart').value = start;
-  document.getElementById('dateEnd').value   = end;
+  document.getElementById('dateEnd').value = end;
 
   document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
   if (ev?.target) ev.target.classList.add('active');
@@ -711,21 +711,21 @@ function setPreset(key, ev) {
 // ── Load data ─────────────────────────────────────────────────────────────────
 async function load() {
   const start = document.getElementById('dateStart').value;
-  const end   = document.getElementById('dateEnd').value;
+  const end = document.getElementById('dateEnd').value;
   if (!start || !end) return;
 
   // set loading state
   ['sOmset','sTrx','sAvg','sPelanggan','sPoin','sPromo'].forEach(id => {
     document.getElementById(id).textContent = '…';
   });
-  document.getElementById('distribusiBody').innerHTML     = '<div class="loading">Memuat…</div>';
+  document.getElementById('distribusiBody').innerHTML = '<div class="loading">Memuat…</div>';
   document.getElementById('distribusiCardList').innerHTML = '<div class="card-body"><div class="loading">Memuat…</div></div>';
-  document.getElementById('labaRugiBody').innerHTML       = '<div class="loading">Memuat…</div>';
-  document.getElementById('statusBody').innerHTML         = '<div class="loading">Memuat…</div>';
-  document.getElementById('poinPromoBody').innerHTML      = '<div class="loading">Memuat…</div>';
+  document.getElementById('labaRugiBody').innerHTML = '<div class="loading">Memuat…</div>';
+  document.getElementById('statusBody').innerHTML = '<div class="loading">Memuat…</div>';
+  document.getElementById('poinPromoBody').innerHTML = '<div class="loading">Memuat…</div>';
   document.getElementById('depositLaporanBody').innerHTML = '<div class="loading">Memuat…</div>';
-  document.getElementById('profitBody').innerHTML         = '<div class="loading">Memuat…</div>';
-  document.getElementById('profitCardList').innerHTML     = '<div class="loading">Memuat…</div>';
+  document.getElementById('profitBody').innerHTML = '<div class="loading">Memuat…</div>';
+  document.getElementById('profitCardList').innerHTML = '<div class="loading">Memuat…</div>';
 
   try {
     const data = await apiFetch(`/api/v1/laporan?start=${start}&end=${end}`);
@@ -740,16 +740,16 @@ function renderAll(d) {
   const { omset, pelanggan_baru, poin, promo, harian, distribusi_layanan, laba_rugi, status_transaksi, periode } = d;
 
   // Stat cards
-  document.getElementById('sOmset').textContent    = rupiah(omset.total);
+  document.getElementById('sOmset').textContent = rupiah(omset.total);
   document.getElementById('sOmsetSub').textContent = `Diskon: ${rupiah(omset.total_diskon)}`;
-  document.getElementById('sTrx').textContent      = omset.jumlah;
-  document.getElementById('sTrxSub').textContent   = `Periode: ${fmt(periode.start)} – ${fmt(periode.end)}`;
-  document.getElementById('sAvg').textContent      = rupiah(omset.rata_rata);
-  document.getElementById('sAvgSub').textContent   = 'per transaksi (selesai)';
+  document.getElementById('sTrx').textContent = omset.jumlah;
+  document.getElementById('sTrxSub').textContent = `Periode: ${fmt(periode.start)} – ${fmt(periode.end)}`;
+  document.getElementById('sAvg').textContent = rupiah(omset.rata_rata);
+  document.getElementById('sAvgSub').textContent = 'per transaksi (selesai)';
   document.getElementById('sPelanggan').textContent = pelanggan_baru;
-  document.getElementById('sPoin').textContent     = poin.diberikan + ' poin';
-  document.getElementById('sPoinSub').textContent  = `Ditukarkan: ${poin.ditukarkan} poin`;
-  document.getElementById('sPromo').textContent    = promo.jumlah_pakai + 'x';
+  document.getElementById('sPoin').textContent = poin.diberikan + ' poin';
+  document.getElementById('sPoinSub').textContent = `Ditukarkan: ${poin.ditukarkan} poin`;
+  document.getElementById('sPromo').textContent = promo.jumlah_pakai + 'x';
   document.getElementById('sPromoSub').textContent = `Total diskon: ${rupiah(promo.total_diskon)}`;
 
   // Chart
@@ -784,7 +784,7 @@ function renderAll(d) {
             label: ctx => rupiah(ctx.parsed.y),
             title: (items) => {
               const idx = items[0].dataIndex;
-              const h   = harian[idx];
+              const h = harian[idx];
               return `${items[0].label} · ${h?.jumlah || 0} transaksi`;
             }
           }
@@ -841,10 +841,10 @@ function renderAll(d) {
   const lr = laba_rugi;
   const labaClass = lr.laba >= 0 ? 'laba' : 'rugi';
   document.getElementById('labaRugiBody').innerHTML = `
-    <div class="lr-row"><span>📥 Total Kas Masuk</span><span style="color:var(--green);font-weight:600">${rupiah(lr.pendapatan)}</span></div>
-    <div class="lr-row"><span>📤 Total Kas Keluar</span><span style="color:var(--red);font-weight:600">${rupiah(lr.pengeluaran)}</span></div>
+    <div class="lr-row"><span>Total Kas Masuk</span><span style="color:var(--green);font-weight:600">${rupiah(lr.pendapatan)}</span></div>
+    <div class="lr-row"><span>Total Kas Keluar</span><span style="color:var(--red);font-weight:600">${rupiah(lr.pengeluaran)}</span></div>
     <div class="lr-row lr-total">
-      <span>${lr.laba >= 0 ? '✅ Laba Bersih' : '❌ Rugi Bersih'}</span>
+      <span>${lr.laba >= 0 ? ' Laba Bersih' : ' Rugi Bersih'}</span>
       <span class="${labaClass}">${rupiah(Math.abs(lr.laba))}</span>
     </div>
     <div style="margin-top:12px;font-size:11px;color:var(--gray-5)">* Berdasarkan entri buku kas pada periode ini</div>
@@ -906,17 +906,17 @@ function renderProfitabilitas(distribusi) {
 
   // Hitung per layanan
   const rows = withHpp.map(r => {
-    const hpp       = Number(r.hpp);
-    const omset     = Number(r.total_omset);
-    const vol       = Number(r.total_jumlah);
-    const estHpp    = hpp * vol;
+    const hpp = Number(r.hpp);
+    const omset = Number(r.total_omset);
+    const vol = Number(r.total_jumlah);
+    const estHpp = hpp * vol;
     const estProfit = omset - estHpp;
     const marginPct = omset > 0 ? (estProfit / omset * 100) : 0;
     return { ...r, hpp, omset, vol, estHpp, estProfit, marginPct };
   }).sort((a, b) => b.marginPct - a.marginPct);
 
   // Kartu ringkasan
-  const best    = rows[0];
+  const best = rows[0];
   const needEval = rows.filter(r => r.marginPct < 20);
   const totalProfit = rows.reduce((s, r) => s + r.estProfit, 0);
 
@@ -984,7 +984,7 @@ function renderProfitabilitas(distribusi) {
 // ── Load Laporan Layanan ──────────────────────────────────────────────────────
 async function loadLayanan() {
   const start = document.getElementById('dateStart').value;
-  const end   = document.getElementById('dateEnd').value;
+  const end = document.getElementById('dateEnd').value;
   const kategoriId = document.getElementById('kategoriFilter').value;
   if (!start || !end) return;
 
@@ -993,7 +993,7 @@ async function loadLayanan() {
     document.getElementById(id).textContent = '…';
   });
   document.getElementById('layananTableBody').innerHTML = '<div class="loading">Memuat…</div>';
-  document.getElementById('layananCardList').innerHTML  = '<div class="card-body"><div class="loading">Memuat…</div></div>';
+  document.getElementById('layananCardList').innerHTML = '<div class="card-body"><div class="loading">Memuat…</div></div>';
 
   try {
     let url = `/api/v1/laporan/layanan?start=${start}&end=${end}`;
@@ -1125,14 +1125,14 @@ function renderLayanan(d) {
 // ── Export CSV ────────────────────────────────────────────────────────────────
 function exportCsv() {
   const start = document.getElementById('dateStart').value;
-  const end   = document.getElementById('dateEnd').value;
+  const end = document.getElementById('dateEnd').value;
   if (!start || !end) { toast('Pilih rentang tanggal terlebih dahulu', true); return; }
   window.location.href = `/api/v1/laporan/export?start=${start}&end=${end}`;
 }
 
 function exportLayananCsv() {
   const start = document.getElementById('dateStart').value;
-  const end   = document.getElementById('dateEnd').value;
+  const end = document.getElementById('dateEnd').value;
   const kategoriId = document.getElementById('kategoriFilter').value;
   if (!start || !end) { toast('Pilih rentang tanggal terlebih dahulu', true); return; }
   let url = `/api/v1/laporan/layanan/export?start=${start}&end=${end}`;
@@ -1145,7 +1145,7 @@ function exportLayananExcel() {
   // atau gunakan library JS untuk generate Excel client-side
   // Untuk simplicity, kita gunakan CSV dengan ekstensi .xls (Excel bisa buka CSV)
   const start = document.getElementById('dateStart').value;
-  const end   = document.getElementById('dateEnd').value;
+  const end = document.getElementById('dateEnd').value;
   const kategoriId = document.getElementById('kategoriFilter').value;
   if (!start || !end) { toast('Pilih rentang tanggal terlebih dahulu', true); return; }
   let url = `/api/v1/laporan/layanan/export?start=${start}&end=${end}`;
@@ -1163,7 +1163,7 @@ function debounceLoadPelanggan() {
 
 async function loadPelanggan() {
   const start = document.getElementById('dateStart').value;
-  const end   = document.getElementById('dateEnd').value;
+  const end = document.getElementById('dateEnd').value;
   const search = document.getElementById('pelangganSearch').value;
   if (!start || !end) return;
 
@@ -1172,7 +1172,7 @@ async function loadPelanggan() {
     document.getElementById(id).textContent = '…';
   });
   document.getElementById('pelangganTableBody').innerHTML = '<div class="loading">Memuat…</div>';
-  document.getElementById('pelangganCardList').innerHTML  = '<div class="card-body"><div class="loading">Memuat…</div></div>';
+  document.getElementById('pelangganCardList').innerHTML = '<div class="card-body"><div class="loading">Memuat…</div></div>';
 
   try {
     let url = `/api/v1/laporan/pelanggan?start=${start}&end=${end}`;
@@ -1274,7 +1274,7 @@ async function showDetailPelanggan(id, nama) {
   document.getElementById('modalPelangganBody').innerHTML = '<div class="loading">Memuat…</div>';
 
   const start = document.getElementById('dateStart').value;
-  const end   = document.getElementById('dateEnd').value;
+  const end = document.getElementById('dateEnd').value;
 
   try {
     const data = await apiFetch(`/api/v1/laporan/pelanggan/${id}/detail?start=${start}&end=${end}`);
@@ -1336,7 +1336,7 @@ function closeDetailModal() {
 // ── Export Pelanggan ──────────────────────────────────────────────────────────
 function exportPelangganCsv() {
   const start = document.getElementById('dateStart').value;
-  const end   = document.getElementById('dateEnd').value;
+  const end = document.getElementById('dateEnd').value;
   const search = document.getElementById('pelangganSearch').value;
   if (!start || !end) { toast('Pilih rentang tanggal terlebih dahulu', true); return; }
   let url = `/api/v1/laporan/pelanggan/export?start=${start}&end=${end}`;
@@ -1346,7 +1346,7 @@ function exportPelangganCsv() {
 
 function exportPelangganExcel() {
   const start = document.getElementById('dateStart').value;
-  const end   = document.getElementById('dateEnd').value;
+  const end = document.getElementById('dateEnd').value;
   const search = document.getElementById('pelangganSearch').value;
   if (!start || !end) { toast('Pilih rentang tanggal terlebih dahulu', true); return; }
   let url = `/api/v1/laporan/pelanggan/export?start=${start}&end=${end}`;
@@ -1359,8 +1359,8 @@ function exportPelangganExcel() {
 async function loadAntarJemput() {
   try {
     const start = document.getElementById('dateStart').value;
-    const end   = document.getElementById('dateEnd').value;
-    const data  = await apiFetch(`/api/v1/laporan/antar-jemput?start=${start}&end=${end}`);
+    const end = document.getElementById('dateEnd').value;
+    const data = await apiFetch(`/api/v1/laporan/antar-jemput?start=${start}&end=${end}`);
 
     // Update ringkasan
     document.getElementById('ajTotalOrder').textContent = data.ringkasan.total_order_aj;
@@ -1370,7 +1370,7 @@ async function loadAntarJemput() {
     document.getElementById('ajMargin').textContent = `Margin: ${data.ringkasan.margin_persen.toFixed(1)}%`;
 
     // Render tabel (desktop) & card list (mobile)
-    const tbody    = document.getElementById('ajTableBody');
+    const tbody = document.getElementById('ajTableBody');
     const cardList = document.getElementById('ajCardList');
     if (data.detail.length === 0) {
       tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--gray-5)">Tidak ada data antar jemput pada periode ini</td></tr>';
@@ -1428,7 +1428,7 @@ function esc(s) {
 function toast(msg, err = false) {
   const el = document.getElementById('toast');
   el.textContent = msg;
-  el.className   = 'toast show' + (err ? ' err' : '');
+  el.className = 'toast show' + (err ? ' err' : '');
   setTimeout(() => el.classList.remove('show'), 3000);
 }
 </script>

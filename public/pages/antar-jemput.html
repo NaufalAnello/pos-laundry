@@ -23,13 +23,13 @@
            background:var(--bg-page); color:var(--gray-9); font-size:14px; min-height:100vh; }
 
     .page { max-width:1100px; margin:0 auto; padding:20px 16px; }
-    .page-title  { font-size:20px; font-weight:800; margin-bottom:16px; }
+    .page-title { font-size:20px; font-weight:800; margin-bottom:16px; }
 
     .tabs { display:flex; gap:4px; border-bottom:2px solid var(--gray-3); margin-bottom:20px; }
-    .tab  { padding:10px 18px; border-radius:8px 8px 0 0; font-size:13px; font-weight:700;
+    .tab { padding:10px 18px; border-radius:8px 8px 0 0; font-size:13px; font-weight:700;
             background:none; border:none; cursor:pointer; color:var(--gray-5);
             border-bottom:2px solid transparent; margin-bottom:-2px; }
-    .tab:hover  { color:var(--gray-9); background:var(--gray-1); }
+    .tab:hover { color:var(--gray-9); background:var(--gray-1); }
     .tab.active { color:var(--blue); border-bottom-color:var(--blue); background:#fff; }
     .tab-section { display:none; }
     .tab-section.active { display:block; }
@@ -51,14 +51,14 @@
     .btn { padding:9px 16px; border-radius:8px; border:1px solid transparent;
            font-size:13px; font-weight:600; cursor:pointer; transition:opacity .15s;
            display:inline-flex; align-items:center; gap:6px; }
-    .btn:hover    { opacity:.85; }
+    .btn:hover { opacity:.85; }
     .btn:disabled { opacity:.4; cursor:default; }
-    .btn-sm  { padding:6px 11px; font-size:12px; }
-    .btn-blue    { background:var(--blue);  color:#fff; }
-    .btn-green   { background:var(--green); color:#fff; }
-    .btn-red     { background:var(--red);   color:#fff; }
+    .btn-sm { padding:6px 11px; font-size:12px; }
+    .btn-blue { background:var(--blue); color:#fff; }
+    .btn-green { background:var(--green); color:#fff; }
+    .btn-red { background:var(--red); color:#fff; }
     .btn-outline { background:#fff; border-color:var(--gray-3); color:var(--gray-7); }
-    .btn-ghost   { background:none; border:none; color:var(--gray-5); }
+    .btn-ghost { background:none; border:none; color:var(--gray-5); }
     .btn-ghost:hover { color:var(--gray-9); }
 
     /* search dropdown */
@@ -143,7 +143,7 @@
              background:#1E2A6E; color:#fff; padding:10px 20px; border-radius:8px;
              font-size:13px; font-weight:600; z-index:10001; transition:transform .3s; }
     .toast.show { transform:translateX(-50%) translateY(0); }
-    .toast.err  { background:var(--red); }
+    .toast.err { background:var(--red); }
 
     @media (max-width: 767px) {
       .tabs { overflow-x:auto; flex-wrap:nowrap; }
@@ -162,17 +162,17 @@
 <body>
 
 <div class="page">
-  <div class="page-title">🛵 Antar Jemput</div>
+  <div class="page-title">Antar Jemput</div>
 
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('hitung',this)">🧮 Hitung Rute Hari Ini</button>
-    <button class="tab" onclick="switchTab('riwayat',this)">📚 Riwayat Rute</button>
+    <button class="tab active" onclick="switchTab('hitung',this)"> Hitung Rute Hari Ini</button>
+    <button class="tab" onclick="switchTab('riwayat',this)">Riwayat Rute</button>
   </div>
 
   <!-- ── TAB: Hitung ── -->
   <div id="sec-hitung" class="tab-section active">
     <div class="card">
-      <div class="card-head">📅 Pilih Tanggal & Pelanggan</div>
+      <div class="card-head">Pilih Tanggal & Pelanggan</div>
       <div class="card-body">
         <div class="field">
           <label>Tanggal</label>
@@ -201,11 +201,11 @@
         </div>
 
         <div class="info-box">
-          💡 Pelanggan yang belum punya data jarak akan diminta input jarak saat dipilih.
+          Pelanggan yang belum punya data jarak akan diminta input jarak saat dipilih.
         </div>
 
         <button class="btn btn-blue" onclick="hitungHPP()" id="btnHitung" disabled>
-          🧮 Hitung HPP &amp; Rute Optimal
+           Hitung HPP &amp; Rute Optimal
         </button>
       </div>
     </div>
@@ -213,28 +213,28 @@
     <!-- Hasil -->
     <div id="ajHasilContainer" style="display:none">
       <div class="card">
-        <div class="card-head">🗺️ Rute Optimal</div>
+        <div class="card-head"> Rute Optimal</div>
         <div class="card-body">
           <div class="rute-display" id="ajRute"></div>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-head">💰 Breakdown HPP</div>
+        <div class="card-head">Breakdown HPP</div>
         <div class="card-body">
           <div class="breakdown" id="ajBreakdown"></div>
         </div>
       </div>
 
       <div class="card" id="ajAICard" style="display:none">
-        <div class="card-head">🤖 Saran AI DeepSeek</div>
+        <div class="card-head">Saran AI DeepSeek</div>
         <div class="card-body">
           <div class="ai-box" id="ajAIText"></div>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-head">💵 Tarif &amp; Simpan</div>
+        <div class="card-head">Tarif &amp; Simpan</div>
         <div class="card-body">
           <div class="field">
             <label>Tarif per Pelanggan (Rp)</label>
@@ -244,7 +244,7 @@
             </div>
           </div>
           <button class="btn btn-green" onclick="simpanRute()" id="btnSimpan">
-            💾 Simpan &amp; Terapkan ke Order
+             Simpan &amp; Terapkan ke Order
           </button>
           <small style="color:var(--gray-5);font-size:11px">
             Biaya AJ akan otomatis ditambahkan ke order aktif tiap pelanggan.
@@ -257,7 +257,7 @@
   <!-- ── TAB: Riwayat ── -->
   <div id="sec-riwayat" class="tab-section">
     <div class="card">
-      <div class="card-head">📚 Riwayat Rute Antar Jemput</div>
+      <div class="card-head">Riwayat Rute Antar Jemput</div>
       <div class="card-body" style="padding:0">
         <table>
           <thead>
@@ -303,11 +303,11 @@
 <script>
 // ── State ────────────────────────────────────────────────────────────────────
 const state = {
-  selected:   [],          // [{id, nama, jarak_km, fromOverride: bool}]
-  searchTO:   null,
-  hasil:      null,        // hasil hitung HPP terakhir
-  pelangganMap: {},        // id -> {nama, jarak_workshop_km}
-  pendingPelanggan: null,  // saat modal jarak terbuka
+  selected: [], // [{id, nama, jarak_km, fromOverride: bool}]
+  searchTO: null,
+  hasil: null, // hasil hitung HPP terakhir
+  pelangganMap: {}, // id -> {nama, jarak_workshop_km}
+  pendingPelanggan: null, // saat modal jarak terbuka
 };
 
 // ── Init ─────────────────────────────────────────────────────────────────────
@@ -362,7 +362,7 @@ async function doSearch() {
         : '<span style="color:var(--yellow);font-weight:600">Belum ada jarak</span>';
       return `
         <div class="search-item" ${alreadyPicked ? 'style="opacity:.5;cursor:default"' : `onclick="pickPelanggan(${p.id})"`}>
-          <div style="font-weight:600">${esc(p.nama)} ${alreadyPicked ? '✓' : ''}</div>
+          <div style="font-weight:600">${esc(p.nama)} ${alreadyPicked ? '' : ''}</div>
           <div class="search-item-meta">${esc(p.telepon || '-')} · ${jarakLabel}</div>
         </div>
       `;
@@ -494,7 +494,7 @@ async function hitungHPP() {
     toast(e.message, true);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '🧮 Hitung HPP &amp; Rute Optimal';
+    btn.innerHTML = ' Hitung HPP &amp; Rute Optimal';
   }
 }
 
@@ -588,7 +588,7 @@ async function simpanRute() {
     toast(e.message, true);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '💾 Simpan &amp; Terapkan ke Order';
+    btn.innerHTML = ' Simpan &amp; Terapkan ke Order';
   }
 }
 
@@ -623,21 +623,21 @@ async function loadRiwayat() {
         </tr>
         <tr class="detail-row" id="detail-${r.id}" style="display:none">
           <td colspan="6">
-            <div><strong>🗺️ Urutan rute:</strong> Workshop → ${(r.urutan_rute || []).map(esc).join(' → ')} → Workshop</div>
+            <div><strong> Urutan rute:</strong> Workshop → ${(r.urutan_rute || []).map(esc).join(' → ')} → Workshop</div>
             <div style="margin-top:6px">
-              <strong>💰 Breakdown:</strong>
+              <strong>Breakdown:</strong>
               BBM Rp ${fmt(r.biaya_bbm)} ·
               Waktu Rp ${fmt(r.biaya_waktu)} ·
               Aus Rp ${fmt(r.biaya_aus)} ·
               Total HPP <strong>Rp ${fmt(r.total_hpp)}</strong>
             </div>
             <div class="snap-box">
-              <strong>📌 Parameter saat itu (snapshot):</strong><br/>
+              <strong>Parameter saat itu (snapshot):</strong><br/>
               Pertalite Rp ${fmt(r.snapshot_harga_bbm)}/L · konsumsi ${r.snapshot_konsumsi_bbm} km/L ·
               aus Rp ${fmt(r.snapshot_biaya_aus)}/km · kecepatan ${r.snapshot_kecepatan} km/jam ·
               nilai waktu Rp ${fmt(r.snapshot_nilai_waktu)}/jam
             </div>
-            ${r.saran_ai ? `<div style="margin-top:8px;padding:10px;background:#fefce8;border-radius:6px;white-space:pre-wrap">🤖 ${esc(r.saran_ai)}</div>` : ''}
+            ${r.saran_ai ? `<div style="margin-top:8px;padding:10px;background:#fefce8;border-radius:6px;white-space:pre-wrap">${esc(r.saran_ai)}</div>` : ''}
           </td>
         </tr>
       `;
