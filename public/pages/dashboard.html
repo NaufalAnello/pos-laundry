@@ -949,7 +949,7 @@ function renderReservasiWidget(list) {
 }
 
 async function rjSelesai(id, pelangganId) {
-  if (!confirm('Tandai reservasi ini sudah dijemput?')) return;
+  // Aksi ringan → langsung eksekusi + toast
   try {
     const r = await fetch(`/api/v1/reservasi-jemput/${id}/selesai`, {
       method: 'PUT', credentials: 'include',

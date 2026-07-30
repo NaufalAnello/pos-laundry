@@ -1557,10 +1557,12 @@ function renderChipLayanan() {
       const id = Number(btn.dataset.id);
       const layanan = layananList.find(x => x.id === id);
       if (!layanan) return;
+      // Default qty (spek README): 3 utk satuan kg, 1 utk lainnya (pcs, dsb).
+      const defaultQty = (String(layanan.satuan || '').toLowerCase() === 'kg') ? 3 : 1;
       addItemRow({
         layanan_id: id,
         satuan: layanan.satuan,
-        jumlah: 1
+        jumlah: defaultQty
       });
       // visual feedback singkat
       btn.style.background = 'var(--blue)';

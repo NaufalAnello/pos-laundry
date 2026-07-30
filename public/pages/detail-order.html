@@ -1065,7 +1065,7 @@ function renderBiayaTambahan() {
 
 // ── Status update ──────────────────────────────────
 async function updateStatus(newStatus, btn) {
-  if (!confirm(`Ubah status ke "${newStatus}"?`)) return;
+  // Aksi ringan → langsung eksekusi + toast (bukan dialog konfirmasi)
   btn.disabled = true;
   try {
     const r = await fetch(`/api/v1/transaksi/${orderId}/status`, {
@@ -1075,7 +1075,7 @@ async function updateStatus(newStatus, btn) {
     });
     const d = await r.json();
     if (!r.ok) { showToast('Gagal: ' + d.error); btn.disabled = false; return; }
-    showToast('Status → "' + newStatus + '"');
+    showToast('Ditandai ' + newStatus);
     setTimeout(() => location.reload(), 600);
   } catch {
     showToast('Koneksi gagal');
