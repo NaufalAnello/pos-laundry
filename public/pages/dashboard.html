@@ -10,295 +10,284 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--font); background: var(--bg-page); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
+    body { font-family: var(--font); background: #F0F7FF; color: #1E2A6E; font-size: 14px; min-height: 100vh; }
 
-    .page { max-width: 1200px; margin: 0 auto; padding: 0 0 100px; }
+    .page { max-width: 1200px; margin: 0 auto; }
 
-    /* Dashboard punya .dash-head sendiri — sembunyikan topbar mobile
-       supaya tidak dobel dgn brand + date + bell yg sudah ada di dalam page. */
+    /* Dashboard punya header sendiri — sembunyikan topbar mobile bawaan nav.js */
     .pos-topbar { display: none !important; }
-    @media (min-width: 1024px) {
-      /* Di laptop, sidebar handle branding. Sisakan .dash-head sebagai
-         header lokal halaman. */
-    }
 
-    /* ── Header (Nala style — flat, blend dgn bg page) ─── */
+    /* ── Header ────────────────────────────────────────── */
     .dash-head {
       position: sticky; top: 0; z-index: 20;
-      background: var(--bg-page);
-      padding: 14px 14px 10px;
+      background: #F0F7FF;
+      padding: 14px 16px 8px;
       display: flex; align-items: center; justify-content: space-between;
       gap: 10px;
     }
-    .dash-head .brand {
-      min-width: 0; display: flex; align-items: center; gap: 10px; flex: 1;
-    }
-    .dash-head .brand .txt { min-width: 0; }
+    .dash-head .brand { min-width: 0; flex: 1; }
     .dash-head .toko {
-      font-size: 20px; font-weight: 700; color: var(--gray-9);
+      font-size: 20px; font-weight: 800; color: #2D3BB5;
       line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       letter-spacing: -.01em;
     }
-    .dash-head .tgl  { font-size: 12px; color: var(--gray-5); margin-top: 2px; }
+    .dash-head .tgl { font-size: 12px; color: #64748B; margin-top: 2px; }
+    .dash-head .btn-ai {
+      flex-shrink: 0; padding: 8px 14px; background: #2D3BB5; color: #fff;
+      border: none; border-radius: 99px; font-size: 12px; font-weight: 700; cursor: pointer;
+    }
     .dash-head .bell {
       position: relative; display: inline-flex; align-items: center; justify-content: center;
-      width: 38px; height: 38px; border-radius: 10px;
-      background: #fff; color: var(--primary);
+      width: 40px; height: 40px; border-radius: 10px;
+      background: #fff; color: #2D3BB5;
       border: none; cursor: pointer; flex-shrink: 0;
-      box-shadow: var(--shadow-md);
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
       text-decoration: none;
     }
-    .dash-head .bell:hover { box-shadow: var(--shadow-lg); }
+    .dash-head .bell:hover { box-shadow: 0 2px 8px rgba(45,59,181,0.12); }
     .dash-head .bell svg { display: block; }
     .dash-head .bell-dot {
       position: absolute; top: -4px; right: -4px;
       min-width: 18px; height: 18px; padding: 0 5px;
-      background: var(--danger); color: #fff;
+      background: #EF4444; color: #fff;
       border-radius: 99px; font-size: 10px; font-weight: 800;
       display: inline-flex; align-items: center; justify-content: center;
       box-shadow: 0 1px 3px rgba(0,0,0,.2);
     }
-    .dash-head .btn-ai {
-      flex-shrink: 0; padding: 8px 14px; background: var(--primary); color: #fff;
-      border: none; border-radius: 99px; font-size: 12px; font-weight: 700; cursor: pointer;
+
+    /* ── Body layout ───────────────────────────────────── */
+    .body-wrap {
+      padding: 18px 16px 130px;
+      display: flex; flex-direction: column; gap: 14px;
     }
+    .dash-col { display: flex; flex-direction: column; gap: 14px; }
 
-    /* ── Page body padding ─────────────────────────────── */
-    .body-wrap { padding: 14px; }
-
-    /* ── KPI Strip — 3 kartu kecil terpisah ────────────── */
+    /* ── KPI Strip ─────────────────────────────────────── */
     .kpi-strip {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
-      margin-bottom: 14px;
     }
     .kpi-card {
-      background: #fff; border-radius: 10px; padding: 10px 8px;
-      box-shadow: var(--shadow-md); border: none;
+      background: #fff; border-radius: 10px; padding: 12px 10px;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08); border: none;
       text-align: left; text-decoration: none; cursor: pointer;
       transition: transform .15s, box-shadow .15s;
-      display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
     }
     .kpi-card:active { transform: scale(.97); }
-    .kpi-card:hover { box-shadow: var(--shadow-lg); }
+    .kpi-card:hover { box-shadow: 0 2px 8px rgba(45,59,181,0.12); }
     .kpi-lbl {
-      font-size: 11px; color: var(--gray-5); font-weight: 400;
-      text-transform: uppercase; letter-spacing: .05em;
+      font-size: 11px; color: #64748B; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.6px;
     }
-    .kpi-val { font-size: 18px; font-weight: 700; line-height: 1.1; color: var(--gray-9); margin-top: 2px; }
-    .kpi-val.primary { color: var(--gray-9); }
-    .kpi-val.success { color: var(--gray-9); font-size: 15px; }
-    .kpi-val.warning { color: var(--gray-9); }
-    @media (min-width: 768px) {
-      .kpi-card { padding: 14px 12px; gap: 4px; }
-      .kpi-val { font-size: 24px; }
-      .kpi-val.success { font-size: 20px; }
-      .kpi-lbl { font-size: 12px; }
-    }
+    .kpi-val { font-size: 20px; font-weight: 800; line-height: 1.1; color: #1E2A6E; }
 
     /* ── Section ───────────────────────────────────────── */
-    .section { margin-bottom: 16px; }
+    .section { display: flex; flex-direction: column; gap: 8px; }
     .section-head {
       display: flex; align-items: center; justify-content: space-between;
-      gap: 8px; margin-bottom: 8px;
+      gap: 8px;
     }
-    .section-head h2 { font-size: 13px; font-weight: 700; color: var(--gray-9); display: flex; align-items: center; gap: 6px; letter-spacing: -.01em; }
-    .section-head a  { font-size: 12px; color: var(--primary); text-decoration: none; font-weight: 700; }
+    .section-head h2 {
+      font-size: 13px; font-weight: 700; color: #1E2A6E;
+      letter-spacing: -.01em;
+    }
+    .section-head a {
+      font-size: 12px; color: #2563EB; text-decoration: none; font-weight: 700;
+    }
+    .section-foot-link {
+      display: block; text-align: center;
+      font-size: 12px; color: #2563EB; font-weight: 700; text-decoration: none;
+      padding: 6px 0 2px;
+    }
 
-    .sub-section { margin-top: 10px; }
-    .sub-section-title {
-      font-size: 12px; font-weight: 700; color: var(--gray-6);
-      display: flex; align-items: center; gap: 6px; margin-bottom: 6px;
-      padding-left: 2px;
-    }
-    .sub-section-title .count {
-      background: var(--gray-2); color: var(--gray-6);
-      padding: 1px 7px; border-radius: 99px; font-size: 10px; font-weight: 800;
-    }
-    .sub-section-title.danger .count { background: var(--danger); color: #fff; }
-    .sub-section-title.warning .count { background: var(--warning-lt); color: var(--warning); }
-
-    /* ── Tagihan hero (Nala — inline order rows) ───────── */
+    /* ── Tagihan hero (satu-satunya gradient merah) ────── */
     .tagihan-hero {
-      background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dk) 100%);
-      color: #fff; border-radius: 14px; padding: 14px;
-      box-shadow: 0 4px 16px rgba(220,38,38,.25);
-      margin-bottom: 10px; display: block; text-decoration: none;
+      display: block; text-decoration: none;
+      background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+      color: #fff; border-radius: 12px; padding: 16px;
+      box-shadow: 0 4px 16px rgba(220,38,38,.20);
     }
-    .tagihan-hero .lbl { font-size: 12px; opacity: .9; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; display: flex; align-items: center; gap: 6px; }
-    .tagihan-hero .amt { font-size: 22px; font-weight: 700; margin-top: 4px; line-height: 1.1; }
-    .tagihan-hero .sub { font-size: 12px; opacity: .9; margin-top: 2px; }
-    .tagihan-hero.empty { background: linear-gradient(135deg, var(--success) 0%, var(--success-dk) 100%); box-shadow: 0 4px 16px rgba(22,163,74,.2); }
-    .hero-list {
-      display: flex; flex-direction: column; gap: 8px; margin-top: 12px;
+    .tagihan-hero .lbl {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; opacity: 0.85;
     }
-    .hero-row {
-      background: rgba(255,255,255,0.15);
-      border-radius: 8px; padding: 8px 10px;
-      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    .tagihan-hero .amt {
+      font-size: 24px; font-weight: 800; margin-top: 4px; line-height: 1.1; color: #fff;
     }
-    .hero-row .hr-txt { min-width: 0; flex: 1; }
-    .hero-row .hr-name { font-size: 13px; font-weight: 600; color: #fff;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .hero-row .hr-amt  { font-size: 12px; opacity: .9; color: #fff; margin-top: 1px; }
-    .hero-row .hr-actions { display: flex; gap: 6px; flex-shrink: 0; }
-    .hero-row .hr-btn {
-      background: #fff; color: var(--danger); border: none; border-radius: 8px;
-      padding: 0 10px; height: 30px; font-size: 12px; font-weight: 700;
-      cursor: pointer; font-family: inherit;
-    }
-    .hero-row .hr-btn.icon {
+    .tagihan-hero .chip {
+      display: inline-flex; align-items: center;
       background: rgba(255,255,255,0.2); color: #fff;
-      width: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+      padding: 4px 10px; border-radius: 999px;
+      font-size: 12px; font-weight: 700; margin-top: 10px;
     }
-    .hero-row .hr-btn:active { transform: scale(.96); }
-    .tagihan-link {
-      display: block; text-align: center; padding: 10px;
-      color: var(--primary); font-size: 13px; font-weight: 700; text-decoration: none;
-      background: #fff; border-radius: 10px; border: 1px solid var(--gray-3); margin-top: 8px;
-    }
-    .tagihan-link:hover { background: var(--primary-lt); }
 
-    /* ── Order card ────────────────────────────────────── */
+    /* ── Perlu Tindakan (card putih dgn border-left) ───── */
+    .action-list { display: flex; flex-direction: column; gap: 8px; }
+    .action-item {
+      display: flex; align-items: center; gap: 10px;
+      background: #fff; border-radius: 10px;
+      padding: 12px 14px;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+      text-decoration: none; color: inherit;
+      border-left: 4px solid #E2E8F0;
+    }
+    .action-item.late { border-left-color: #EF4444; }
+    .action-item.pickup { border-left-color: #F59E0B; }
+    .action-item .ai-txt { min-width: 0; flex: 1; }
+    .action-item .ai-title { font-size: 14px; font-weight: 600; color: #1E2A6E; line-height: 1.3;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .action-item .ai-note { font-size: 12px; margin-top: 2px; line-height: 1.3; }
+    .action-item.late .ai-note { color: #EF4444; }
+    .action-item.pickup .ai-note { color: #B45309; }
+    .action-item .ai-chev { flex-shrink: 0; color: #94A3B8; }
+
+    /* ── Order Card standar (Antrian) ──────────────────── */
+    .order-list { display: flex; flex-direction: column; gap: 8px; }
     .order-card {
-      background: #fff; border-radius: 12px; border: 1px solid var(--gray-3);
-      padding: 12px 14px; box-shadow: var(--shadow-sm);
-      margin-bottom: 8px;
+      background: #fff; border-radius: 10px;
+      padding: 12px 14px;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+      border-left: 4px solid #94A3B8;
     }
-    .order-card.urgent { border-left: 3px solid var(--danger); }
-    .order-card.warn   { border-left: 3px solid var(--warning); }
-    .order-card.proses { border-left: 3px solid var(--primary); }
-    .order-card-row1 {
+    .order-card.status-pending { border-left-color: #94A3B8; }
+    .order-card.status-proses  { border-left-color: #4BB8FA; }
+    .order-card.status-selesai { border-left-color: #10B981; }
+    .order-card.status-diambil { border-left-color: #2D3BB5; }
+    .order-card.urgent { border-left-color: #EF4444; }
+
+    .oc-row1 {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; margin-bottom: 4px;
+    }
+    .oc-nomor { font-size: 12px; font-weight: 700; color: #94A3B8; }
+    .oc-badges { display: inline-flex; gap: 4px; }
+
+    .oc-row2 {
       display: flex; align-items: flex-start; justify-content: space-between;
-      gap: 10px; margin-bottom: 6px;
+      gap: 10px; margin-bottom: 8px;
     }
-    .order-card-nama { font-size: 14px; font-weight: 700; color: var(--gray-9); line-height: 1.2; }
-    .order-card-meta { font-size: 11px; color: var(--gray-5); margin-top: 2px; line-height: 1.3; word-break: break-word; }
-    .order-card-amt { font-size: 15px; font-weight: 800; white-space: nowrap; color: var(--gray-9); }
-    .order-card-amt.danger { color: var(--danger); }
-    .order-card-row2 {
-      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-      margin-bottom: 8px;
-    }
-    .order-card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
-    .order-card-actions .btn { flex: 1; min-height: 40px; padding: 8px 10px; font-size: 12px;
-      border-radius: 8px; border: 1px solid transparent; cursor: pointer; font-weight: 700;
+    .oc-mid { min-width: 0; flex: 1; }
+    .oc-nama { font-size: 15px; font-weight: 600; color: #1E2A6E; line-height: 1.2; }
+    .oc-layanan { font-size: 13px; color: #64748B; margin-top: 2px; line-height: 1.3;
+      word-break: break-word; }
+    .oc-total { font-size: 15px; font-weight: 700; color: #1E2A6E; white-space: nowrap; }
+
+    .oc-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .oc-actions .btn {
+      flex: 1; height: 36px; padding: 0 10px; font-size: 12px; font-weight: 700;
+      border: 1px solid transparent; border-radius: 8px; cursor: pointer;
       display: inline-flex; align-items: center; justify-content: center; gap: 4px;
-      text-decoration: none; font-family: inherit; min-width: 70px;
+      text-decoration: none; font-family: inherit; min-width: 64px;
     }
-    .order-card-actions .btn:active { transform: scale(.98); }
-    .order-card-actions a.btn { flex: 0 0 44px; min-width: 44px; }
-    .btn-proses  { background: var(--primary); color: #fff; }
-    .btn-selesai { background: var(--success); color: #fff; }
+    .oc-actions a.btn.icon-only { flex: 0 0 44px; min-width: 44px; padding: 0; }
+    .oc-actions .btn:active { transform: scale(.98); }
+    .btn-proses  { background: #2D3BB5; color: #fff; }
+    .btn-selesai { background: #10B981; color: #fff; }
     .btn-lunasi  { background: #10B981; color: #fff; }
-    .btn-wa      { background: #2D3BB5; color: #fff; }
-    .btn-detail  { background: #fff; border-color: var(--gray-3); color: var(--gray-6); }
+    .btn-wa      { background: #8B5CF6; color: #fff; }
+    .btn-detail  { background: #fff; border-color: #E2E8F0; color: #64748B; }
 
-    .list { display: flex; flex-direction: column; gap: 8px; }
-
-    /* ── AJ Widget ─────────────────────────────────────── */
-    .aj-widget {
-      background: linear-gradient(135deg, var(--purple-lt) 0%, #fdf4ff 100%);
-      border: 1px solid #e9d5ff; border-radius: 12px; padding: 14px;
+    /* ── Badge status (mengikuti design system) ───────── */
+    .badge {
+      display: inline-flex; align-items: center;
+      font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px;
+      line-height: 1;
     }
-    .aj-row {
+    .b-pending { background: #F1F5F9; color: #64748B; }
+    .b-proses  { background: #E3F2FF; color: #2563EB; }
+    .b-selesai { background: #E7F8F1; color: #10B981; }
+    .b-diambil { background: #2D3BB5; color: #fff; }
+    .b-lunas   { background: #E7F8F1; color: #10B981; }
+    .b-belum   { background: #FDECEC; color: #EF4444; }
+    .b-dp      { background: #FEF3E2; color: #F59E0B; }
+
+    /* ── Widget card (AJ / RJ / Stok) — card putih standar ── */
+    .widget-card {
+      background: #fff; border-radius: 10px; padding: 12px 14px;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+    }
+    .widget-row {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 6px 0; font-size: 12px;
-      border-bottom: 1px solid rgba(139,92,246,.1);
+      padding: 8px 0; font-size: 13px;
+      border-bottom: 1px solid #F1F5F9;
     }
-    .aj-row:last-child { border-bottom: none; }
-
-    .chart-card { background: #fff; border-radius: 12px; border: 1px solid var(--gray-3); padding: 14px; }
-    .chart-wrap { position: relative; height: 220px; }
-
-    /* ── Tabs ──────────────────────────────────────────── */
-    .tabs {
-      display: flex; gap: 4px; background: var(--gray-2);
-      border-radius: 10px; padding: 4px; margin-bottom: 10px;
-    }
-    .tab-btn {
-      flex: 1; padding: 8px 12px; border: none; background: transparent;
-      cursor: pointer; font-size: 12px; font-weight: 700; color: var(--gray-5);
-      border-radius: 7px; transition: all .15s; font-family: inherit;
-      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    }
-    .tab-btn.active { background: #fff; color: var(--gray-9); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
-    .tab-badge {
-      background: var(--gray-3); color: var(--gray-7);
-      padding: 1px 7px; border-radius: 99px; font-size: 10px; font-weight: 800;
-    }
-    .tab-btn.active .tab-badge { background: var(--primary-lt); color: var(--primary); }
-    .tab-badge.danger { background: var(--danger); color: #fff; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+    .widget-row:last-child { border-bottom: none; }
 
     /* ── Empty state ───────────────────────────────────── */
     .empty {
-      text-align: center; padding: 24px 16px; color: var(--gray-5);
-      background: #fff; border-radius: 10px; border: 1px dashed var(--gray-3);
+      text-align: center; padding: 18px 12px; color: #94A3B8;
+      background: #fff; border-radius: 10px;
       font-size: 13px;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.04);
     }
-    .empty .ic { font-size: 36px; display: block; margin-bottom: 6px; opacity: .8; }
 
-    /* ── Laptop two-column ─────────────────────────────── */
+    /* ── Chart (laptop only, disembunyikan di mobile) ── */
+    .chart-card {
+      background: #fff; border-radius: 10px; padding: 14px;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+    }
+    .chart-wrap { position: relative; height: 220px; }
+    .desktop-only { display: none; }
+    @media (min-width: 768px) {
+      .desktop-only { display: block; }
+    }
+
+    /* ── Laptop layout ─────────────────────────────────── */
     @media (min-width: 1024px) {
       .dash-grid { display: grid; grid-template-columns: 1fr 380px; gap: 16px; align-items: start; }
-      .desktop-only { display: block; }
-      .mobile-only  { display: none; }
-    }
-    @media (max-width: 1023px) {
-      .desktop-only { display: none !important; }
-    }
-    @media (max-width: 767px) {
-      .body-wrap { padding: 12px; }
+      .dash-col { gap: 14px; }
     }
 
-    /* ── AI Chat Panel ─────────────────────────────────── */
+    /* ── AI Chat Panel (dipertahankan dari versi lama) ── */
     #aiChatPanel {
       position: fixed; right: -400px; top: 0; width: 400px; height: 100vh;
       background: #fff; box-shadow: -4px 0 20px rgba(0,0,0,.15); z-index: 999;
       transition: right .3s; display: flex; flex-direction: column;
     }
     #aiChatPanel.open { right: 0; }
-    .ai-chat-header { padding: 16px; border-bottom: 1px solid var(--gray-3);
+    .ai-chat-header { padding: 16px; border-bottom: 1px solid #E2E8F0;
       display: flex; align-items: center; justify-content: space-between; }
     .ai-chat-header h3 { font-size: 16px; font-weight: 700; }
     .ai-chat-header button {
-      background: none; border: none; font-size: 20px; cursor: pointer;
-      color: var(--gray-5); padding: 4px 8px; border-radius: 6px;
+      background: none; border: none; cursor: pointer;
+      color: #64748B; padding: 4px 8px; border-radius: 6px;
+      display: inline-flex; align-items: center; justify-content: center;
     }
     .ai-chat-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
     .ai-chat-msg { display: flex; gap: 10px; align-items: flex-start; }
     .ai-chat-msg.user { flex-direction: row-reverse; }
     .ai-chat-msg .avatar {
-      width: 32px; height: 32px; border-radius: 50%; background: var(--gray-3);
-      display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+      width: 32px; height: 32px; border-radius: 50%; background: #E2E8F0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; color: #64748B; flex-shrink: 0;
     }
-    .ai-chat-msg.user .avatar { background: var(--primary-lt); }
+    .ai-chat-msg.user .avatar { background: #E3F2FF; color: #2D3BB5; }
     .ai-chat-msg .bubble {
-      background: var(--gray-1); padding: 10px 14px; border-radius: 12px;
+      background: #F8FAFF; padding: 10px 14px; border-radius: 12px;
       font-size: 13px; line-height: 1.6; max-width: 75%;
     }
-    .ai-chat-msg.user .bubble { background: var(--primary); color: #fff; }
-    .ai-chat-footer { padding: 12px; border-top: 1px solid var(--gray-3); }
+    .ai-chat-msg.user .bubble { background: #2D3BB5; color: #fff; }
+    .ai-chat-footer { padding: 12px; border-top: 1px solid #E2E8F0; }
     .ai-quick-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
     .ai-quick-btns button {
-      padding: 6px 12px; border-radius: 16px; border: 1px solid var(--gray-3);
-      background: #fff; font-size: 11px; cursor: pointer; color: var(--gray-7);
+      padding: 6px 12px; border-radius: 16px; border: 1px solid #E2E8F0;
+      background: #fff; font-size: 11px; cursor: pointer; color: #334155;
     }
     .ai-input-wrap { display: flex; gap: 8px; align-items: center; }
     .ai-input-wrap input {
-      flex: 1; padding: 9px 12px; border: 1px solid var(--gray-3);
+      flex: 1; padding: 9px 12px; border: 1px solid #E2E8F0;
       border-radius: 20px; font-size: 13px; font-family: inherit;
     }
     .ai-input-wrap button {
       width: 36px; height: 36px; border-radius: 50%; border: none;
-      background: var(--primary); color: #fff; font-size: 16px; cursor: pointer;
+      background: #2D3BB5; color: #fff; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
     }
     @media (max-width: 767px) { #aiChatPanel { right: -100%; width: 100%; } }
 
     #toast {
-      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-      background: var(--gray-9); color: #fff; padding: 10px 20px; border-radius: 99px;
+      position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%);
+      background: #1E2A6E; color: #fff; padding: 10px 20px; border-radius: 99px;
       font-size: 13px; font-weight: 600; z-index: 9999;
       opacity: 0; pointer-events: none; transition: opacity .25s;
     }
@@ -308,17 +297,14 @@
 <body>
 
 <div class="page">
-  <!-- HEADER STICKY (Nala style) -->
   <div class="dash-head">
     <div class="brand">
-      <div class="txt">
-        <div class="toko" id="tokoNama">nala laundry</div>
-        <div class="tgl" id="pageDate">Memuat...</div>
-      </div>
+      <div class="toko" id="tokoNama">nala laundry</div>
+      <div class="tgl" id="pageDate">Memuat...</div>
     </div>
     <button class="btn-ai desktop-only" onclick="toggleAIChat()">Tanya AI</button>
     <button class="bell" onclick="showNotifInfo()" id="bellBtn" title="Notifikasi" aria-label="Notifikasi">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
         <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
       </svg>
@@ -327,119 +313,71 @@
   </div>
 
   <div class="body-wrap">
-    <!-- KPI STRIP (Nala — label atas, angka bawah) -->
     <div class="kpi-strip">
-      <a href="/order" class="kpi-card">
+      <a href="/orders" class="kpi-card">
         <div class="kpi-lbl">Order</div>
-        <div class="kpi-val primary" id="kpiOrder">—</div>
+        <div class="kpi-val" id="kpiOrder">—</div>
       </a>
       <a href="/laporan" class="kpi-card">
         <div class="kpi-lbl">Omset</div>
-        <div class="kpi-val success" id="kpiOmset">—</div>
+        <div class="kpi-val" id="kpiOmset">—</div>
       </a>
-      <a href="/order" class="kpi-card">
+      <a href="/orders" class="kpi-card">
         <div class="kpi-lbl">Proses</div>
-        <div class="kpi-val warning" id="kpiProses">—</div>
+        <div class="kpi-val" id="kpiProses">—</div>
       </a>
     </div>
 
     <div class="dash-grid">
-      <div>
-        <!-- SEKSI 1: TAGIHAN -->
-        <div class="section">
-          <div class="section-head">
-            <h2>Tagihan Belum Lunas</h2>
-            <a href="/tagihan">Lihat Semua</a>
-          </div>
-          <div class="tagihan-hero" id="tagihanHero">
-            <div class="lbl">Tagihan Belum Lunas</div>
-            <div class="amt" id="tagihanAmt">Rp 0</div>
-            <div class="sub" id="tagihanSub">— order belum lunas</div>
-            <div class="hero-list" id="tagihanList"></div>
-          </div>
-          <a href="/tagihan" class="tagihan-link" id="tagihanLink" style="display:none">
-            Lihat Semua Tagihan →
-          </a>
-        </div>
+      <div class="dash-col">
+        <a href="/tagihan" class="tagihan-hero" id="tagihanHero" style="display:none">
+          <div class="lbl">Tagihan Belum Lunas</div>
+          <div class="amt" id="tagihanAmt">Rp 0</div>
+          <div class="chip" id="tagihanChip">0 order</div>
+        </a>
 
-        <!-- SEKSI 2: PERLU TINDAKAN -->
-        <div class="section">
+        <div class="section" id="perluTindakanSection" style="display:none">
           <div class="section-head">
             <h2>Perlu Tindakan</h2>
           </div>
-
-          <div class="sub-section">
-            <div class="sub-section-title warning">
-              Selesai Belum Diambil
-              <span class="count" id="cntBelumDiambil">0</span>
-            </div>
-            <div class="list" id="listBelumDiambil"></div>
-          </div>
-
-          <div class="sub-section">
-            <div class="sub-section-title danger">
-              Lewat Estimasi
-              <span class="count" id="cntLewat">0</span>
-            </div>
-            <div class="list" id="listLewat"></div>
-          </div>
+          <div class="action-list" id="perluTindakanList"></div>
         </div>
 
-        <!-- SEKSI 4: ANTRIAN AKTIF -->
         <div class="section">
           <div class="section-head">
             <h2>Antrian Aktif</h2>
-            <a href="/order">Kelola</a>
           </div>
-          <div class="list" id="antrianList"><div class="empty">Memuat...</div></div>
-        </div>
-
-        <!-- SEKSI 5: SELESAI HARI INI (tab) -->
-        <div class="section">
-          <div class="section-head">
-            <h2>Estimasi Hari Ini</h2>
+          <div class="order-list" id="antrianList">
+            <div class="empty">Memuat...</div>
           </div>
-          <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('selesai', event)">
-              Selesai Hari Ini <span class="tab-badge" id="badgeSelesai">0</span>
-            </button>
-            <button class="tab-btn" onclick="switchTab('lewat', event)">
-              Lewat Waktu <span class="tab-badge danger" id="badgeLewat">0</span>
-            </button>
-          </div>
-          <div class="tab-content active" id="tabSelesai"><div class="empty">Memuat...</div></div>
-          <div class="tab-content" id="tabLewat"><div class="empty">Memuat...</div></div>
+          <a href="/orders" class="section-foot-link" id="antrianLihatSemua" style="display:none">Lihat semua</a>
         </div>
       </div>
 
-      <div>
-        <!-- SEKSI 3: WIDGET AJ -->
+      <div class="dash-col">
         <div class="section" id="ajSection" style="display:none">
           <div class="section-head">
             <h2>Antar Jemput Hari Ini</h2>
           </div>
-          <div class="aj-widget" id="ajWidget"></div>
+          <div class="widget-card" id="ajWidget"></div>
         </div>
 
-        <!-- SEKSI 3B: WIDGET RESERVASI JEMPUT -->
         <div class="section" id="rjSection" style="display:none">
           <div class="section-head">
-            <h2>Penjemputan Hari Ini <span id="rjCount" style="color:var(--primary)"></span></h2>
+            <h2>Penjemputan Hari Ini <span id="rjCount" style="color:#2563EB"></span></h2>
             <a href="/reservasi-jemput">Kelola</a>
           </div>
-          <div class="aj-widget" id="rjWidget"></div>
+          <div class="widget-card" id="rjWidget"></div>
         </div>
 
-        <!-- WIDGET STOK MENIPIS (mobile + desktop, tampil hanya jika ada) -->
         <div class="section" id="stokMenipisSection" style="display:none">
           <div class="section-head">
-            <h2>Stok Menipis <span id="stokMenipisCount" style="color:var(--danger)"></span></h2>
-            <a href="/stok-bahan">Lihat Stok Bahan</a>
+            <h2>Stok Menipis <span id="stokMenipisCount" style="color:#EF4444"></span></h2>
+            <a href="/stok-bahan">Kelola</a>
           </div>
-          <div class="chart-card" id="stokMenipisBody"></div>
+          <div class="widget-card" id="stokMenipisBody"></div>
         </div>
 
-        <!-- GRAFIK (laptop only) -->
         <div class="section desktop-only">
           <div class="section-head"><h2>Omset 7 Hari</h2></div>
           <div class="chart-card"><div class="chart-wrap"><canvas id="omsetChart"></canvas></div></div>
@@ -450,12 +388,12 @@
             <h2>Deposit Pelanggan</h2>
             <a href="/deposit">Kelola</a>
           </div>
-          <div class="chart-card" id="depositBody"><div class="empty">Memuat...</div></div>
+          <div class="widget-card" id="depositBody"><div class="empty">Memuat...</div></div>
         </div>
 
         <div class="section desktop-only">
           <div class="section-head"><h2>Promo Aktif</h2></div>
-          <div class="chart-card" id="promoBody"><div class="empty">Memuat...</div></div>
+          <div class="widget-card" id="promoBody"><div class="empty">Memuat...</div></div>
         </div>
       </div>
     </div>
@@ -467,10 +405,12 @@
 <div id="aiChatPanel">
   <div class="ai-chat-header">
     <h3>AI Assistant</h3>
-    <button onclick="toggleAIChat()" aria-label="Tutup">×</button>
+    <button onclick="toggleAIChat()" aria-label="Tutup">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+    </button>
   </div>
   <div class="ai-chat-body" id="aiChatBody">
-    <div style="text-align:center;color:var(--gray-5);font-size:12px;padding:20px">
+    <div style="text-align:center;color:#64748B;font-size:12px;padding:20px">
       Powered by DeepSeek<br/>Tanya apa saja tentang bisnis Anda!
     </div>
   </div>
@@ -483,7 +423,7 @@
     <div class="ai-input-wrap">
       <input type="text" id="aiInput" placeholder="Ketik pertanyaan..." onkeypress="if(event.key==='Enter')sendAIMessage()"/>
       <button onclick="sendAIMessage()" id="btnSendAI" aria-label="Kirim">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
       </button>
     </div>
   </div>
@@ -501,6 +441,8 @@ const daysSince = s => {
 };
 const escHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+const CHEVRON_SVG = '<svg class="ai-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+
 let chartInstance = null;
 let notifTotal = 0;
 let notifBreakdown = { ajBelum: 0, tagihanLama: 0, lewatWaktu: 0 };
@@ -517,7 +459,7 @@ function showNotifInfo() {
   if (notifTotal === 0) { showToast('Tidak ada notifikasi'); return; }
   const parts = [];
   if (notifBreakdown.lewatWaktu > 0) parts.push(`${notifBreakdown.lewatWaktu} order lewat waktu`);
-  if (notifBreakdown.ajBelum > 0)   parts.push(`${notifBreakdown.ajBelum} order AJ belum diproses`);
+  if (notifBreakdown.ajBelum > 0)    parts.push(`${notifBreakdown.ajBelum} order AJ belum diproses`);
   if (notifBreakdown.tagihanLama > 0) parts.push(`${notifBreakdown.tagihanLama} tagihan > 7 hari`);
   showToast(parts.join(' · '));
 }
@@ -550,236 +492,123 @@ async function updateStatus(id, status, btn) {
     });
     const d = await r.json();
     if (!r.ok) { showToast('Gagal: ' + d.error); return; }
-    showToast('Status → "' + status + '"');
+    showToast('Status diubah ke ' + status);
     loadDashboard();
   } catch { showToast('Koneksi gagal'); }
   finally { btn.disabled = false; }
 }
 
-function switchTab(tab, ev) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  if (ev) ev.currentTarget.classList.add('active');
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.getElementById(tab === 'selesai' ? 'tabSelesai' : 'tabLewat').classList.add('active');
-}
-
 /* ── Renderers ───────────────────────────────────────── */
-function renderTagihan(list, totalSisa, totalCount) {
+function renderTagihan(totalSisa, totalCount) {
   const hero = document.getElementById('tagihanHero');
-  const amt  = document.getElementById('tagihanAmt');
-  const sub  = document.getElementById('tagihanSub');
-  const listEl = document.getElementById('tagihanList');
-  const linkEl = document.getElementById('tagihanLink');
-
-  hero.classList.toggle('empty', totalCount === 0);
-  if (totalCount === 0) {
-    amt.textContent = 'Lunas';
-    sub.textContent = 'Semua tagihan sudah dibayar';
-    listEl.innerHTML = '';
-    linkEl.style.display = 'none';
+  if (!totalCount || totalCount <= 0) {
+    hero.style.display = 'none';
     return;
   }
-  amt.textContent = fmtRpShort(totalSisa);
-  sub.textContent = `${totalCount} order belum lunas`;
-  linkEl.style.display = totalCount > 3 ? 'block' : 'none';
-
-  listEl.innerHTML = list.slice(0, 3).map(t => {
-    const sisa = Number(t.total_bayar) - Number(t.bayar);
-    const tel = t.pelanggan_telepon;
-    const pl = JSON.stringify(payload(t)).replace(/'/g, "&#39;");
-    const wp = JSON.stringify(waPayload(t)).replace(/'/g, "&#39;");
-    return `
-    <div class="hero-row">
-      <div class="hr-txt">
-        <div class="hr-name">${escHtml(t.pelanggan_nama || 'Non-member')}</div>
-        <div class="hr-amt">${fmtRpShort(sisa)} · ${t.nomor_transaksi}</div>
-      </div>
-      <div class="hr-actions">
-        <button class="hr-btn" onclick='openLunasiSheet(${pl})'>Lunasi</button>
-        ${tel ? `<button class="hr-btn icon" onclick='openWaSheet(${wp})' title="Kirim WA" aria-label="Kirim WA">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-        </button>` : ''}
-      </div>
-    </div>`;
-  }).join('');
+  hero.style.display = 'block';
+  document.getElementById('tagihanAmt').textContent = fmtRpShort(totalSisa);
+  document.getElementById('tagihanChip').textContent = `${totalCount} order`;
 }
 
-/** Card untuk Selesai Belum Diambil (status='selesai') */
-function renderBelumDiambil(list) {
-  document.getElementById('cntBelumDiambil').textContent = list.length;
-  const el = document.getElementById('listBelumDiambil');
-  if (!list.length) {
-    el.innerHTML = '<div class="empty">Tidak ada laundry yang siap diambil</div>';
-    return;
-  }
-  el.innerHTML = list.slice(0, 5).map(t => {
-    const lunas = (t.total_dibayar || t.bayar || 0) >= t.total_bayar;
-    const tel = t.pelanggan_telepon;
-    const dibayar = t.total_dibayar || t.bayar || 0;
-    const pl = JSON.stringify(payload(t, dibayar)).replace(/'/g, "&#39;");
-    const wp = JSON.stringify(waPayload(t)).replace(/'/g, "&#39;");
-    return `
-    <div class="order-card warn">
-      <div class="order-card-row1">
-        <div style="min-width:0;flex:1">
-          <div class="order-card-nama">${escHtml(t.pelanggan_nama || 'Non-member')}</div>
-          <div class="order-card-meta">${t.nomor_transaksi} · Selesai ${fmtDate(t.tanggal_selesai)}</div>
-        </div>
-        <div class="order-card-amt">${fmtRpShort(t.total_bayar)}</div>
-      </div>
-      <div class="order-card-row2">
-        <span class="ds-badge ds-badge-selesai">Selesai</span>
-        ${!lunas ? `<span class="ds-badge ds-badge-belum">Belum Lunas</span>` : `<span class="ds-badge ds-badge-lunas">Lunas</span>`}
-      </div>
-      <div class="order-card-actions">
-        ${tel ? `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>WA Siap Diambil</button>` : ''}
-        <button class="btn btn-selesai" onclick="updateStatus(${t.id},'diambil',this)">Diambil</button>
-        ${!lunas ? `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>Lunasi</button>` : ''}
-        <a class="btn btn-detail" href="/order/detail?id=${t.id}">›</a>
-      </div>
-    </div>`;
-  }).join('');
-}
+/* Perlu Tindakan — card simple: nama+nomor, note, chevron → detail */
+function renderPerluTindakan(belumDiambil, lewatWaktu) {
+  const section = document.getElementById('perluTindakanSection');
+  const list = document.getElementById('perluTindakanList');
 
-/** Card untuk Lewat Estimasi (pending/proses + tanggal_selesai < today) */
-function renderLewat(list) {
-  document.getElementById('cntLewat').textContent = list.length;
-  const el = document.getElementById('listLewat');
-  if (!list.length) {
-    el.innerHTML = '<div class="empty">Tidak ada order lewat estimasi</div>';
-    return;
-  }
-  el.innerHTML = list.slice(0, 5).map(t => {
-    const lunas = (t.total_dibayar || t.bayar || 0) >= t.total_bayar;
-    const tel = t.pelanggan_telepon;
-    const dibayar = t.total_dibayar || t.bayar || 0;
+  const items = [];
+
+  (lewatWaktu || []).slice(0, 5).forEach(t => {
     const hari = daysSince(t.tanggal_selesai);
-    const pl = JSON.stringify(payload(t, dibayar)).replace(/'/g, "&#39;");
-    const wp = JSON.stringify(waPayload(t)).replace(/'/g, "&#39;");
-    return `
-    <div class="order-card urgent">
-      <div class="order-card-row1">
-        <div style="min-width:0;flex:1">
-          <div class="order-card-nama">${escHtml(t.pelanggan_nama || 'Non-member')}</div>
-          <div class="order-card-meta">${t.nomor_transaksi} · Est ${fmtDate(t.tanggal_selesai)}</div>
-        </div>
-        <div class="order-card-amt">${fmtRpShort(t.total_bayar)}</div>
+    items.push({
+      kind: 'late',
+      href: `/order/detail?id=${t.id}`,
+      title: `${escHtml(t.pelanggan_nama || 'Non-member')} · ${t.nomor_transaksi}`,
+      note: `Lewat estimasi ${hari > 0 ? hari + ' hari' : 'hari ini'}`
+    });
+  });
+
+  (belumDiambil || []).slice(0, 5).forEach(t => {
+    items.push({
+      kind: 'pickup',
+      href: `/order/detail?id=${t.id}`,
+      title: `${escHtml(t.pelanggan_nama || 'Non-member')} · ${t.nomor_transaksi}`,
+      note: `Selesai ${fmtDate(t.tanggal_selesai)} — belum diambil`
+    });
+  });
+
+  if (!items.length) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  list.innerHTML = items.map(it => `
+    <a class="action-item ${it.kind}" href="${it.href}">
+      <div class="ai-txt">
+        <div class="ai-title">${it.title}</div>
+        <div class="ai-note">${it.note}</div>
       </div>
-      <div class="order-card-row2">
-        <span class="ds-badge ds-badge-${t.status}">${t.status}</span>
-        <span class="ds-badge ds-badge-belum">Telat ${hari}h</span>
-        ${!lunas ? `<span class="ds-badge ds-badge-belum">Belum Lunas</span>` : ''}
-      </div>
-      <div class="order-card-actions">
-        <button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">Selesai</button>
-        ${!lunas ? `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>Lunasi</button>` : ''}
-        ${tel ? `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>WA</button>` : ''}
-        <a class="btn btn-detail" href="/order/detail?id=${t.id}">›</a>
-      </div>
-    </div>`;
-  }).join('');
+      ${CHEVRON_SVG}
+    </a>
+  `).join('');
 }
 
-/** Card untuk Antrian Aktif (pending/proses) */
+/* Antrian aktif — card order standar (max 3) */
 function renderAntrian(list) {
   const el = document.getElementById('antrianList');
+  const lihatSemua = document.getElementById('antrianLihatSemua');
   if (!list.length) {
     el.innerHTML = '<div class="empty">Tidak ada antrian aktif</div>';
+    lihatSemua.style.display = 'none';
     return;
   }
-  el.innerHTML = list.slice(0, 5).map(t => {
+  const showList = list.slice(0, 3);
+  lihatSemua.style.display = list.length > 3 ? '' : 'none';
+
+  el.innerHTML = showList.map(t => {
     const lunas = (t.total_dibayar || t.bayar || 0) >= t.total_bayar;
     const tel = t.pelanggan_telepon;
     const items = (t.items || []).map(i => `${i.jumlah}${i.satuan ? ' ' + i.satuan : ''} ${i.nama_layanan}`).join(', ') || '—';
     const dibayar = t.total_dibayar || t.bayar || 0;
     const pl = JSON.stringify(payload(t, dibayar)).replace(/'/g, "&#39;");
     const wp = JSON.stringify(waPayload(t)).replace(/'/g, "&#39;");
+    const statusCls = `status-${t.status}`;
+    const badgeCls = `b-${t.status}`;
     return `
-    <div class="order-card ${t.status === 'proses' ? 'proses' : ''}">
-      <div class="order-card-row1">
-        <div style="min-width:0;flex:1">
-          <div class="order-card-nama">${t.nomor_transaksi} · ${escHtml(t.pelanggan_nama || 'Non-member')}</div>
-          <div class="order-card-meta">${items}</div>
+      <div class="order-card ${statusCls}">
+        <div class="oc-row1">
+          <span class="oc-nomor">${t.nomor_transaksi}</span>
+          <span class="oc-badges">
+            <span class="badge ${badgeCls}">${t.status}</span>
+            ${lunas ? '<span class="badge b-lunas">Lunas</span>' : '<span class="badge b-belum">Belum Lunas</span>'}
+          </span>
         </div>
-        <div class="order-card-amt">${fmtRpShort(t.total_bayar)}</div>
-      </div>
-      <div class="order-card-row2">
-        <span class="ds-badge ds-badge-${t.status}">${t.status}</span>
-        ${!lunas ? `<span class="ds-badge ds-badge-belum">Belum Lunas</span>` : `<span class="ds-badge ds-badge-lunas">Lunas</span>`}
-      </div>
-      <div class="order-card-actions">
-        ${t.status === 'pending' ? `<button class="btn btn-proses" onclick="updateStatus(${t.id},'proses',this)">Proses</button>` : ''}
-        ${t.status === 'proses' ? `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">Selesai</button>` : ''}
-        ${!lunas ? `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>Lunasi</button>` : ''}
-        ${tel ? `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>WA</button>` : ''}
-        <a class="btn btn-detail" href="/order/detail?id=${t.id}">›</a>
-      </div>
-    </div>`;
+        <div class="oc-row2">
+          <div class="oc-mid">
+            <div class="oc-nama">${escHtml(t.pelanggan_nama || 'Non-member')}</div>
+            <div class="oc-layanan">${items}</div>
+          </div>
+          <div class="oc-total">${fmtRpShort(t.total_bayar)}</div>
+        </div>
+        <div class="oc-actions">
+          ${t.status === 'pending' ? `<button class="btn btn-proses" onclick="updateStatus(${t.id},'proses',this)">Proses</button>` : ''}
+          ${t.status === 'proses'  ? `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">Selesai</button>` : ''}
+          ${!lunas ? `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>Lunasi</button>` : ''}
+          ${tel ? `<button class="btn btn-wa" onclick='openWaSheet(${wp})' aria-label="Kirim WA">WA</button>` : ''}
+          <a class="btn btn-detail icon-only" href="/order/detail?id=${t.id}" aria-label="Detail">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </div>`;
   }).join('');
-}
-
-/** Card untuk tab Selesai Hari Ini (pending/proses, est = today) & Lewat Waktu */
-function renderTabCard(t, kind) {
-  const lunas = (t.total_dibayar || t.bayar || 0) >= t.total_bayar;
-  const tel = t.pelanggan_telepon;
-  const items = (t.items || []).map(i => `${i.jumlah}${i.satuan ? ' ' + i.satuan : ''} ${i.nama_layanan}`).join(', ') || '—';
-  const dibayar = t.total_dibayar || t.bayar || 0;
-  const hari = kind === 'lewat' ? daysSince(t.tanggal_selesai) : 0;
-  const pl = JSON.stringify(payload(t, dibayar)).replace(/'/g, "&#39;");
-  const wp = JSON.stringify(waPayload(t)).replace(/'/g, "&#39;");
-  return `
-  <div class="order-card ${kind === 'lewat' ? 'urgent' : ''}">
-    <div class="order-card-row1">
-      <div style="min-width:0;flex:1">
-        <div class="order-card-nama">${t.nomor_transaksi} · ${escHtml(t.pelanggan_nama || 'Non-member')}</div>
-        <div class="order-card-meta">${items}</div>
-      </div>
-      <div class="order-card-amt">${fmtRpShort(t.total_bayar)}</div>
-    </div>
-    <div class="order-card-row2">
-      <span class="ds-badge ds-badge-${t.status}">${t.status}</span>
-      ${!lunas ? `<span class="ds-badge ds-badge-belum">Belum Lunas</span>` : ''}
-      ${hari > 0 ? `<span class="ds-badge ds-badge-belum">Telat ${hari}h</span>` : ''}
-    </div>
-    <div class="order-card-actions">
-      <button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">Selesai</button>
-      ${!lunas ? `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>Lunasi</button>` : ''}
-      ${tel ? `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>WA</button>` : ''}
-      <a class="btn btn-detail" href="/order/detail?id=${t.id}">›</a>
-    </div>
-  </div>`;
-}
-
-function renderSelesaiHariIni(list) {
-  document.getElementById('badgeSelesai').textContent = list.length;
-  const el = document.getElementById('tabSelesai');
-  if (!list.length) {
-    el.innerHTML = '<div class="empty">Tidak ada estimasi selesai hari ini</div>';
-    return;
-  }
-  el.innerHTML = '<div class="list">' + list.map(t => renderTabCard(t, 'selesai')).join('') + '</div>';
-}
-
-function renderLewatWaktu(list) {
-  document.getElementById('badgeLewat').textContent = list.length;
-  const el = document.getElementById('tabLewat');
-  if (!list.length) {
-    el.innerHTML = '<div class="empty">Tidak ada order lewat waktu</div>';
-    return;
-  }
-  el.innerHTML = '<div class="list">' + list.map(t => renderTabCard(t, 'lewat')).join('') + '</div>';
 }
 
 function renderPromo(list) {
   const el = document.getElementById('promoBody');
   if (!list || !list.length) { el.innerHTML = '<div class="empty">Tidak ada promo aktif</div>'; return; }
-  el.innerHTML = list.slice(0,5).map(p => {
+  el.innerHTML = list.slice(0, 5).map(p => {
     const disc = p.diskon_persen > 0 ? `${p.diskon_persen}%` : fmtRp(p.diskon_nominal);
-    return `<div style="padding:10px 0;border-bottom:1px solid var(--gray-3)">
-      <div style="font-weight:700;font-size:13px">${escHtml(p.nama)}</div>
-      <div style="display:flex;justify-content:space-between;margin-top:2px;font-size:11px">
-        <span style="color:var(--success);font-weight:700">Diskon ${disc}</span>
-        <span style="color:var(--gray-5)">${p.berlaku_sampai ? 'Sampai ' + fmtDate(p.berlaku_sampai) : 'Tanpa batas'}</span>
+    return `<div class="widget-row" style="flex-direction:column;align-items:stretch;gap:4px">
+      <div style="font-weight:700;font-size:13px;color:#1E2A6E">${escHtml(p.nama)}</div>
+      <div style="display:flex;justify-content:space-between;font-size:11px">
+        <span style="color:#10B981;font-weight:700">Diskon ${disc}</span>
+        <span style="color:#64748B">${p.berlaku_sampai ? 'Sampai ' + fmtDate(p.berlaku_sampai) : 'Tanpa batas'}</span>
       </div>
     </div>`;
   }).join('');
@@ -796,16 +625,16 @@ function renderStokMenipis(list) {
   body.innerHTML = list.slice(0, 6).map(b => {
     const stok = Number(b.stok_sekarang);
     const min  = Number(b.batas_minimum);
-    const cls  = stok <= 0 ? 'var(--danger)' : 'var(--warning)';
+    const cls  = stok <= 0 ? '#EF4444' : '#F59E0B';
     return `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--gray-3)">
+      <div class="widget-row">
         <div>
-          <div style="font-weight:700;font-size:13px">${escHtml(b.nama)}</div>
-          <div style="font-size:11px;color:var(--gray-5)">min ${fmt(min)} ${escHtml(b.satuan)}</div>
+          <div style="font-weight:700;font-size:13px;color:#1E2A6E">${escHtml(b.nama)}</div>
+          <div style="font-size:11px;color:#64748B">min ${fmt(min)} ${escHtml(b.satuan)}</div>
         </div>
         <div style="font-size:14px;font-weight:800;color:${cls}">${fmt(stok)} ${escHtml(b.satuan)}</div>
       </div>`;
-  }).join('') + (list.length > 6 ? `<div style="text-align:center;padding-top:8px;font-size:11px;color:var(--gray-5)">dan ${list.length - 6} bahan lainnya…</div>` : '');
+  }).join('') + (list.length > 6 ? `<div style="text-align:center;padding-top:8px;font-size:11px;color:#64748B">dan ${list.length - 6} bahan lainnya…</div>` : '');
 }
 
 function renderDeposit(d) {
@@ -814,17 +643,17 @@ function renderDeposit(d) {
   el.innerHTML = `
     <div style="display:flex;flex-direction:column;gap:10px">
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:13px;color:var(--gray-5)">Total Saldo Beredar</span>
-        <span style="font-size:16px;font-weight:800;color:var(--primary)">${fmtRp(d.total_saldo)}</span>
+        <span style="font-size:13px;color:#64748B">Total Saldo Beredar</span>
+        <span style="font-size:16px;font-weight:800;color:#2D3BB5">${fmtRp(d.total_saldo)}</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:13px;color:var(--gray-5)">Pelanggan Aktif</span>
-        <span style="font-size:14px;font-weight:700">${d.jumlah_pelanggan} pelanggan</span>
+        <span style="font-size:13px;color:#64748B">Pelanggan Aktif</span>
+        <span style="font-size:14px;font-weight:700;color:#1E2A6E">${d.jumlah_pelanggan} pelanggan</span>
       </div>
       ${d.pelanggan_saldo_tipis > 0 ? `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--danger-lt);border-radius:7px">
-        <span style="font-size:12px;color:var(--danger);font-weight:600">Saldo tipis</span>
-        <span style="font-size:14px;font-weight:800;color:var(--danger)">${d.pelanggan_saldo_tipis}</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#FDECEC;border-radius:8px">
+        <span style="font-size:12px;color:#EF4444;font-weight:600">Saldo tipis</span>
+        <span style="font-size:14px;font-weight:800;color:#EF4444">${d.pelanggan_saldo_tipis}</span>
       </div>` : ''}
     </div>`;
 }
@@ -868,7 +697,7 @@ async function loadDashboard() {
     // Tagihan
     const tagList = tagD.data || [];
     const totalSisa = tagList.reduce((s, t) => s + (Number(t.total_bayar) - Number(t.bayar)), 0);
-    renderTagihan(tagList, totalSisa, d.tagihan_belum_lunas);
+    renderTagihan(totalSisa, d.tagihan_belum_lunas);
 
     // Notifikasi: lewat waktu + AJ belum diproses + tagihan > 7 hari
     const tagihanLama = tagList.filter(t => daysSince(t.tanggal_masuk) >= 7).length;
@@ -876,17 +705,14 @@ async function loadDashboard() {
     const lewatWaktu = (d.lewat_waktu || []).length;
     setNotif(tagihanLama + ajBelum + lewatWaktu, { tagihanLama, ajBelum, lewatWaktu });
 
-    // Perlu Tindakan
+    // Perlu Tindakan (lewat + selesai belum diambil)
     const belumDiambil = (selD.data || []).filter(t => !t.tanggal_ambil);
-    renderBelumDiambil(belumDiambil);
-    renderLewat(d.lewat_waktu || []);
+    renderPerluTindakan(belumDiambil, d.lewat_waktu || []);
 
-    // Antrian + tabs
+    // Antrian aktif
     renderAntrian(d.antrian_aktif || []);
-    renderSelesaiHariIni(d.selesai_hari_ini || []);
-    renderLewatWaktu(d.lewat_waktu || []);
 
-    // Stok bahan menipis (mobile + desktop)
+    // Stok bahan menipis
     renderStokMenipis(d.stok_hampir_habis || []);
 
     // Desktop widgets
@@ -925,31 +751,30 @@ function renderReservasiWidget(list) {
   const rows = list.map(r => {
     const jam = r.jam_jemput || '--:--';
     const alamat = r.alamat || r.pelanggan_alamat || '';
-    const catatan = r.catatan ? `<div style="font-size:11px;color:var(--gray-6);margin-top:2px;font-style:italic">${escHtml(r.catatan)}</div>` : '';
+    const catatan = r.catatan ? `<div style="font-size:11px;color:#334155;margin-top:2px;font-style:italic">${escHtml(r.catatan)}</div>` : '';
     return `
-      <div style="padding:10px;background:#fff;border-radius:10px;margin-bottom:8px;border-left:3px solid var(--primary)">
+      <div style="padding:10px 0;border-bottom:1px solid #F1F5F9">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
           <div style="flex:1;min-width:0">
-            <div style="font-weight:800;font-size:13px;color:var(--primary)">${escHtml(jam)}</div>
-            <div style="font-weight:700;font-size:14px;margin-top:2px">${escHtml(r.pelanggan_nama || '—')}</div>
-            ${alamat ? `<div style="font-size:12px;color:var(--gray-6);margin-top:2px">${escHtml(alamat)}</div>` : ''}
+            <div style="font-weight:800;font-size:13px;color:#2563EB">${escHtml(jam)}</div>
+            <div style="font-weight:700;font-size:14px;margin-top:2px;color:#1E2A6E">${escHtml(r.pelanggan_nama || '—')}</div>
+            ${alamat ? `<div style="font-size:12px;color:#64748B;margin-top:2px">${escHtml(alamat)}</div>` : ''}
             ${catatan}
           </div>
         </div>
         <div style="display:flex;gap:6px;margin-top:8px">
-          <button class="btn btn-selesai" style="flex:1;padding:8px;min-height:36px;font-size:12px" onclick="rjSelesai(${r.id}, ${r.pelanggan_id || 'null'})">Selesai</button>
-          <a class="btn btn-detail" style="padding:8px 12px;min-height:36px;font-size:12px;text-decoration:none" href="/reservasi-jemput?edit=${r.id}">Edit</a>
-          <button class="btn btn-wa" style="padding:8px 12px;min-height:36px;font-size:12px;background:#EF4444" onclick="rjBatal(${r.id})">Batal</button>
+          <button class="btn btn-selesai" style="flex:1;height:36px;font-size:12px;border:none;border-radius:8px;color:#fff;background:#10B981;font-weight:700;cursor:pointer" onclick="rjSelesai(${r.id}, ${r.pelanggan_id || 'null'})">Selesai</button>
+          <a class="btn btn-detail" style="height:36px;padding:0 12px;font-size:12px;text-decoration:none;border:1px solid #E2E8F0;border-radius:8px;color:#64748B;background:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700" href="/reservasi-jemput?edit=${r.id}">Edit</a>
+          <button class="btn" style="height:36px;padding:0 12px;font-size:12px;background:#EF4444;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer" onclick="rjBatal(${r.id})">Batal</button>
         </div>
       </div>`;
   }).join('');
 
   widget.innerHTML = rows + `
-    <a class="btn btn-detail" style="display:block;text-align:center;padding:10px;font-size:13px;text-decoration:none;margin-top:6px" href="/reservasi-jemput">+ Tambah Jadwal Jemput</a>`;
+    <a style="display:block;text-align:center;padding:10px 0 2px;font-size:12px;color:#2563EB;font-weight:700;text-decoration:none" href="/reservasi-jemput">+ Tambah Jadwal Jemput</a>`;
 }
 
 async function rjSelesai(id, pelangganId) {
-  // Aksi ringan → langsung eksekusi + toast
   try {
     const r = await fetch(`/api/v1/reservasi-jemput/${id}/selesai`, {
       method: 'PUT', credentials: 'include',
@@ -1006,32 +831,32 @@ function renderAJWidget(d) {
   const widget = document.getElementById('ajWidget');
   const list = d.order_list.map(o => {
     if (o.sudah_diterapkan) {
-      return `<div class="aj-row"><span>${escHtml(o.nama_pelanggan)}</span><span style="color:var(--success);font-weight:700">Diterapkan</span></div>`;
+      return `<div class="widget-row"><span style="color:#1E2A6E">${escHtml(o.nama_pelanggan)}</span><span style="color:#10B981;font-weight:700;font-size:12px">Diterapkan</span></div>`;
     }
     if (!o.has_jarak) {
-      return `<div class="aj-row">
-        <span style="color:var(--warning);font-weight:600">${escHtml(o.nama_pelanggan)}</span>
-        <button class="btn btn-detail" style="min-height:32px;padding:4px 10px;font-size:11px" onclick="ajIsiJarak(${o.order_id}, ${o.pelanggan_id || 'null'}, '${escHtml(o.nama_pelanggan).replace(/'/g,"\\'")}')">Isi Jarak</button>
+      return `<div class="widget-row">
+        <span style="color:#B45309;font-weight:600">${escHtml(o.nama_pelanggan)}</span>
+        <button style="height:32px;padding:0 10px;font-size:11px;border:1px solid #E2E8F0;background:#fff;color:#64748B;border-radius:8px;font-weight:700;cursor:pointer" onclick="ajIsiJarak(${o.order_id}, ${o.pelanggan_id || 'null'}, '${escHtml(o.nama_pelanggan).replace(/'/g,"\\'")}')">Isi Jarak</button>
       </div>`;
     }
-    return `<div class="aj-row"><span>${escHtml(o.nama_pelanggan)}</span><span style="color:var(--gray-5)">${o.jarak_km} km</span></div>`;
+    return `<div class="widget-row"><span style="color:#1E2A6E">${escHtml(o.nama_pelanggan)}</span><span style="color:#64748B;font-size:12px">${o.jarak_km} km</span></div>`;
   }).join('');
 
-  let html = `<div style="margin-bottom:10px;font-size:12px;color:var(--gray-6)">
-    <strong style="color:var(--purple)">${d.order_list.length} order</strong> antar jemput hari ini
+  let html = `<div style="margin-bottom:10px;font-size:12px;color:#334155">
+    <strong style="color:#8B5CF6">${d.order_list.length} order</strong> antar jemput hari ini
   </div>`;
 
   if (d.kalkulasi) {
     const k = d.kalkulasi;
     html += `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
-      <div style="padding:8px;background:#fff;border-radius:8px;text-align:center">
-        <div style="font-size:10px;color:var(--gray-5);font-weight:700;text-transform:uppercase">HPP/pelanggan</div>
-        <div style="font-size:14px;font-weight:800;color:var(--primary)">Rp ${Number(k.hpp_per_pelanggan).toLocaleString('id-ID')}</div>
+      <div style="padding:8px;background:#F8FAFF;border-radius:8px;text-align:center">
+        <div style="font-size:10px;color:#64748B;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">HPP/pelanggan</div>
+        <div style="font-size:14px;font-weight:800;color:#2D3BB5;margin-top:2px">Rp ${Number(k.hpp_per_pelanggan).toLocaleString('id-ID')}</div>
       </div>
-      <div style="padding:8px;background:#fff;border-radius:8px;text-align:center">
-        <div style="font-size:10px;color:var(--gray-5);font-weight:700;text-transform:uppercase">Tarif rekomendasi</div>
-        <div style="font-size:14px;font-weight:800;color:var(--success)">Rp ${Number(k.tarif_rekomendasi).toLocaleString('id-ID')}</div>
+      <div style="padding:8px;background:#F8FAFF;border-radius:8px;text-align:center">
+        <div style="font-size:10px;color:#64748B;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Tarif rekomendasi</div>
+        <div style="font-size:14px;font-weight:800;color:#10B981;margin-top:2px">Rp ${Number(k.tarif_rekomendasi).toLocaleString('id-ID')}</div>
       </div>
     </div>`;
   }
@@ -1040,12 +865,12 @@ function renderAJWidget(d) {
     html += `
     <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px">
       <input type="number" id="ajWidgetTarif" value="${d.kalkulasi.tarif_rekomendasi}" min="0"
-             style="flex:1;padding:8px 10px;border:1px solid var(--gray-3);border-radius:8px;font-size:13px;font-weight:700"/>
-      <button class="btn btn-selesai" style="padding:8px 14px;min-height:40px;font-size:12px" onclick="ajTerapkanTarif()">Terapkan ${d.belum_diterapkan}</button>
+             style="flex:1;padding:8px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;font-weight:700;font-family:inherit"/>
+      <button class="btn btn-selesai" style="height:36px;padding:0 14px;font-size:12px;border:none;border-radius:8px;background:#10B981;color:#fff;font-weight:700;cursor:pointer" onclick="ajTerapkanTarif()">Terapkan ${d.belum_diterapkan}</button>
     </div>
-    <a class="btn btn-detail" style="display:block;text-align:center;padding:10px;font-size:13px" href="/antar-jemput">Edit Manual</a>`;
+    <a style="display:block;text-align:center;padding:8px 0 0;font-size:12px;color:#2563EB;font-weight:700;text-decoration:none" href="/antar-jemput">Edit Manual</a>`;
   } else if (d.belum_diterapkan === 0 && d.sudah_diterapkan > 0) {
-    html += `<div style="padding:8px;background:var(--success-lt);border-radius:8px;font-size:12px;color:var(--success);text-align:center;font-weight:700">Semua tarif AJ sudah diterapkan</div>`;
+    html += `<div style="padding:8px;background:#E7F8F1;border-radius:8px;font-size:12px;color:#10B981;text-align:center;font-weight:700">Semua tarif AJ sudah diterapkan</div>`;
   }
 
   widget.innerHTML = html;
@@ -1116,7 +941,7 @@ loadTokoNama();
 
 const now = new Date();
 document.getElementById('pageDate').textContent =
-  now.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
+  now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
 loadDashboard();
 setInterval(loadDashboard, 300000);
