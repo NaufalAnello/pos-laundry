@@ -9,7 +9,7 @@
   /* Brand — biru tua "nala" */
   --primary:    #2D3BB5;
   --primary-dk: #1E2A8A;
-  --primary-lt: #EEF2FF;
+  --primary-lt: #E3F2FF;
 
   /* Brand — biru muda "laundry" */
   --secondary:    #4BB8FA;
@@ -18,20 +18,23 @@
 
   /* Brand — emas bintang */
   --accent:    #F59E0B;
-  --accent-lt: #FFFBEB;
+  --accent-lt: #FEF3E2;
+
+  /* Blue medium (link/subtle CTA) */
+  --primary-md: #2563EB;
 
   /* Semantic */
   --success:    #10B981;
   --success-dk: #059669;
-  --success-lt: #ECFDF5;
+  --success-lt: #E7F8F1;
 
   --warning:    #F59E0B;
   --warning-dk: #B45309;
-  --warning-lt: #FFFBEB;
+  --warning-lt: #FEF3E2;
 
   --danger:     #EF4444;
   --danger-dk:  #DC2626;
-  --danger-lt:  #FEF2F2;
+  --danger-lt:  #FDECEC;
 
   --purple:     #8B5CF6;
   --purple-lt:  #F5F3FF;
@@ -197,16 +200,16 @@ body {
   white-space: nowrap;
   border: 1px solid transparent;
 }
-.ds-badge-pending     { background: #EEF2FF; color: #2D3BB5; border-color: #C7D2FE; }
-.ds-badge-proses      { background: #E8F6FF; color: #2196D9; border-color: #BAE6FD; }
-.ds-badge-selesai     { background: #ECFDF5; color: #10B981; border-color: #A7F3D0; }
-.ds-badge-diambil     { background: #1E2A6E; color: #fff;    border-color: #1E2A6E; }
-.ds-badge-dibatalkan  { background: #FEF2F2; color: #EF4444; border-color: #FECACA; }
-.ds-badge-batal       { background: #FEF2F2; color: #EF4444; border-color: #FECACA; }
-.ds-badge-lunas       { background: #ECFDF5; color: #10B981; border-color: #A7F3D0; }
-.ds-badge-belum       { background: #FEF2F2; color: #EF4444; border-color: #FECACA; }
-.ds-badge-dp          { background: #FFFBEB; color: #F59E0B; border-color: #FDE68A; }
-.ds-badge-lewat       { background: #FEF2F2; color: #EF4444; border-color: #FECACA; }
+.ds-badge-pending     { background: #F1F5F9; color: #64748B; border-color: #E2E8F0; }
+.ds-badge-proses      { background: #E3F2FF; color: #2563EB; border-color: #BFDBFE; }
+.ds-badge-selesai     { background: #E7F8F1; color: #10B981; border-color: #A7F3D0; }
+.ds-badge-diambil     { background: #2D3BB5; color: #fff;    border-color: #2D3BB5; }
+.ds-badge-dibatalkan  { background: #FDECEC; color: #EF4444; border-color: #FECACA; }
+.ds-badge-batal       { background: #FDECEC; color: #EF4444; border-color: #FECACA; }
+.ds-badge-lunas       { background: #E7F8F1; color: #10B981; border-color: #A7F3D0; }
+.ds-badge-belum       { background: #FDECEC; color: #EF4444; border-color: #FECACA; }
+.ds-badge-dp          { background: #FEF3E2; color: #F59E0B; border-color: #FDE68A; }
+.ds-badge-lewat       { background: #FDECEC; color: #EF4444; border-color: #FECACA; }
 
 /* ═══════════════════════════════════════════════════════════
    PILL (filter chip)
@@ -428,38 +431,6 @@ body {
 .ds-icon-btn.wa      { background: #25d366;          color: #fff; border-color: #25d366; }
 .ds-icon-btn.danger  { background: var(--danger);    color: #fff; border-color: var(--danger); }
 .ds-icon-btn.purple  { background: var(--purple);    color: #fff; border-color: var(--purple); }
-
-/* ═══════════════════════════════════════════════════════════
-   BOTTOM NAV — tombol Order (+) di tengah
-   ═══════════════════════════════════════════════════════════ */
-.pos-bottom-nav { position: relative; }
-.pos-bottom-nav .bn-item[href="/order/baru"] {
-  position: relative;
-  z-index: 2;
-}
-.pos-bottom-nav .bn-item[href="/order/baru"] .bn-icon {
-  background: var(--secondary);
-  color: #fff;
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(75,184,250,0.35);
-  margin-top: -14px;
-  margin-bottom: 2px;
-}
-.pos-bottom-nav .bn-item[href="/order/baru"] .bn-label {
-  display: none;
-}
-
-.pos-bottom-nav .bn-badge {
-  background: var(--danger);
-  box-shadow: 0 1px 3px rgba(0,0,0,.2);
-}
 
 /* ═══════════════════════════════════════════════════════════
    STICKY BOTTOM BAR
