@@ -743,6 +743,163 @@
       border-color: var(--blue); background: #fff;
       box-shadow: 0 0 0 3px rgba(37,99,235,.12);
     }
+
+    /* ══════════════════════════════════════════════════════
+       DESIGN-REFERENCE ALIGNMENT (tahap 5)
+       Menimpa style lama; JANGAN ubah handler/logic-nya.
+       ══════════════════════════════════════════════════════ */
+
+    /* Nav bawah + FAB + topbar mobile — DISEMBUNYIKAN total di halaman ini
+       sesuai spek Order Baru (halaman punya action bar sticky sendiri). */
+    .pos-pill-nav, .pos-fab-order, .pos-topbar, .pos-sidebar,
+    .more-overlay, .more-sheet { display: none !important; }
+
+    body { background: #F0F7FF; }
+
+    /* ── Header ramping ────────────────────────────────── */
+    header {
+      background: #F0F7FF; border-bottom: none; box-shadow: none;
+      padding: 14px 16px 10px; height: auto;
+    }
+    header h1 { font-size: 20px; font-weight: 800; color: #1E2A6E; letter-spacing: -.01em; }
+    .back-btn {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: #fff; color: #2D3BB5;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 0; text-decoration: none;
+    }
+    .back-btn:hover { box-shadow: 0 2px 8px rgba(45,59,181,0.12); }
+    .header-badge {
+      background: #fff; color: #2D3BB5;
+      font-size: 11px; font-weight: 800; padding: 4px 10px;
+      border-radius: 999px; letter-spacing: .4px;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+    }
+
+    /* ── Customer chips (recent + Tamu) ───────────────── */
+    .cust-chips {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      margin-bottom: 10px;
+    }
+    .cust-chip {
+      height: 38px; padding: 0 14px; border-radius: 999px;
+      background: #fff; border: 1px solid #E2E8F0;
+      font-size: 13px; font-weight: 600; color: #64748B;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+      font-family: inherit; transition: background .15s, color .15s, border-color .15s;
+      white-space: nowrap;
+    }
+    .cust-chip:active { transform: scale(.97); }
+    .cust-chip.active { background: #2D3BB5; color: #fff; border-color: #2D3BB5; }
+    .cust-chip.tamu { border-style: dashed; }
+
+    /* ── Repeat banner — spek: biru muda + tombol biru ── */
+    .repeat-card {
+      background: #E3F2FF !important;
+      border: none !important;
+      box-shadow: none !important;
+      border-radius: 12px !important;
+      padding: 12px 14px !important;
+    }
+    .repeat-head { color: #2563EB !important; font-weight: 700 !important; }
+    .repeat-summary { color: #1E2A6E !important; }
+    .repeat-meta { color: #64748B !important; opacity: 1 !important; }
+    .btn-repeat-yes {
+      background: #2563EB !important; color: #fff !important;
+      font-weight: 700 !important;
+    }
+    .btn-repeat-no {
+      background: #fff !important; color: #64748B !important;
+      border: 1px solid #E2E8F0 !important;
+    }
+
+    /* ── Chip layanan populer — 2 kolom, min-height 54px ── */
+    #chipLayananWrap { margin-bottom: 12px; }
+    #chipLayanan {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px !important;
+    }
+    .svc-chip {
+      min-height: 54px; padding: 8px 12px; border-radius: 10px;
+      background: #fff; border: 1.5px solid #E2E8F0;
+      display: flex; flex-direction: column; justify-content: center; gap: 2px;
+      cursor: pointer; text-align: left; font-family: inherit;
+      transition: background .15s, border-color .15s;
+    }
+    .svc-chip:active { transform: scale(.98); }
+    .svc-chip.selected { background: #E3F2FF; border-color: #2563EB; }
+    .svc-chip .sc-name { font-size: 13px; font-weight: 600; color: #1E2A6E; line-height: 1.2; }
+    .svc-chip .sc-price { font-size: 12px; color: #94A3B8; line-height: 1.2; }
+
+    /* ── Payment tabs — segmented sesuai spek ─────────── */
+    .payment-tabs {
+      background: #E2E8F0; border-radius: 10px; padding: 3px;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 0 !important;
+    }
+    .payment-tab-btn {
+      padding: 8px 10px !important;
+      border: none !important; background: transparent !important;
+      color: #64748B !important; font-size: 12px; font-weight: 700;
+      border-radius: 7px; min-height: 36px;
+      box-shadow: none !important;
+    }
+    .payment-tab-btn.active {
+      background: #fff !important; color: #2D3BB5 !important;
+      box-shadow: 0 1px 2px rgba(0,0,0,.08) !important;
+    }
+
+    /* ── Sticky bottom bar (spek) ─────────────────────── */
+    .order-sticky-bar {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+      background: #fff; border-top: 1px solid #E2E8F0;
+      box-shadow: 0 -4px 16px rgba(45,59,181,0.08);
+      padding: 10px 12px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .osb-info {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 10px; padding: 0 2px;
+    }
+    .osb-summary {
+      font-size: 12px; color: #64748B; min-width: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-weight: 600;
+    }
+    .osb-total {
+      font-size: 20px; font-weight: 800; color: #1E2A6E; white-space: nowrap;
+      letter-spacing: -.01em;
+    }
+    .osb-actions { display: flex; gap: 6px; }
+    .osb-btn {
+      height: 48px; padding: 0 12px; font-size: 13px; font-weight: 700;
+      border: 1.5px solid transparent; border-radius: 8px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+      cursor: pointer; font-family: inherit; text-decoration: none;
+      transition: opacity .15s;
+    }
+    .osb-btn:active { opacity: .85; transform: scale(.98); }
+    .osb-btn:disabled { opacity: .6; cursor: not-allowed; }
+    .osb-btn.primary { flex: 2; background: #2D3BB5; color: #fff; }
+    .osb-btn.outline-wa {
+      flex: 1; background: #fff; border-color: #E2E8F0; color: #2D3BB5;
+    }
+    .osb-btn.outline-save {
+      flex: 0 0 74px; background: #fff; border-color: #E2E8F0; color: #64748B;
+    }
+
+    /* Ruang di bawah layout supaya konten tidak ketutup sticky bar */
+    .layout { padding-bottom: 180px !important; }
+
+    /* Actions block di panel-right (versi lama) — matikan display,
+       tombolnya dipindahkan ke sticky bar via HTML. */
+    .panel-right > .actions { display: none !important; }
+    @media (max-width: 767px) {
+      /* override rule mobile lama yg bikin actions fixed */
+      .panel-right > .actions { display: none !important; position: static !important; }
+    }
   </style>
 </head>
 <body>
@@ -751,7 +908,9 @@
 <div id="toast"></div>
 
 <header>
-  <a href="/" class="back-btn">← Dashboard</a>
+  <a href="/dashboard" class="back-btn" aria-label="Kembali">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+  </a>
   <h1>Order Baru</h1>
   <span class="header-badge" id="nomorPreview">LDR-...</span>
 </header>
@@ -791,6 +950,8 @@
         <span style="font-size:11px;color:var(--gray-5)">Opsional — bisa walk-in</span>
       </div>
       <div class="card-body">
+        <!-- Recent customer chips + Tamu (spek Langkah 1) -->
+        <div class="cust-chips" id="custChips" style="display:none"></div>
         <div class="ac-wrap">
           <input type="text" id="customerSearch" placeholder="Cari nama atau nomor WA pelanggan..." autocomplete="off" />
           <div id="customerDropdown" class="ac-dropdown hidden"></div>
@@ -834,10 +995,10 @@
         <span id="itemCount" style="font-size:12px;color:var(--gray-5)">0 layanan</span>
       </div>
       <div class="card-body">
-        <!-- Chip layanan populer — tap untuk tambah cepat -->
-        <div id="chipLayananWrap" style="margin-bottom:12px;display:none">
-          <div style="font-size:11px;font-weight:700;color:var(--gray-5);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Tap untuk tambah cepat</div>
-          <div id="chipLayanan" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        <!-- Chip layanan populer (spek Langkah 2: grid 2 kolom, min-height 54px) -->
+        <div id="chipLayananWrap" style="display:none">
+          <div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Layanan Populer</div>
+          <div id="chipLayanan"></div>
         </div>
         <div class="item-header">
           <span>Layanan</span><span>Jumlah</span><span>Satuan</span><span>Subtotal</span><span></span>
@@ -1087,7 +1248,7 @@
         <!-- TAB: Bayar Nanti -->
         <div class="payment-tab-content" id="tab-bayar-nanti">
           <div style="padding:16px 12px;background:var(--gray-1);border:1.5px solid var(--gray-3);border-radius:8px;text-align:center;">
-            <div style="font-size:32px;margin-bottom:8px;">⏱️</div>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:6px"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
             <div style="font-size:14px;font-weight:700;color:var(--gray-7);margin-bottom:4px;">Order tersimpan BELUM LUNAS</div>
             <div style="font-size:12px;color:var(--gray-5);">Pembayaran dilakukan saat pelanggan mengambil cucian</div>
           </div>
@@ -1115,22 +1276,27 @@
       </div>
     </div>
 
-    <!-- Action Buttons -->
+    <!-- Actions block (versi lama) — tombolnya dipindah ke sticky bar,
+         wrapper dikosongkan tapi dibiarkan untuk indikator printer. -->
     <div class="actions">
-      <button class="btn btn-success" id="saveWaBtn">
-        Simpan & Kirim WA
-      </button>
-      <button class="btn btn-primary" id="savePrintBtn">
-        Simpan & Cetak
-      </button>
-      <div class="printer-status-bar">
+      <div class="printer-status-bar" style="margin-top:0;padding:8px 12px;background:#fff;border-radius:8px;border:1px solid #E2E8F0">
         <span class="printer-dot" id="printerDotOrder"></span>
         <span id="printerStatusTxtOrder">Cek printer...</span>
       </div>
-      <button class="btn btn-secondary" id="saveBtn">
-        Simpan Saja
-      </button>
     </div>
+  </div>
+</div>
+
+<!-- ══ STICKY BOTTOM BAR (spek) ══ -->
+<div class="order-sticky-bar" id="orderStickyBar">
+  <div class="osb-info">
+    <div class="osb-summary" id="osbSummary">Walk-in · 0 layanan</div>
+    <div class="osb-total" id="osbTotal">Rp 0</div>
+  </div>
+  <div class="osb-actions">
+    <button class="osb-btn primary" id="savePrintBtn">Simpan & Cetak</button>
+    <button class="osb-btn outline-wa" id="saveWaBtn">Kirim WA</button>
+    <button class="osb-btn outline-save" id="saveBtn">Simpan</button>
   </div>
 </div>
 
@@ -1400,6 +1566,11 @@ async function selectCustomer(p) {
   updatePaymentPreview();
   calcTotal();
 
+  // Sync customer chip active state
+  document.querySelectorAll('.cust-chip').forEach(x => {
+    x.classList.toggle('active', String(x.dataset.id) === String(p.id));
+  });
+
   // Quick Repeat Order — cek order terakhir pelanggan
   loadRepeatSuggestion(p.id);
 }
@@ -1517,6 +1688,8 @@ document.getElementById('clearCustomer').addEventListener('click', () => {
   document.getElementById('poinSection').classList.add('hidden');
   document.getElementById('poinToggleSub').textContent = 'Pilih pelanggan terlebih dahulu';
   document.getElementById('waToggleSub').textContent = 'Pilih pelanggan dengan nomor WA';
+  // Sync chip active state (Tamu/Walk-in atau none)
+  document.querySelectorAll('.cust-chip').forEach(x => x.classList.remove('active'));
   // Reset ke tunai jika sedang deposit
   if (state.metodeBayar === 'deposit') {
     document.querySelectorAll('.pay-method-btn[data-method]').forEach(b => b.classList.remove('active'));
@@ -1544,15 +1717,14 @@ function renderChipLayanan() {
   wrap.style.display = '';
   el.innerHTML = populer.map(l => {
     const harga = Number(l.harga || 0);
-    const estJam = getEstimasiJam(l);
-    const estTxt = formatEstimasi(estJam);
-    return `<button type="button" class="chip-svc" data-id="${l.id}"
-      style="padding:8px 12px;border:1.5px solid var(--blue-lt);border-radius:99px;background:#fff;color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px">
-      ${escapeHtml(l.nama)} <span style="opacity:.7;font-weight:600">${harga ? 'Rp ' + fmtRp(harga) : ''}</span>
-      <span style="opacity:.5;font-size:10px">⏱ ${estTxt}</span>
+    const satuan = String(l.satuan || '').toLowerCase() || 'pcs';
+    const priceTxt = harga ? `Rp ${fmtRp(harga)}/${satuan}` : '—';
+    return `<button type="button" class="svc-chip" data-id="${l.id}">
+      <span class="sc-name">${escapeHtml(l.nama)}</span>
+      <span class="sc-price">${priceTxt}</span>
     </button>`;
   }).join('');
-  el.querySelectorAll('.chip-svc').forEach(btn => {
+  el.querySelectorAll('.svc-chip').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = Number(btn.dataset.id);
       const layanan = layananList.find(x => x.id === id);
@@ -1565,9 +1737,8 @@ function renderChipLayanan() {
         jumlah: defaultQty
       });
       // visual feedback singkat
-      btn.style.background = 'var(--blue)';
-      btn.style.color = '#fff';
-      setTimeout(() => { btn.style.background = '#fff'; btn.style.color = 'var(--blue)'; }, 250);
+      btn.classList.add('selected');
+      setTimeout(() => btn.classList.remove('selected'), 400);
     });
   });
 }
@@ -2669,7 +2840,7 @@ function updatePaymentPreview() {
 // ════════════════════════════════════════════════════════
 async function submitOrder(kirimWa, cetakSetelah) {
   const validItems = state.items.filter(i => i.layanan_id && i.jumlah > 0);
-  if (validItems.length === 0) { showToast('Tambahkan minimal 1 layanan', 'error'); return; }
+  if (validItems.length === 0) { showToast('Pilih pelanggan dan minimal 1 layanan dulu', 'error'); return; }
 
   const total = state._totalBayar || 0;
   const mode = state.paymentMode;
@@ -2785,8 +2956,8 @@ async function submitOrder(kirimWa, cetakSetelah) {
     await cetakStrukOrder(data.data.id);
   }
 
-  // Reset form setelah save/print selesai
-  setTimeout(() => window.location.reload(), cetakSetelah ? 2000 : 1500);
+  // Spek: order baru masuk atas Antrian & navigasi ke Antrian + toast konfirmasi.
+  setTimeout(() => { window.location.href = '/order'; }, cetakSetelah ? 2000 : 1500);
 }
 
 // ════════════════════════════════════════════════════════
@@ -2845,6 +3016,71 @@ setInterval(cekStatusPrinter, 10000);
 document.getElementById('saveBtn').addEventListener('click', () => submitOrder(false, false));
 document.getElementById('savePrintBtn').addEventListener('click', () => submitOrder(false, true));
 document.getElementById('saveWaBtn').addEventListener('click', () => submitOrder(true, false));
+
+// ════════════════════════════════════════════════════════
+// TAHAP 5 — Recent customer chips + Walk-in + sticky bar sync
+// ════════════════════════════════════════════════════════
+
+// Recent customers → chip strip di atas search
+async function loadRecentCustomerChips() {
+  const wrap = document.getElementById('custChips');
+  if (!wrap) return;
+  let recent = [];
+  try {
+    // ambil pelanggan terurut update_at desc (fallback: created_at)
+    const r = await apiFetch('/api/v1/pelanggan?limit=5&sort=terbaru');
+    recent = (r?.data || []).slice(0, 4);
+  } catch { /* silent */ }
+
+  const chips = [];
+  chips.push(`<button type="button" class="cust-chip tamu" data-id="tamu">Tamu / Walk-in</button>`);
+  recent.forEach(p => {
+    chips.push(`<button type="button" class="cust-chip" data-id="${p.id}" data-nama="${escapeHtml(p.nama)}">${escapeHtml(p.nama)}</button>`);
+  });
+  wrap.innerHTML = chips.join('');
+  wrap.style.display = '';
+
+  wrap.querySelectorAll('.cust-chip').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      wrap.querySelectorAll('.cust-chip').forEach(x => x.classList.remove('active'));
+      btn.classList.add('active');
+      if (btn.dataset.id === 'tamu') {
+        // Walk-in — hapus pelanggan
+        document.getElementById('clearCustomer').click();
+        updateStickyBar();
+        return;
+      }
+      // Ambil detail pelanggan penuh (butuh level, poin, deposit)
+      const pid = btn.dataset.id;
+      const pr = await apiFetch(`/api/v1/pelanggan/${pid}`);
+      if (pr?.data) selectCustomer(pr.data);
+    });
+  });
+}
+loadRecentCustomerChips();
+
+// Sync sticky bottom bar (Nama · N layanan + total live)
+function updateStickyBar() {
+  const totalEl = document.getElementById('sumTotal');
+  const osbTotal = document.getElementById('osbTotal');
+  const osbSummary = document.getElementById('osbSummary');
+  if (osbTotal && totalEl) osbTotal.textContent = totalEl.textContent;
+  if (osbSummary) {
+    const nama = state.pelanggan?.nama || 'Walk-in';
+    const nItem = (state.items || []).filter(i => Number(i.subtotal) > 0).length;
+    osbSummary.textContent = `${nama} · ${nItem} layanan`;
+  }
+}
+// Observe #sumTotal changes as trigger (dipanggil setiap calcTotal jalan)
+(function attachStickySync() {
+  const sumTotalEl = document.getElementById('sumTotal');
+  if (!sumTotalEl) return;
+  const obs = new MutationObserver(updateStickyBar);
+  obs.observe(sumTotalEl, { childList: true, characterData: true, subtree: true });
+  // Panggilan awal + sinkronisasi periodik ringan (mengcover perubahan state.pelanggan)
+  updateStickyBar();
+  setInterval(updateStickyBar, 800);
+})();
 </script>
 <script src="/js/nav.js"></script>
 </body>
