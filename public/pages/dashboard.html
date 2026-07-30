@@ -14,33 +14,44 @@
 
     .page { max-width: 1200px; margin: 0 auto; padding: 0 0 100px; }
 
-    /* ── Sticky Header ─────────────────────────────────── */
+    /* Dashboard punya .dash-head sendiri — sembunyikan topbar mobile
+       supaya tidak dobel dgn brand + date + bell yg sudah ada di dalam page. */
+    .pos-topbar { display: none !important; }
+    @media (min-width: 1024px) {
+      /* Di laptop, sidebar handle branding. Sisakan .dash-head sebagai
+         header lokal halaman. */
+    }
+
+    /* ── Header (Nala style — flat, blend dgn bg page) ─── */
     .dash-head {
       position: sticky; top: 0; z-index: 20;
-      background: #fff; border-bottom: 1px solid var(--gray-3);
-      padding: 12px 14px;
+      background: var(--bg-page);
+      padding: 14px 14px 10px;
       display: flex; align-items: center; justify-content: space-between;
       gap: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04);
     }
     .dash-head .brand {
-      min-width: 0; display: flex; align-items: center; gap: 8px; flex: 1;
+      min-width: 0; display: flex; align-items: center; gap: 10px; flex: 1;
     }
-    .dash-head .brand .logo-ic { font-size: 20px; flex-shrink: 0; }
     .dash-head .brand .txt { min-width: 0; }
-    .dash-head .toko { font-size: 15px; font-weight: 800; color: var(--gray-9);
-      line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .dash-head .tgl  { font-size: 11px; color: var(--gray-5); }
+    .dash-head .toko {
+      font-size: 20px; font-weight: 700; color: var(--gray-9);
+      line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      letter-spacing: -.01em;
+    }
+    .dash-head .tgl  { font-size: 12px; color: var(--gray-5); margin-top: 2px; }
     .dash-head .bell {
       position: relative; display: inline-flex; align-items: center; justify-content: center;
-      width: 40px; height: 40px; border-radius: 50%;
-      background: var(--gray-1); color: var(--gray-7);
-      border: none; cursor: pointer; flex-shrink: 0; font-size: 18px;
+      width: 38px; height: 38px; border-radius: 10px;
+      background: #fff; color: var(--primary);
+      border: none; cursor: pointer; flex-shrink: 0;
+      box-shadow: var(--shadow-md);
       text-decoration: none;
     }
-    .dash-head .bell:hover { background: var(--gray-2); }
+    .dash-head .bell:hover { box-shadow: var(--shadow-lg); }
+    .dash-head .bell svg { display: block; }
     .dash-head .bell-dot {
-      position: absolute; top: 6px; right: 6px;
+      position: absolute; top: -4px; right: -4px;
       min-width: 18px; height: 18px; padding: 0 5px;
       background: var(--danger); color: #fff;
       border-radius: 99px; font-size: 10px; font-weight: 800;
@@ -61,23 +72,27 @@
       margin-bottom: 14px;
     }
     .kpi-card {
-      background: #fff; border-radius: 12px; padding: 12px 10px;
-      box-shadow: var(--shadow-sm); border: 1px solid var(--gray-3);
-      text-align: center; text-decoration: none; cursor: pointer;
+      background: #fff; border-radius: 10px; padding: 10px 8px;
+      box-shadow: var(--shadow-md); border: none;
+      text-align: left; text-decoration: none; cursor: pointer;
       transition: transform .15s, box-shadow .15s;
-      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
     }
     .kpi-card:active { transform: scale(.97); }
-    .kpi-card:hover { box-shadow: var(--shadow-md); }
-    .kpi-val { font-size: 18px; font-weight: 800; line-height: 1.1; color: var(--gray-9); }
-    .kpi-val.primary { color: var(--primary); }
-    .kpi-val.success { color: var(--success); }
-    .kpi-val.warning { color: var(--warning); }
-    .kpi-lbl { font-size: 10px; color: var(--gray-5); font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
+    .kpi-card:hover { box-shadow: var(--shadow-lg); }
+    .kpi-lbl {
+      font-size: 11px; color: var(--gray-5); font-weight: 400;
+      text-transform: uppercase; letter-spacing: .05em;
+    }
+    .kpi-val { font-size: 18px; font-weight: 700; line-height: 1.1; color: var(--gray-9); margin-top: 2px; }
+    .kpi-val.primary { color: var(--gray-9); }
+    .kpi-val.success { color: var(--gray-9); font-size: 15px; }
+    .kpi-val.warning { color: var(--gray-9); }
     @media (min-width: 768px) {
-      .kpi-card { padding: 16px 12px; gap: 6px; }
+      .kpi-card { padding: 14px 12px; gap: 4px; }
       .kpi-val { font-size: 24px; }
-      .kpi-lbl { font-size: 11px; }
+      .kpi-val.success { font-size: 20px; }
+      .kpi-lbl { font-size: 12px; }
     }
 
     /* ── Section ───────────────────────────────────────── */
@@ -86,7 +101,7 @@
       display: flex; align-items: center; justify-content: space-between;
       gap: 8px; margin-bottom: 8px;
     }
-    .section-head h2 { font-size: 14px; font-weight: 800; color: var(--gray-9); display: flex; align-items: center; gap: 6px; }
+    .section-head h2 { font-size: 13px; font-weight: 700; color: var(--gray-9); display: flex; align-items: center; gap: 6px; letter-spacing: -.01em; }
     .section-head a  { font-size: 12px; color: var(--primary); text-decoration: none; font-weight: 700; }
 
     .sub-section { margin-top: 10px; }
@@ -102,17 +117,40 @@
     .sub-section-title.danger .count { background: var(--danger); color: #fff; }
     .sub-section-title.warning .count { background: var(--warning-lt); color: var(--warning); }
 
-    /* ── Tagihan hero ──────────────────────────────────── */
+    /* ── Tagihan hero (Nala — inline order rows) ───────── */
     .tagihan-hero {
       background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dk) 100%);
-      color: #fff; border-radius: 14px; padding: 16px 18px;
+      color: #fff; border-radius: 14px; padding: 14px;
       box-shadow: 0 4px 16px rgba(220,38,38,.25);
       margin-bottom: 10px; display: block; text-decoration: none;
     }
-    .tagihan-hero .lbl { font-size: 11px; opacity: .9; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; display: flex; align-items: center; gap: 6px; }
-    .tagihan-hero .amt { font-size: 26px; font-weight: 800; margin-top: 6px; line-height: 1.1; }
-    .tagihan-hero .sub { font-size: 12px; opacity: .9; margin-top: 4px; }
+    .tagihan-hero .lbl { font-size: 12px; opacity: .9; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; display: flex; align-items: center; gap: 6px; }
+    .tagihan-hero .amt { font-size: 22px; font-weight: 700; margin-top: 4px; line-height: 1.1; }
+    .tagihan-hero .sub { font-size: 12px; opacity: .9; margin-top: 2px; }
     .tagihan-hero.empty { background: linear-gradient(135deg, var(--success) 0%, var(--success-dk) 100%); box-shadow: 0 4px 16px rgba(22,163,74,.2); }
+    .hero-list {
+      display: flex; flex-direction: column; gap: 8px; margin-top: 12px;
+    }
+    .hero-row {
+      background: rgba(255,255,255,0.15);
+      border-radius: 8px; padding: 8px 10px;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .hero-row .hr-txt { min-width: 0; flex: 1; }
+    .hero-row .hr-name { font-size: 13px; font-weight: 600; color: #fff;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hero-row .hr-amt  { font-size: 12px; opacity: .9; color: #fff; margin-top: 1px; }
+    .hero-row .hr-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .hero-row .hr-btn {
+      background: #fff; color: var(--danger); border: none; border-radius: 8px;
+      padding: 0 10px; height: 30px; font-size: 12px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+    }
+    .hero-row .hr-btn.icon {
+      background: rgba(255,255,255,0.2); color: #fff;
+      width: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .hero-row .hr-btn:active { transform: scale(.96); }
     .tagihan-link {
       display: block; text-align: center; padding: 10px;
       color: var(--primary); font-size: 13px; font-weight: 700; text-decoration: none;
@@ -270,36 +308,38 @@
 <body>
 
 <div class="page">
-  <!-- HEADER STICKY -->
+  <!-- HEADER STICKY (Nala style) -->
   <div class="dash-head">
     <div class="brand">
-      <span class="logo-ic">🧺</span>
       <div class="txt">
-        <div class="toko" id="tokoNama">POS Laundry</div>
+        <div class="toko" id="tokoNama">nala laundry</div>
         <div class="tgl" id="pageDate">Memuat...</div>
       </div>
     </div>
-    <button class="btn-ai desktop-only" onclick="toggleAIChat()">🤖 Tanya AI</button>
-    <button class="bell" onclick="showNotifInfo()" id="bellBtn" title="Notifikasi">
-      🔔
+    <button class="btn-ai desktop-only" onclick="toggleAIChat()">Tanya AI</button>
+    <button class="bell" onclick="showNotifInfo()" id="bellBtn" title="Notifikasi" aria-label="Notifikasi">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+      </svg>
       <span class="bell-dot" id="bellDot" style="display:none">0</span>
     </button>
   </div>
 
   <div class="body-wrap">
-    <!-- KPI STRIP -->
+    <!-- KPI STRIP (Nala — label atas, angka bawah) -->
     <div class="kpi-strip">
       <a href="/order" class="kpi-card">
+        <div class="kpi-lbl">Order</div>
         <div class="kpi-val primary" id="kpiOrder">—</div>
-        <div class="kpi-lbl">Order Hari Ini</div>
       </a>
       <a href="/laporan" class="kpi-card">
+        <div class="kpi-lbl">Omset</div>
         <div class="kpi-val success" id="kpiOmset">—</div>
-        <div class="kpi-lbl">Omset Hari Ini</div>
       </a>
       <a href="/order" class="kpi-card">
+        <div class="kpi-lbl">Proses</div>
         <div class="kpi-val warning" id="kpiProses">—</div>
-        <div class="kpi-lbl">Sedang Proses</div>
       </a>
     </div>
 
@@ -308,15 +348,15 @@
         <!-- SEKSI 1: TAGIHAN -->
         <div class="section">
           <div class="section-head">
-            <h2>💰 Tagihan Belum Lunas</h2>
-            <a href="/tagihan">Lihat Semua →</a>
+            <h2>Tagihan Belum Lunas</h2>
+            <a href="/tagihan">Lihat Semua</a>
           </div>
-          <a href="/tagihan" class="tagihan-hero" id="tagihanHero">
-            <div class="lbl">⚠️ Total tagihan</div>
+          <div class="tagihan-hero" id="tagihanHero">
+            <div class="lbl">Tagihan Belum Lunas</div>
             <div class="amt" id="tagihanAmt">Rp 0</div>
             <div class="sub" id="tagihanSub">— order belum lunas</div>
-          </a>
-          <div class="list" id="tagihanList"></div>
+            <div class="hero-list" id="tagihanList"></div>
+          </div>
           <a href="/tagihan" class="tagihan-link" id="tagihanLink" style="display:none">
             Lihat Semua Tagihan →
           </a>
@@ -325,12 +365,12 @@
         <!-- SEKSI 2: PERLU TINDAKAN -->
         <div class="section">
           <div class="section-head">
-            <h2>⚡ Perlu Tindakan</h2>
+            <h2>Perlu Tindakan</h2>
           </div>
 
           <div class="sub-section">
             <div class="sub-section-title warning">
-              ✅ Selesai Belum Diambil
+              Selesai Belum Diambil
               <span class="count" id="cntBelumDiambil">0</span>
             </div>
             <div class="list" id="listBelumDiambil"></div>
@@ -338,7 +378,7 @@
 
           <div class="sub-section">
             <div class="sub-section-title danger">
-              🔴 Lewat Estimasi
+              Lewat Estimasi
               <span class="count" id="cntLewat">0</span>
             </div>
             <div class="list" id="listLewat"></div>
@@ -348,8 +388,8 @@
         <!-- SEKSI 4: ANTRIAN AKTIF -->
         <div class="section">
           <div class="section-head">
-            <h2>📋 Antrian Aktif</h2>
-            <a href="/order">Kelola →</a>
+            <h2>Antrian Aktif</h2>
+            <a href="/order">Kelola</a>
           </div>
           <div class="list" id="antrianList"><div class="empty">Memuat...</div></div>
         </div>
@@ -357,7 +397,7 @@
         <!-- SEKSI 5: SELESAI HARI INI (tab) -->
         <div class="section">
           <div class="section-head">
-            <h2>📅 Estimasi Hari Ini</h2>
+            <h2>Estimasi Hari Ini</h2>
           </div>
           <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('selesai', event)">
@@ -376,7 +416,7 @@
         <!-- SEKSI 3: WIDGET AJ -->
         <div class="section" id="ajSection" style="display:none">
           <div class="section-head">
-            <h2>🛵 Antar Jemput Hari Ini</h2>
+            <h2>Antar Jemput Hari Ini</h2>
           </div>
           <div class="aj-widget" id="ajWidget"></div>
         </div>
@@ -384,8 +424,8 @@
         <!-- SEKSI 3B: WIDGET RESERVASI JEMPUT -->
         <div class="section" id="rjSection" style="display:none">
           <div class="section-head">
-            <h2>📅 Penjemputan Hari Ini <span id="rjCount" style="color:var(--primary)"></span></h2>
-            <a href="/reservasi-jemput">Kelola →</a>
+            <h2>Penjemputan Hari Ini <span id="rjCount" style="color:var(--primary)"></span></h2>
+            <a href="/reservasi-jemput">Kelola</a>
           </div>
           <div class="aj-widget" id="rjWidget"></div>
         </div>
@@ -393,28 +433,28 @@
         <!-- WIDGET STOK MENIPIS (mobile + desktop, tampil hanya jika ada) -->
         <div class="section" id="stokMenipisSection" style="display:none">
           <div class="section-head">
-            <h2>📦 Stok Menipis <span id="stokMenipisCount" style="color:var(--danger)"></span></h2>
-            <a href="/stok-bahan">Lihat Stok Bahan →</a>
+            <h2>Stok Menipis <span id="stokMenipisCount" style="color:var(--danger)"></span></h2>
+            <a href="/stok-bahan">Lihat Stok Bahan</a>
           </div>
           <div class="chart-card" id="stokMenipisBody"></div>
         </div>
 
         <!-- GRAFIK (laptop only) -->
         <div class="section desktop-only">
-          <div class="section-head"><h2>📊 Omset 7 Hari</h2></div>
+          <div class="section-head"><h2>Omset 7 Hari</h2></div>
           <div class="chart-card"><div class="chart-wrap"><canvas id="omsetChart"></canvas></div></div>
         </div>
 
         <div class="section desktop-only">
           <div class="section-head">
-            <h2>💳 Deposit Pelanggan</h2>
-            <a href="/deposit">Kelola →</a>
+            <h2>Deposit Pelanggan</h2>
+            <a href="/deposit">Kelola</a>
           </div>
           <div class="chart-card" id="depositBody"><div class="empty">Memuat...</div></div>
         </div>
 
         <div class="section desktop-only">
-          <div class="section-head"><h2>🎁 Promo Aktif</h2></div>
+          <div class="section-head"><h2>Promo Aktif</h2></div>
           <div class="chart-card" id="promoBody"><div class="empty">Memuat...</div></div>
         </div>
       </div>
@@ -426,8 +466,8 @@
 
 <div id="aiChatPanel">
   <div class="ai-chat-header">
-    <h3>🤖 AI Assistant</h3>
-    <button onclick="toggleAIChat()">✕</button>
+    <h3>AI Assistant</h3>
+    <button onclick="toggleAIChat()" aria-label="Tutup">×</button>
   </div>
   <div class="ai-chat-body" id="aiChatBody">
     <div style="text-align:center;color:var(--gray-5);font-size:12px;padding:20px">
@@ -436,13 +476,15 @@
   </div>
   <div class="ai-chat-footer">
     <div class="ai-quick-btns">
-      <button onclick="sendQuickQuestion('Ringkasan hari ini')">📊 Ringkasan</button>
-      <button onclick="sendQuickQuestion('Pendapatan minggu ini')">💰 Pendapatan</button>
-      <button onclick="sendQuickQuestion('Order lewat waktu')">⚠️ Lewat waktu</button>
+      <button onclick="sendQuickQuestion('Ringkasan hari ini')">Ringkasan</button>
+      <button onclick="sendQuickQuestion('Pendapatan minggu ini')">Pendapatan</button>
+      <button onclick="sendQuickQuestion('Order lewat waktu')">Lewat Waktu</button>
     </div>
     <div class="ai-input-wrap">
       <input type="text" id="aiInput" placeholder="Ketik pertanyaan..." onkeypress="if(event.key==='Enter')sendAIMessage()"/>
-      <button onclick="sendAIMessage()" id="btnSendAI">➤</button>
+      <button onclick="sendAIMessage()" id="btnSendAI" aria-label="Kirim">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+      </button>
     </div>
   </div>
 </div>
@@ -474,10 +516,10 @@ window.showToast = showToast;
 function showNotifInfo() {
   if (notifTotal === 0) { showToast('Tidak ada notifikasi'); return; }
   const parts = [];
-  if (notifBreakdown.lewatWaktu > 0) parts.push(`🔴 ${notifBreakdown.lewatWaktu} order lewat waktu`);
-  if (notifBreakdown.ajBelum > 0)   parts.push(`🛵 ${notifBreakdown.ajBelum} order AJ belum diproses`);
-  if (notifBreakdown.tagihanLama > 0) parts.push(`💰 ${notifBreakdown.tagihanLama} tagihan > 7 hari`);
-  alert(parts.join('\n'));
+  if (notifBreakdown.lewatWaktu > 0) parts.push(`${notifBreakdown.lewatWaktu} order lewat waktu`);
+  if (notifBreakdown.ajBelum > 0)   parts.push(`${notifBreakdown.ajBelum} order AJ belum diproses`);
+  if (notifBreakdown.tagihanLama > 0) parts.push(`${notifBreakdown.tagihanLama} tagihan > 7 hari`);
+  showToast(parts.join(' · '));
 }
 
 function setNotif(n, breakdown) {
@@ -531,7 +573,7 @@ function renderTagihan(list, totalSisa, totalCount) {
 
   hero.classList.toggle('empty', totalCount === 0);
   if (totalCount === 0) {
-    amt.textContent = '✓ Lunas';
+    amt.textContent = 'Lunas';
     sub.textContent = 'Semua tagihan sudah dibayar';
     listEl.innerHTML = '';
     linkEl.style.display = 'none';
@@ -543,24 +585,20 @@ function renderTagihan(list, totalSisa, totalCount) {
 
   listEl.innerHTML = list.slice(0, 3).map(t => {
     const sisa = Number(t.total_bayar) - Number(t.bayar);
-    const hari = daysSince(t.tanggal_masuk);
-    const urgent = hari >= 3;
     const tel = t.pelanggan_telepon;
     const pl = JSON.stringify(payload(t)).replace(/'/g, "&#39;");
     const wp = JSON.stringify(waPayload(t)).replace(/'/g, "&#39;");
     return `
-    <div class="order-card ${urgent ? 'urgent' : ''}">
-      <div class="order-card-row1">
-        <div style="min-width:0;flex:1">
-          <div class="order-card-nama">${escHtml(t.pelanggan_nama || 'Non-member')}</div>
-          <div class="order-card-meta">${t.nomor_transaksi} · ${hari} hari lalu</div>
-        </div>
-        <div class="order-card-amt danger">${fmtRpShort(sisa)}</div>
+    <div class="hero-row">
+      <div class="hr-txt">
+        <div class="hr-name">${escHtml(t.pelanggan_nama || 'Non-member')}</div>
+        <div class="hr-amt">${fmtRpShort(sisa)} · ${t.nomor_transaksi}</div>
       </div>
-      <div class="order-card-actions">
-        <button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>💰 Lunasi</button>
-        ${tel ? `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>💬 WA</button>` : ''}
-        <a class="btn btn-detail" href="/order/detail?id=${t.id}">›</a>
+      <div class="hr-actions">
+        <button class="hr-btn" onclick='openLunasiSheet(${pl})'>Lunasi</button>
+        ${tel ? `<button class="hr-btn icon" onclick='openWaSheet(${wp})' title="Kirim WA" aria-label="Kirim WA">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </button>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -594,9 +632,9 @@ function renderBelumDiambil(list) {
         ${!lunas ? `<span class="ds-badge ds-badge-belum">Belum Lunas</span>` : `<span class="ds-badge ds-badge-lunas">Lunas</span>`}
       </div>
       <div class="order-card-actions">
-        ${tel ? `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>💬 WA Siap Diambil</button>` : ''}
-        <button class="btn btn-selesai" onclick="updateStatus(${t.id},'diambil',this)">✓ Diambil</button>
-        ${!lunas ? `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>💰</button>` : ''}
+        ${tel ? `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>WA Siap Diambil</button>` : ''}
+        <button class="btn btn-selesai" onclick="updateStatus(${t.id},'diambil',this)">Diambil</button>
+        ${!lunas ? `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>Lunasi</button>` : ''}
         <a class="btn btn-detail" href="/order/detail?id=${t.id}">›</a>
       </div>
     </div>`;
@@ -633,9 +671,9 @@ function renderLewat(list) {
         ${!lunas ? `<span class="ds-badge ds-badge-belum">Belum Lunas</span>` : ''}
       </div>
       <div class="order-card-actions">
-        <button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">✓ Selesai</button>
-        ${!lunas ? `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>💰</button>` : ''}
-        ${tel ? `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>💬</button>` : ''}
+        <button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">Selesai</button>
+        ${!lunas ? `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>Lunasi</button>` : ''}
+        ${tel ? `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>WA</button>` : ''}
         <a class="btn btn-detail" href="/order/detail?id=${t.id}">›</a>
       </div>
     </div>`;
@@ -646,7 +684,7 @@ function renderLewat(list) {
 function renderAntrian(list) {
   const el = document.getElementById('antrianList');
   if (!list.length) {
-    el.innerHTML = '<div class="empty"><span class="ic">📭</span>Tidak ada antrian aktif</div>';
+    el.innerHTML = '<div class="empty">Tidak ada antrian aktif</div>';
     return;
   }
   el.innerHTML = list.slice(0, 5).map(t => {
@@ -670,10 +708,10 @@ function renderAntrian(list) {
         ${!lunas ? `<span class="ds-badge ds-badge-belum">Belum Lunas</span>` : `<span class="ds-badge ds-badge-lunas">Lunas</span>`}
       </div>
       <div class="order-card-actions">
-        ${t.status === 'pending' ? `<button class="btn btn-proses" onclick="updateStatus(${t.id},'proses',this)">▶ Proses</button>` : ''}
-        ${t.status === 'proses' ? `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">✓ Selesai</button>` : ''}
-        ${!lunas ? `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>💰 Lunasi</button>` : ''}
-        ${tel ? `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>💬</button>` : ''}
+        ${t.status === 'pending' ? `<button class="btn btn-proses" onclick="updateStatus(${t.id},'proses',this)">Proses</button>` : ''}
+        ${t.status === 'proses' ? `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">Selesai</button>` : ''}
+        ${!lunas ? `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>Lunasi</button>` : ''}
+        ${tel ? `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>WA</button>` : ''}
         <a class="btn btn-detail" href="/order/detail?id=${t.id}">›</a>
       </div>
     </div>`;
@@ -704,9 +742,9 @@ function renderTabCard(t, kind) {
       ${hari > 0 ? `<span class="ds-badge ds-badge-belum">Telat ${hari}h</span>` : ''}
     </div>
     <div class="order-card-actions">
-      <button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">✓ Selesai</button>
-      ${!lunas ? `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>💰</button>` : ''}
-      ${tel ? `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>💬</button>` : ''}
+      <button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">Selesai</button>
+      ${!lunas ? `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>Lunasi</button>` : ''}
+      ${tel ? `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>WA</button>` : ''}
       <a class="btn btn-detail" href="/order/detail?id=${t.id}">›</a>
     </div>
   </div>`;
@@ -716,7 +754,7 @@ function renderSelesaiHariIni(list) {
   document.getElementById('badgeSelesai').textContent = list.length;
   const el = document.getElementById('tabSelesai');
   if (!list.length) {
-    el.innerHTML = '<div class="empty"><span class="ic">✨</span>Tidak ada estimasi selesai hari ini</div>';
+    el.innerHTML = '<div class="empty">Tidak ada estimasi selesai hari ini</div>';
     return;
   }
   el.innerHTML = '<div class="list">' + list.map(t => renderTabCard(t, 'selesai')).join('') + '</div>';
@@ -726,7 +764,7 @@ function renderLewatWaktu(list) {
   document.getElementById('badgeLewat').textContent = list.length;
   const el = document.getElementById('tabLewat');
   if (!list.length) {
-    el.innerHTML = '<div class="empty"><span class="ic">👍</span>Tidak ada order lewat waktu</div>';
+    el.innerHTML = '<div class="empty">Tidak ada order lewat waktu</div>';
     return;
   }
   el.innerHTML = '<div class="list">' + list.map(t => renderTabCard(t, 'lewat')).join('') + '</div>';
@@ -785,7 +823,7 @@ function renderDeposit(d) {
       </div>
       ${d.pelanggan_saldo_tipis > 0 ? `
       <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--danger-lt);border-radius:7px">
-        <span style="font-size:12px;color:var(--danger);font-weight:600">⚠ Saldo tipis</span>
+        <span style="font-size:12px;color:var(--danger);font-weight:600">Saldo tipis</span>
         <span style="font-size:14px;font-weight:800;color:var(--danger)">${d.pelanggan_saldo_tipis}</span>
       </div>` : ''}
     </div>`;
@@ -887,21 +925,21 @@ function renderReservasiWidget(list) {
   const rows = list.map(r => {
     const jam = r.jam_jemput || '--:--';
     const alamat = r.alamat || r.pelanggan_alamat || '';
-    const catatan = r.catatan ? `<div style="font-size:11px;color:var(--gray-6);margin-top:2px">📝 ${escHtml(r.catatan)}</div>` : '';
+    const catatan = r.catatan ? `<div style="font-size:11px;color:var(--gray-6);margin-top:2px;font-style:italic">${escHtml(r.catatan)}</div>` : '';
     return `
       <div style="padding:10px;background:#fff;border-radius:10px;margin-bottom:8px;border-left:3px solid var(--primary)">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
           <div style="flex:1;min-width:0">
-            <div style="font-weight:800;font-size:13px;color:var(--primary)">⏰ ${escHtml(jam)}</div>
+            <div style="font-weight:800;font-size:13px;color:var(--primary)">${escHtml(jam)}</div>
             <div style="font-weight:700;font-size:14px;margin-top:2px">${escHtml(r.pelanggan_nama || '—')}</div>
-            ${alamat ? `<div style="font-size:12px;color:var(--gray-6);margin-top:2px">📍 ${escHtml(alamat)}</div>` : ''}
+            ${alamat ? `<div style="font-size:12px;color:var(--gray-6);margin-top:2px">${escHtml(alamat)}</div>` : ''}
             ${catatan}
           </div>
         </div>
         <div style="display:flex;gap:6px;margin-top:8px">
-          <button class="btn btn-selesai" style="flex:1;padding:8px;min-height:36px;font-size:12px" onclick="rjSelesai(${r.id}, ${r.pelanggan_id || 'null'})">✓ Selesai</button>
-          <a class="btn btn-detail" style="padding:8px 12px;min-height:36px;font-size:12px;text-decoration:none" href="/reservasi-jemput?edit=${r.id}">✏️</a>
-          <button class="btn btn-wa" style="padding:8px 12px;min-height:36px;font-size:12px;background:#EF4444" onclick="rjBatal(${r.id})">🗑️</button>
+          <button class="btn btn-selesai" style="flex:1;padding:8px;min-height:36px;font-size:12px" onclick="rjSelesai(${r.id}, ${r.pelanggan_id || 'null'})">Selesai</button>
+          <a class="btn btn-detail" style="padding:8px 12px;min-height:36px;font-size:12px;text-decoration:none" href="/reservasi-jemput?edit=${r.id}">Edit</a>
+          <button class="btn btn-wa" style="padding:8px 12px;min-height:36px;font-size:12px;background:#EF4444" onclick="rjBatal(${r.id})">Batal</button>
         </div>
       </div>`;
   }).join('');
@@ -968,15 +1006,15 @@ function renderAJWidget(d) {
   const widget = document.getElementById('ajWidget');
   const list = d.order_list.map(o => {
     if (o.sudah_diterapkan) {
-      return `<div class="aj-row"><span>✓ ${escHtml(o.nama_pelanggan)}</span><span style="color:var(--gray-5)">diterapkan</span></div>`;
+      return `<div class="aj-row"><span>${escHtml(o.nama_pelanggan)}</span><span style="color:var(--success);font-weight:700">Diterapkan</span></div>`;
     }
     if (!o.has_jarak) {
       return `<div class="aj-row">
-        <span>⚠️ ${escHtml(o.nama_pelanggan)}</span>
+        <span style="color:var(--warning);font-weight:600">${escHtml(o.nama_pelanggan)}</span>
         <button class="btn btn-detail" style="min-height:32px;padding:4px 10px;font-size:11px" onclick="ajIsiJarak(${o.order_id}, ${o.pelanggan_id || 'null'}, '${escHtml(o.nama_pelanggan).replace(/'/g,"\\'")}')">Isi Jarak</button>
       </div>`;
     }
-    return `<div class="aj-row"><span>📦 ${escHtml(o.nama_pelanggan)}</span><span style="color:var(--gray-5)">${o.jarak_km} km</span></div>`;
+    return `<div class="aj-row"><span>${escHtml(o.nama_pelanggan)}</span><span style="color:var(--gray-5)">${o.jarak_km} km</span></div>`;
   }).join('');
 
   let html = `<div style="margin-bottom:10px;font-size:12px;color:var(--gray-6)">
@@ -1005,9 +1043,9 @@ function renderAJWidget(d) {
              style="flex:1;padding:8px 10px;border:1px solid var(--gray-3);border-radius:8px;font-size:13px;font-weight:700"/>
       <button class="btn btn-selesai" style="padding:8px 14px;min-height:40px;font-size:12px" onclick="ajTerapkanTarif()">Terapkan ${d.belum_diterapkan}</button>
     </div>
-    <a class="btn btn-detail" style="display:block;text-align:center;padding:10px;font-size:13px" href="/antar-jemput">⚙️ Edit Manual</a>`;
+    <a class="btn btn-detail" style="display:block;text-align:center;padding:10px;font-size:13px" href="/antar-jemput">Edit Manual</a>`;
   } else if (d.belum_diterapkan === 0 && d.sudah_diterapkan > 0) {
-    html += `<div style="padding:8px;background:var(--success-lt);border-radius:8px;font-size:12px;color:var(--success);text-align:center;font-weight:700">✓ Semua tarif AJ sudah diterapkan</div>`;
+    html += `<div style="padding:8px;background:var(--success-lt);border-radius:8px;font-size:12px;color:var(--success);text-align:center;font-weight:700">Semua tarif AJ sudah diterapkan</div>`;
   }
 
   widget.innerHTML = html;
@@ -1056,7 +1094,7 @@ async function ajTerapkanTarif() {
     });
     const j = await r.json();
     if (!r.ok) throw new Error(j.error);
-    showToast(`✓ Tarif diterapkan ke ${j.biaya_terpasang} order`);
+    showToast(`Tarif diterapkan ke ${j.biaya_terpasang} order`);
     loadDashboard();
     if (window.posRefreshBadges) window.posRefreshBadges();
   } catch (e) { showToast('Gagal: ' + e.message); }
@@ -1084,7 +1122,7 @@ loadDashboard();
 setInterval(loadDashboard, 300000);
 
 window.addEventListener('lunasi:done', () => {
-  showToast('✓ Pembayaran tersimpan');
+  showToast('Pembayaran tersimpan');
   loadDashboard();
 });
 
@@ -1094,7 +1132,7 @@ function addAIMessage(role, content) {
   const chatBody = document.getElementById('aiChatBody');
   const msgDiv = document.createElement('div');
   msgDiv.className = `ai-chat-msg ${role === 'user' ? 'user' : 'assistant'}`;
-  msgDiv.innerHTML = `<div class="avatar">${role === 'user' ? '👤' : '🤖'}</div><div class="bubble">${escHtml(content).replace(/\n/g,'<br>')}</div>`;
+  msgDiv.innerHTML = `<div class="avatar">${role === 'user' ? 'U' : 'AI'}</div><div class="bubble">${escHtml(content).replace(/\n/g,'<br>')}</div>`;
   const welcome = chatBody.querySelector('[style*="text-align:center"]');
   if (welcome) welcome.remove();
   chatBody.appendChild(msgDiv);

@@ -48,31 +48,33 @@
     .search-bar input:focus { border-color: var(--primary); background: #fff; }
 
     /* ── Filter pills ──────────────────────────────────── */
+    /* Spek: 4 pill TETAP sama lebar (bukan scroll), Semua/Aktif/Selesai/Lewat Waktu.
+       Filter "Belum Lunas" SENGAJA tidak ada di sini — urusan bayar hanya di Tagihan. */
     .pill-wrap {
       background: #fff; border-bottom: 1px solid var(--gray-3);
       padding: 10px 12px;
-      overflow-x: auto; -webkit-overflow-scrolling: touch;
     }
-    .pill-wrap::-webkit-scrollbar { display: none; }
-    .pills { display: inline-flex; gap: 8px; white-space: nowrap; }
+    .pills { display: flex; gap: 6px; }
     .pill {
-      padding: 8px 14px; border-radius: 99px;
+      flex: 1;
+      height: 36px; padding: 0 10px; border-radius: 999px;
       border: 1px solid var(--gray-3); background: #fff;
-      font-size: 13px; font-weight: 700; cursor: pointer;
-      color: var(--gray-7); font-family: inherit;
-      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      color: var(--gray-5); font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
       transition: all .15s;
+      white-space: nowrap;
     }
     .pill:active { transform: scale(.97); }
     .pill .cnt {
       background: var(--gray-2); color: var(--gray-6);
-      padding: 1px 7px; border-radius: 99px;
-      font-size: 11px; font-weight: 800;
+      padding: 0 6px; border-radius: 999px;
+      font-size: 10px; font-weight: 800;
+      min-width: 16px; height: 16px;
+      display: inline-flex; align-items: center; justify-content: center;
     }
     .pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
     .pill.active .cnt { background: rgba(255,255,255,.25); color: #fff; }
-    .pill.danger.active { background: var(--danger); border-color: var(--danger); }
-    .pill.warning.active { background: var(--warning); border-color: var(--warning); }
 
     /* ── Body ──────────────────────────────────────────── */
     .body-wrap { padding: 14px 12px; }
@@ -233,9 +235,13 @@
 <div class="page">
   <!-- HEADER -->
   <div class="head">
-    <a href="/dashboard" class="back" title="Kembali">←</a>
+    <a href="/dashboard" class="back" title="Kembali" aria-label="Kembali">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
     <div class="ttl">Antrian</div>
-    <button class="ic-btn" onclick="toggleSearch()" title="Cari">🔍</button>
+    <button class="ic-btn" onclick="toggleSearch()" title="Cari" aria-label="Cari">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5 16.7 16.7"/></svg>
+    </button>
   </div>
 
   <!-- SEARCH (toggle) -->
@@ -244,7 +250,7 @@
            oninput="debounceLoad()"/>
   </div>
 
-  <!-- FILTER PILLS -->
+  <!-- FILTER PILLS — 4 sama lebar. "Belum Lunas" khusus di Tagihan. -->
   <div class="pill-wrap">
     <div class="pills" id="pills">
       <button class="pill active" data-quick="semua">
@@ -256,11 +262,8 @@
       <button class="pill" data-quick="selesai">
         Selesai <span class="cnt" id="cnt-selesai">0</span>
       </button>
-      <button class="pill danger" data-quick="lewat">
-        🔴 Lewat Waktu <span class="cnt" id="cnt-lewat">0</span>
-      </button>
-      <button class="pill warning" data-quick="belum_lunas">
-        💰 Belum Lunas <span class="cnt" id="cnt-belum_lunas">0</span>
+      <button class="pill" data-quick="lewat">
+        Lewat Waktu <span class="cnt" id="cnt-lewat">0</span>
       </button>
     </div>
   </div>
@@ -389,8 +392,10 @@ async function loadCounts() {
     document.getElementById('cnt-semua').textContent = semua.meta?.total || 0;
     document.getElementById('cnt-aktif').textContent = aktifTotal;
     document.getElementById('cnt-selesai').textContent = selesai.meta?.total || 0;
-    document.getElementById('cnt-belum_lunas').textContent = belum.meta?.total || 0;
     document.getElementById('cnt-lewat').textContent = lewatCount;
+    // (Belum Lunas dihitung tapi tidak ditampilkan di Antrian —
+    //  ada halaman Tagihan tersendiri untuk itu)
+    void belum;
   } catch {}
 }
 
@@ -420,7 +425,7 @@ async function loadOrders(page = 1) {
   if (belumLunas) params.set('belum_lunas', '1');
   if (sortParam) params.set('sort', sortParam);
 
-  document.getElementById('cardList').innerHTML = '<div class="empty"><span class="ic">⏳</span><div class="ttl">Memuat...</div></div>';
+  document.getElementById('cardList').innerHTML = '<div class="empty"><div class="ttl">Memuat…</div></div>';
   document.getElementById('tableBody').innerHTML =
     '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--gray-5)">Memuat...</td></tr>';
 
@@ -445,7 +450,7 @@ async function loadOrders(page = 1) {
     renderPagination(totalAll);
   } catch (err) {
     console.error(err);
-    document.getElementById('cardList').innerHTML = '<div class="empty"><span class="ic">⚠️</span><div class="ttl">Gagal memuat data</div></div>';
+    document.getElementById('cardList').innerHTML = '<div class="empty"><div class="ttl">Gagal memuat data</div></div>';
     document.getElementById('tableBody').innerHTML =
       '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--gray-5)">Gagal memuat data</td></tr>';
   }
@@ -475,26 +480,26 @@ function renderCards(rows) {
     // Baris 1: tombol status
     let row1 = '';
     if (t.status === 'pending') {
-      row1 += `<button class="btn btn-proses" onclick="updateStatus(${t.id},'proses',this)">▶ Proses</button>`;
-      row1 += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">✓ Selesai</button>`;
+      row1 += `<button class="btn btn-proses" onclick="updateStatus(${t.id},'proses',this)">Proses</button>`;
+      row1 += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">Selesai</button>`;
     } else if (t.status === 'proses') {
-      row1 += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">✓ Selesai</button>`;
+      row1 += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">Selesai</button>`;
     } else if (t.status === 'selesai') {
-      row1 += `<button class="btn btn-diambil" onclick="updateStatus(${t.id},'diambil',this)">✓ Diambil</button>`;
+      row1 += `<button class="btn btn-diambil" onclick="updateStatus(${t.id},'diambil',this)">Diambil</button>`;
     }
 
     // Baris 2: Lunasi, WA, Label, Detail
     let row2 = '';
     if (!lunas && t.status !== 'dibatalkan') {
-      row2 += `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>💰 Lunasi</button>`;
+      row2 += `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>Lunasi</button>`;
     }
     if (tel && t.status !== 'dibatalkan') {
-      row2 += `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>💬 WA</button>`;
+      row2 += `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>WA</button>`;
     }
     if (t.status !== 'dibatalkan') {
-      row2 += `<button class="btn btn-label" onclick="openLabelSheet(${t.id})">🏷️ Label</button>`;
+      row2 += `<button class="btn btn-label" onclick="openLabelSheet(${t.id})">Label</button>`;
     }
-    row2 += `<a class="btn btn-detail" href="/order/detail?id=${t.id}" title="Detail">›</a>`;
+    row2 += `<a class="btn btn-detail" href="/order/detail?id=${t.id}" title="Detail" aria-label="Detail"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></a>`;
 
     const actionsHtml = `<div class="oc-actions">
       ${row1 ? `<div class="card-actions-row1">${row1}</div>` : ''}
@@ -517,9 +522,9 @@ function renderCards(rows) {
           <span class="total">${fmtRp(t.total_bayar)}</span>
         </div>
         <div class="oc-badges">
-          <span class="ds-badge ds-badge-${t.status}">● ${statusLabel(t.status)}</span>
-          ${!lunas ? `<span class="ds-badge ds-badge-belum">💰 BELUM LUNAS</span>` : `<span class="ds-badge ds-badge-lunas">✓ LUNAS</span>`}
-          ${lewat ? `<span class="ds-badge ds-badge-belum">🔴 LEWAT WAKTU</span>` : ''}
+          <span class="ds-badge ds-badge-${t.status}">${statusLabel(t.status)}</span>
+          ${!lunas ? `<span class="ds-badge ds-badge-belum">Belum Lunas</span>` : `<span class="ds-badge ds-badge-lunas">Lunas</span>`}
+          ${lewat ? `<span class="ds-badge ds-badge-lewat">Lewat Waktu</span>` : ''}
         </div>
       </div>
       ${actionsHtml}
@@ -543,25 +548,23 @@ function renderTable(rows) {
 
     let actions = '';
     if (t.status === 'pending') {
-      actions += `<button class="btn btn-proses" onclick="updateStatus(${t.id},'proses',this)">▶ Proses</button>`;
-      actions += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">✓ Selesai</button>`;
+      actions += `<button class="btn btn-proses" onclick="updateStatus(${t.id},'proses',this)">Proses</button>`;
+      actions += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">Selesai</button>`;
     } else if (t.status === 'proses') {
-      actions += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">✓ Selesai</button>`;
+      actions += `<button class="btn btn-selesai" onclick="updateStatus(${t.id},'selesai',this)">Selesai</button>`;
     } else if (t.status === 'selesai') {
-      actions += `<button class="btn btn-diambil" onclick="updateStatus(${t.id},'diambil',this)">✓ Diambil</button>`;
+      actions += `<button class="btn btn-diambil" onclick="updateStatus(${t.id},'diambil',this)">Diambil</button>`;
     }
     if (!lunas && t.status !== 'dibatalkan') {
-      actions += `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>💰</button>`;
+      actions += `<button class="btn btn-lunasi" onclick='openLunasiSheet(${pl})'>Lunasi</button>`;
     }
-    // Tombol WA tampil di semua card selama ada nomor telepon, kecuali dibatalkan
     if (tel && t.status !== 'dibatalkan') {
-      actions += `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>💬</button>`;
+      actions += `<button class="btn btn-wa" onclick='openWaSheet(${wp})'>WA</button>`;
     }
-    // Tombol Label (selalu ada kecuali dibatalkan)
     if (t.status !== 'dibatalkan') {
-      actions += `<button class="btn btn-label" onclick="openLabelSheet(${t.id})">🏷️</button>`;
+      actions += `<button class="btn btn-label" onclick="openLabelSheet(${t.id})">Label</button>`;
     }
-    actions += `<a class="btn btn-detail" href="/order/detail?id=${t.id}">›</a>`;
+    actions += `<a class="btn btn-detail" href="/order/detail?id=${t.id}" aria-label="Detail"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></a>`;
 
     return `<tr>
       <td>
@@ -580,7 +583,7 @@ function renderTable(rows) {
       </td>
       <td>
         <span class="ds-badge ds-badge-${t.status}">${t.status}</span>
-        ${lewat ? `<div class="td-meta" style="color:var(--danger);font-weight:700;">🔴 Lewat</div>` : ''}
+        ${lewat ? `<div class="td-meta" style="color:var(--danger);font-weight:700;">Lewat Waktu</div>` : ''}
       </td>
       <td style="white-space:nowrap;font-size:12px;">${fmtDate(t.tanggal_selesai)}</td>
       <td class="td-actions-cell">${actions}</td>
@@ -599,10 +602,9 @@ function renderEmpty() {
   const lbl = labels[quickFilter] || 'order';
   return `
     <div class="empty">
-      <span class="ic">📭</span>
       <div class="ttl">Tidak ada ${lbl}</div>
       <div class="sub">Belum ada data untuk filter ini</div>
-      <a href="/order/baru" class="btn">+ Buat Order Baru</a>
+      <a href="/order/baru" class="btn">Buat Order Baru</a>
     </div>`;
 }
 
@@ -626,7 +628,7 @@ function renderPagination(total) {
 }
 
 async function updateStatus(id, status, btn) {
-  if (!confirm(`Ubah status ke "${status}"?`)) return;
+  // Aksi ringan → langsung eksekusi + toast (bukan dialog konfirmasi)
   btn.disabled = true;
   try {
     const r = await fetch(`/api/v1/transaksi/${id}/status`, {
@@ -636,7 +638,7 @@ async function updateStatus(id, status, btn) {
     });
     const d = await r.json();
     if (!r.ok) { showToast('Gagal: ' + d.error); return; }
-    showToast('Status → "' + status + '"');
+    showToast('Ditandai ' + status);
     loadOrders(currentPage);
     loadCounts();
   } catch { showToast('Koneksi gagal'); }
@@ -663,7 +665,7 @@ if (qpParam && ['semua','aktif','selesai','lewat','belum_lunas'].includes(qpPara
 
 // Reload setelah lunasi
 window.addEventListener('lunasi:done', () => {
-  showToast('✓ Pembayaran tersimpan');
+  showToast('Pembayaran tersimpan');
   loadOrders(currentPage);
   loadCounts();
 });
