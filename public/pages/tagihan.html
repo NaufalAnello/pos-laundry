@@ -9,275 +9,206 @@
   <title>Tagihan — POS Laundry</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--font); background: var(--bg-page); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
+    body { font-family: var(--font); background: #F0F7FF; color: #1E2A6E; font-size: 14px; min-height: 100vh; }
 
-    .page { max-width: 1200px; margin: 0 auto; padding: 0 0 calc(var(--bn-h, 64px) + 20px); }
-    @media (min-width: 1024px) {
-      .page { padding: 0 0 40px; }
-    }
+    .page { max-width: 1200px; margin: 0 auto; }
+
+    /* Nav.js sudah render topbar mobile — sembunyikan supaya tidak dobel */
+    .pos-topbar { display: none !important; }
 
     /* ── Sticky Header ─────────────────────────────────── */
     .tg-head {
       position: sticky; top: 0; z-index: 20;
-      background: #fff; border-bottom: 1px solid var(--gray-3);
-      box-shadow: 0 1px 3px rgba(0,0,0,.04);
-      display: flex; align-items: center; gap: 8px;
-      padding: 12px 14px;
+      background: #F0F7FF;
+      padding: 14px 16px 10px;
+      display: flex; align-items: center; gap: 10px;
     }
-    .tg-back {
-      width: 40px; height: 40px; border-radius: 50%;
+    .tg-head .ic-btn {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: #fff; color: #2D3BB5;
+      border: none; cursor: pointer; flex-shrink: 0;
       display: inline-flex; align-items: center; justify-content: center;
-      background: transparent; color: var(--gray-7); border: none;
-      text-decoration: none; font-size: 20px; cursor: pointer;
-      flex-shrink: 0;
+      text-decoration: none;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
     }
-    .tg-back:hover { background: var(--gray-2); }
-    .tg-title {
-      flex: 1; font-size: 17px; font-weight: 800; color: var(--gray-9);
-      min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    .tg-head .ic-btn:hover { box-shadow: 0 2px 8px rgba(45,59,181,0.12); }
+    .tg-title { flex: 1; font-size: 20px; font-weight: 800; color: #1E2A6E; letter-spacing: -.01em; }
+
+    /* ── Search bar (toggle) ───────────────────────────── */
+    .search-bar { padding: 0 16px 8px; display: none; }
+    .search-bar.open { display: block; }
+    .search-bar input {
+      width: 100%; padding: 10px 14px; border: 1px solid #E2E8F0;
+      border-radius: 10px; font-size: 14px; font-family: inherit;
+      background: #fff; color: #1E2A6E; outline: none;
+    }
+    .search-bar input:focus { border-color: #2D3BB5; }
+
+    /* ── Body ──────────────────────────────────────────── */
+    .body-wrap {
+      padding: 4px 16px 130px;
+      display: flex; flex-direction: column; gap: 12px;
     }
 
-    /* ── Body ───────────────────────────────────────────── */
-    .body-wrap { padding: 14px; }
-
-    /* ── Summary card ───────────────────────────────────── */
+    /* ── Summary card (spek: gradient merah) ───────────── */
     .sum-card {
-      background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dk) 100%);
-      color: #fff; border-radius: 14px; padding: 18px;
-      box-shadow: 0 6px 20px rgba(220,38,38,.25);
-      margin-bottom: 14px;
-    }
-    .sum-card.empty {
-      background: linear-gradient(135deg, var(--success) 0%, var(--success-dk) 100%);
-      box-shadow: 0 6px 20px rgba(22,163,74,.2);
+      background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+      color: #fff; border-radius: 12px; padding: 16px;
+      box-shadow: 0 4px 16px rgba(220,38,38,0.20);
+      display: block; text-decoration: none;
     }
     .sum-lbl {
-      font-size: 11px; opacity: .9; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
-      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; opacity: 0.85; color: #fff;
     }
-    .sum-amt { font-size: 28px; font-weight: 800; margin-top: 6px; line-height: 1.1; }
-    .sum-sub { font-size: 13px; opacity: .9; margin-top: 4px; }
-    .sum-breakdown {
-      display: flex; gap: 8px; margin-top: 12px; padding-top: 12px;
-      border-top: 1px solid rgba(255,255,255,.2);
-      font-size: 12px; font-weight: 700; flex-wrap: wrap;
+    .sum-row {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      gap: 10px; margin-top: 4px;
     }
-    .sum-breakdown .pill {
-      display: inline-flex; align-items: center; gap: 4px;
-      background: rgba(255,255,255,.2); padding: 4px 10px;
-      border-radius: 99px;
+    .sum-amt { font-size: 26px; font-weight: 800; line-height: 1.1; color: #fff; }
+    .sum-chip {
+      display: inline-flex; align-items: center;
+      background: rgba(255,255,255,0.2); color: #fff;
+      padding: 4px 10px; border-radius: 999px;
+      font-size: 12px; font-weight: 700;
     }
-
-    /* ── Filter pill ───────────────────────────────────── */
-    .tg-pills {
-      display: flex; gap: 8px; margin-bottom: 12px;
-      overflow-x: auto; scrollbar-width: none;
-      padding-bottom: 4px;
-    }
-    .tg-pills::-webkit-scrollbar { display: none; }
-    .tg-pill {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 14px; border-radius: 99px;
-      border: 1px solid var(--gray-3); background: #fff;
-      font-size: 12px; font-weight: 700; color: var(--gray-7);
-      cursor: pointer; white-space: nowrap; min-height: 36px;
-      font-family: inherit; transition: all .15s;
-    }
-    .tg-pill:active { transform: scale(.97); }
-    .tg-pill.active { background: var(--gray-9); color: #fff; border-color: var(--gray-9); }
-    .tg-pill .cnt {
-      background: var(--gray-2); color: var(--gray-6);
-      padding: 1px 7px; border-radius: 99px;
-      font-size: 10px; font-weight: 800;
-    }
-    .tg-pill.active .cnt { background: rgba(255,255,255,.25); color: #fff; }
-
-    /* ── Search ─────────────────────────────────────────── */
-    .tg-search {
-      position: relative; margin-bottom: 12px;
-    }
-    .tg-search input {
-      width: 100%; min-height: 44px;
-      padding: 10px 14px 10px 40px;
-      border: 1px solid var(--gray-3); border-radius: 10px;
-      background: #fff; font-size: 14px; font-family: inherit;
-      outline: none;
-    }
-    .tg-search input:focus { border-color: var(--primary); }
-    .tg-search::before {
-      content: '';
-      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-      font-size: 16px; pointer-events: none;
+    .sum-card.empty {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      box-shadow: 0 4px 16px rgba(16,185,129,0.20);
     }
 
-    /* ── Sort toggle ────────────────────────────────────── */
-    .tg-sort {
-      display: flex; align-items: center; gap: 8px;
-      margin-bottom: 12px;
-    }
-    .tg-sort-lbl {
-      font-size: 11px; font-weight: 700; color: var(--gray-5); text-transform: uppercase;
-      letter-spacing: .3px;
-    }
-    .tg-sort-group {
-      display: inline-flex; gap: 2px; background: var(--gray-2);
-      border-radius: 99px; padding: 3px;
-    }
-    .tg-sort-btn {
-      padding: 6px 12px; border: none; background: transparent;
-      cursor: pointer; font-size: 11px; font-weight: 700; color: var(--gray-6);
-      border-radius: 99px; font-family: inherit; transition: all .15s;
-      min-height: 30px;
-    }
-    .tg-sort-btn.active { background: #fff; color: var(--gray-9); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
-
-    /* ── Tagihan card ───────────────────────────────────── */
-    .tg-card {
-      background: #fff; border-radius: 12px;
-      border: 1px solid var(--gray-3);
-      border-left: 3px solid var(--danger);
-      box-shadow: var(--shadow-sm);
-      margin-bottom: 10px;
-      overflow: hidden;
-    }
-    .tg-card.dp { border-left-color: var(--warning); }
-    .tg-card.urgent { border-left-width: 4px; }
-
-    .tg-card-body { padding: 12px 14px; cursor: pointer; }
-
-    .tg-row1 {
-      display: flex; align-items: flex-start; justify-content: space-between;
-      gap: 10px;
-    }
-    .tg-nama { font-size: 15px; font-weight: 800; color: var(--gray-9); line-height: 1.2; }
-    .tg-amt { font-size: 18px; font-weight: 800; color: var(--danger); white-space: nowrap; }
-    .tg-amt.dp { color: var(--warning); }
-
-    .tg-nomor { font-size: 12px; color: var(--gray-5); margin-top: 4px; font-family: ui-monospace, monospace; }
-
-    .tg-meta { font-size: 12px; color: var(--gray-6); margin-top: 4px; }
-    .tg-meta .urgent { color: var(--danger); font-weight: 700; }
-
-    .tg-dp-info {
-      margin-top: 6px; padding: 8px 10px;
-      background: var(--warning-lt); color: var(--gray-7);
-      border-radius: 8px; font-size: 12px;
-      display: flex; justify-content: space-between; gap: 8px;
-    }
-    .tg-dp-info b { color: var(--warning); }
-
-    .tg-badges {
-      display: flex; gap: 6px; flex-wrap: wrap;
-      margin-top: 8px;
-    }
-    .tg-badge {
-      padding: 3px 9px; border-radius: 99px;
-      font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .3px;
-    }
-    .tg-badge.belum { background: var(--danger-lt); color: var(--danger); }
-    .tg-badge.dp { background: var(--warning-lt); color: var(--warning); }
-    .tg-badge.lama { background: var(--danger); color: #fff; }
-
-    .tg-actions {
-      display: flex; gap: 6px; padding: 0 14px 12px;
-    }
-    .tg-act {
-      flex: 1; min-height: 42px; padding: 10px 12px;
-      border: 1px solid transparent; border-radius: 8px;
-      font-size: 13px; font-weight: 700; cursor: pointer;
+    /* ── Filter pills (spek: sama seperti Antrian) ─────── */
+    .pills { display: flex; gap: 6px; }
+    .pill {
+      flex: 1; height: 36px; padding: 0 8px; border-radius: 999px;
+      border: 1px solid #E2E8F0; background: #fff;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      color: #64748B; font-family: inherit;
       display: inline-flex; align-items: center; justify-content: center;
-      gap: 5px; font-family: inherit; text-decoration: none;
+      transition: background .15s, color .15s, border-color .15s;
+      white-space: nowrap;
     }
-    .tg-act:active { transform: scale(.98); }
-    .tg-act.lunasi { background: var(--success); color: #fff; }
-    .tg-act.wa { background: #25d366; color: #fff; }
-    .tg-act.detail {
-      background: #fff; border-color: var(--gray-3); color: var(--gray-6);
-      flex: 0 0 44px; min-width: 44px; padding: 0;
+    .pill:active { transform: scale(.97); }
+    .pill.active { background: #2D3BB5; color: #fff; border-color: #2D3BB5; }
+
+    .info-line { font-size: 12px; color: #64748B; padding: 0 2px; }
+
+    /* ── Tagihan card (spek README + reference) ────────── */
+    .tg-list { display: flex; flex-direction: column; gap: 10px; }
+    .tg-card {
+      background: #fff; border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+      padding: 12px 14px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .tg-row1 {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px;
+    }
+    .tg-nomor {
+      font-size: 12px; font-weight: 700; color: #94A3B8;
+      letter-spacing: 0.4px; min-width: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .tg-nomor .age { color: #64748B; font-weight: 600; }
+    .tg-badges { display: inline-flex; gap: 5px; flex-shrink: 0; }
+
+    .tg-row2 {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; cursor: pointer;
+    }
+    .tg-mid { min-width: 0; flex: 1; }
+    .tg-nama {
+      font-size: 15px; font-weight: 600; color: #1E2A6E; line-height: 1.2;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .tg-svc {
+      font-size: 13px; color: #64748B; margin-top: 2px; line-height: 1.3;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .tg-sisa {
+      font-size: 15px; font-weight: 700; color: #EF4444; white-space: nowrap;
+      flex-shrink: 0;
     }
 
-    /* ── Empty ──────────────────────────────────────────── */
-    .tg-empty {
-      text-align: center; padding: 60px 20px;
-      background: #fff; border-radius: 12px;
-      border: 1px dashed var(--gray-3);
+    .tg-actions { display: flex; gap: 6px; }
+    .tg-act {
+      flex: 1; height: 38px; padding: 0 12px;
+      border: 1px solid transparent; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+      font-family: inherit; text-decoration: none;
+      transition: opacity .15s;
     }
-    .tg-empty .ic {
-      font-size: 72px; display: block; margin-bottom: 16px;
+    .tg-act:active { opacity: .8; transform: scale(.98); }
+    .tg-act.lunasi { background: #10B981; color: #fff; }
+    .tg-act.wa     { background: #fff; border-color: #E2E8F0; color: #2D3BB5; }
+
+    /* ── Badge status bayar (spek) ─────────────────────── */
+    .badge {
+      display: inline-flex; align-items: center;
+      font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px;
+      line-height: 1;
     }
-    .tg-empty h3 {
-      font-size: 18px; font-weight: 800; color: var(--success);
-      margin-bottom: 8px;
-    }
-    .tg-empty p {
-      font-size: 14px; color: var(--gray-5);
+    .b-belum { background: #FDECEC; color: #EF4444; }
+    .b-dp    { background: #FEF3E2; color: #F59E0B; }
+    .b-lunas { background: #E7F8F1; color: #10B981; }
+
+    /* ── Empty state (spek: teks tengah 13px #94A3B8) ── */
+    .empty {
+      text-align: center; padding: 40px 20px;
+      color: #94A3B8; font-size: 13px;
     }
 
-    /* ── Info bar ──────────────────────────────────────── */
-    .tg-info {
-      font-size: 12px; color: var(--gray-5); margin-bottom: 10px;
-    }
-
-    /* ── Toast ─────────────────────────────────────────── */
+    /* ── Toast (spek Komponen Konsisten) ──────────────── */
     #toast {
-      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-      background: var(--gray-9); color: #fff; padding: 10px 20px; border-radius: 99px;
+      position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%);
+      background: #1E2A6E; color: #fff; padding: 10px 20px; border-radius: 99px;
       font-size: 13px; font-weight: 600; z-index: 9999;
-      opacity: 0; pointer-events: none; transition: opacity .25s;
+      opacity: 0; pointer-events: none; transition: opacity .2s;
     }
     #toast.show { opacity: 1; }
 
-    /* ══════════════════════════════════════════════════════
-       LAPTOP (≥1024px) — pakai tabel
-       ══════════════════════════════════════════════════════ */
+    /* ── DESKTOP (>= 1024px): table view ──────────────── */
+    .desktop-only { display: none; }
+    .mobile-only { display: block; }
+
     @media (min-width: 1024px) {
       .desktop-only { display: block; }
-      .mobile-only { display: none !important; }
+      .mobile-only  { display: none; }
 
-      .body-wrap { padding: 20px; }
-
-      .sum-card { display: flex; justify-content: space-between; align-items: center; padding: 22px 24px; }
-      .sum-card > div:first-child { flex: 1; }
-      .sum-breakdown { border-top: none; padding-top: 0; margin-top: 0; }
-
-      .tg-controls {
-        display: flex; align-items: center; justify-content: space-between;
-        gap: 14px; flex-wrap: wrap; margin-bottom: 14px;
-      }
-      .tg-pills, .tg-search { margin-bottom: 0; flex: 1 1 auto; }
-      .tg-search { max-width: 320px; min-width: 200px; }
+      .body-wrap { padding: 4px 20px 40px; }
+      .tg-head   { padding: 18px 20px 10px; }
+      .search-bar { padding: 0 20px 10px; }
 
       .tg-table-card {
-        background: #fff; border-radius: 12px; border: 1px solid var(--gray-3);
-        box-shadow: var(--shadow-sm); overflow: hidden;
+        background: #fff; border-radius: 10px;
+        box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+        overflow: hidden;
       }
       .tg-table-wrap { overflow-x: auto; }
       table.tg-table { width: 100%; border-collapse: collapse; }
       table.tg-table thead th {
-        padding: 11px 14px; text-align: left;
-        font-size: 11px; font-weight: 700; color: var(--gray-5);
-        text-transform: uppercase; letter-spacing: .4px;
-        background: var(--gray-1); border-bottom: 1px solid var(--gray-3);
+        padding: 12px 14px; text-align: left;
+        font-size: 11px; font-weight: 700; color: #64748B;
+        text-transform: uppercase; letter-spacing: .5px;
+        background: #F8FAFF; border-bottom: 1px solid #E2E8F0;
         white-space: nowrap;
       }
       table.tg-table tbody tr {
-        border-bottom: 1px solid var(--gray-2); transition: background .1s; cursor: pointer;
+        border-bottom: 1px solid #F1F5F9; transition: background .1s; cursor: pointer;
       }
-      table.tg-table tbody tr:hover { background: var(--gray-1); }
+      table.tg-table tbody tr:hover { background: #F8FAFF; }
       table.tg-table tbody tr:last-child { border-bottom: none; }
       table.tg-table tbody td {
-        padding: 12px 14px; font-size: 13px; vertical-align: middle;
+        padding: 12px 14px; font-size: 13px; vertical-align: middle; color: #1E2A6E;
       }
       table.tg-table .td-actions {
-        display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end;
+        display: flex; gap: 6px; justify-content: flex-end;
       }
       table.tg-table .td-actions .tg-act {
-        min-height: 32px; padding: 4px 10px; font-size: 11px; min-width: 0; flex: 0 0 auto;
+        height: 32px; padding: 0 12px; font-size: 12px; flex: 0 0 auto;
       }
-      table.tg-table .td-actions .tg-act.detail { flex: 0 0 32px; min-width: 32px; }
-    }
-    @media (max-width: 1023px) {
-      .desktop-only { display: none !important; }
     }
   </style>
 </head>
@@ -285,69 +216,60 @@
 
 <div class="page">
   <div class="tg-head">
-    <a class="tg-back" href="/" title="Kembali">←</a>
+    <a class="ic-btn" href="/dashboard" title="Kembali" aria-label="Kembali">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
     <div class="tg-title">Tagihan</div>
+    <button class="ic-btn" onclick="toggleSearch()" title="Cari" aria-label="Cari">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5 16.7 16.7"/></svg>
+    </button>
+  </div>
+
+  <div class="search-bar" id="searchBar">
+    <input type="text" id="searchInput" placeholder="Cari nama pelanggan / nomor order..." autocomplete="off"/>
   </div>
 
   <div class="body-wrap">
-    <!-- Summary -->
     <div class="sum-card" id="sumCard">
-      <div>
-        <div class="sum-lbl">Total Tagihan</div>
+      <div class="sum-lbl">Total belum lunas</div>
+      <div class="sum-row">
         <div class="sum-amt" id="sumAmt">Rp 0</div>
-        <div class="sum-sub" id="sumSub">— order belum lunas</div>
-        <div class="sum-breakdown" id="sumBreakdown" style="display:none">
-          <span class="pill" id="sumBelum">— Belum Bayar</span>
-          <span class="pill" id="sumDp">— DP</span>
+        <div class="sum-chip" id="sumChip">0 order</div>
+      </div>
+    </div>
+
+    <div class="pills" id="pills">
+      <button class="pill active" data-filter="semua">Semua</button>
+      <button class="pill" data-filter="belum">Belum Bayar</button>
+      <button class="pill" data-filter="dp">DP</button>
+    </div>
+
+    <div class="info-line" id="infoBar">Memuat...</div>
+
+    <div class="mobile-only">
+      <div class="tg-list" id="cardList"></div>
+    </div>
+
+    <div class="desktop-only">
+      <div class="tg-table-card">
+        <div class="tg-table-wrap">
+          <table class="tg-table">
+            <thead>
+              <tr>
+                <th>Pelanggan</th>
+                <th>No. Order</th>
+                <th>Umur</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Sisa</th>
+                <th style="text-align:right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr><td colspan="7" style="text-align:center;padding:40px;color:#94A3B8">Memuat...</td></tr>
+            </tbody>
+          </table>
         </div>
-      </div>
-    </div>
-
-    <!-- Controls -->
-    <div class="tg-controls">
-      <div class="tg-pills">
-        <button class="tg-pill active" data-filter="semua">Semua <span class="cnt" id="cntSemua">0</span></button>
-        <button class="tg-pill" data-filter="belum">Belum Bayar <span class="cnt" id="cntBelum">0</span></button>
-        <button class="tg-pill" data-filter="dp">DP <span class="cnt" id="cntDp">0</span></button>
-      </div>
-      <div class="tg-search">
-        <input type="text" id="searchInput" placeholder="Cari nama pelanggan / nomor order..." autocomplete="off"/>
-      </div>
-    </div>
-
-    <div class="tg-sort">
-      <span class="tg-sort-lbl">Urutkan</span>
-      <div class="tg-sort-group" id="sortGroup">
-        <button class="tg-sort-btn active" data-sort="terlama">Terlama</button>
-        <button class="tg-sort-btn" data-sort="terbaru">Terbaru</button>
-        <button class="tg-sort-btn" data-sort="terbesar">Terbesar</button>
-      </div>
-    </div>
-
-    <div class="tg-info" id="infoBar">Memuat...</div>
-
-    <!-- MOBILE: card list -->
-    <div class="mobile-only" id="cardList"></div>
-
-    <!-- LAPTOP: table -->
-    <div class="tg-table-card desktop-only">
-      <div class="tg-table-wrap">
-        <table class="tg-table">
-          <thead>
-            <tr>
-              <th>Pelanggan</th>
-              <th>No. Order</th>
-              <th>Masuk</th>
-              <th>Status</th>
-              <th>Total</th>
-              <th>Sisa</th>
-              <th style="text-align:right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody">
-            <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--gray-5)">Memuat...</td></tr>
-          </tbody>
-        </table>
       </div>
     </div>
   </div>
@@ -357,14 +279,7 @@
 
 <script>
 const fmtRp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
-const fmtRpShort = n => {
-  n = Number(n || 0);
-  if (n >= 1_000_000) return 'Rp ' + (n / 1_000_000).toFixed(1).replace('.0','') + 'jt';
-  if (n >= 1_000) return 'Rp ' + Math.round(n / 1_000) + 'rb';
-  return 'Rp ' + n.toLocaleString('id-ID');
-};
 const fmtDate = s => s ? new Date(s).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '—';
-const fmtDateShort = s => s ? new Date(s).toLocaleDateString('id-ID', { day:'2-digit', month:'short' }) : '—';
 const daysSince = s => {
   if (!s) return 0;
   const d1 = new Date(s); d1.setHours(0,0,0,0);
@@ -375,11 +290,10 @@ const escHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':
 
 let allData = [];
 let activeFilter = 'semua';
-let activeSort = 'terlama';
 let searchQuery = '';
 let debTimer = null;
 
-function showToast(msg, dur = 2500) {
+function showToast(msg, dur = 2200) {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
@@ -387,11 +301,21 @@ function showToast(msg, dur = 2500) {
 }
 window.showToast = showToast;
 
+function toggleSearch() {
+  const bar = document.getElementById('searchBar');
+  bar.classList.toggle('open');
+  if (bar.classList.contains('open')) {
+    document.getElementById('searchInput').focus();
+  } else {
+    document.getElementById('searchInput').value = '';
+    searchQuery = '';
+    rerender();
+  }
+}
+
 /* ── Helpers ─────────────────────────────────────────── */
 function tipeTagihan(t) {
-  const bayar = Number(t.bayar || 0);
-  if (bayar <= 0) return 'belum';
-  return 'dp';
+  return Number(t.bayar || 0) > 0 ? 'dp' : 'belum';
 }
 function sisa(t) { return Math.max(0, Number(t.total_bayar) - Number(t.bayar)); }
 
@@ -405,188 +329,122 @@ function waPayload(t) {
   return { id: t.id, nomor: t.nomor_transaksi, nama: t.pelanggan_nama, telepon: t.pelanggan_telepon };
 }
 
-/* ── Filter ──────────────────────────────────────────── */
+/* ── Filter (client-side) ───────────────────────────── */
 function applyFilter(data, key) {
   if (key === 'semua') return data;
   if (key === 'belum') return data.filter(t => tipeTagihan(t) === 'belum');
-  if (key === 'dp') return data.filter(t => tipeTagihan(t) === 'dp');
+  if (key === 'dp')    return data.filter(t => tipeTagihan(t) === 'dp');
   return data;
 }
 
-function applySort(data, key) {
-  const arr = [...data];
-  if (key === 'terbaru') return arr.sort((a, b) => new Date(b.tanggal_masuk) - new Date(a.tanggal_masuk));
-  if (key === 'terbesar') return arr.sort((a, b) => sisa(b) - sisa(a));
-  return arr.sort((a, b) => new Date(a.tanggal_masuk) - new Date(b.tanggal_masuk));
+/* ── Sort: paling lama menunggak duluan (fixed) ─────── */
+function sortTerlama(data) {
+  return [...data].sort((a, b) => new Date(a.tanggal_masuk) - new Date(b.tanggal_masuk));
 }
 
-/* ── Update pill counts + summary ────────────────────── */
-function updateSummary() {
-  const belumList = applyFilter(allData, 'belum');
-  const dpList = applyFilter(allData, 'dp');
-  document.getElementById('cntSemua').textContent = allData.length;
-  document.getElementById('cntBelum').textContent = belumList.length;
-  document.getElementById('cntDp').textContent = dpList.length;
+function umurLabel(t) {
+  const hari = daysSince(t.tanggal_masuk);
+  if (tipeTagihan(t) === 'dp') return `DP ${fmtRp(t.bayar)}`;
+  if (hari <= 0) return 'menunggak hari ini';
+  return `menunggak ${hari} hari`;
+}
 
+/* ── Update summary ─────────────────────────────────── */
+function updateSummary() {
   const totalSisa = allData.reduce((s, t) => s + sisa(t), 0);
   const sumCard = document.getElementById('sumCard');
-  const sumAmt = document.getElementById('sumAmt');
-  const sumSub = document.getElementById('sumSub');
-  const sumBreakdown = document.getElementById('sumBreakdown');
+  const sumAmt  = document.getElementById('sumAmt');
+  const sumChip = document.getElementById('sumChip');
 
   if (!allData.length) {
     sumCard.classList.add('empty');
     sumAmt.textContent = 'Lunas';
-    sumSub.textContent = 'Tidak ada tagihan';
-    sumBreakdown.style.display = 'none';
+    sumChip.textContent = 'Semua sudah dibayar';
     return;
   }
   sumCard.classList.remove('empty');
   sumAmt.textContent = fmtRp(totalSisa);
-  sumSub.textContent = `${allData.length} order belum lunas`;
-  sumBreakdown.style.display = 'flex';
-  document.getElementById('sumBelum').textContent = `${belumList.length} Belum Bayar`;
-  document.getElementById('sumDp').textContent = `${dpList.length} DP`;
+  sumChip.textContent = `${allData.length} order`;
 }
 
-/* ── Render ──────────────────────────────────────────── */
+/* ── Render ─────────────────────────────────────────── */
 function renderCardList(rows) {
   const el = document.getElementById('cardList');
   if (!rows.length) {
-    el.innerHTML = emptyHtml();
+    el.innerHTML = `<div class="empty">${allData.length === 0 ? 'Semua lunas. Mantap!' : 'Tidak ada tagihan di filter ini'}</div>`;
     return;
   }
 
   el.innerHTML = rows.map(t => {
     const tipe = tipeTagihan(t);
     const s = sisa(t);
-    const hari = daysSince(t.tanggal_masuk);
-    const urgent = hari >= 3;
     const tel = t.pelanggan_telepon;
     const pl = JSON.stringify(lunasiPayload(t)).replace(/'/g, "&#39;");
     const wp = JSON.stringify(waPayload(t)).replace(/'/g, "&#39;");
-
-    let body = '';
-    if (tipe === 'dp') {
-      body = `
-        <div class="tg-row1">
-          <div style="min-width:0;flex:1">
-            <div class="tg-nama">${escHtml(t.pelanggan_nama || 'Non-member')}</div>
-            <div class="tg-nomor">${t.nomor_transaksi}</div>
-          </div>
-          <div class="tg-amt dp">${fmtRp(s)}</div>
-        </div>
-        <div class="tg-dp-info">
-          <span>DP: <b>${fmtRp(t.bayar)}</b></span>
-          <span>Sisa: <b>${fmtRp(s)}</b></span>
-        </div>
-        <div class="tg-meta">
-          Masuk: ${fmtDate(t.tanggal_masuk)} · ${hari > 0 ? `<span class="${urgent ? 'urgent' : ''}">${hari} hari lalu</span>` : 'hari ini'}
-        </div>
-        <div class="tg-badges">
-          <span class="tg-badge dp">DP</span>
-          ${hari >= 7 ? `<span class="tg-badge lama">> 7 hari</span>` : ''}
-        </div>`;
-    } else {
-      body = `
-        <div class="tg-row1">
-          <div style="min-width:0;flex:1">
-            <div class="tg-nama">${escHtml(t.pelanggan_nama || 'Non-member')}</div>
-            <div class="tg-nomor">${t.nomor_transaksi}</div>
-          </div>
-          <div class="tg-amt">${fmtRp(s)}</div>
-        </div>
-        <div class="tg-meta">
-          Masuk: ${fmtDate(t.tanggal_masuk)} · ${hari > 0 ? `<span class="${urgent ? 'urgent' : ''}">${hari} hari lalu</span>` : 'hari ini'}
-        </div>
-        <div class="tg-badges">
-          <span class="tg-badge belum">BELUM BAYAR</span>
-          ${hari >= 7 ? `<span class="tg-badge lama">> 7 hari</span>` : ''}
-        </div>`;
-    }
+    const layanan = t.layanan_ringkas || '—';
+    const badge = tipe === 'dp'
+      ? '<span class="badge b-dp">DP</span>'
+      : '<span class="badge b-belum">Belum Lunas</span>';
 
     return `
-    <div class="tg-card ${tipe === 'dp' ? 'dp' : ''} ${urgent ? 'urgent' : ''}">
-      <div class="tg-card-body" onclick="goDetail(${t.id}, event)">
-        ${body}
-      </div>
-      <div class="tg-actions">
-        <button class="tg-act lunasi" onclick='event.stopPropagation();openLunasiSheet(${pl})'>${tipe === 'dp' ? 'Lunasi Sisa' : 'Lunasi'}</button>
-        ${tel ? `<button class="tg-act wa" onclick='event.stopPropagation();openWaSheet(${wp})'>Tagih WA</button>` : ''}
-        <a class="tg-act detail" href="/order/detail?id=${t.id}" onclick='event.stopPropagation()' title="Detail">›</a>
-      </div>
-    </div>`;
+      <div class="tg-card">
+        <div class="tg-row1">
+          <div class="tg-nomor">${escHtml(t.nomor_transaksi)} <span class="age">· ${escHtml(umurLabel(t))}</span></div>
+          <div class="tg-badges">${badge}</div>
+        </div>
+        <div class="tg-row2" onclick="location.href='/order/detail?id=${t.id}'">
+          <div class="tg-mid">
+            <div class="tg-nama">${escHtml(t.pelanggan_nama || 'Non-member')}</div>
+            <div class="tg-svc" title="${escHtml(layanan)}">${escHtml(layanan)}</div>
+          </div>
+          <div class="tg-sisa">${fmtRp(s)}</div>
+        </div>
+        <div class="tg-actions" onclick="event.stopPropagation()">
+          <button class="tg-act lunasi" onclick='openLunasiSheet(${pl})'>Lunasi</button>
+          ${tel ? `<button class="tg-act wa" onclick='openWaSheet(${wp})'>Tagih via WA</button>` : ''}
+        </div>
+      </div>`;
   }).join('');
 }
 
 function renderTable(rows) {
   const tbody = document.getElementById('tableBody');
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="7" style="padding:0">${emptyHtml(true)}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:#94A3B8">${allData.length === 0 ? 'Semua lunas. Mantap!' : 'Tidak ada tagihan di filter ini'}</td></tr>`;
     return;
   }
-
   tbody.innerHTML = rows.map(t => {
     const tipe = tipeTagihan(t);
     const s = sisa(t);
-    const hari = daysSince(t.tanggal_masuk);
     const tel = t.pelanggan_telepon;
     const pl = JSON.stringify(lunasiPayload(t)).replace(/'/g, "&#39;");
     const wp = JSON.stringify(waPayload(t)).replace(/'/g, "&#39;");
+    const badge = tipe === 'dp'
+      ? '<span class="badge b-dp">DP</span>'
+      : '<span class="badge b-belum">Belum Lunas</span>';
 
     return `
-    <tr onclick="goDetail(${t.id}, event)" style="border-left:3px solid ${tipe === 'dp' ? 'var(--warning)' : 'var(--danger)'}">
-      <td>
-        <div style="font-weight:700">${escHtml(t.pelanggan_nama || 'Non-member')}</div>
-        ${tel ? `<div style="font-size:11px;color:var(--gray-5)">${escHtml(tel)}</div>` : ''}
-      </td>
-      <td style="font-family:ui-monospace,monospace;font-size:12px">${t.nomor_transaksi}</td>
-      <td style="white-space:nowrap">
-        <div>${fmtDate(t.tanggal_masuk)}</div>
-        ${hari > 0 ? `<div style="font-size:11px;color:${hari >= 3 ? 'var(--danger)' : 'var(--gray-5)'};font-weight:${hari >= 3 ? 700 : 400}">${hari} hari lalu</div>` : ''}
-      </td>
-      <td>
-        ${tipe === 'dp'
-          ? `<span class="tg-badge dp">DP</span><div style="font-size:11px;color:var(--gray-5);margin-top:2px">Bayar ${fmtRp(t.bayar)}</div>`
-          : `<span class="tg-badge belum">BELUM BAYAR</span>`}
-      </td>
-      <td style="white-space:nowrap;font-weight:700">${fmtRp(t.total_bayar)}</td>
-      <td style="white-space:nowrap;font-weight:800;color:${tipe === 'dp' ? 'var(--warning)' : 'var(--danger)'}">${fmtRp(s)}</td>
-      <td>
-        <div class="td-actions">
-          <button class="tg-act lunasi" onclick='event.stopPropagation();openLunasiSheet(${pl})'>${tipe === 'dp' ? 'Lunasi Sisa' : 'Lunasi'}</button>
-          ${tel ? `<button class="tg-act wa" onclick='event.stopPropagation();openWaSheet(${wp})'>Tagih</button>` : ''}
-          <a class="tg-act detail" href="/order/detail?id=${t.id}" onclick='event.stopPropagation()' title="Detail">›</a>
-        </div>
-      </td>
-    </tr>`;
+      <tr onclick="location.href='/order/detail?id=${t.id}'">
+        <td>
+          <div style="font-weight:700;color:#1E2A6E">${escHtml(t.pelanggan_nama || 'Non-member')}</div>
+          ${tel ? `<div style="font-size:11px;color:#64748B">${escHtml(tel)}</div>` : ''}
+        </td>
+        <td style="font-family:ui-monospace,monospace;font-size:12px;color:#64748B">${escHtml(t.nomor_transaksi)}</td>
+        <td style="white-space:nowrap;font-size:12px;color:#64748B">${escHtml(umurLabel(t))}</td>
+        <td>${badge}</td>
+        <td style="white-space:nowrap;font-weight:700">${fmtRp(t.total_bayar)}</td>
+        <td style="white-space:nowrap;font-weight:700;color:#EF4444">${fmtRp(s)}</td>
+        <td>
+          <div class="td-actions" onclick="event.stopPropagation()">
+            <button class="tg-act lunasi" onclick='openLunasiSheet(${pl})'>Lunasi</button>
+            ${tel ? `<button class="tg-act wa" onclick='openWaSheet(${wp})'>Tagih via WA</button>` : ''}
+          </div>
+        </td>
+      </tr>`;
   }).join('');
 }
 
-function emptyHtml(inline) {
-  if (allData.length === 0) {
-    return `
-      <div class="tg-empty" ${inline ? 'style="border:none;border-radius:0"' : ''}>
-        <span class="ic"></span>
-        <h3>Semua tagihan sudah lunas!</h3>
-        <p>Tidak ada yang perlu ditagih.</p>
-      </div>`;
-  }
-  // Ada data tapi filter/search tidak match
-  return `
-    <div class="tg-empty" ${inline ? 'style="border:none;border-radius:0"' : ''}>
-      <span class="ic"></span>
-      <h3 style="color:var(--gray-7)">Tidak ada yang cocok</h3>
-      <p>Coba ganti filter atau pencarian.</p>
-    </div>`;
-}
-
-window.goDetail = (id, ev) => {
-  if (ev && ev.target.closest('button, a.tg-act')) return;
-  location.href = `/order/detail?id=${id}`;
-};
-
-/* ── Render orchestrator ─────────────────────────────── */
+/* ── Render orchestrator ────────────────────────────── */
 function rerender() {
   let rows = applyFilter(allData, activeFilter);
   if (searchQuery) {
@@ -597,7 +455,7 @@ function rerender() {
       (t.pelanggan_telepon || '').includes(q)
     ));
   }
-  rows = applySort(rows, activeSort);
+  rows = sortTerlama(rows);
 
   document.getElementById('infoBar').textContent =
     `Menampilkan ${rows.length} dari ${allData.length} tagihan${searchQuery ? ' untuk "' + searchQuery + '"' : ''}`;
@@ -606,7 +464,7 @@ function rerender() {
   renderTable(rows);
 }
 
-/* ── Loader ──────────────────────────────────────────── */
+/* ── Loader ─────────────────────────────────────────── */
 async function loadData() {
   try {
     const r = await fetch('/api/v1/transaksi?belum_lunas=1&sort=tanggal_asc&limit=500', { credentials: 'include' });
@@ -617,26 +475,16 @@ async function loadData() {
     rerender();
   } catch {
     document.getElementById('infoBar').textContent = 'Gagal memuat data';
-    document.getElementById('cardList').innerHTML =
-      `<div class="tg-empty"><span class="ic"></span><h3 style="color:var(--danger)">Gagal memuat</h3><p>Periksa koneksi dan coba lagi.</p></div>`;
+    document.getElementById('cardList').innerHTML = '<div class="empty">Gagal memuat data</div>';
   }
 }
 
-/* ── Bind filter ─────────────────────────────────────── */
-document.querySelectorAll('.tg-pill').forEach(p => {
+/* ── Bind filter pills ──────────────────────────────── */
+document.querySelectorAll('.pill').forEach(p => {
   p.addEventListener('click', () => {
-    document.querySelectorAll('.tg-pill').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.pill').forEach(x => x.classList.remove('active'));
     p.classList.add('active');
     activeFilter = p.dataset.filter;
-    rerender();
-  });
-});
-
-document.querySelectorAll('.tg-sort-btn').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('.tg-sort-btn').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    activeSort = b.dataset.sort;
     rerender();
   });
 });
