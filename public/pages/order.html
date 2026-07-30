@@ -900,6 +900,61 @@
       /* override rule mobile lama yg bikin actions fixed */
       .panel-right > .actions { display: none !important; position: static !important; }
     }
+
+    /* ── Global service search (di bawah chip populer) ─── */
+    .svc-global-wrap { position: relative; margin-top: 12px; }
+    .svc-global-input {
+      width: 100%; padding: 10px 14px; border: 1px solid #E2E8F0;
+      border-radius: 10px; font-size: 14px; font-family: inherit;
+      background: #fff; color: #1E2A6E; outline: none;
+    }
+    .svc-global-input:focus { border-color: #2D3BB5; }
+    #svcGlobalDropdown { max-height: 320px; }
+
+    /* ── Item row sederhana (nama + stepper + hapus) ───── */
+    #itemsContainer { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .item-wrapper.item-simple { padding: 0; border: none; }
+    .item-simple-row {
+      display: flex; align-items: center; gap: 10px;
+      background: #fff; border: 1px solid #E2E8F0; border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .isr-mid { min-width: 0; flex: 1; }
+    .isr-name {
+      font-size: 14px; font-weight: 600; color: #1E2A6E; line-height: 1.2;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .isr-sub { font-size: 12px; color: #64748B; margin-top: 2px; line-height: 1.2; }
+    .isr-stepper { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .isr-btn {
+      width: 32px; height: 32px; border-radius: 8px;
+      border: 1px solid #E2E8F0; background: #fff;
+      color: #1E2A6E; font-size: 16px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: background .12s, border-color .12s;
+    }
+    .isr-btn:hover { background: #F8FAFF; border-color: #2D3BB5; }
+    .isr-btn:active { transform: scale(.95); }
+    .isr-qty-val {
+      min-width: 34px; text-align: center; font-weight: 700; color: #1E2A6E;
+      font-size: 14px;
+    }
+    .isr-remove {
+      width: 36px; height: 36px; flex-shrink: 0;
+      background: #fff; border: 1px solid #E2E8F0; border-radius: 8px;
+      color: #EF4444; cursor: pointer; padding: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: background .12s, border-color .12s;
+    }
+    .isr-remove:hover { background: #FDECEC; border-color: #EF4444; }
+    .isr-remove:active { transform: scale(.95); }
+    .item-wrapper.item-simple .btn-toggle-rincian { margin-top: 6px; margin-left: 2px; }
+    .empty-items {
+      text-align: center; padding: 20px 12px; color: #94A3B8;
+      background: #fff; border: 1px dashed #E2E8F0; border-radius: 10px;
+      font-size: 13px;
+    }
   </style>
 </head>
 <body>
@@ -995,18 +1050,22 @@
         <span id="itemCount" style="font-size:12px;color:var(--gray-5)">0 layanan</span>
       </div>
       <div class="card-body">
-        <!-- Chip layanan populer (spek Langkah 2: grid 2 kolom, min-height 54px) -->
+        <!-- 1. Chip layanan populer (spek Langkah 2: grid 2 kolom, min-height 54px) -->
         <div id="chipLayananWrap" style="display:none">
           <div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Layanan Populer</div>
           <div id="chipLayanan"></div>
         </div>
-        <div class="item-header">
-          <span>Layanan</span><span>Jumlah</span><span>Satuan</span><span>Subtotal</span><span></span>
+
+        <!-- 2. Search bar layanan lainnya -->
+        <div class="svc-global-wrap">
+          <input type="text" id="svcGlobalSearch" class="svc-global-input" placeholder="Cari layanan lainnya..." autocomplete="off"/>
+          <div id="svcGlobalDropdown" class="svc-dropdown hidden"></div>
         </div>
+
+        <!-- 3. Daftar layanan terpilih (name + stepper + hapus) -->
         <div id="itemsContainer">
-          <div class="empty-items">Belum ada layanan. Tap chip di atas atau klik "+ Tambah Layanan".</div>
+          <div class="empty-items">Belum ada layanan. Tap chip di atas atau cari lewat search di atas.</div>
         </div>
-        <button class="btn-add-item" id="addItemBtn">+ Tambah Layanan</button>
       </div>
     </div>
 
@@ -1376,7 +1435,7 @@ let acTimer = null;
   const tomorrow = new Date(Date.now() + 86400000);
   document.getElementById('tanggalSelesai').value = tomorrow.toISOString().slice(0, 10);
 
-  addItemRow(); // baris item pertama langsung
+  // Empty state ditampilkan sampai user tap chip populer atau cari lewat search.
   updateEstimasiSelesai(); // hitung estimasi awal
 })();
 
@@ -1762,6 +1821,12 @@ function renderCatatanPelanggan(p) {
 }
 
 function addItemRow(defaults = {}) {
+  // Spek baru: row hanya dibuat kalau layanan sudah dipilih (via chip populer
+  // atau search bar di atas). Tidak ada lagi row kosong dgn search di dalam.
+  if (!defaults.layanan_id) return;
+  const layanan = layananList.find(l => l.id === defaults.layanan_id);
+  if (!layanan) return;
+
   const id = ++itemIdSeq;
   const container = document.getElementById('itemsContainer');
 
@@ -1769,31 +1834,33 @@ function addItemRow(defaults = {}) {
   const empty = container.querySelector('.empty-items');
   if (empty) empty.remove();
 
+  const satuan = defaults.satuan || layanan.satuan || 'pcs';
+  const isKg = String(satuan).toLowerCase() === 'kg';
+  const step = isKg ? 0.5 : 1;
+  const initialQty = Number(defaults.jumlah) > 0
+    ? Number(defaults.jumlah)
+    : (isKg ? 3 : 1);
+
   const wrapper = document.createElement('div');
-  wrapper.className = 'item-wrapper';
+  wrapper.className = 'item-wrapper item-simple';
   wrapper.dataset.itemId = id;
 
-  // Default layanan jika ada
-  let defaultNama = '';
-  if (defaults.layanan_id) {
-    const found = layananList.find(l => l.id === defaults.layanan_id);
-    if (found) defaultNama = found.nama;
-  }
-
   wrapper.innerHTML = `
-    <div class="item-row">
-      <div class="svc-search-wrap">
-        <input type="text" class="svc-search-input" placeholder="Cari layanan..." autocomplete="off" value="${defaultNama}" />
-        <span class="svc-chevron">▼</span>
-        <button class="svc-clear-btn" title="Hapus pilihan">×</button>
-        <div class="svc-dropdown hidden"></div>
+    <div class="item-simple-row">
+      <div class="isr-mid">
+        <div class="isr-name">${escapeHtml(layanan.nama)}</div>
+        <div class="isr-sub"><span class="isr-summary"></span></div>
       </div>
-      <input type="number" class="item-jumlah" min="0.1" step="0.1" value="${defaults.jumlah || 1}" />
-      <input type="text" class="item-satuan" readonly value="${defaults.satuan || ''}" style="background:var(--gray-1);color:var(--gray-5)" />
-      <span class="item-subtotal">${defaults.subtotal ? 'Rp ' + fmtRp(defaults.subtotal) : 'Rp 0'}</span>
-      <button class="btn-remove" title="Hapus">×</button>
+      <div class="isr-stepper">
+        <button type="button" class="isr-btn isr-dec" aria-label="Kurangi">−</button>
+        <span class="isr-qty-val">${initialQty}</span>
+        <button type="button" class="isr-btn isr-inc" aria-label="Tambah">+</button>
+      </div>
+      <button type="button" class="btn-remove isr-remove" aria-label="Hapus layanan">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      </button>
     </div>
-    <button class="btn-toggle-rincian" style="display:none;">
+    <button type="button" class="btn-toggle-rincian">
       <span class="rincian-icon">▼</span> Rincian Pakaian
     </button>
     <div class="rincian-panel">
@@ -1812,12 +1879,11 @@ function addItemRow(defaults = {}) {
     </div>
   `;
 
-  const searchInput = wrapper.querySelector('.svc-search-input');
-  const dropdown = wrapper.querySelector('.svc-dropdown');
-  const clearBtn = wrapper.querySelector('.svc-clear-btn');
-  const inpJumlah = wrapper.querySelector('.item-jumlah');
-  const inpSatuan = wrapper.querySelector('.item-satuan');
-  const spanSub = wrapper.querySelector('.item-subtotal');
+  const qtyValEl = wrapper.querySelector('.isr-qty-val');
+  const summaryEl = wrapper.querySelector('.isr-summary');
+  const btnDec = wrapper.querySelector('.isr-dec');
+  const btnInc = wrapper.querySelector('.isr-inc');
+  const btnRemoveEl = wrapper.querySelector('.isr-remove');
   const btnToggleRincian = wrapper.querySelector('.btn-toggle-rincian');
   const rincianPanel = wrapper.querySelector('.rincian-panel');
   const masterItemGrid = wrapper.querySelector('.master-item-grid');
@@ -1826,156 +1892,62 @@ function addItemRow(defaults = {}) {
   const newItemSatuanSelect = wrapper.querySelector('.new-item-satuan');
   const btnSaveMaster = wrapper.querySelector('.btn-save-master');
 
-  let selectedLayanan = null;
-  let searchTimer = null;
-  let rincianItems = []; // Array untuk menyimpan rincian item
+  let jumlah = initialQty;
+  let rincianItems = [];
 
-  // Jika ada default, set langsung
-  if (defaults.layanan_id) {
-    selectedLayanan = layananList.find(l => l.id === defaults.layanan_id);
-    if (selectedLayanan) {
-      searchInput.classList.add('filled');
-    }
-  }
-
-  // Search input
-  searchInput.addEventListener('input', () => {
-    clearTimeout(searchTimer);
-    const q = searchInput.value.trim().toLowerCase();
-
-    // Jika kosong, clear selection
-    if (!q) {
-      selectedLayanan = null;
-      searchInput.classList.remove('filled');
-      dropdown.classList.add('hidden');
-      btnToggleRincian.style.display = 'none';
-      rincianPanel.classList.remove('show');
-      rincianItems = [];
-      masterItemGrid.innerHTML = '';
-      selectedItemsList.innerHTML = '';
-      updateRow();
-      return;
-    }
-
-    searchTimer = setTimeout(() => {
-      const filtered = layananList.filter(l =>
-        l.nama.toLowerCase().includes(q)
-      );
-      renderServiceDropdown(filtered, q);
-    }, 200);
-  });
-
-  searchInput.addEventListener('focus', () => {
-    if (!selectedLayanan && searchInput.value.trim()) {
-      const q = searchInput.value.trim().toLowerCase();
-      const filtered = layananList.filter(l => l.nama.toLowerCase().includes(q));
-      renderServiceDropdown(filtered, q);
-    } else if (!selectedLayanan) {
-      renderServiceDropdown(layananList, '');
-    }
-  });
-
-  searchInput.addEventListener('blur', () => {
-    setTimeout(() => dropdown.classList.add('hidden'), 200);
-  });
-
-  // Clear button
-  clearBtn.addEventListener('click', () => {
-    searchInput.value = '';
-    selectedLayanan = null;
-    searchInput.classList.remove('filled');
-    dropdown.classList.add('hidden');
-    btnToggleRincian.style.display = 'none';
-    rincianPanel.classList.remove('show');
-    rincianItems = [];
-    masterItemGrid.innerHTML = '';
-    selectedItemsList.innerHTML = '';
-    searchInput.focus();
-    updateRow();
-  });
-
-  // Render dropdown
-  function renderServiceDropdown(services, query) {
-    if (services.length === 0) {
-      dropdown.innerHTML = '<div class="svc-empty">Layanan tidak ditemukan</div>';
-      dropdown.classList.remove('hidden');
-      return;
-    }
-
-    // Group by category
-    const grouped = {};
-    services.forEach(l => {
-      const cat = l.kategori_nama || 'Lainnya';
-      if (!grouped[cat]) grouped[cat] = [];
-      grouped[cat].push(l);
-    });
-
-    let html = '';
-    Object.entries(grouped).forEach(([cat, items]) => {
-      html += `<div class="svc-category">${cat}</div>`;
-      items.forEach(l => {
-        const highlightedName = query
-          ? l.nama.replace(new RegExp(`(${escapeRegex(query)})`, 'gi'), '<span class="highlight">$1</span>')
-          : l.nama;
-        html += `
-          <div class="svc-item" data-id="${l.id}">
-            <div class="svc-item-name">${highlightedName}</div>
-            <div class="svc-item-price"><strong>Rp ${fmtRp(l.harga)}</strong> / ${l.satuan}</div>
-          </div>
-        `;
-      });
-    });
-
-    dropdown.innerHTML = html;
-    dropdown.classList.remove('hidden');
-
-    // Attach click handlers
-    dropdown.querySelectorAll('.svc-item[data-id]').forEach(el => {
-      el.addEventListener('click', () => {
-        const found = services.find(l => l.id == el.dataset.id);
-        if (found) selectService(found);
-      });
-    });
-  }
-
-  function selectService(layanan) {
-    selectedLayanan = layanan;
-    searchInput.value = layanan.nama;
-    searchInput.classList.add('filled');
-    dropdown.classList.add('hidden');
-    // Tampilkan tombol rincian saat layanan dipilih
-    btnToggleRincian.style.display = 'inline-flex';
-    updateRow();
+  function formatQty(n) {
+    return isKg ? String(Math.round(n * 10) / 10) : String(Math.round(n));
   }
 
   function updateRow() {
-    const harga = selectedLayanan?.harga || 0;
-    const satuan = selectedLayanan?.satuan || '';
-    const jumlah = parseFloat(inpJumlah.value) || 0;
+    const harga = layanan.harga || 0;
     const sub = harga * jumlah;
+    const qtyTxt = formatQty(jumlah);
+    qtyValEl.textContent = qtyTxt;
+    summaryEl.textContent = `${qtyTxt} ${satuan} · Rp ${fmtRp(sub)}`;
 
-    inpSatuan.value = satuan;
-    spanSub.textContent = 'Rp ' + fmtRp(sub);
-
-    // Update state
     const existing = state.items.find(i => i.id === id);
     const data = {
       id,
-      layanan_id: selectedLayanan?.id || 0,
-      nama: selectedLayanan?.nama || '',
+      layanan_id: layanan.id,
+      nama: layanan.nama,
       harga,
       satuan,
       jumlah,
       subtotal: sub,
-      rincian: rincianItems // Tambahkan rincian items
+      rincian: rincianItems
     };
     if (existing) Object.assign(existing, data);
     else state.items.push(data);
 
     updateItemCount();
     calcTotal();
-    updateEstimasiSelesai(); // update estimasi setiap kali item berubah
+    updateEstimasiSelesai();
   }
+
+  function removeSelf() {
+    state.items = state.items.filter(i => i.id !== id);
+    wrapper.remove();
+    if (!document.querySelector('.item-wrapper')) {
+      document.getElementById('itemsContainer').innerHTML =
+        '<div class="empty-items">Belum ada layanan. Tap chip di atas atau cari lewat search di atas.</div>';
+    }
+    updateItemCount();
+    calcTotal();
+    updateEstimasiSelesai();
+  }
+
+  btnDec.addEventListener('click', () => {
+    const next = +(jumlah - step).toFixed(2);
+    if (next <= 0) { removeSelf(); return; } // qty 0 = hapus otomatis (spek)
+    jumlah = next;
+    updateRow();
+  });
+  btnInc.addEventListener('click', () => {
+    jumlah = +(jumlah + step).toFixed(2);
+    updateRow();
+  });
+  btnRemoveEl.addEventListener('click', removeSelf);
 
   // ── Rincian Item Functions with Master Items ──
   function renderMasterItemGrid() {
@@ -2117,26 +2089,8 @@ function addItemRow(defaults = {}) {
     }
   });
 
-  inpJumlah.addEventListener('input', updateRow);
-
-  wrapper.querySelector('.btn-remove').addEventListener('click', () => {
-    state.items = state.items.filter(i => i.id !== id);
-    wrapper.remove();
-    if (!document.querySelector('.item-wrapper')) {
-      document.getElementById('itemsContainer').innerHTML =
-        '<div class="empty-items">Belum ada layanan. Tap chip di atas atau klik "+ Tambah Layanan".</div>';
-    }
-    updateItemCount();
-    calcTotal();
-    updateEstimasiSelesai(); // update estimasi saat item dihapus
-  });
-
   container.appendChild(wrapper);
-  if (defaults.layanan_id) {
-    updateRow();
-    // Jika ada default layanan, tampilkan tombol rincian
-    btnToggleRincian.style.display = 'inline-flex';
-  }
+  updateRow();
 }
 
 // Helper: escape regex special chars
@@ -2144,14 +2098,75 @@ function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-document.getElementById('addItemBtn').addEventListener('click', () => addItemRow());
+// ── Global service search (satu-satunya tempat cari layanan di luar 6 populer) ──
+(function initGlobalServiceSearch() {
+  const input = document.getElementById('svcGlobalSearch');
+  const dropdown = document.getElementById('svcGlobalDropdown');
+  if (!input || !dropdown) return;
+  let timer = null;
+
+  function render(list, query) {
+    if (!list.length) {
+      dropdown.innerHTML = '<div class="svc-empty">Layanan tidak ditemukan</div>';
+      dropdown.classList.remove('hidden');
+      return;
+    }
+    const grouped = {};
+    list.forEach(l => {
+      const cat = l.kategori_nama || 'Lainnya';
+      (grouped[cat] = grouped[cat] || []).push(l);
+    });
+    let html = '';
+    Object.entries(grouped).forEach(([cat, items]) => {
+      html += `<div class="svc-category">${escapeHtml(cat)}</div>`;
+      items.forEach(l => {
+        const hi = query
+          ? escapeHtml(l.nama).replace(new RegExp(`(${escapeRegex(query)})`, 'gi'), '<span class="highlight">$1</span>')
+          : escapeHtml(l.nama);
+        html += `<div class="svc-item" data-id="${l.id}">
+          <div class="svc-item-name">${hi}</div>
+          <div class="svc-item-price"><strong>Rp ${fmtRp(l.harga)}</strong> / ${escapeHtml(l.satuan)}</div>
+        </div>`;
+      });
+    });
+    dropdown.innerHTML = html;
+    dropdown.classList.remove('hidden');
+    dropdown.querySelectorAll('.svc-item[data-id]').forEach(el => {
+      el.addEventListener('click', () => {
+        const found = layananList.find(l => l.id == el.dataset.id);
+        if (!found) return;
+        addItemRow({ layanan_id: found.id, satuan: found.satuan });
+        input.value = '';
+        dropdown.classList.add('hidden');
+        input.blur();
+      });
+    });
+  }
+
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    const q = input.value.trim().toLowerCase();
+    if (!q) { dropdown.classList.add('hidden'); return; }
+    timer = setTimeout(() => {
+      const filtered = layananList.filter(l => l.nama.toLowerCase().includes(q));
+      render(filtered, q);
+    }, 200);
+  });
+  input.addEventListener('focus', () => {
+    const q = input.value.trim().toLowerCase();
+    if (!q) render(layananList, ''); // tampilkan semua saat kosong
+  });
+  input.addEventListener('blur', () => {
+    setTimeout(() => dropdown.classList.add('hidden'), 200);
+  });
+})();
 
 // Quick Repeat Order — tombol konfirmasi & tolak
 document.getElementById('btnRepeatYes').addEventListener('click', applyRepeatOrder);
 document.getElementById('btnRepeatNo').addEventListener('click', hideRepeatSuggestion);
 
 function updateItemCount() {
-  const n = document.querySelectorAll('.item-row').length;
+  const n = document.querySelectorAll('#itemsContainer .item-wrapper').length;
   document.getElementById('itemCount').textContent = n + ' layanan';
 }
 
