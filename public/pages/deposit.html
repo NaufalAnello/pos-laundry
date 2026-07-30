@@ -9,122 +9,155 @@
   <title>Deposit Pelanggan — POS Laundry</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--font); background: var(--bg-page); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
+    body { font-family: var(--font); background: #F0F7FF; color: #1E2A6E; font-size: 14px; min-height: 100vh; }
 
-    .page { max-width: 1200px; margin: 0 auto; padding: 0 0 100px; }
+    .page { max-width: 1200px; margin: 0 auto; }
 
-    /* ── Sticky Header ─────────────────────────────────── */
-    .head {
+    /* Nav.js render topbar mobile — sembunyikan supaya tidak dobel */
+    .pos-topbar { display: none !important; }
+
+    /* ── Header ─────────────────────────────────────────── */
+    .dp-head {
       position: sticky; top: 0; z-index: 20;
-      background: #fff; border-bottom: 1px solid var(--gray-3);
-      padding: 12px 14px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+      background: #F0F7FF;
+      padding: 14px 16px 10px;
+      display: flex; align-items: center; gap: 10px;
     }
-    .head .ttl { font-size: 18px; font-weight: 800; color: var(--gray-9); margin-bottom: 10px; }
-    .search-wrap { position: relative; }
+    .dp-head .ic-btn {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: #fff; color: #2D3BB5;
+      border: none; cursor: pointer; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      text-decoration: none;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+    }
+    .dp-title { flex: 1; font-size: 20px; font-weight: 800; color: #1E2A6E; letter-spacing: -.01em; }
+
+    /* ── Search ─────────────────────────────────────────── */
+    .search-wrap { padding: 0 16px 10px; }
     .search-wrap input {
-      width: 100%; padding: 10px 14px 10px 38px; border: 1px solid var(--gray-3);
-      border-radius: 10px; font-size: 14px; font-family: inherit;
-      background: var(--gray-1); color: var(--gray-9); outline: none;
+      width: 100%; height: 42px; border: 1.5px solid #E2E8F0;
+      border-radius: 10px; padding: 0 14px; font-size: 14px;
+      font-family: inherit; color: #1E2A6E; outline: none; background: #fff;
     }
-    .search-wrap input:focus { border-color: var(--primary); background: #fff; }
-    .search-wrap::before {
-      content: ''; position: absolute; left: 12px; top: 50%;
-      transform: translateY(-50%); font-size: 14px;
+    .search-wrap input:focus { border-color: #2D3BB5; }
+
+    .body-wrap {
+      padding: 4px 16px 130px;
+      display: flex; flex-direction: column; gap: 12px;
     }
 
-    .body-wrap { padding: 14px 12px; }
-
-    /* ── Summary strip ─────────────────────────────────── */
-    .summary-strip {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-      margin-bottom: 12px;
+    /* ── Hero card (gradient biru) ─────────────────────── */
+    .hero-card {
+      background: linear-gradient(135deg, #2D3BB5 0%, #2563EB 100%);
+      color: #fff; border-radius: 12px; padding: 16px;
+      box-shadow: 0 4px 16px rgba(37,99,235,0.20);
     }
-    .sm-box {
-      background: #fff; border: 1px solid var(--gray-3); border-radius: 10px;
-      padding: 10px 12px; box-shadow: var(--shadow-sm);
+    .hero-lbl {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; opacity: 0.85; color: #fff;
     }
-    .sm-box .val { font-size: 17px; font-weight: 800; line-height: 1.1; color: var(--gray-9); }
-    .sm-box .val.primary { color: var(--primary); }
-    .sm-box .val.success { color: var(--success); }
-    .sm-box .lbl { font-size: 10px; color: var(--gray-5); font-weight: 700; text-transform: uppercase; letter-spacing: .4px; margin-top: 4px; }
+    .hero-row {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      gap: 10px; margin-top: 4px;
+    }
+    .hero-amt { font-size: 26px; font-weight: 800; line-height: 1.1; color: #fff; }
+    .hero-chip {
+      display: inline-flex; align-items: center;
+      background: rgba(255,255,255,0.2); color: #fff;
+      padding: 4px 10px; border-radius: 999px;
+      font-size: 12px; font-weight: 700;
+    }
 
-    .info-line { font-size: 12px; color: var(--gray-5); margin-bottom: 10px; padding: 0 2px; }
+    /* ── Desktop-only extras ───────────────────────────── */
+    .stat-tile {
+      background: #fff; border-radius: 10px; padding: 12px;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+    }
+    .stat-tile .lbl {
+      font-size: 11px; color: #64748B; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .6px;
+    }
+    .stat-tile .val { font-size: 20px; font-weight: 800; margin-top: 4px; color: #1E2A6E; }
+    .stat-tile .val.warn { color: #F59E0B; }
+
+    .info-line { font-size: 12px; color: #64748B; padding: 0 2px; }
 
     /* ── Customer card ─────────────────────────────────── */
     .cust-card {
-      background: #fff; border-radius: 12px; border: 1px solid var(--gray-3);
-      box-shadow: var(--shadow-sm); padding: 12px 14px;
-      margin-bottom: 10px;
-      display: flex; align-items: flex-start; gap: 12px;
+      background: #fff; border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+      padding: 12px 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px;
     }
-    .avatar {
-      width: 44px; height: 44px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px; font-weight: 800; color: #fff;
-      flex-shrink: 0;
+    .cust-info { min-width: 0; flex: 1; }
+    .cust-nama {
+      font-size: 14px; font-weight: 700; color: #1E2A6E;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .cust-info { flex: 1; min-width: 0; }
-    .cust-nama { font-size: 14px; font-weight: 700; color: var(--gray-9); line-height: 1.2;
-                 white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .cust-tel { font-size: 11px; color: var(--gray-5); margin-top: 2px; }
     .cust-saldo {
-      font-size: 15px; font-weight: 800; color: var(--success); margin-top: 4px;
+      font-size: 15px; font-weight: 800;
+      color: #10B981; margin-top: 3px;
     }
-    .cust-saldo.zero { color: var(--gray-5); }
-    .cust-saldo.low { color: var(--warning); }
-    .cust-actions { display: flex; gap: 6px; margin-top: 8px; }
+    .cust-saldo.zero { color: #94A3B8; }
+    .cust-tel { font-size: 11px; color: #94A3B8; margin-top: 2px; }
+
+    .cust-actions { display: flex; gap: 6px; flex-shrink: 0; }
     .cust-actions button {
-      flex: 1; min-height: 36px; padding: 6px 10px;
-      border-radius: 8px; border: 1px solid transparent;
-      font-size: 12px; font-weight: 700;
-      display: inline-flex; align-items: center; justify-content: center; gap: 4px;
-      cursor: pointer; font-family: inherit;
+      height: 36px; padding: 0 12px; border-radius: 8px;
+      font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; gap: 4px;
     }
-    .btn-topup { background: var(--primary); color: #fff; }
-    .btn-mutasi { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
+    .btn-topup {
+      background: #10B981; color: #fff; border: none;
+    }
+    .btn-topup:active { transform: scale(.97); }
+    .btn-mutasi {
+      background: #fff; color: #64748B; border: 1px solid #E2E8F0;
+    }
+    .btn-mutasi:active { transform: scale(.97); }
 
     /* ── Empty ─────────────────────────────────────────── */
     .empty {
-      text-align: center; padding: 50px 20px; color: var(--gray-5);
-      background: #fff; border-radius: 12px; border: 1px dashed var(--gray-3);
+      text-align: center; padding: 40px 20px; color: #94A3B8;
+      background: #fff; border-radius: 10px; border: 1px dashed #E2E8F0;
     }
-    .empty .ic { font-size: 56px; display: block; margin-bottom: 10px; opacity: .8; }
-    .empty .ttl-em { font-size: 15px; font-weight: 700; color: var(--gray-7); margin-bottom: 4px; }
-    .empty .sub { font-size: 12px; }
+    .empty .ttl-em { font-size: 15px; font-weight: 700; color: #64748B; margin-bottom: 4px; }
+    .empty .sub { font-size: 13px; }
 
     /* ── Pagination ────────────────────────────────────── */
     .pagination {
       display: flex; justify-content: center; align-items: center; gap: 6px;
-      margin-top: 12px; flex-wrap: wrap;
+      margin-top: 8px; flex-wrap: wrap;
     }
     .pg-btn {
       min-width: 36px; height: 36px; padding: 0 10px;
-      border: 1px solid var(--gray-3); background: #fff;
+      border: 1px solid #E2E8F0; background: #fff;
       border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 700;
-      font-family: inherit; color: var(--gray-7);
+      font-family: inherit; color: #64748B;
     }
-    .pg-btn:hover:not(:disabled) { background: var(--gray-1); }
-    .pg-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .pg-btn:hover:not(:disabled) { background: #F8FAFF; }
+    .pg-btn.active { background: #2D3BB5; color: #fff; border-color: #2D3BB5; }
     .pg-btn:disabled { opacity: .4; cursor: default; }
 
     /* ── Toast ─────────────────────────────────────────── */
     #toast {
-      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-      background: var(--gray-9); color: #fff; padding: 10px 20px; border-radius: 99px;
+      position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%);
+      background: #1E2A6E; color: #fff; padding: 10px 20px; border-radius: 999px;
       font-size: 13px; font-weight: 600; z-index: 99999;
       opacity: 0; pointer-events: none; transition: opacity .25s;
     }
     #toast.show { opacity: 1; }
-    #toast.err { background: var(--danger); }
+    #toast.err { background: #EF4444; }
 
     /* ── Mutasi Panel ──────────────────────────────────── */
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 90; display: none; }
+    .overlay { position: fixed; inset: 0; background: rgba(30,42,110,0.45); z-index: 90; display: none; }
     .overlay.open { display: block; }
 
     .panel {
       position: fixed; right: 0; top: 0; bottom: 0; width: 480px; max-width: 100vw;
-      background: var(--gray-2); box-shadow: -4px 0 24px rgba(0,0,0,.12); z-index: 91;
+      background: #F0F7FF; box-shadow: -4px 0 24px rgba(45,59,181,.12); z-index: 91;
       display: flex; flex-direction: column;
       transform: translateX(100%); transition: transform .25s cubic-bezier(.4,0,.2,1);
     }
@@ -132,20 +165,22 @@
     .panel-head {
       display: flex; align-items: center; gap: 10px;
       padding: 14px 16px; background: #fff;
-      border-bottom: 1px solid var(--gray-3); flex-shrink: 0;
+      border-bottom: 1px solid #E2E8F0; flex-shrink: 0;
     }
     .panel-head .ic-btn {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: var(--gray-1); border: none; cursor: pointer; font-size: 16px;
+      width: 36px; height: 36px; border-radius: 10px;
+      background: #F1F5F9; color: #64748B; border: none; cursor: pointer;
       display: inline-flex; align-items: center; justify-content: center;
     }
     .panel-head .h-info { flex: 1; min-width: 0; }
-    .panel-head h2 { font-size: 15px; font-weight: 800; color: var(--gray-9);
-                     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .panel-head .h-saldo { font-size: 12px; font-weight: 700; color: var(--success); }
+    .panel-head h2 {
+      font-size: 16px; font-weight: 800; color: #1E2A6E;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .panel-head .h-saldo { font-size: 12px; font-weight: 700; color: #10B981; margin-top: 2px; }
     .panel-body-mutasi { flex: 1; overflow-y: auto; padding: 14px; }
     .panel-foot {
-      padding: 12px 14px; border-top: 1px solid var(--gray-3);
+      padding: 12px 14px; border-top: 1px solid #E2E8F0;
       background: #fff; flex-shrink: 0;
       display: flex; gap: 8px;
     }
@@ -153,100 +188,105 @@
 
     /* ── Mutasi card ───────────────────────────────────── */
     .mutasi-card {
-      background: #fff; border-radius: 10px; border: 1px solid var(--gray-3);
+      background: #fff; border-radius: 10px;
       padding: 12px 14px; margin-bottom: 8px;
       display: flex; gap: 10px; align-items: flex-start;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
     }
     .mutasi-card.batal { opacity: .55; }
     .mutasi-dot {
       width: 30px; height: 30px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 14px; flex-shrink: 0; color: #fff; font-weight: 800;
+      flex-shrink: 0; color: #fff;
     }
-    .mt-topup { background: var(--success); }
-    .mt-bayar { background: var(--danger); }
-    .mt-kelebihan { background: var(--success); }
-    .mt-refund { background: var(--warning); }
+    .mt-topup { background: #10B981; }
+    .mt-bayar { background: #EF4444; }
+    .mt-kelebihan { background: #10B981; }
+    .mt-refund { background: #F59E0B; }
     .mutasi-info { flex: 1; min-width: 0; }
     .mutasi-line1 {
       display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
     }
-    .mutasi-jenis { font-size: 13px; font-weight: 800; color: var(--gray-9); }
+    .mutasi-jenis { font-size: 13px; font-weight: 800; color: #1E2A6E; }
     .mutasi-nominal { font-size: 14px; font-weight: 800; white-space: nowrap; }
-    .mutasi-nominal.plus { color: var(--success); }
-    .mutasi-nominal.minus { color: var(--danger); }
-    .mutasi-meta { font-size: 11px; color: var(--gray-5); margin-top: 3px; line-height: 1.4; word-break: break-word; }
-    .mutasi-saldo { font-size: 11px; color: var(--gray-5); margin-top: 4px; }
+    .mutasi-nominal.plus { color: #10B981; }
+    .mutasi-nominal.minus { color: #EF4444; }
+    .mutasi-meta { font-size: 11px; color: #94A3B8; margin-top: 3px; line-height: 1.4; word-break: break-word; }
+    .mutasi-saldo { font-size: 11px; color: #64748B; margin-top: 4px; }
     .mutasi-actions { margin-top: 8px; display: flex; gap: 6px; }
     .mutasi-actions button {
-      padding: 6px 12px; border-radius: 6px; border: 1px solid var(--danger);
-      background: #fff; color: var(--danger); font-size: 11px; font-weight: 700;
+      padding: 6px 12px; border-radius: 6px; border: 1px solid #EF4444;
+      background: #fff; color: #EF4444; font-size: 11px; font-weight: 700;
       cursor: pointer; font-family: inherit;
     }
     .mutasi-batal-tag {
       display: inline-block; padding: 1px 7px; border-radius: 99px;
-      background: var(--gray-2); color: var(--gray-5); font-size: 10px; font-weight: 700;
+      background: #F1F5F9; color: #94A3B8; font-size: 10px; font-weight: 700;
       text-transform: uppercase; margin-left: 6px;
     }
 
-    /* ── Local form bottom sheet ───────────────────────── */
+    /* ── Bottom sheet form ─────────────────────────────── */
     .lm-bg {
-      position: fixed !important; inset: 0 !important; background: rgba(0,0,0,.5) !important;
+      position: fixed !important; inset: 0 !important; background: rgba(30,42,110,0.45) !important;
       z-index: 9999 !important; display: none; align-items: flex-end; justify-content: center;
       padding: 0; overflow-y: auto;
     }
     .lm-bg.open { display: flex !important; }
     .lm {
-      position: relative; background: #fff; border-radius: 16px 16px 0 0;
+      position: relative; background: #fff; border-radius: 18px 18px 0 0;
       width: 100%; max-width: 100%; max-height: 92vh; overflow-y: auto;
-      box-shadow: 0 -8px 32px rgba(0,0,0,.18);
+      box-shadow: 0 -8px 32px rgba(45,59,181,.18);
     }
     .lm-h {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 18px; border-bottom: 1px solid var(--gray-3);
+      padding: 14px 18px; border-bottom: 1px solid #E2E8F0;
       position: sticky; top: 0; background: #fff; z-index: 2;
     }
-    .lm-h h3 { font-size: 16px; font-weight: 800; }
-    .lm-h .x { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--gray-5); }
+    .lm-h h3 { font-size: 16px; font-weight: 800; color: #1E2A6E; }
+    .lm-h .x {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: #F1F5F9; border: none; cursor: pointer; color: #64748B;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
     .lm-b { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
-    .lm-f { padding: 12px 18px; border-top: 1px solid var(--gray-3); display: flex; gap: 8px;
+    .lm-f { padding: 12px 18px; border-top: 1px solid #E2E8F0; display: flex; gap: 8px;
             position: sticky; bottom: 0; background: #fff; }
     .lm-f .btn { flex: 1; min-height: 44px; }
 
-    .fld label { display: block; font-size: 12px; font-weight: 700; color: var(--gray-7); margin-bottom: 5px; }
+    .fld label { display: block; font-size: 12px; font-weight: 700; color: #64748B; margin-bottom: 5px; }
     .fld input, .fld select {
-      width: 100%; padding: 10px 12px; border: 1px solid var(--gray-3);
+      width: 100%; padding: 10px 12px; border: 1.5px solid #E2E8F0;
       border-radius: 8px; font-size: 14px; font-family: inherit;
-      background: #fff; color: var(--gray-9); outline: none;
+      background: #fff; color: #1E2A6E; outline: none;
     }
-    .fld input:focus, .fld select:focus { border-color: var(--primary); }
-    .fld small { font-size: 11px; color: var(--gray-5); margin-top: 3px; display: block; }
+    .fld input:focus, .fld select:focus { border-color: #2D3BB5; }
+    .fld small { font-size: 11px; color: #94A3B8; margin-top: 3px; display: block; }
 
     .toggle-grp { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
     .toggle-grp button {
-      padding: 10px 8px; border-radius: 8px; border: 1.5px solid var(--gray-3);
-      background: var(--gray-1); color: var(--gray-5); font-size: 12px; font-weight: 700;
+      padding: 10px 8px; border-radius: 8px; border: 1.5px solid #E2E8F0;
+      background: #F8FAFF; color: #94A3B8; font-size: 12px; font-weight: 700;
       cursor: pointer; font-family: inherit; text-align: center;
     }
-    .toggle-grp button.active { border-color: var(--primary); background: var(--primary-lt); color: var(--primary); }
+    .toggle-grp button.active { border-color: #2D3BB5; background: #E3F2FF; color: #2D3BB5; }
 
     .preview-box {
-      background: var(--success-lt); border: 1.5px solid #86efac;
+      background: #E7F8F1; border: 1.5px solid #86efac;
       border-radius: 8px; padding: 12px 14px;
       display: flex; justify-content: space-between; align-items: center;
-      font-weight: 700; color: var(--success);
+      font-weight: 700; color: #10B981;
     }
-    .preview-box.danger { background: var(--danger-lt); border-color: #fca5a5; color: var(--danger); }
+    .preview-box.danger { background: #FDECEC; border-color: #fca5a5; color: #EF4444; }
 
     .info-box {
-      background: var(--gray-1); border-radius: 8px; padding: 12px;
+      background: #F8FAFF; border-radius: 8px; padding: 12px;
     }
     .info-box .row {
       display: flex; justify-content: space-between; align-items: center;
       padding: 4px 0; font-size: 13px;
     }
-    .info-box .row .lbl { color: var(--gray-5); }
-    .info-box .row .val { font-weight: 700; color: var(--gray-9); }
+    .info-box .row .lbl { color: #64748B; }
+    .info-box .row .val { font-weight: 700; color: #1E2A6E; }
 
     .btn {
       padding: 10px 16px; border-radius: 8px; border: 1px solid transparent;
@@ -254,10 +294,10 @@
       display: inline-flex; align-items: center; justify-content: center; gap: 5px;
       text-decoration: none;
     }
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-success { background: var(--success); color: #fff; }
-    .btn-outline { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
-    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-primary { background: #2D3BB5; color: #fff; }
+    .btn-success { background: #10B981; color: #fff; }
+    .btn-outline { background: #fff; border-color: #E2E8F0; color: #64748B; }
+    .btn-danger { background: #EF4444; color: #fff; }
     .btn:disabled { opacity: .5; cursor: default; }
 
     /* ══ DESKTOP (>= 1024px) ══ */
@@ -267,32 +307,32 @@
     @media (min-width: 1024px) {
       .desktop-only { display: block; }
       .mobile-only { display: none; }
-      .body-wrap { padding: 20px; }
-      .head { padding: 16px 20px; }
-      .head .ttl { font-size: 22px; }
-      .summary-strip { grid-template-columns: repeat(3, 1fr); }
+      .body-wrap { padding: 4px 20px 40px; }
+      .dp-head { padding: 16px 20px 10px; }
+      .search-wrap { padding: 0 20px 10px; }
+      .dp-title { font-size: 22px; }
+
+      .desktop-stats {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      }
 
       .table-card {
-        background: #fff; border: 1px solid var(--gray-3); border-radius: 12px;
-        overflow: hidden; box-shadow: var(--shadow-sm);
+        background: #fff; border-radius: 12px;
+        overflow: hidden; box-shadow: 0 1px 3px rgba(45,59,181,0.08);
       }
       .table-wrap { overflow-x: auto; }
       table { width: 100%; border-collapse: collapse; min-width: 800px; }
       thead th {
         padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 800;
-        text-transform: uppercase; letter-spacing: .4px; color: var(--gray-5);
-        background: var(--gray-1); border-bottom: 1px solid var(--gray-3);
+        text-transform: uppercase; letter-spacing: .4px; color: #64748B;
+        background: #F8FAFF; border-bottom: 1px solid #E2E8F0;
       }
-      tbody tr { border-bottom: 1px solid var(--gray-3); }
+      tbody tr { border-bottom: 1px solid #F1F5F9; }
       tbody tr:last-child { border-bottom: none; }
-      tbody tr:hover { background: var(--gray-1); }
-      tbody td { padding: 12px 14px; vertical-align: middle; font-size: 13px; }
-      .td-name { display: flex; align-items: center; gap: 10px; }
+      tbody tr:hover { background: #F8FAFF; }
+      tbody td { padding: 12px 14px; vertical-align: middle; font-size: 13px; color: #1E2A6E; }
+      .td-nama { font-weight: 700; }
       .td-actions { display: flex; gap: 6px; }
-      .td-actions button {
-        padding: 6px 12px; border-radius: 6px; border: 1px solid transparent;
-        font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
-      }
 
       .lm-bg { align-items: center; padding: 16px; }
       .lm { max-width: 480px; border-radius: 14px; }
@@ -303,35 +343,45 @@
 
 <div class="page">
   <!-- HEADER -->
-  <div class="head">
-    <div class="ttl">Deposit Pelanggan</div>
-    <div class="search-wrap">
-      <input type="text" id="searchInput" placeholder="Cari nama pelanggan..." oninput="onSearch()"/>
-    </div>
+  <div class="dp-head">
+    <a class="ic-btn" href="/dashboard" aria-label="Kembali">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <div class="dp-title">Deposit</div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Cari nama pelanggan…" oninput="onSearch()"/>
   </div>
 
   <!-- BODY -->
   <div class="body-wrap">
-    <!-- SUMMARY -->
-    <div class="summary-strip">
-      <div class="sm-box">
-        <div class="val primary" id="smTotalSaldo">—</div>
-        <div class="lbl">Total Saldo Beredar</div>
-      </div>
-      <div class="sm-box">
-        <div class="val" id="smJumlahPelanggan">—</div>
-        <div class="lbl">Pelanggan Aktif</div>
-      </div>
-      <div class="sm-box desktop-only">
-        <div class="val" style="color:var(--warning)" id="smSaldoTipis">—</div>
-        <div class="lbl">Saldo Tipis</div>
+    <!-- HERO CARD -->
+    <div class="hero-card">
+      <div class="hero-lbl">Saldo Beredar</div>
+      <div class="hero-row">
+        <div class="hero-amt" id="heroTotal">—</div>
+        <div class="hero-chip"><span id="heroCount">0</span>&nbsp;pelanggan</div>
       </div>
     </div>
 
-    <div class="info-line" id="infoLine">Memuat...</div>
+    <!-- DESKTOP EXTRA STATS -->
+    <div class="desktop-stats desktop-only">
+      <div class="stat-tile">
+        <div class="lbl">Saldo Tipis</div>
+        <div class="val warn" id="statTipis">—</div>
+      </div>
+      <div class="stat-tile">
+        <div class="lbl">Pelanggan Aktif</div>
+        <div class="val" id="statAktif">—</div>
+      </div>
+    </div>
+
+    <div class="info-line" id="infoLine">Memuat…</div>
 
     <!-- MOBILE: card list -->
-    <div class="mobile-only" id="cardList"></div>
+    <div class="mobile-only" id="cardList" style="display:flex;flex-direction:column;gap:8px"></div>
 
     <!-- DESKTOP: table -->
     <div class="desktop-only">
@@ -348,7 +398,7 @@
               </tr>
             </thead>
             <tbody id="tableBody">
-              <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--gray-5)">Memuat...</td></tr>
+              <tr><td colspan="5" style="text-align:center;padding:40px;color:#94A3B8">Memuat…</td></tr>
             </tbody>
           </table>
         </div>
@@ -363,18 +413,20 @@
 <div class="overlay" id="overlay" onclick="closeMutasiPanel()"></div>
 <aside class="panel" id="mutasiPanel">
   <div class="panel-head">
-    <button class="ic-btn" onclick="closeMutasiPanel()">←</button>
+    <button class="ic-btn" onclick="closeMutasiPanel()" aria-label="Tutup">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
     <div class="h-info">
       <h2 id="mutasiNama">—</h2>
       <div class="h-saldo">Saldo: <span id="mutasiSaldo">—</span></div>
     </div>
   </div>
   <div class="panel-body-mutasi" id="mutasiBody">
-    <div style="text-align:center;color:var(--gray-5);padding:40px">Memuat...</div>
+    <div style="text-align:center;color:#94A3B8;padding:40px">Memuat…</div>
   </div>
   <div class="panel-foot">
     <button class="btn btn-outline" onclick="closeMutasiPanel()">Tutup</button>
-    <button class="btn btn-primary" id="btnTopupFromPanel" onclick="topupFromPanel()">+ Topup</button>
+    <button class="btn btn-success" id="btnTopupFromPanel" onclick="topupFromPanel()">+ Topup</button>
   </div>
 </aside>
 
@@ -383,7 +435,9 @@
   <div class="lm">
     <div class="lm-h">
       <h3>Topup Saldo Deposit</h3>
-      <button class="x" onclick="closeModalTopup()">×</button>
+      <button class="x" onclick="closeModalTopup()" aria-label="Tutup">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
     </div>
     <div class="lm-b">
       <div class="info-box">
@@ -404,7 +458,7 @@
       </div>
 
       <div>
-        <label style="display:block;font-size:12px;font-weight:700;color:var(--gray-7);margin-bottom:6px">Metode Pembayaran</label>
+        <label style="display:block;font-size:12px;font-weight:700;color:#64748B;margin-bottom:6px">Metode Pembayaran</label>
         <div class="toggle-grp" id="topupMetodeGrp">
           <button class="metode-btn active" data-metode="tunai" onclick="setTopupMetode('tunai')">Tunai</button>
           <button class="metode-btn" data-metode="transfer" onclick="setTopupMetode('transfer')">Transfer</button>
@@ -428,8 +482,10 @@
 <div class="lm-bg" id="modalBatal">
   <div class="lm">
     <div class="lm-h">
-      <h3 style="color:var(--danger)">Batalkan Topup</h3>
-      <button class="x" onclick="closeModalBatal()">×</button>
+      <h3 style="color:#EF4444">Batalkan Topup</h3>
+      <button class="x" onclick="closeModalBatal()" aria-label="Tutup">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
     </div>
     <div class="lm-b">
       <div class="info-box">
@@ -439,19 +495,19 @@
         </div>
         <div class="row">
           <span class="lbl">Nominal topup</span>
-          <span class="val" style="color:var(--success)" id="batalNominal">—</span>
+          <span class="val" style="color:#10B981" id="batalNominal">—</span>
         </div>
         <div class="row">
           <span class="lbl">Tanggal topup</span>
           <span class="val" id="batalTanggal">—</span>
         </div>
-        <div class="row" style="border-top:1px solid var(--gray-3);margin-top:6px;padding-top:8px">
+        <div class="row" style="border-top:1px solid #E2E8F0;margin-top:6px;padding-top:8px">
           <span class="lbl">Saldo saat ini</span>
           <span class="val" id="batalSaldoSekarang">—</span>
         </div>
         <div class="row">
           <span class="lbl">Saldo setelah batal</span>
-          <span class="val" style="color:var(--danger)" id="batalSaldoAkhir">—</span>
+          <span class="val" style="color:#EF4444" id="batalSaldoAkhir">—</span>
         </div>
       </div>
 
@@ -459,7 +515,7 @@
         Saldo tidak mencukupi untuk membatalkan topup
       </div>
 
-      <div style="font-size:12px;color:var(--gray-5);line-height:1.5">
+      <div style="font-size:12px;color:#64748B;line-height:1.5">
         Pembatalan akan mencatat <strong>refund</strong> dan mengurangi kas operasional sebesar nominal topup. Tindakan ini tidak bisa diundo.
       </div>
     </div>
@@ -484,19 +540,6 @@ const fmtDate = s => s ? new Date(s).toLocaleDateString('id-ID', { day:'2-digit'
 const fmtDateTime = s => s ? new Date(s).toLocaleString('id-ID', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-const AVATAR_COLORS = ['#2D3BB5','#10B981','#F59E0B','#EF4444','#8B5CF6','#0891b2','#db2777','#65a30d','#ea580c','#0d9488','#9333ea','#0284c7','#059669','#b45309','#be123c'];
-function avatarColor(name) {
-  let hash = 0;
-  const s = String(name || '?');
-  for (let i = 0; i < s.length; i++) hash = s.charCodeAt(i) + ((hash << 5) - hash);
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
-function initials(name) {
-  const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return '?';
-  if (parts.length === 1) return parts[0][0].toUpperCase();
-  return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
-}
 function tel08(t) {
   if (!t) return '';
   t = String(t).replace(/\D/g, '');
@@ -511,12 +554,18 @@ let topupTarget = null;
 let topupMetode = 'tunai';
 let batalContext = null;
 
+// ── SVG icons untuk mutasi dot ───────────────────────
+const SVG_UP    = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>';
+const SVG_DOWN  = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>';
+const SVG_UNDO  = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>';
+const SVG_DOT   = '<svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" fill="currentColor"/></svg>';
+
 function showToast(msg, err = false) {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
   el.classList.toggle('err', !!err);
-  setTimeout(() => el.classList.remove('show'), 2800);
+  setTimeout(() => el.classList.remove('show'), 2200);
 }
 
 function onSearch() {
@@ -530,9 +579,10 @@ async function loadDeposit(page = 1) {
   const params = new URLSearchParams({ page, limit: 30 });
   if (q) params.set('q', q);
 
-  document.getElementById('cardList').innerHTML = '<div class="empty"><span class="ic">⏳</span><div class="ttl-em">Memuat...</div></div>';
+  document.getElementById('cardList').innerHTML =
+    '<div class="empty"><div class="ttl-em">Memuat…</div></div>';
   document.getElementById('tableBody').innerHTML =
-    '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--gray-5)">Memuat...</td></tr>';
+    '<tr><td colspan="5" style="text-align:center;padding:40px;color:#94A3B8">Memuat…</td></tr>';
 
   try {
     const r = await fetch('/api/v1/deposit?' + params, { credentials: 'include' });
@@ -542,9 +592,12 @@ async function loadDeposit(page = 1) {
     const meta = d.meta || {};
     const ring = d.ringkasan || {};
 
-    document.getElementById('smTotalSaldo').textContent = fmtRpShort(ring.total_saldo);
-    document.getElementById('smJumlahPelanggan').textContent = (ring.jumlah_pelanggan || 0) + ' Orang';
-    document.getElementById('smSaldoTipis').textContent = (ring.pelanggan_saldo_tipis || 0) + ' Orang';
+    document.getElementById('heroTotal').textContent = fmtRpShort(ring.total_saldo);
+    document.getElementById('heroCount').textContent = ring.jumlah_pelanggan || 0;
+    const statTipis = document.getElementById('statTipis');
+    const statAktif = document.getElementById('statAktif');
+    if (statTipis) statTipis.textContent = (ring.pelanggan_saldo_tipis || 0) + ' Orang';
+    if (statAktif) statAktif.textContent = (ring.jumlah_pelanggan || 0) + ' Orang';
 
     totalPages = Math.max(1, Math.ceil((meta.total || 0) / 30));
     document.getElementById('infoLine').textContent =
@@ -556,7 +609,7 @@ async function loadDeposit(page = 1) {
   } catch (e) {
     console.error(e);
     document.getElementById('cardList').innerHTML =
-      `<div class="empty"><span class="ic"></span><div class="ttl-em">Gagal memuat data</div></div>`;
+      `<div class="empty"><div class="ttl-em">Gagal memuat data</div></div>`;
   }
 }
 
@@ -566,30 +619,29 @@ function renderCards(rows) {
     const q = document.getElementById('searchInput').value.trim();
     el.innerHTML = `
       <div class="empty">
-        <span class="ic">${q ? '' : ''}</span>
         <div class="ttl-em">${q ? 'Tidak ada pelanggan yang cocok' : 'Belum ada data deposit'}</div>
         <div class="sub">${q ? 'Coba kata kunci lain' : 'Topup deposit pertama dari halaman pelanggan'}</div>
       </div>`;
     return;
   }
   el.innerHTML = rows.map(p => {
-    const ini = initials(p.nama);
-    const col = avatarColor(p.nama);
     const tel = tel08(p.telepon);
     const saldo = Number(p.saldo || 0);
-    const saldoClass = saldo === 0 ? 'zero' : (saldo < 20000 ? 'low' : '');
+    const saldoClass = saldo === 0 ? 'zero' : '';
     const namaEsc = esc(p.nama).replace(/'/g, "&#39;");
     return `
     <div class="cust-card">
-      <div class="avatar" style="background:${col}">${esc(ini)}</div>
       <div class="cust-info">
         <div class="cust-nama">${esc(p.nama)}</div>
+        <div class="cust-saldo ${saldoClass}">${fmtRp(saldo)}</div>
         ${tel ? `<div class="cust-tel">${esc(tel)}</div>` : ''}
-        <div class="cust-saldo ${saldoClass}">Saldo: ${fmtRp(saldo)}</div>
-        <div class="cust-actions">
-          <button class="btn-topup" onclick="openModalTopup(${p.id}, '${namaEsc.replace(/'/g, "\\'")}', ${saldo})">+ Topup</button>
-          <button class="btn-mutasi" onclick="openMutasiPanel(${p.id}, '${namaEsc.replace(/'/g, "\\'")}')">Mutasi</button>
-        </div>
+      </div>
+      <div class="cust-actions">
+        <button class="btn-topup" onclick="openModalTopup(${p.id}, '${namaEsc.replace(/'/g, "\\'")}', ${saldo})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Topup
+        </button>
+        <button class="btn-mutasi" onclick="openMutasiPanel(${p.id}, '${namaEsc.replace(/'/g, "\\'")}')">Mutasi</button>
       </div>
     </div>`;
   }).join('');
@@ -598,27 +650,20 @@ function renderCards(rows) {
 function renderTable(rows) {
   const tbody = document.getElementById('tableBody');
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--gray-5)">Tidak ada data</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:#94A3B8">Tidak ada data</td></tr>`;
     return;
   }
   tbody.innerHTML = rows.map(p => {
-    const ini = initials(p.nama);
-    const col = avatarColor(p.nama);
     const tel = tel08(p.telepon);
     const saldo = Number(p.saldo || 0);
-    const saldoColor = saldo === 0 ? 'var(--gray-5)' : (saldo < 20000 ? 'var(--warning)' : 'var(--success)');
+    const saldoColor = saldo === 0 ? '#94A3B8' : '#10B981';
     const namaEsc = esc(p.nama).replace(/'/g, "&#39;");
     return `
     <tr>
-      <td>
-        <div class="td-name">
-          <div class="avatar" style="background:${col};width:36px;height:36px;font-size:13px">${esc(ini)}</div>
-          <div style="font-weight:700">${esc(p.nama)}</div>
-        </div>
-      </td>
-      <td>${tel ? esc(tel) : '<span style="color:var(--gray-5)">—</span>'}</td>
+      <td class="td-nama">${esc(p.nama)}</td>
+      <td>${tel ? esc(tel) : '<span style="color:#94A3B8">—</span>'}</td>
       <td style="text-align:right;font-weight:800;color:${saldoColor}">${fmtRp(saldo)}</td>
-      <td style="color:var(--gray-5);font-size:12px">${fmtDate(p.saldo_updated_at)}</td>
+      <td style="color:#94A3B8;font-size:12px">${fmtDate(p.saldo_updated_at)}</td>
       <td class="td-actions">
         <button class="btn-topup" onclick="openModalTopup(${p.id}, '${namaEsc.replace(/'/g, "\\'")}', ${saldo})">+ Topup</button>
         <button class="btn-mutasi" onclick="openMutasiPanel(${p.id}, '${namaEsc.replace(/'/g, "\\'")}')">Mutasi</button>
@@ -635,11 +680,11 @@ function renderPagination() {
   const start = Math.max(1, currentPage - 2);
   const end = Math.min(totalPages, currentPage + 2);
   if (start > 1) html += `<button class="pg-btn" onclick="loadDeposit(1)">1</button>`;
-  if (start > 2) html += `<span style="padding:0 4px;color:var(--gray-5)">…</span>`;
+  if (start > 2) html += `<span style="padding:0 4px;color:#94A3B8">…</span>`;
   for (let p = start; p <= end; p++) {
     html += `<button class="pg-btn ${p === currentPage ? 'active' : ''}" onclick="loadDeposit(${p})">${p}</button>`;
   }
-  if (end < totalPages - 1) html += `<span style="padding:0 4px;color:var(--gray-5)">…</span>`;
+  if (end < totalPages - 1) html += `<span style="padding:0 4px;color:#94A3B8">…</span>`;
   if (end < totalPages) html += `<button class="pg-btn" onclick="loadDeposit(${totalPages})">${totalPages}</button>`;
   html += `<button class="pg-btn" onclick="loadDeposit(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>›</button>`;
   el.innerHTML = html;
@@ -686,7 +731,7 @@ async function submitTopup() {
   if (nominal <= 0) { showToast('Nominal harus > 0', true); return; }
   const btn = document.getElementById('btnSimpanTopup');
   btn.disabled = true;
-  btn.textContent = 'Menyimpan...';
+  btn.textContent = 'Menyimpan…';
   try {
     const r = await fetch(`/api/v1/deposit/${topupTarget.id}/topup`, {
       method: 'POST', credentials: 'include',
@@ -710,11 +755,11 @@ async function submitTopup() {
 async function openMutasiPanel(pelangganId, nama) {
   currentPelanggan = { id: pelangganId, nama: nama || 'Pelanggan', saldo: 0 };
   document.getElementById('mutasiNama').textContent = currentPelanggan.nama;
-  document.getElementById('mutasiSaldo').textContent = '...';
+  document.getElementById('mutasiSaldo').textContent = '…';
   document.getElementById('overlay').classList.add('open');
   document.getElementById('mutasiPanel').classList.add('open');
   document.getElementById('mutasiBody').innerHTML =
-    '<div style="text-align:center;color:var(--gray-5);padding:40px">Memuat...</div>';
+    '<div style="text-align:center;color:#94A3B8;padding:40px">Memuat…</div>';
   await loadMutasi(pelangganId);
 }
 async function loadMutasi(pelangganId) {
@@ -727,7 +772,7 @@ async function loadMutasi(pelangganId) {
     renderMutasi(d.data || []);
   } catch (e) {
     document.getElementById('mutasiBody').innerHTML =
-      `<div style="color:var(--danger);text-align:center;padding:40px">${esc(e.message)}</div>`;
+      `<div style="color:#EF4444;text-align:center;padding:40px">${esc(e.message)}</div>`;
   }
 }
 function renderMutasi(rows) {
@@ -735,7 +780,6 @@ function renderMutasi(rows) {
   if (!rows.length) {
     el.innerHTML = `
       <div class="empty" style="background:transparent;border:none">
-        <span class="ic"></span>
         <div class="ttl-em">Belum ada mutasi</div>
         <div class="sub">Topup atau bayar order akan muncul di sini</div>
       </div>`;
@@ -750,7 +794,7 @@ function renderMutasi(rows) {
       topup: 'Topup', bayar: 'Bayar Order',
       kelebihan: 'Kelebihan Bayar', refund: 'Refund Topup'
     }[jenis] || jenis;
-    const icon = { topup: '↑', bayar: '↓', kelebihan: '↑', refund: '↺' }[jenis] || '•';
+    const icon = { topup: SVG_UP, bayar: SVG_DOWN, kelebihan: SVG_UP, refund: SVG_UNDO }[jenis] || SVG_DOT;
 
     const meta = [];
     if (jenis === 'topup' && m.metode_bayar) meta.push(esc(m.metode_bayar));
@@ -760,18 +804,17 @@ function renderMutasi(rows) {
 
     let aksi = '';
     // RBAC: batalkan topup adalah aksi owner-only (mempengaruhi kas & saldo).
-    // Karyawan tidak akan pernah melihat tombol Batalkan.
     const canCancelTopup = typeof window.isOwner === 'function' ? window.isOwner() : false;
     if (jenis === 'topup' && !isCanceled && canCancelTopup) {
       const diffDays = Math.floor((Date.now() - new Date(m.created_at).getTime()) / 86400000);
       const saldoCukup = currentPelanggan && currentPelanggan.saldo >= nominal;
       if (diffDays <= 7 && saldoCukup) {
         const ctx = JSON.stringify({ mutasiId: m.id, nominal, tanggal: m.created_at }).replace(/'/g, "&#39;");
-        aksi = `<div class="mutasi-actions"><button onclick='openModalBatal(${ctx})'> Batalkan</button></div>`;
+        aksi = `<div class="mutasi-actions"><button onclick='openModalBatal(${ctx})'>Batalkan</button></div>`;
       } else if (diffDays > 7) {
-        aksi = `<div style="margin-top:6px;font-size:11px;color:var(--gray-5)">Tidak bisa dibatalkan — lebih dari 7 hari</div>`;
+        aksi = `<div style="margin-top:6px;font-size:11px;color:#94A3B8">Tidak bisa dibatalkan — lebih dari 7 hari</div>`;
       } else if (!saldoCukup) {
-        aksi = `<div style="margin-top:6px;font-size:11px;color:var(--gray-5)">Tidak bisa dibatalkan — saldo sudah digunakan</div>`;
+        aksi = `<div style="margin-top:6px;font-size:11px;color:#94A3B8">Tidak bisa dibatalkan — saldo sudah digunakan</div>`;
       }
     }
 
@@ -793,7 +836,7 @@ function renderMutasi(rows) {
           ${fmtDateTime(m.created_at)}
           ${meta.length ? ' · ' + meta.join(' · ') : ''}
         </div>
-        <div class="mutasi-saldo">Saldo: ${fmtRp(m.saldo_sebelum)} → ${fmtRp(m.saldo_sesudah)}</div>
+        <div class="mutasi-saldo">Saldo: ${fmtRp(m.saldo_sebelum)} &rarr; ${fmtRp(m.saldo_sesudah)}</div>
         ${aksi}
       </div>
     </div>`;
@@ -840,7 +883,7 @@ async function submitBatalTopup() {
   if (!batalContext || !currentPelanggan) return;
   const btn = document.getElementById('btnConfirmBatal');
   btn.disabled = true;
-  btn.textContent = 'Memproses...';
+  btn.textContent = 'Memproses…';
   try {
     const r = await fetch(`/api/v1/deposit/${currentPelanggan.id}/batalkan-topup`, {
       method: 'POST', credentials: 'include',
