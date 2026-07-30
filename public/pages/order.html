@@ -10,8 +10,8 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --blue:   #2D3BB5; --blue-dk: #1E2A8A; --blue-lt: #EEF2FF;
-      --green:  #10B981; --red: #EF4444; --yellow: #F59E0B;
+      --blue: #2D3BB5; --blue-dk: #1E2A8A; --blue-lt: #EEF2FF;
+      --green: #10B981; --red: #EF4444; --yellow: #F59E0B;
       --gray-1: #f8fafc; --gray-2: #f1f5f9; --gray-3: #e2e8f0;
       --gray-5: #64748b; --gray-7: #374151; --gray-9: #1E2A6E;
       --radius: 10px; --shadow: 0 1px 4px rgba(0,0,0,.08);
@@ -135,16 +135,16 @@
       display: flex; align-items: center; justify-content: center;
       font-weight: 700; font-size: 13px; flex-shrink: 0;
     }
-    .ac-name  { font-weight: 600; font-size: 13px; }
-    .ac-sub   { font-size: 11px; color: var(--gray-5); margin-top: 1px; }
+    .ac-name { font-weight: 600; font-size: 13px; }
+    .ac-sub { font-size: 11px; color: var(--gray-5); margin-top: 1px; }
     .level-badge {
       padding: 1px 7px; border-radius: 99px; font-size: 10px;
       font-weight: 700; letter-spacing: .3px; text-transform: uppercase;
     }
     .level-Platinum { background: #ede9fe; color: #6d28d9; }
-    .level-Gold     { background: #fef3c7; color: #92400e; }
-    .level-Silver   { background: #f1f5f9; color: #475569; }
-    .level-Bronze   { background: #fef9ee; color: #92400e; }
+    .level-Gold { background: #fef3c7; color: #92400e; }
+    .level-Silver { background: #f1f5f9; color: #475569; }
+    .level-Bronze { background: #fef9ee; color: #92400e; }
 
     /* ── Searchable Service Select ── */
     /* SATU input field dengan chevron/clear (kanan) */
@@ -240,9 +240,9 @@
       font-weight: 700; font-size: 16px; flex-shrink: 0;
     }
     .ci-detail { flex: 1; }
-    .ci-name  { font-weight: 700; font-size: 14px; color: var(--blue-dk); }
-    .ci-meta  { font-size: 12px; color: var(--gray-5); margin-top: 2px; }
-    .ci-poin  { font-size: 13px; font-weight: 600; color: var(--blue-dk); }
+    .ci-name { font-weight: 700; font-size: 14px; color: var(--blue-dk); }
+    .ci-meta { font-size: 12px; color: var(--gray-5); margin-top: 2px; }
+    .ci-poin { font-size: 13px; font-weight: 600; color: var(--blue-dk); }
     .ci-clear { background: none; border: none; cursor: pointer;
                 color: var(--gray-5); font-size: 18px; padding: 4px; }
 
@@ -257,7 +257,7 @@
     }
     @keyframes repeatPop {
       from { transform: translateY(-4px); opacity: 0; }
-      to   { transform: none; opacity: 1; }
+      to { transform: none; opacity: 1; }
     }
     .repeat-head {
       display: flex; align-items: center; gap: 6px;
@@ -552,7 +552,7 @@
       padding: 10px 0;
     }
     .toggle-label { font-size: 13px; font-weight: 600; color: var(--gray-7); }
-    .toggle-sub   { font-size: 11px; color: var(--gray-5); margin-top: 2px; }
+    .toggle-sub { font-size: 11px; color: var(--gray-5); margin-top: 2px; }
     .toggle {
       position: relative; width: 44px; height: 24px; flex-shrink: 0;
     }
@@ -690,7 +690,7 @@
     }
     #toast.show { transform: translateY(0); opacity: 1; }
     #toast.success { background: var(--green); }
-    #toast.error   { background: var(--red); }
+    #toast.error { background: var(--red); }
 
     /* Loading overlay */
     #loadingOverlay {
@@ -708,7 +708,7 @@
     .empty-items {
       text-align: center; padding: 24px; color: var(--gray-5); font-size: 13px;
     }
-    .kembalian-ok    { color: var(--green); }
+    .kembalian-ok { color: var(--green); }
     .kembalian-kurang{ color: var(--red); }
     .keleb-btn.active {
       border-color: var(--blue) !important;
@@ -729,7 +729,7 @@
     }
     .printer-dot { width: 8px; height: 8px; border-radius: 50%;
                    background: var(--gray-3); flex-shrink: 0; }
-    .printer-dot.on  { background: var(--green); box-shadow: 0 0 4px rgba(22,163,74,.5); }
+    .printer-dot.on { background: var(--green); box-shadow: 0 0 4px rgba(22,163,74,.5); }
     .printer-dot.off { background: var(--red); }
 
     /* ── Waktu Transaksi Picker ── */
@@ -766,7 +766,7 @@
       <div class="card-body" style="padding:12px 18px;">
         <div class="toggle-wrap" style="padding:0;">
           <div>
-            <div class="toggle-label">🕒 Pilih Waktu Transaksi</div>
+            <div class="toggle-label">Pilih Waktu Transaksi</div>
             <div class="toggle-sub">Aktifkan jika ingin membuat transaksi yang waktunya sebelum saat ini</div>
           </div>
           <label class="toggle"><input type="checkbox" id="toggleWaktu" /><span class="toggle-slider"></span></label>
@@ -779,7 +779,7 @@
             id="inputWaktuTransaksi"
           />
           <div style="font-size:11px;color:var(--gray-5);margin-top:4px;">
-            ⚠️ Tidak bisa memilih waktu yang akan datang
+            Tidak bisa memilih waktu yang akan datang
           </div>
         </div>
       </div>
@@ -787,7 +787,7 @@
 
     <!-- Customer -->
     <div class="card">
-      <div class="card-header"><h2>👤 Pelanggan</h2>
+      <div class="card-header"><h2>Pelanggan</h2>
         <span style="font-size:11px;color:var(--gray-5)">Opsional — bisa walk-in</span>
       </div>
       <div class="card-body">
@@ -802,17 +802,17 @@
             <div class="ci-meta" id="ciMeta">—</div>
             <div class="ci-poin" id="ciPoin">—</div>
           </div>
-          <button class="ci-clear" id="clearCustomer" title="Hapus pilihan">✕</button>
+          <button class="ci-clear" id="clearCustomer" title="Hapus pilihan">×</button>
         </div>
         <div id="ciNoteBox" style="display:none;background:#fef9c3;border:1px solid #fde047;border-left:4px solid #F59E0B;border-radius:10px;padding:10px 12px;margin-top:8px;font-size:13px;color:#713f12">
-          <div style="font-weight:700;margin-bottom:4px">📋 Catatan Pelanggan</div>
+          <div style="font-weight:700;margin-bottom:4px">Catatan Pelanggan</div>
           <div id="ciNoteBody" style="line-height:1.55"></div>
         </div>
 
         <!-- Quick Repeat Order — suggestion order seperti terakhir -->
         <div id="repeatSuggestion" class="repeat-card" style="display:none">
           <div class="repeat-head">
-            <span class="repeat-bolt">⚡</span>
+            
             <span class="repeat-title">Order seperti terakhir kali?</span>
           </div>
           <div class="repeat-body">
@@ -820,7 +820,7 @@
             <div class="repeat-meta" id="repeatMeta">—</div>
           </div>
           <div class="repeat-actions">
-            <button type="button" id="btnRepeatYes" class="btn-repeat-yes">✓ Ya, Ulangi Order</button>
+            <button type="button" id="btnRepeatYes" class="btn-repeat-yes">Ya, Ulangi Order</button>
             <button type="button" id="btnRepeatNo" class="btn-repeat-no">Tidak</button>
           </div>
         </div>
@@ -830,13 +830,13 @@
     <!-- Items -->
     <div class="card">
       <div class="card-header">
-        <h2>🧺 Layanan Laundry</h2>
+        <h2>Layanan Laundry</h2>
         <span id="itemCount" style="font-size:12px;color:var(--gray-5)">0 layanan</span>
       </div>
       <div class="card-body">
         <!-- Chip layanan populer — tap untuk tambah cepat -->
         <div id="chipLayananWrap" style="margin-bottom:12px;display:none">
-          <div style="font-size:11px;font-weight:700;color:var(--gray-5);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">⚡ Tap untuk tambah cepat</div>
+          <div style="font-size:11px;font-weight:700;color:var(--gray-5);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Tap untuk tambah cepat</div>
           <div id="chipLayanan" style="display:flex;flex-wrap:wrap;gap:6px"></div>
         </div>
         <div class="item-header">
@@ -851,7 +851,7 @@
 
     <!-- Catatan & Jemput -->
     <div class="card">
-      <div class="card-header"><h2>📝 Catatan & Pengiriman</h2></div>
+      <div class="card-header"><h2>Catatan & Pengiriman</h2></div>
       <div class="card-body">
         <div class="field">
           <label>Catatan</label>
@@ -859,7 +859,7 @@
         </div>
         <div class="toggle-wrap">
           <div>
-            <div class="toggle-label">🛵 Antar Jemput</div>
+            <div class="toggle-label">Antar Jemput</div>
             <div class="toggle-sub">Aktifkan jika perlu pickup/delivery</div>
           </div>
           <label class="toggle"><input type="checkbox" id="antarJemput" /><span class="toggle-slider"></span></label>
@@ -880,7 +880,7 @@
 
     <!-- Promo & Poin -->
     <div class="card">
-      <div class="card-header"><h2>🎁 Promo & Poin</h2></div>
+      <div class="card-header"><h2>Promo & Poin</h2></div>
       <div class="card-body">
         <div class="field">
           <label>Paket Promo</label>
@@ -891,7 +891,7 @@
         </div>
         <div class="toggle-wrap">
           <div>
-            <div class="toggle-label">⭐ Tukar Poin</div>
+            <div class="toggle-label">Tukar Poin</div>
             <div class="toggle-sub" id="poinToggleSub">Pilih pelanggan terlebih dahulu</div>
           </div>
           <label class="toggle"><input type="checkbox" id="usePoin" disabled /><span class="toggle-slider"></span></label>
@@ -909,16 +909,16 @@
 
     <!-- Diskon -->
     <div class="card">
-      <div class="card-header"><h2>🏷️ Diskon</h2></div>
+      <div class="card-header"><h2>Diskon</h2></div>
       <div class="card-body">
         <div class="field">
           <label>Tipe Diskon</label>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
             <button class="diskon-type-btn active" data-type="nominal">
-              💵 Nominal (Rp)
+              Nominal (Rp)
             </button>
             <button class="diskon-type-btn" data-type="persen">
-              📊 Persen (%)
+              Persen (%)
             </button>
           </div>
         </div>
@@ -932,7 +932,7 @@
 
     <!-- Ringkasan Harga -->
     <div class="card">
-      <div class="card-header"><h2>💰 Ringkasan</h2></div>
+      <div class="card-header"><h2>Ringkasan</h2></div>
       <div class="card-body">
         <div class="summary-row">
           <span>Subtotal</span><span class="summary-val" id="sumSubtotal">Rp 0</span>
@@ -972,16 +972,16 @@
             <label>Metode Bayar</label>
             <div class="pay-methods">
               <button class="pay-method-btn active" data-method="tunai">
-                <span class="pay-method-icon">💵</span>Tunai
+                Tunai
               </button>
               <button class="pay-method-btn" data-method="transfer">
-                <span class="pay-method-icon">🏦</span>Transfer
+                Transfer
               </button>
               <button class="pay-method-btn" data-method="qris">
-                <span class="pay-method-icon">📱</span>QRIS
+                QRIS
               </button>
               <button class="pay-method-btn" data-method="deposit">
-                <span class="pay-method-icon">💳</span>Deposit
+                Deposit
                 <span class="pay-method-saldo zero" id="depositSaldoBtnFull">—</span>
               </button>
             </div>
@@ -989,15 +989,15 @@
 
         <!-- Panel deposit saldo pelanggan -->
         <div id="depositPanel" style="display:none;background:#EEF2FF;border:1.5px solid #BAE6FD;border-radius:8px;padding:12px 14px;margin-top:4px;">
-          <div style="font-size:12px;font-weight:700;color:#1E2A8A;margin-bottom:6px;">💳 Saldo Deposit</div>
+          <div style="font-size:12px;font-weight:700;color:#1E2A8A;margin-bottom:6px;">Saldo Deposit</div>
           <div id="depositSaldoInfo" style="font-size:13px;color:#1E2A8A;">Pilih pelanggan untuk lihat saldo</div>
           <div id="depositKurangInfo" style="display:none;margin-top:8px;padding:8px;background:#FEF2F2;border-radius:6px;border:1px solid #fecaca;">
             <div style="font-size:12px;color:var(--red);font-weight:700;margin-bottom:6px;" id="depositKurangTxt"></div>
             <label style="font-size:11px;font-weight:700;color:var(--gray-5);text-transform:uppercase;margin-bottom:4px;display:block;">Bayar kekurangan dengan:</label>
             <div style="display:flex;gap:6px;margin-bottom:8px;">
-              <button class="pay-method-btn active" data-kk="tunai" style="flex:1;min-width:60px;font-size:12px;padding:6px;">💵 Tunai</button>
-              <button class="pay-method-btn" data-kk="transfer" style="flex:1;min-width:60px;font-size:12px;padding:6px;">🏦 Transfer</button>
-              <button class="pay-method-btn" data-kk="qris" style="flex:1;min-width:60px;font-size:12px;padding:6px;">📱 QRIS</button>
+              <button class="pay-method-btn active" data-kk="tunai" style="flex:1;min-width:60px;font-size:12px;padding:6px;">Tunai</button>
+              <button class="pay-method-btn" data-kk="transfer" style="flex:1;min-width:60px;font-size:12px;padding:6px;">Transfer</button>
+              <button class="pay-method-btn" data-kk="qris" style="flex:1;min-width:60px;font-size:12px;padding:6px;">QRIS</button>
             </div>
             <label style="font-size:11px;font-weight:700;color:var(--gray-5);text-transform:uppercase;margin-bottom:4px;display:block;">Bayar kekurangan (Rp)</label>
             <input type="number" id="kekuranganInput" min="0" step="1000" value="0" style="font-size:13px;padding:7px 10px;" />
@@ -1023,13 +1023,13 @@
                 style="padding:8px 6px;border:1.5px solid var(--gray-3);border-radius:8px;
                        background:var(--gray-1);cursor:pointer;font-size:12px;font-weight:600;
                        color:var(--gray-5);transition:all .15s;text-align:center;">
-                💵 Kembalikan tunai
+                Kembalikan tunai
               </button>
               <button id="btnMasukDeposit" class="keleb-btn active" onclick="setKelebihanMode('deposit')"
                 style="padding:8px 6px;border:1.5px solid var(--blue);border-radius:8px;
                        background:var(--blue-lt);cursor:pointer;font-size:12px;font-weight:600;
                        color:var(--blue);transition:all .15s;text-align:center;">
-                💳 Masuk deposit
+                Masuk deposit
               </button>
             </div>
             <!-- Preview saldo baru jika masuk deposit -->
@@ -1047,16 +1047,16 @@
             <label>Metode DP</label>
             <div class="pay-methods">
               <button class="pay-method-btn-dp active" data-method-dp="tunai">
-                <span class="pay-method-icon">💵</span>Tunai
+                Tunai
               </button>
               <button class="pay-method-btn-dp" data-method-dp="transfer">
-                <span class="pay-method-icon">🏦</span>Transfer
+                Transfer
               </button>
               <button class="pay-method-btn-dp" data-method-dp="qris">
-                <span class="pay-method-icon">📱</span>QRIS
+                QRIS
               </button>
               <button class="pay-method-btn-dp" data-method-dp="deposit">
-                <span class="pay-method-icon">💳</span>Deposit
+                Deposit
                 <span class="pay-method-saldo zero" id="depositSaldoBtnDp">—</span>
               </button>
             </div>
@@ -1068,7 +1068,7 @@
           </div>
 
           <div id="dpPreview" style="display:none;margin-top:8px;padding:10px 12px;background:var(--yellow-lt);border:1.5px solid #fcd34d;border-radius:8px;">
-            <div style="font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:6px;">📋 Preview DP</div>
+            <div style="font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:6px;">Preview DP</div>
             <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
               <span style="color:var(--gray-5)">Total</span>
               <span id="dpPreviewTotal" style="font-weight:700;">Rp 0</span>
@@ -1103,7 +1103,7 @@
 
     <!-- Notifikasi WA -->
     <div class="card">
-      <div class="card-header"><h2>📲 Notifikasi</h2></div>
+      <div class="card-header"><h2>Notifikasi</h2></div>
       <div class="card-body">
         <div class="toggle-wrap">
           <div>
@@ -1118,17 +1118,17 @@
     <!-- Action Buttons -->
     <div class="actions">
       <button class="btn btn-success" id="saveWaBtn">
-        <span>📲</span> Simpan & Kirim WA
+        Simpan & Kirim WA
       </button>
       <button class="btn btn-primary" id="savePrintBtn">
-        <span>🖨️</span> Simpan & Cetak
+        Simpan & Cetak
       </button>
       <div class="printer-status-bar">
         <span class="printer-dot" id="printerDotOrder"></span>
         <span id="printerStatusTxtOrder">Cek printer...</span>
       </div>
       <button class="btn btn-secondary" id="saveBtn">
-        <span>💾</span> Simpan Saja
+        Simpan Saja
       </button>
     </div>
   </div>
@@ -1139,29 +1139,29 @@
 // STATE
 // ════════════════════════════════════════════════════════
 const state = {
-  pelanggan:       null,
-  items:           [],     // { id, layanan_id, nama, harga, satuan, jumlah, subtotal }
-  promo:           null,
-  poinDigunakan:   0,
-  usePoin:         false,
-  diskonTipe:      'nominal', // 'nominal' | 'persen'
-  diskonNilai:     0,
-  paymentMode:     'bayar-nanti', // default: mayoritas Bayar Nanti, lunasi saat ambil
-  metodeBayar:     'tunai',
-  bayar:           0,
-  dpAmount:        0,
-  metodeDp:        'tunai',
-  depositSaldo:    0,
+  pelanggan: null,
+  items: [], // { id, layanan_id, nama, harga, satuan, jumlah, subtotal }
+  promo: null,
+  poinDigunakan: 0,
+  usePoin: false,
+  diskonTipe: 'nominal', // 'nominal' | 'persen'
+  diskonNilai: 0,
+  paymentMode: 'bayar-nanti', // default: mayoritas Bayar Nanti, lunasi saat ambil
+  metodeBayar: 'tunai',
+  bayar: 0,
+  dpAmount: 0,
+  metodeDp: 'tunai',
+  depositSaldo: 0,
   metodKekurangan: 'tunai',
-  kelebihanMode:   'deposit', // 'tunai' | 'deposit'  — default: masuk deposit
-  _totalBayar:     0,
-  settings:        { perNominal: 10000, nilaiPerPoin: 100, minRedeem: 100 }
+  kelebihanMode: 'deposit', // 'tunai' | 'deposit' — default: masuk deposit
+  _totalBayar: 0,
+  settings: { perNominal: 10000, nilaiPerPoin: 100, minRedeem: 100 }
 };
 
 let layananList = [];
-let promoList   = [];
+let promoList = [];
 let masterItemList = [];
-let acTimer     = null;
+let acTimer = null;
 
 // ════════════════════════════════════════════════════════
 // INIT
@@ -1174,9 +1174,9 @@ let acTimer     = null;
   // Load settings
   const cfg = await apiFetch('/api/v1/pengaturan');
   if (cfg?.data) {
-    state.settings.perNominal   = parseInt(cfg.data.poin_per_nominal)  || 10000;
-    state.settings.nilaiPerPoin = parseInt(cfg.data.nilai_tukar_poin)  || 100;
-    state.settings.minRedeem    = parseInt(cfg.data.min_poin_redeem)   || 100;
+    state.settings.perNominal = parseInt(cfg.data.poin_per_nominal) || 10000;
+    state.settings.nilaiPerPoin = parseInt(cfg.data.nilai_tukar_poin) || 100;
+    state.settings.minRedeem = parseInt(cfg.data.min_poin_redeem) || 100;
   }
 
   // Load layanan
@@ -1261,7 +1261,7 @@ function setLoading(on) {
 // ════════════════════════════════════════════════════════
 const toggleWaktuEl = document.getElementById('toggleWaktu');
 const waktuPickerEl = document.getElementById('waktuPicker');
-const inputWaktuEl  = document.getElementById('inputWaktuTransaksi');
+const inputWaktuEl = document.getElementById('inputWaktuTransaksi');
 
 toggleWaktuEl.addEventListener('change', () => {
   const isOn = toggleWaktuEl.checked;
@@ -1306,8 +1306,8 @@ function getWaktuTransaksi() {
 // ════════════════════════════════════════════════════════
 // CUSTOMER AUTOCOMPLETE
 // ════════════════════════════════════════════════════════
-const searchEl    = document.getElementById('customerSearch');
-const dropdownEl  = document.getElementById('customerDropdown');
+const searchEl = document.getElementById('customerSearch');
+const dropdownEl = document.getElementById('customerDropdown');
 const customerInfo = document.getElementById('customerInfo');
 
 searchEl.addEventListener('input', () => {
@@ -1340,7 +1340,7 @@ async function doSearch(q) {
           ${p.nama}
           <span class="level-badge level-${p.level?.label || 'Bronze'}">${p.level?.label || 'Bronze'}</span>
         </div>
-        <div class="ac-sub">📱 ${p.telepon || '—'} &nbsp;·&nbsp; ⭐ ${p.total_poin} poin</div>
+        <div class="ac-sub">${p.telepon || '—'} &nbsp;·&nbsp; ${p.total_poin} poin</div>
       </div>
     </div>
   `).join('');
@@ -1356,7 +1356,7 @@ async function doSearch(q) {
 
 async function selectCustomer(p) {
   state.pelanggan = p;
-  searchEl.value  = '';
+  searchEl.value = '';
   dropdownEl.classList.add('hidden');
   // Reset override saat pelanggan berubah
   window.ajJarakOverride = null;
@@ -1364,11 +1364,11 @@ async function selectCustomer(p) {
   if (typeof refreshJarakAJSection === 'function') refreshJarakAJSection();
 
   document.getElementById('ciAvatar').textContent = p.nama.charAt(0).toUpperCase();
-  document.getElementById('ciName').textContent   = p.nama;
-  document.getElementById('ciMeta').textContent   = `📱 ${p.telepon || '—'}`;
+  document.getElementById('ciName').textContent = p.nama;
+  document.getElementById('ciMeta').textContent = `${p.telepon || '—'}`;
   const lvl = p.level || { label: 'Bronze' };
   document.getElementById('ciPoin').innerHTML =
-    `⭐ ${p.total_poin} poin &nbsp;<span class="level-badge level-${lvl.label}">${lvl.label}</span>`;
+    `${p.total_poin} poin &nbsp;<span class="level-badge level-${lvl.label}">${lvl.label}</span>`;
   customerInfo.classList.remove('hidden');
 
   // Info box catatan pelanggan
@@ -1376,7 +1376,7 @@ async function selectCustomer(p) {
 
   // Aktifkan toggle poin jika ada poin
   const poinToggle = document.getElementById('usePoin');
-  const waToggle   = document.getElementById('kirimWa');
+  const waToggle = document.getElementById('kirimWa');
   if (p.total_poin >= state.settings.minRedeem) {
     poinToggle.disabled = false;
     document.getElementById('poinToggleSub').textContent =
@@ -1449,8 +1449,8 @@ function formatRelativeDate(ms) {
   const diff = Math.floor((now.setHours(0,0,0,0) - new Date(d).setHours(0,0,0,0)) / dayMs);
   if (diff <= 0) return 'hari ini';
   if (diff === 1) return 'kemarin';
-  if (diff < 7)   return `${diff} hari lalu`;
-  if (diff < 30)  return `${Math.floor(diff/7)} minggu lalu`;
+  if (diff < 7) return `${diff} hari lalu`;
+  if (diff < 30) return `${Math.floor(diff/7)} minggu lalu`;
   return d.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
 }
 
@@ -1465,8 +1465,8 @@ function applyRepeatOrder() {
   itemIdSeq = 0;
 
   // 2. Tambah ulang setiap layanan dari order terakhir
-  //    addItemRow dengan defaults layanan_id → akan auto-fill nama via layananList.find,
-  //    set selectedLayanan & filled class, lalu kita override jumlah & trigger updateRow.
+  // addItemRow dengan defaults layanan_id → akan auto-fill nama via layananList.find,
+  // set selectedLayanan & filled class, lalu kita override jumlah & trigger updateRow.
   let added = 0;
   lastOrderCache.layanan.forEach(l => {
     const masih = layananList.find(x => x.id === l.layanan_id);
@@ -1492,7 +1492,7 @@ function applyRepeatOrder() {
 
   // 4. Sembunyikan suggestion + lompat ke ringkasan/bayar
   hideRepeatSuggestion();
-  showToast(`✓ ${added} layanan diulang dari order terakhir`);
+  showToast(`${added} layanan diulang dari order terakhir`);
 
   const target = document.querySelector('.panel-right') || document.getElementById('sumTotal');
   if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1510,13 +1510,13 @@ document.getElementById('clearCustomer').addEventListener('click', () => {
   customerInfo.classList.add('hidden');
   document.getElementById('ciNoteBox').style.display = 'none';
   hideRepeatSuggestion();
-  document.getElementById('usePoin').checked  = false;
+  document.getElementById('usePoin').checked = false;
   document.getElementById('usePoin').disabled = true;
-  document.getElementById('kirimWa').checked  = false;
+  document.getElementById('kirimWa').checked = false;
   document.getElementById('kirimWa').disabled = true;
   document.getElementById('poinSection').classList.add('hidden');
   document.getElementById('poinToggleSub').textContent = 'Pilih pelanggan terlebih dahulu';
-  document.getElementById('waToggleSub').textContent   = 'Pilih pelanggan dengan nomor WA';
+  document.getElementById('waToggleSub').textContent = 'Pilih pelanggan dengan nomor WA';
   // Reset ke tunai jika sedang deposit
   if (state.metodeBayar === 'deposit') {
     document.querySelectorAll('.pay-method-btn[data-method]').forEach(b => b.classList.remove('active'));
@@ -1576,13 +1576,13 @@ function escapeHtml(s) {
 }
 
 function renderCatatanPelanggan(p) {
-  const box  = document.getElementById('ciNoteBox');
+  const box = document.getElementById('ciNoteBox');
   const body = document.getElementById('ciNoteBody');
   if (!box || !body) return;
   const parts = [];
-  if (p.parfum)            parts.push(`<strong>Parfum:</strong> ${escapeHtml(p.parfum)}`);
-  if (p.instruksi_khusus)  parts.push(`<strong>Instruksi:</strong> ${escapeHtml(p.instruksi_khusus)}`);
-  if (p.catatan)           parts.push(`<strong>Catatan:</strong> ${escapeHtml(p.catatan)}`);
+  if (p.parfum) parts.push(`<strong>Parfum:</strong> ${escapeHtml(p.parfum)}`);
+  if (p.instruksi_khusus) parts.push(`<strong>Instruksi:</strong> ${escapeHtml(p.instruksi_khusus)}`);
+  if (p.catatan) parts.push(`<strong>Catatan:</strong> ${escapeHtml(p.catatan)}`);
   if (parts.length === 0) { box.style.display = 'none'; return; }
   body.innerHTML = parts.join('<br>');
   box.style.display = '';
@@ -1612,19 +1612,19 @@ function addItemRow(defaults = {}) {
       <div class="svc-search-wrap">
         <input type="text" class="svc-search-input" placeholder="Cari layanan..." autocomplete="off" value="${defaultNama}" />
         <span class="svc-chevron">▼</span>
-        <button class="svc-clear-btn" title="Hapus pilihan">✕</button>
+        <button class="svc-clear-btn" title="Hapus pilihan">×</button>
         <div class="svc-dropdown hidden"></div>
       </div>
       <input type="number" class="item-jumlah" min="0.1" step="0.1" value="${defaults.jumlah || 1}" />
       <input type="text" class="item-satuan" readonly value="${defaults.satuan || ''}" style="background:var(--gray-1);color:var(--gray-5)" />
       <span class="item-subtotal">${defaults.subtotal ? 'Rp ' + fmtRp(defaults.subtotal) : 'Rp 0'}</span>
-      <button class="btn-remove" title="Hapus">✕</button>
+      <button class="btn-remove" title="Hapus">×</button>
     </div>
     <button class="btn-toggle-rincian" style="display:none;">
       <span class="rincian-icon">▼</span> Rincian Pakaian
     </button>
     <div class="rincian-panel">
-      <div class="rincian-panel-header">📋 Rincian Pakaian</div>
+      <div class="rincian-panel-header">Rincian Pakaian</div>
       <div class="master-item-grid"></div>
       <div class="add-master-form">
         <input type="text" class="new-item-name" placeholder="Item baru..." />
@@ -1640,11 +1640,11 @@ function addItemRow(defaults = {}) {
   `;
 
   const searchInput = wrapper.querySelector('.svc-search-input');
-  const dropdown    = wrapper.querySelector('.svc-dropdown');
-  const clearBtn    = wrapper.querySelector('.svc-clear-btn');
-  const inpJumlah   = wrapper.querySelector('.item-jumlah');
-  const inpSatuan   = wrapper.querySelector('.item-satuan');
-  const spanSub     = wrapper.querySelector('.item-subtotal');
+  const dropdown = wrapper.querySelector('.svc-dropdown');
+  const clearBtn = wrapper.querySelector('.svc-clear-btn');
+  const inpJumlah = wrapper.querySelector('.item-jumlah');
+  const inpSatuan = wrapper.querySelector('.item-satuan');
+  const spanSub = wrapper.querySelector('.item-subtotal');
   const btnToggleRincian = wrapper.querySelector('.btn-toggle-rincian');
   const rincianPanel = wrapper.querySelector('.rincian-panel');
   const masterItemGrid = wrapper.querySelector('.master-item-grid');
@@ -1776,10 +1776,10 @@ function addItemRow(defaults = {}) {
   }
 
   function updateRow() {
-    const harga  = selectedLayanan?.harga || 0;
+    const harga = selectedLayanan?.harga || 0;
     const satuan = selectedLayanan?.satuan || '';
     const jumlah = parseFloat(inpJumlah.value) || 0;
-    const sub    = harga * jumlah;
+    const sub = harga * jumlah;
 
     inpSatuan.value = satuan;
     spanSub.textContent = 'Rp ' + fmtRp(sub);
@@ -1860,7 +1860,7 @@ function addItemRow(defaults = {}) {
           <button class="qty-btn btn-inc">+</button>
           <span style="font-size:10px;color:var(--gray-5);margin-left:2px;">${item.satuan}</span>
         </div>
-        <button class="btn-remove-selected">✕</button>
+        <button class="btn-remove-selected">×</button>
       `;
 
       row.querySelector('.btn-dec').addEventListener('click', () => {
@@ -1995,7 +1995,7 @@ document.getElementById('promoSelect').addEventListener('change', (e) => {
     const minB = state.promo.min_pembelian > 0
       ? ` | Min. beli Rp ${fmtRp(state.promo.min_pembelian)}`
       : '';
-    info.textContent = `✓ Diskon ${disc}${minB}`;
+    info.textContent = `Diskon aktif: ${disc}${minB}`;
   } else {
     info.textContent = '';
   }
@@ -2016,13 +2016,13 @@ document.getElementById('usePoin').addEventListener('change', (e) => {
 });
 
 document.getElementById('poinInput').addEventListener('input', (e) => {
-  const max  = state.pelanggan?.total_poin || 0;
-  const val  = Math.min(parseInt(e.target.value) || 0, max);
+  const max = state.pelanggan?.total_poin || 0;
+  const val = Math.min(parseInt(e.target.value) || 0, max);
   e.target.value = val;
   state.poinDigunakan = val;
   const diskon = val * state.settings.nilaiPerPoin;
   document.getElementById('poinDiskonInfo').textContent =
-    val > 0 ? `✓ Diskon poin: Rp ${fmtRp(diskon)}` : '';
+    val > 0 ? `Diskon aktif: poin: Rp ${fmtRp(diskon)}` : '';
   calcTotal();
 });
 
@@ -2073,10 +2073,10 @@ function updateDiskonPreview() {
   let diskonRp = 0;
   if (state.diskonTipe === 'nominal') {
     diskonRp = state.diskonNilai;
-    preview.textContent = `✓ Diskon: Rp ${fmtRp(diskonRp)}`;
+    preview.textContent = `Diskon aktif:: Rp ${fmtRp(diskonRp)}`;
   } else {
     diskonRp = Math.round(totalHarga * state.diskonNilai / 100);
-    preview.textContent = `✓ Diskon ${state.diskonNilai}% = Rp ${fmtRp(diskonRp)}`;
+    preview.textContent = `Diskon aktif: ${state.diskonNilai}% = Rp ${fmtRp(diskonRp)}`;
   }
 }
 
@@ -2105,9 +2105,14 @@ document.querySelectorAll('.payment-tab-btn').forEach(btn => {
       state.bayar = 0;
       document.getElementById('bayarInput').value = 0;
     } else if (tab === 'dp') {
-      state.dpAmount = 0;
+      // DP default = 50% total, dibulatkan ke ribuan terdekat (spek README)
+      const total = Number(state._totalBayar) || 0;
+      const dpDefault = total > 0 ? Math.round((total / 2) / 1000) * 1000 : 0;
+      state.dpAmount = dpDefault;
       state.metodeDp = 'tunai';
-      document.getElementById('dpInput').value = 0;
+      const dpEl = document.getElementById('dpInput');
+      if (dpEl) dpEl.value = dpDefault || 0;
+      updateDpPreview && updateDpPreview();
     } else if (tab === 'bayar-nanti') {
       state.bayar = 0;
     }
@@ -2189,11 +2194,11 @@ function updateDepositButtonSaldo() {
 // ── updateDepositPanel: tampilkan status saldo & preview di mode deposit ────
 function updateDepositPanel() {
   const isDeposit = state.metodeBayar === 'deposit';
-  const total     = state._totalBayar || 0;
+  const total = state._totalBayar || 0;
 
   // Sembunyikan panel deposit jika bukan mode deposit
   document.getElementById('depositPanel').style.display = isDeposit ? 'block' : 'none';
-  document.getElementById('tunaiPanel').style.display   = isDeposit ? 'none'  : 'block';
+  document.getElementById('tunaiPanel').style.display = isDeposit ? 'none' : 'block';
   document.getElementById('depositPreviewBox').style.display = 'none';
 
   // Tombol Deposit: dim jika belum pilih pelanggan
@@ -2221,8 +2226,8 @@ function updateDepositPanel() {
 
   document.getElementById('depositSaldoInfo').innerHTML =
     `Saldo deposit: <strong>Rp ${fmtRp(saldo)}</strong>` +
-    (cukup ? ' <span style="color:var(--green);font-weight:700;">✓ Cukup, order lunas</span>'
-           : total > 0 ? ` <span style="color:var(--red);font-weight:700;">⚠ Kurang Rp ${fmtRp(kurang)}</span>` : '');
+    (cukup ? ' <span style="color:var(--green);font-weight:700;">Cukup, order lunas</span>'
+           : total > 0 ? ` <span style="color:var(--red);font-weight:700;">Kurang Rp ${fmtRp(kurang)}</span>` : '');
 
   if (kurang > 0 && total > 0) {
     document.getElementById('depositKurangInfo').style.display = 'block';
@@ -2241,7 +2246,7 @@ function updateDepositPanel() {
   if (cukup) {
     const saldoSesudah = saldo - total;
     depPrev.innerHTML = `
-      <div style="font-size:12px;font-weight:700;color:#1E2A8A;margin-bottom:6px;">📋 Preview Pembayaran</div>
+      <div style="font-size:12px;font-weight:700;color:#1E2A8A;margin-bottom:6px;">Preview Pembayaran</div>
       <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">
         <span>Total Order</span><span style="font-weight:700;">Rp ${fmtRp(total)}</span>
       </div>
@@ -2258,7 +2263,7 @@ function updateDepositPanel() {
     const bayarKekurangan = parseFloat(document.getElementById('kekuranganInput')?.value) || 0;
     const saldoSesudah = saldo > 0 ? 0 : 0;
     depPrev.innerHTML = `
-      <div style="font-size:12px;font-weight:700;color:#1E2A8A;margin-bottom:6px;">📋 Preview Pembayaran Kombinasi</div>
+      <div style="font-size:12px;font-weight:700;color:#1E2A8A;margin-bottom:6px;">Preview Pembayaran Kombinasi</div>
       <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;">
         <span>Total Order</span><span style="font-weight:700;">Rp ${fmtRp(total)}</span>
       </div>
@@ -2294,27 +2299,27 @@ function updateDpPreview() {
 // ── setKelebihanMode: pilih kembalian tunai atau masuk deposit ───────────────
 function setKelebihanMode(mode) {
   state.kelebihanMode = mode;
-  const btnTunai  = document.getElementById('btnKembaliTunai');
-  const btnDepo   = document.getElementById('btnMasukDeposit');
+  const btnTunai = document.getElementById('btnKembaliTunai');
+  const btnDepo = document.getElementById('btnMasukDeposit');
 
   // Reset both
   [btnTunai, btnDepo].forEach(b => {
     b.classList.remove('active');
     b.style.borderColor = 'var(--gray-3)';
-    b.style.background  = 'var(--gray-1)';
-    b.style.color       = 'var(--gray-5)';
+    b.style.background = 'var(--gray-1)';
+    b.style.color = 'var(--gray-5)';
   });
 
   if (mode === 'tunai') {
     btnTunai.classList.add('active');
     btnTunai.style.borderColor = 'var(--green)';
-    btnTunai.style.background  = 'var(--green-lt)';
-    btnTunai.style.color       = 'var(--green)';
+    btnTunai.style.background = 'var(--green-lt)';
+    btnTunai.style.color = 'var(--green)';
   } else {
     btnDepo.classList.add('active');
     btnDepo.style.borderColor = 'var(--blue)';
-    btnDepo.style.background  = 'var(--blue-lt)';
-    btnDepo.style.color       = 'var(--blue)';
+    btnDepo.style.background = 'var(--blue-lt)';
+    btnDepo.style.color = 'var(--blue)';
   }
 
   updatePaymentPreview();
@@ -2336,8 +2341,8 @@ document.getElementById('antarJemput').addEventListener('change', (e) => {
 // State khusus jarak AJ — terisi:
 // - dari profil pelanggan jika ada (read-only display)
 // - dari input inline jika user pilih "Isi Sekarang" atau walk-in
-window.ajJarakOverride = null;     // angka km, sumber: user input atau walk-in
-window.ajSkipJarak     = false;    // true: user tekan "Lewati"
+window.ajJarakOverride = null; // angka km, sumber: user input atau walk-in
+window.ajSkipJarak = false; // true: user tekan "Lewati"
 
 function refreshJarakAJSection() {
   const section = document.getElementById('jarakAJSection');
@@ -2354,7 +2359,7 @@ function refreshJarakAJSection() {
 
   const p = state.pelanggan;
   const jarakProfil = p ? Number(p.jarak_workshop_km || 0) : 0;
-  const jarakAktif  = window.ajJarakOverride != null
+  const jarakAktif = window.ajJarakOverride != null
     ? Number(window.ajJarakOverride)
     : jarakProfil;
 
@@ -2380,7 +2385,7 @@ function refreshJarakAJSection() {
       : '';
     section.innerHTML = `
       <div style="padding:10px 12px;background:var(--green-lt);border:1px solid #A7F3D0;border-radius:8px;font-size:12px;color:var(--gray-7)">
-        📍 <strong>Jarak: ${jarakAktif} km</strong> dari workshop ${sumber}
+        <strong>Jarak: ${jarakAktif} km</strong> dari workshop ${sumber}
         ${window.ajJarakOverride == null ? `<button type="button" onclick="ajPromptEditJarak()" style="margin-left:8px;background:none;border:none;color:var(--blue);cursor:pointer;font-size:11px;font-weight:600">Ubah</button>` : ''}
       </div>
     `;
@@ -2390,7 +2395,7 @@ function refreshJarakAJSection() {
   if (window.ajSkipJarak) {
     section.innerHTML = `
       <div style="padding:10px 12px;background:var(--yellow-lt);border:1px solid #fde68a;border-radius:8px;font-size:12px;color:var(--gray-7)">
-        ⚠️ Order dibuat tanpa data jarak — HPP tidak bisa dihitung otomatis di dashboard.
+        Order dibuat tanpa data jarak — HPP tidak bisa dihitung otomatis di dashboard.
         <button type="button" onclick="window.ajSkipJarak = false; refreshJarakAJSection()" style="margin-left:8px;background:none;border:none;color:var(--blue);cursor:pointer;font-size:11px;font-weight:600">Batal lewati</button>
       </div>
     `;
@@ -2400,7 +2405,7 @@ function refreshJarakAJSection() {
   // Belum ada jarak — minta input
   section.innerHTML = `
     <div style="padding:12px;background:var(--yellow-lt);border:1px solid #fde68a;border-radius:8px;font-size:12px;color:var(--gray-7)">
-      <div style="font-weight:700;margin-bottom:4px">⚠️ Data jarak belum diisi</div>
+      <div style="font-weight:700;margin-bottom:4px">Data jarak belum diisi</div>
       <div style="margin-bottom:8px"><strong>${esc(p.nama)}</strong> belum punya data jarak dari workshop. HPP antar jemput tidak bisa dihitung otomatis.</div>
       <div id="ajInlineInput" style="display:none;margin-bottom:8px">
         <label style="font-size:11px;font-weight:600;color:var(--gray-7);display:block;margin-bottom:4px">Jarak dari workshop (km)</label>
@@ -2517,7 +2522,7 @@ function calcTotal() {
   // Jika ada diskon manual, abaikan diskon promo
   const diskon = diskonManual > 0 ? diskonManual : diskonPromo;
   const diskonPoin = state.poinDigunakan * state.settings.nilaiPerPoin;
-  const total      = Math.max(0, totalHarga - diskon - diskonPoin);
+  const total = Math.max(0, totalHarga - diskon - diskonPoin);
 
   document.getElementById('sumSubtotal').textContent = 'Rp ' + fmtRp(totalHarga);
 
@@ -2561,7 +2566,7 @@ function calcTotal() {
     const lvl = state.pelanggan.level || { label: 'Bronze' };
     const poinNet = state.pelanggan.total_poin - state.poinDigunakan + poinEarned;
     ciPoinEl.innerHTML =
-      `⭐ ${state.pelanggan.total_poin} poin &nbsp;<span class="level-badge level-${lvl.label}">${lvl.label}</span>` +
+      `${state.pelanggan.total_poin} poin &nbsp;<span class="level-badge level-${lvl.label}">${lvl.label}</span>` +
       (poinEarned > 0 ? ` &nbsp;<span style="color:var(--green);font-size:11px">+${poinEarned} dari order ini</span>` : '');
   }
 }
@@ -2573,10 +2578,10 @@ function updatePaymentPreview() {
     return;
   }
 
-  const total     = state._totalBayar || 0;
-  const nominal   = state.bayar;
+  const total = state._totalBayar || 0;
+  const nominal = state.bayar;
   const kembalian = Math.max(0, nominal - total);
-  const kurang    = Math.max(0, total - nominal);
+  const kurang = Math.max(0, total - nominal);
 
   // Preview box kembalian
   const prevEl = document.getElementById('kembalianPreview');
@@ -2596,22 +2601,22 @@ function updatePaymentPreview() {
         <span>Kembalian</span><span>Rp ${fmtRp(kembalian)}</span>
       </div>`;
       prevEl.style.borderColor = '#A7F3D0';
-      prevEl.style.background  = '#ECFDF5';
+      prevEl.style.background = '#ECFDF5';
     } else if (kurang > 0) {
       html += `<div style="display:flex;justify-content:space-between;padding:2px 0 0;font-size:13px;font-weight:700;
                border-top:1px solid var(--gray-3);margin-top:4px;color:var(--red);">
         <span>Kekurangan</span><span>Rp ${fmtRp(kurang)}</span>
       </div>`;
       prevEl.style.borderColor = '#fecaca';
-      prevEl.style.background  = '#FEF2F2';
+      prevEl.style.background = '#FEF2F2';
     } else if (lunas) {
       html += `<div style="padding:2px 0 0;font-size:12px;color:var(--green);font-weight:700;
-               border-top:1px solid var(--gray-3);margin-top:4px;">✓ Pas — Tidak ada kembalian</div>`;
+               border-top:1px solid var(--gray-3);margin-top:4px;">Pas — Tidak ada kembalian</div>`;
       prevEl.style.borderColor = '#A7F3D0';
-      prevEl.style.background  = '#ECFDF5';
+      prevEl.style.background = '#ECFDF5';
     } else {
       prevEl.style.borderColor = 'var(--gray-3)';
-      prevEl.style.background  = 'var(--gray-1)';
+      prevEl.style.background = 'var(--gray-1)';
     }
     prevEl.innerHTML = html;
   } else {
@@ -2620,7 +2625,7 @@ function updatePaymentPreview() {
 
   // Panel kelebihan → deposit (hanya jika ada pelanggan & kelebihan > 0)
   const kelebihanPanel = document.getElementById('kelebihanPanel');
-  const adaPelanggan   = !!state.pelanggan;
+  const adaPelanggan = !!state.pelanggan;
 
   if (kembalian > 0 && adaPelanggan) {
     kelebihanPanel.style.display = 'block';
@@ -2647,7 +2652,7 @@ function updatePaymentPreview() {
       const saldoBaru = state.depositSaldo + kembalian;
       depKelPreview.style.display = 'block';
       depKelPreview.innerHTML =
-        `💳 Saldo deposit: Rp ${fmtRp(state.depositSaldo)} → <strong>Rp ${fmtRp(saldoBaru)}</strong> setelah kelebihan masuk`;
+        `Saldo deposit: Rp ${fmtRp(state.depositSaldo)} → <strong>Rp ${fmtRp(saldoBaru)}</strong> setelah kelebihan masuk`;
     } else {
       depKelPreview.style.display = 'none';
     }
@@ -2706,27 +2711,27 @@ async function submitOrder(kirimWa, cetakSetelah) {
   const isDepositMode = metode === 'deposit';
 
   const body = {
-    pelanggan_id:    state.pelanggan?.id   || null,
-    paket_promo_id:  state.promo?.id       || null,
-    poin_digunakan:  state.usePoin ? state.poinDigunakan : 0,
-    diskon_tipe:     state.diskonTipe,
-    diskon_nilai:    state.diskonNilai,
-    items:           validItems.map(i => ({
+    pelanggan_id: state.pelanggan?.id || null,
+    paket_promo_id: state.promo?.id || null,
+    poin_digunakan: state.usePoin ? state.poinDigunakan : 0,
+    diskon_tipe: state.diskonTipe,
+    diskon_nilai: state.diskonNilai,
+    items: validItems.map(i => ({
       layanan_id: i.layanan_id,
       jumlah: i.jumlah,
       rincian: (i.rincian || []).filter(r => r.nama_item && r.nama_item.trim())
     })),
-    payment_mode:    mode,
-    is_dp:           isDp,
-    metode_bayar:    metode,
-    bayar:           isDepositMode ? 0 : bayar,
-    catatan:         document.getElementById('catatan').value.trim() || null,
+    payment_mode: mode,
+    is_dp: isDp,
+    metode_bayar: metode,
+    bayar: isDepositMode ? 0 : bayar,
+    catatan: document.getElementById('catatan').value.trim() || null,
     tanggal_selesai: document.getElementById('tanggalSelesai').value || null,
-    antar_jemput:    document.getElementById('antarJemput').checked,
-    alamat_jemput:   document.getElementById('alamatJemput').value.trim() || null,
+    antar_jemput: document.getElementById('antarJemput').checked,
+    alamat_jemput: document.getElementById('alamatJemput').value.trim() || null,
     jarak_jemput_km: (document.getElementById('antarJemput').checked && window.ajJarakOverride != null)
                      ? Number(window.ajJarakOverride) : null,
-    kirim_wa:        kirimWa && document.getElementById('kirimWa').checked,
+    kirim_wa: kirimWa && document.getElementById('kirimWa').checked,
     kelebihan_ke_deposit:
       mode === 'bayar-sekarang' && !isDepositMode && kelebihan > 0 && !!state.pelanggan && state.kelebihanMode === 'deposit',
     waktu_transaksi: getWaktuTransaksi()
@@ -2735,15 +2740,15 @@ async function submitOrder(kirimWa, cetakSetelah) {
   // Deposit kekurangan
   if (mode === 'bayar-sekarang' && isDepositMode && state.depositSaldo < total) {
     body.metode_kekurangan = state.metodKekurangan;
-    body.bayar_kekurangan  = parseFloat(document.getElementById('kekuranganInput').value) || 0;
+    body.bayar_kekurangan = parseFloat(document.getElementById('kekuranganInput').value) || 0;
   }
 
   setLoading(true);
   const res = await fetch('/api/v1/transaksi', {
-    method:  'POST',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
-    body:    JSON.stringify(body)
+    body: JSON.stringify(body)
   });
   setLoading(false);
 
@@ -2763,7 +2768,7 @@ async function submitOrder(kirimWa, cetakSetelah) {
   }
 
   // Compose result toast with deposit info if applicable
-  let toastMsg = `✓ Order ${data.data.nomor_transaksi} berhasil disimpan`;
+  let toastMsg = `Order ${data.data.nomor_transaksi} berhasil disimpan`;
   const di = data.deposit_info;
   if (di) {
     if (di.saldoSesudah !== undefined) {
@@ -2797,7 +2802,7 @@ async function cetakStrukOrder(transaksiId) {
     });
     const d = await res.json();
     if (d.success) {
-      showToast('🖨️ Struk berhasil dicetak!', 'success');
+      showToast('Struk berhasil dicetak!', 'success');
     } else {
       showToast('Gagal cetak: ' + (d.error || 'Error printer'), 'error');
       window.open(`/api/v1/transaksi/${transaksiId}/struk`, '_blank');
@@ -2807,7 +2812,7 @@ async function cetakStrukOrder(transaksiId) {
     window.open(`/api/v1/transaksi/${transaksiId}/struk`, '_blank');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<span>🖨️</span> Simpan & Cetak';
+    btn.innerHTML = 'Simpan & Cetak';
   }
 }
 
@@ -2835,9 +2840,9 @@ async function cekStatusPrinter() {
 cekStatusPrinter();
 setInterval(cekStatusPrinter, 10000);
 
-document.getElementById('saveBtn').addEventListener('click',      () => submitOrder(false, false));
+document.getElementById('saveBtn').addEventListener('click', () => submitOrder(false, false));
 document.getElementById('savePrintBtn').addEventListener('click', () => submitOrder(false, true));
-document.getElementById('saveWaBtn').addEventListener('click',    () => submitOrder(true,  false));
+document.getElementById('saveWaBtn').addEventListener('click', () => submitOrder(true, false));
 </script>
 <script src="/js/nav.js"></script>
 </body>

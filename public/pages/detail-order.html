@@ -115,17 +115,17 @@
     }
     .item:last-child { border-bottom: none; }
     .item .name { font-size: 13px; font-weight: 700; color: var(--gray-9); }
-    .item .qty  { font-size: 11px; color: var(--gray-5); margin-top: 2px; }
-    .item .cat  { font-size: 11px; color: var(--gray-5); font-style: italic; margin-top: 3px;
+    .item .qty { font-size: 11px; color: var(--gray-5); margin-top: 2px; }
+    .item .cat { font-size: 11px; color: var(--gray-5); font-style: italic; margin-top: 3px;
                    padding-left: 8px; border-left: 2px solid var(--gray-3); }
-    .item .sub  { font-size: 13px; font-weight: 800; color: var(--gray-9); white-space: nowrap; }
+    .item .sub { font-size: 13px; font-weight: 800; color: var(--gray-9); white-space: nowrap; }
     .item-actions { display: flex; gap: 4px; margin-top: 6px; }
     .item-actions .mini {
       padding: 4px 8px; border: none; border-radius: 6px; cursor: pointer; font-size: 11px;
       font-weight: 600; font-family: inherit;
     }
     .mini-edit { background: var(--primary-lt); color: var(--primary); }
-    .mini-del  { background: var(--danger-lt); color: var(--danger); }
+    .mini-del { background: var(--danger-lt); color: var(--danger); }
 
     .dashed-btn {
       width: 100%; padding: 10px; margin-top: 10px;
@@ -144,8 +144,8 @@
     }
     .biaya-row:last-child { margin-bottom: 0; }
     .biaya-row .nama { font-size: 13px; font-weight: 700; color: var(--gray-9); }
-    .biaya-row .tgl  { font-size: 11px; color: var(--gray-5); margin-top: 2px; }
-    .biaya-row .nom  { font-size: 13px; font-weight: 800; color: var(--success); }
+    .biaya-row .tgl { font-size: 11px; color: var(--gray-5); margin-top: 2px; }
+    .biaya-row .nom { font-size: 13px; font-weight: 800; color: var(--success); }
     .biaya-row .acts { display: flex; gap: 4px; margin-left: 8px; }
 
     /* ── Ringkasan ─────────────────────────────────────── */
@@ -161,7 +161,7 @@
     }
     .sum-row.total .lbl, .sum-row.total .val { color: var(--gray-9); font-weight: 800; }
     .sum-row.minus .val { color: var(--danger); }
-    .sum-row.plus  .val { color: var(--success); }
+    .sum-row.plus .val { color: var(--success); }
 
     /* ── Timeline ──────────────────────────────────────── */
     .timeline { position: relative; padding-left: 22px; }
@@ -178,7 +178,7 @@
     }
     .tl-item:last-child::after { display: none; }
     .tl-item.done::before { background: var(--success); }
-    .tl-item.now::before  { background: var(--primary); }
+    .tl-item.now::before { background: var(--primary); }
     .tl-item.now { animation: none; }
     .tl-lbl { font-size: 11px; color: var(--gray-5); font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
     .tl-val { font-size: 13px; font-weight: 700; margin-top: 2px; color: var(--gray-9); }
@@ -227,17 +227,17 @@
     }
     .btn:active { transform: scale(.98); }
     .btn:disabled { opacity: .5; cursor: default; }
-    .btn-proses  { background: var(--primary); color: #fff; }
+    .btn-proses { background: var(--primary); color: #fff; }
     .btn-selesai { background: var(--success); color: #fff; }
     .btn-diambil { background: var(--success); color: #fff; }
-    .btn-lunasi  { background: #10B981; color: #fff; }
-    .btn-wa      { background: #2D3BB5; color: #fff; }
-    .btn-wa-grn  { background: #25d366; color: #fff; }
-    .btn-edit    { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
-    .btn-struk   { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
-    .btn-label   { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
-    .btn-batal   { background: #fff; border: 1px solid var(--danger); color: var(--danger); }
-    .btn-hapus   { background: var(--gray-7); color: #fff; }
+    .btn-lunasi { background: #10B981; color: #fff; }
+    .btn-wa { background: #2D3BB5; color: #fff; }
+    .btn-wa-grn { background: #25d366; color: #fff; }
+    .btn-edit { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
+    .btn-struk { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
+    .btn-label { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
+    .btn-batal { background: #fff; border: 1px solid var(--danger); color: var(--danger); }
+    .btn-hapus { background: var(--gray-7); color: #fff; }
 
     /* ── Toast ─────────────────────────────────────────── */
     #toast {
@@ -352,7 +352,7 @@
       <div>
         <!-- SEKSI 1: PELANGGAN -->
         <div class="card">
-          <div class="card-head"><h2>👤 PELANGGAN</h2></div>
+          <div class="card-head"><h2>PELANGGAN</h2></div>
           <div class="card-bd">
             <div class="pelanggan-row">
               <div class="avatar" id="pelangganAvatar" style="background:var(--gray-4)">?</div>
@@ -362,8 +362,8 @@
               </div>
             </div>
             <div class="pelanggan-actions" id="pelangganActions" style="display:none">
-              <a class="btn-call" id="btnCall" href="#">📞 Telepon</a>
-              <a class="btn-chat" id="btnChatWa" href="#" target="_blank" rel="noopener">💬 Chat WA</a>
+              <a class="btn-call" id="btnCall" href="#">Telepon</a>
+              <a class="btn-chat" id="btnChatWa" href="#" target="_blank" rel="noopener">Chat WA</a>
             </div>
             <div class="pelanggan-alamat" id="pelangganAlamat" style="display:none">—</div>
             <div class="pelanggan-stats">
@@ -389,14 +389,14 @@
 
         <!-- SEKSI 2: DETAIL LAYANAN -->
         <div class="card">
-          <div class="card-head"><h2>📋 DETAIL LAYANAN</h2></div>
+          <div class="card-head"><h2>DETAIL LAYANAN</h2></div>
           <div class="card-bd">
             <div id="itemsList"></div>
             <button id="btnShowTambahItem" onclick="showTambahItem()" class="dashed-btn primary" style="display:none">+ Tambah Layanan</button>
 
             <!-- Form tambah item -->
             <div id="formTambahItem" style="display:none;margin-top:12px;padding:14px;background:var(--gray-1);border-radius:10px;border:1.5px dashed var(--gray-3);">
-              <div style="font-size:13px;font-weight:800;margin-bottom:10px;color:var(--gray-7)">➕ Tambah Layanan</div>
+              <div style="font-size:13px;font-weight:800;margin-bottom:10px;color:var(--gray-7)">Tambah Layanan</div>
               <div class="fld" style="margin-bottom:10px">
                 <label>Layanan</label>
                 <select id="inputLayanan"><option value="">Pilih Layanan...</option></select>
@@ -425,7 +425,7 @@
 
         <!-- SEKSI 3: BIAYA TAMBAHAN -->
         <div class="card" id="biayaCard">
-          <div class="card-head"><h2>🧾 BIAYA TAMBAHAN</h2></div>
+          <div class="card-head"><h2>BIAYA TAMBAHAN</h2></div>
           <div class="card-bd">
             <div id="biayaList">
               <div style="font-size:13px;color:var(--gray-5);text-align:center;padding:8px 0">Tidak ada biaya tambahan</div>
@@ -437,8 +437,8 @@
         <!-- SEKSI 4: RINGKASAN HARGA -->
         <div class="card">
           <div class="card-head">
-            <h2>💰 RINGKASAN HARGA</h2>
-            <button class="ic-btn" id="btnEditDiskon" onclick="showModalDiskon()" title="Edit Diskon" style="display:none">🏷️</button>
+            <h2>RINGKASAN HARGA</h2>
+            <button class="ic-btn" id="btnEditDiskon" onclick="showModalDiskon()" title="Edit Diskon" style="display:none;font-size:12px;font-weight:600;padding:4px 10px">Diskon</button>
           </div>
           <div class="card-bd">
             <div class="sum-row">
@@ -470,7 +470,7 @@
 
         <!-- Catatan (jika ada) -->
         <div class="card" id="catatanCard" style="display:none">
-          <div class="card-head"><h2>📝 CATATAN</h2></div>
+          <div class="card-head"><h2>CATATAN</h2></div>
           <div class="card-bd">
             <div id="catatanBody" style="font-size:13px;line-height:1.5;color:var(--gray-7)">—</div>
           </div>
@@ -481,7 +481,7 @@
       <div>
         <!-- SEKSI 5: WAKTU -->
         <div class="card">
-          <div class="card-head"><h2>🕒 WAKTU</h2></div>
+          <div class="card-head"><h2>WAKTU</h2></div>
           <div class="card-bd">
             <div class="timeline" id="timeline">
               <div class="tl-item done">
@@ -506,7 +506,7 @@
 
         <!-- SEKSI 6: PEMBAYARAN -->
         <div class="card">
-          <div class="card-head"><h2>💳 PEMBAYARAN</h2></div>
+          <div class="card-head"><h2>PEMBAYARAN</h2></div>
           <div class="card-bd">
             <div style="margin-bottom:10px">
               <div style="font-size:10px;color:var(--gray-5);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px">Status Bayar</div>
@@ -535,7 +535,7 @@
 
         <!-- SEKSI 7: POIN -->
         <div class="card" id="poinCard" style="display:none">
-          <div class="card-head"><h2>⭐ POIN</h2></div>
+          <div class="card-head"><h2>POIN</h2></div>
           <div class="card-bd">
             <div class="sum-row" style="padding:4px 0">
               <span class="lbl">Poin dari order ini</span>
@@ -550,7 +550,7 @@
 
         <!-- SEKSI 8: AKSI (desktop only inline) -->
         <div class="card desktop-only">
-          <div class="card-head"><h2>⚡ AKSI</h2></div>
+          <div class="card-head"><h2>AKSI</h2></div>
           <div class="card-bd">
             <div class="action-bar">
               <div class="action-bar-inner">
@@ -578,8 +578,8 @@
 <div class="lm-bg" id="modalHapus">
   <div class="lm">
     <div class="lm-h">
-      <h3 style="color:var(--danger)">⚠️ Hapus Order Permanen</h3>
-      <button class="x" onclick="closeModalHapus()">✕</button>
+      <h3 style="color:var(--danger)">Hapus Order Permanen</h3>
+      <button class="x" onclick="closeModalHapus()">×</button>
     </div>
     <div class="lm-b">
       <div style="background:var(--danger-lt);padding:12px;border-radius:8px;border:1.5px solid var(--danger);color:var(--danger);font-size:13px">
@@ -606,8 +606,8 @@
 <div class="lm-bg" id="modalBiaya">
   <div class="lm">
     <div class="lm-h">
-      <h3 id="modalBiayaTitle">🧾 Tambah Biaya</h3>
-      <button class="x" onclick="closeModalBiaya()">✕</button>
+      <h3 id="modalBiayaTitle">Tambah Biaya</h3>
+      <button class="x" onclick="closeModalBiaya()">×</button>
     </div>
     <div class="lm-b">
       <div class="fld">
@@ -631,15 +631,15 @@
 <div class="lm-bg" id="modalDiskon">
   <div class="lm">
     <div class="lm-h">
-      <h3>🏷️ Edit Diskon</h3>
-      <button class="x" onclick="closeModalDiskon()">✕</button>
+      <h3>Edit Diskon</h3>
+      <button class="x" onclick="closeModalDiskon()">×</button>
     </div>
     <div class="lm-b">
       <div>
         <label style="display:block;font-size:12px;font-weight:700;color:var(--gray-7);margin-bottom:6px">Tipe Diskon</label>
         <div class="toggle-grp">
-          <button class="modal-diskon-type-btn active" data-type="nominal" onclick="setModalDiskonType('nominal')">💵 Nominal (Rp)</button>
-          <button class="modal-diskon-type-btn" data-type="persen" onclick="setModalDiskonType('persen')">📊 Persen (%)</button>
+          <button class="modal-diskon-type-btn active" data-type="nominal" onclick="setModalDiskonType('nominal')">Nominal (Rp)</button>
+          <button class="modal-diskon-type-btn" data-type="persen" onclick="setModalDiskonType('persen')">Persen (%)</button>
         </div>
       </div>
       <div class="fld">
@@ -662,7 +662,7 @@
       </div>
     </div>
     <div class="lm-f">
-      <button class="btn btn-batal" onclick="hapusDiskon()">🗑️ Hapus</button>
+      <button class="btn btn-batal" onclick="hapusDiskon()">Hapus</button>
       <button class="btn btn-edit" onclick="closeModalDiskon()">Batal</button>
       <button class="btn btn-selesai" onclick="submitDiskon()">Simpan</button>
     </div>
@@ -807,7 +807,7 @@ function renderDetail() {
 
   if (p?.telepon) {
     const tel = tel08(p.telepon);
-    document.getElementById('pelangganTelMeta').textContent = '📱 ' + tel;
+    document.getElementById('pelangganTelMeta').textContent = '' + tel;
     document.getElementById('btnCall').href = 'tel:' + tel;
     document.getElementById('btnChatWa').href = `https://wa.me/${telWa(p.telepon)}`;
     document.getElementById('pelangganActions').style.display = '';
@@ -816,7 +816,7 @@ function renderDetail() {
     document.getElementById('pelangganActions').style.display = 'none';
   }
   if (p?.alamat) {
-    document.getElementById('pelangganAlamat').textContent = '📍 ' + p.alamat;
+    document.getElementById('pelangganAlamat').textContent = '' + p.alamat;
     document.getElementById('pelangganAlamat').style.display = '';
   } else {
     document.getElementById('pelangganAlamat').style.display = 'none';
@@ -832,8 +832,8 @@ function renderDetail() {
     const catatan = item.catatan ? `<div class="cat">Catatan: ${esc(item.catatan)}</div>` : '';
     const actions = canEdit ? `
       <div class="item-actions">
-        <button class="mini mini-edit" onclick="editItem(${item.id}, ${item.jumlah}, '${(item.catatan || '').replace(/'/g, "\\'")}')">✏️ Edit</button>
-        <button class="mini mini-del" onclick="deleteItem(${item.id}, '${esc(item.nama_layanan)}')">🗑️ Hapus</button>
+        <button class="mini mini-edit" onclick="editItem(${item.id}, ${item.jumlah}, '${(item.catatan || '').replace(/'/g, "\\'")}')">Edit</button>
+        <button class="mini mini-del" onclick="deleteItem(${item.id}, '${esc(item.nama_layanan)}')">Hapus</button>
       </div>` : '';
     return `
     <div class="item">
@@ -950,9 +950,9 @@ function renderDetail() {
   // Catatan
   const catParts = [];
   if (o.catatan) catParts.push(`<strong>Catatan order:</strong> ${esc(o.catatan)}`);
-  if (o.pelanggan_parfum)     catParts.push(`<strong>Parfum:</strong> ${esc(o.pelanggan_parfum)}`);
-  if (o.pelanggan_instruksi)  catParts.push(`<strong>Instruksi:</strong> ${esc(o.pelanggan_instruksi)}`);
-  if (o.pelanggan_catatan)    catParts.push(`<strong>Catatan pelanggan:</strong> ${esc(o.pelanggan_catatan)}`);
+  if (o.pelanggan_parfum) catParts.push(`<strong>Parfum:</strong> ${esc(o.pelanggan_parfum)}`);
+  if (o.pelanggan_instruksi) catParts.push(`<strong>Instruksi:</strong> ${esc(o.pelanggan_instruksi)}`);
+  if (o.pelanggan_catatan) catParts.push(`<strong>Catatan pelanggan:</strong> ${esc(o.pelanggan_catatan)}`);
   if (o.antar_jemput) catParts.push(`<strong>Antar jemput:</strong> Ya`);
   if (catParts.length) {
     document.getElementById('catatanBody').innerHTML = catParts.join('<br>');
@@ -982,24 +982,24 @@ function renderActions() {
 
   if (o.status === 'pending') {
     primary.push(`<button class="btn btn-proses" onclick="updateStatus('proses', this)">▶ Proses</button>`);
-    primary.push(`<button class="btn btn-selesai" onclick="updateStatus('selesai', this)">✓ Selesai</button>`);
+    primary.push(`<button class="btn btn-selesai" onclick="updateStatus('selesai', this)">Selesai</button>`);
   } else if (o.status === 'proses') {
-    primary.push(`<button class="btn btn-selesai" onclick="updateStatus('selesai', this)">✓ Selesai</button>`);
+    primary.push(`<button class="btn btn-selesai" onclick="updateStatus('selesai', this)">Selesai</button>`);
   } else if (o.status === 'selesai') {
-    primary.push(`<button class="btn btn-diambil" onclick="updateStatus('diambil', this)">✓ Diambil</button>`);
-    if (tel) primary.push(`<button class="btn btn-wa-grn" onclick="openWaFromDetail()">💬 WA Siap Diambil</button>`);
+    primary.push(`<button class="btn btn-diambil" onclick="updateStatus('diambil', this)">Diambil</button>`);
+    if (tel) primary.push(`<button class="btn btn-wa-grn" onclick="openWaFromDetail()">WA Siap Diambil</button>`);
   }
 
   // Lunasi — selalu tampil jika belum lunas & belum dibatalkan
   if (showLunasi) {
-    primary.push(`<button class="btn btn-lunasi" onclick="lunasi()">💰 Lunasi</button>`);
+    primary.push(`<button class="btn btn-lunasi" onclick="lunasi()">Lunasi</button>`);
   }
 
   // Util buttons
-  util.push(`<button class="btn btn-struk" onclick="cetakStruk()">🖨️ Struk</button>`);
-  util.push(`<button class="btn btn-label" onclick="openLabelSheet(orderId)">🏷️ Label</button>`);
+  util.push(`<button class="btn btn-struk" onclick="cetakStruk()">Struk</button>`);
+  util.push(`<button class="btn btn-label" onclick="openLabelSheet(orderId)">Label</button>`);
   if (tel && o.status !== 'selesai') {
-    util.push(`<button class="btn btn-wa" onclick="openWaFromDetail()">💬 WA</button>`);
+    util.push(`<button class="btn btn-wa" onclick="openWaFromDetail()">WA</button>`);
   }
 
   document.getElementById('primaryActionsMobile').innerHTML = primary.join('');
@@ -1010,10 +1010,10 @@ function renderActions() {
   // Danger zone (cancel / delete) — only on desktop, separate
   const danger = [];
   if (['pending','proses'].includes(o.status)) {
-    danger.push(`<button class="btn btn-batal" onclick="batalOrder()" style="min-height:38px">❌ Batalkan Order</button>`);
+    danger.push(`<button class="btn btn-batal" onclick="batalOrder()" style="min-height:38px">Batalkan Order</button>`);
   }
   if (currentUser?.role === 'owner') {
-    danger.push(`<button class="btn btn-hapus" onclick="openModalHapus()" style="min-height:38px">🗑️ Hapus Permanen</button>`);
+    danger.push(`<button class="btn btn-hapus" onclick="openModalHapus()" style="min-height:38px">Hapus Permanen</button>`);
   }
   document.getElementById('dangerActionsDesktop').innerHTML = danger.join('');
 
@@ -1048,8 +1048,8 @@ function renderBiayaTambahan() {
   document.getElementById('biayaList').innerHTML = list.map(b => {
     const acts = canEdit ? `
       <div class="acts">
-        <button class="mini mini-edit" onclick="editBiaya(${b.id}, '${b.keterangan.replace(/'/g, "\\'")}', ${b.nominal})">✏️</button>
-        <button class="mini mini-del" onclick="deleteBiaya(${b.id}, '${b.keterangan.replace(/'/g, "\\'")}')">🗑️</button>
+        <button class="mini mini-edit" onclick="editBiaya(${b.id}, '${b.keterangan.replace(/'/g, "\\'")}', ${b.nominal})">Edit</button>
+        <button class="mini mini-del" onclick="deleteBiaya(${b.id}, '${b.keterangan.replace(/'/g, "\\'")}')">Hapus</button>
       </div>` : '';
     return `
     <div class="biaya-row">
@@ -1192,7 +1192,7 @@ let modalBiayaId = null;
 function showModalBiaya(mode = 'add', id = null, keterangan = '', nominal = 0) {
   modalBiayaMode = mode;
   modalBiayaId = id;
-  document.getElementById('modalBiayaTitle').textContent = mode === 'add' ? '🧾 Tambah Biaya' : '✏️ Edit Biaya';
+  document.getElementById('modalBiayaTitle').textContent = mode === 'add' ? 'Tambah Biaya' : 'Edit Biaya';
   document.getElementById('modalBiayaKeterangan').value = keterangan;
   document.getElementById('modalBiayaNominal').value = nominal || '';
   document.getElementById('modalBtnBiaya').textContent = mode === 'add' ? 'Simpan' : 'Update';
@@ -1449,7 +1449,7 @@ if (document.readyState === 'loading') {
 }
 
 window.addEventListener('lunasi:done', () => {
-  showToast('✓ Pembayaran tersimpan');
+  showToast('Pembayaran tersimpan');
   loadDetail();
 });
 </script>
