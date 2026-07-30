@@ -9,152 +9,173 @@
   <title>Stok Bahan — POS Laundry</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--font); background: var(--bg-page); color: var(--gray-9); font-size: 14px; min-height: 100vh; }
+    body { font-family: var(--font); background: #F0F7FF; color: #1E2A6E; font-size: 14px; min-height: 100vh; }
 
-    .page { max-width: 1200px; margin: 0 auto; padding: 0 0 100px; }
+    .page { max-width: 1200px; margin: 0 auto; }
 
-    /* ── Header ─────────────────────────────────── */
-    .head {
+    .pos-topbar { display: none !important; }
+
+    /* ── Header ─────────────────────────────────────────── */
+    .st-head {
       position: sticky; top: 0; z-index: 20;
-      background: #fff; border-bottom: 1px solid var(--gray-3);
-      padding: 12px 14px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04);
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      background: #F0F7FF;
+      padding: 14px 16px 10px;
+      display: flex; align-items: center; gap: 10px;
     }
-    .head .ttl { font-size: 18px; font-weight: 800; color: var(--gray-9); }
+    .st-head .ic-btn {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: #fff; color: #2D3BB5;
+      border: none; cursor: pointer; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      text-decoration: none;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+    }
+    .st-title { flex: 1; font-size: 20px; font-weight: 800; color: #1E2A6E; letter-spacing: -.01em; }
     .btn-add {
-      background: var(--primary); color: #fff; border: none;
-      padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 13px;
-      font-family: inherit; cursor: pointer;
+      height: 36px; padding: 0 14px; border: none; border-radius: 8px;
+      background: #2D3BB5; color: #fff; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
       display: inline-flex; align-items: center; gap: 4px;
     }
+    .btn-add:active { transform: scale(.97); }
 
-    .body-wrap { padding: 14px 12px; }
+    .body-wrap {
+      padding: 4px 16px 130px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
 
-    /* ── Alert banner ──────────────────────────── */
+    /* ── Alert banner (spek: bg #FDECEC border #EF4444) ── */
     .alert-banner {
-      background: #FFFBEB; border: 1px solid #FDE68A; border-left: 4px solid var(--warning);
-      border-radius: 10px; padding: 12px 14px; margin-bottom: 12px;
+      background: #FDECEC; border: 1px solid #EF4444;
+      border-radius: 10px; padding: 12px 14px;
+      color: #EF4444; font-size: 13px; font-weight: 600;
+      display: flex; gap: 10px; align-items: flex-start;
     }
-    .alert-banner.danger { background: var(--danger-lt); border-color: #fca5a5; border-left-color: var(--danger); }
-    .alert-banner .ttl { font-weight: 800; color: var(--warning); font-size: 13px; margin-bottom: 6px; }
-    .alert-banner.danger .ttl { color: var(--danger); }
-    .alert-banner .ttl.danger { color: var(--danger); }
-    .alert-banner ul { list-style: none; padding: 0; margin: 0; }
-    .alert-banner li { font-size: 12px; color: var(--gray-7); padding: 2px 0; }
-    .alert-banner li b { color: var(--gray-9); }
+    .alert-banner .ic {
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .alert-banner .body { flex: 1; min-width: 0; }
+    .alert-banner .body ul {
+      list-style: none; padding: 0; margin: 6px 0 0;
+      font-weight: 500;
+    }
+    .alert-banner .body li { padding: 2px 0; font-size: 12px; color: #EF4444; }
+    .alert-banner .body li b { color: #1E2A6E; }
 
-    /* ── Cards ─────────────────────────────────── */
+    /* ── Bahan card ────────────────────────────────────── */
     .bahan-card {
-      background: #fff; border-radius: 12px; border: 1px solid var(--gray-3);
-      box-shadow: var(--shadow-sm); margin-bottom: 10px; overflow: hidden;
+      background: #fff; border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+      padding: 12px 14px;
+      display: flex; flex-direction: column; gap: 8px;
     }
-    .bahan-card.low { border-color: #FDE68A; }
-    .bahan-card.critical { border-color: #fca5a5; }
-    .bahan-body { padding: 12px 14px; }
-    .bahan-nama { font-size: 15px; font-weight: 800; color: var(--gray-9); margin-bottom: 4px; }
-    .bahan-stok { font-size: 14px; font-weight: 700; color: var(--success); margin-bottom: 2px; }
-    .bahan-stok.zero { color: var(--gray-5); }
-    .bahan-stok.low { color: var(--warning); }
-    .bahan-stok.critical { color: var(--danger); }
-    .bahan-rasio { font-size: 12px; color: var(--gray-5); }
-    .bahan-warn {
-      font-size: 12px; color: var(--warning); font-weight: 700; margin-top: 6px;
-      display: flex; align-items: center; gap: 4px;
+    .bahan-top {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px;
     }
-    .bahan-warn.critical { color: var(--danger); }
-    .bahan-actions {
-      display: flex; gap: 6px; padding: 10px 14px;
-      border-top: 1px solid var(--gray-3); background: var(--gray-1);
+    .bahan-nama { font-size: 14px; font-weight: 700; color: #1E2A6E; }
+    .bahan-stok {
+      font-size: 14px; font-weight: 800; color: #1E2A6E; white-space: nowrap;
     }
+    .bahan-stok.low { color: #EF4444; }
+    .bahan-info { font-size: 12px; color: #94A3B8; }
+    .bahan-actions { display: flex; gap: 6px; }
     .bahan-actions button {
-      flex: 1; min-height: 36px; padding: 6px 8px;
-      border-radius: 8px; border: 1px solid var(--gray-3); background: #fff;
-      font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
-      color: var(--gray-7);
-      display: inline-flex; align-items: center; justify-content: center; gap: 3px;
+      flex: 1; height: 36px; padding: 0 8px; border-radius: 8px;
+      font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center; gap: 4px;
     }
-    .bahan-actions .btn-restock { background: var(--success); color: #fff; border-color: var(--success); }
-    .bahan-actions .btn-koreksi { background: var(--warning); color: #fff; border-color: var(--warning); }
-    .bahan-actions .btn-edit { background: var(--primary); color: #fff; border-color: var(--primary); }
-    .bahan-actions .btn-ic { flex: 0 0 auto; min-width: 40px; }
+    .btn-restock {
+      background: #2D3BB5; color: #fff; border: none;
+    }
+    .btn-restock:active { transform: scale(.97); }
+    .btn-koreksi, .btn-riwayat, .btn-edit-bahan {
+      background: #fff; color: #64748B; border: 1px solid #E2E8F0;
+    }
+    .btn-koreksi:active, .btn-riwayat:active, .btn-edit-bahan:active { transform: scale(.97); }
 
-    /* ── Empty ─────────────────────────────────── */
+    /* ── Empty ─────────────────────────────────────────── */
     .empty {
-      text-align: center; padding: 60px 20px; color: var(--gray-5);
-      background: #fff; border-radius: 12px; border: 1px dashed var(--gray-3);
+      text-align: center; padding: 40px 20px; color: #94A3B8;
+      background: #fff; border-radius: 10px; border: 1px dashed #E2E8F0;
     }
-    .empty .ic { font-size: 56px; display: block; margin-bottom: 10px; opacity: .8; }
-    .empty .ttl-em { font-size: 15px; font-weight: 700; color: var(--gray-7); margin-bottom: 4px; }
-    .empty .sub { font-size: 12px; margin-bottom: 14px; }
+    .empty .ttl-em { font-size: 15px; font-weight: 700; color: #64748B; margin-bottom: 4px; }
+    .empty .sub { font-size: 13px; margin-bottom: 14px; }
+    .empty .btn-first {
+      height: 40px; padding: 0 18px; border-radius: 8px; border: none;
+      background: #2D3BB5; color: #fff; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+    }
 
-    /* ── Toast ─────────────────────────────────── */
+    /* ── Toast ─────────────────────────────────────────── */
     #toast {
-      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-      background: var(--gray-9); color: #fff; padding: 10px 20px; border-radius: 99px;
+      position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%);
+      background: #1E2A6E; color: #fff; padding: 10px 20px; border-radius: 999px;
       font-size: 13px; font-weight: 600; z-index: 99999;
       opacity: 0; pointer-events: none; transition: opacity .25s;
     }
     #toast.show { opacity: 1; }
-    #toast.err { background: var(--danger); }
+    #toast.err { background: #EF4444; }
 
-    /* ── Bottom sheet form ─────────────────────── */
+    /* ── Bottom sheet form ─────────────────────────────── */
     .lm-bg {
-      position: fixed !important; inset: 0 !important; background: rgba(0,0,0,.5) !important;
+      position: fixed !important; inset: 0 !important; background: rgba(30,42,110,0.45) !important;
       z-index: 9999 !important; display: none; align-items: flex-end; justify-content: center;
       padding: 0; overflow-y: auto;
     }
     .lm-bg.open { display: flex !important; }
     .lm {
-      position: relative; background: #fff; border-radius: 16px 16px 0 0;
+      position: relative; background: #fff; border-radius: 18px 18px 0 0;
       width: 100%; max-width: 100%; max-height: 92vh; overflow-y: auto;
-      box-shadow: 0 -8px 32px rgba(0,0,0,.18);
+      box-shadow: 0 -8px 32px rgba(45,59,181,.18);
     }
     .lm-h {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 18px; border-bottom: 1px solid var(--gray-3);
+      padding: 14px 18px; border-bottom: 1px solid #E2E8F0;
       position: sticky; top: 0; background: #fff; z-index: 2;
     }
-    .lm-h h3 { font-size: 16px; font-weight: 800; }
-    .lm-h .x { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--gray-5); }
+    .lm-h h3 { font-size: 16px; font-weight: 800; color: #1E2A6E; }
+    .lm-h .x {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: #F1F5F9; border: none; cursor: pointer; color: #64748B;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
     .lm-b { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
     .lm-f {
-      padding: 12px 18px; border-top: 1px solid var(--gray-3); display: flex; gap: 8px;
+      padding: 12px 18px; border-top: 1px solid #E2E8F0; display: flex; gap: 8px;
       position: sticky; bottom: 0; background: #fff;
     }
     .lm-f .btn { flex: 1; min-height: 44px; }
 
-    .fld label { display: block; font-size: 12px; font-weight: 700; color: var(--gray-7); margin-bottom: 5px; }
+    .fld label { display: block; font-size: 12px; font-weight: 700; color: #64748B; margin-bottom: 5px; }
     .fld input, .fld select {
-      width: 100%; padding: 10px 12px; border: 1px solid var(--gray-3);
+      width: 100%; padding: 10px 12px; border: 1.5px solid #E2E8F0;
       border-radius: 8px; font-size: 14px; font-family: inherit;
-      background: #fff; color: var(--gray-9); outline: none;
+      background: #fff; color: #1E2A6E; outline: none;
     }
-    .fld input:focus, .fld select:focus { border-color: var(--primary); }
-    .fld small { font-size: 11px; color: var(--gray-5); margin-top: 3px; display: block; }
+    .fld input:focus, .fld select:focus { border-color: #2D3BB5; }
+    .fld small { font-size: 11px; color: #94A3B8; margin-top: 3px; display: block; }
 
     .field-row {
       display: grid; grid-template-columns: 2fr 1fr; gap: 8px;
     }
 
-    .info-box {
-      background: var(--gray-1); border-radius: 8px; padding: 12px;
-    }
+    .info-box { background: #F8FAFF; border-radius: 8px; padding: 12px; }
     .info-box .row {
       display: flex; justify-content: space-between; align-items: center;
       padding: 4px 0; font-size: 13px;
     }
-    .info-box .row .lbl { color: var(--gray-5); }
-    .info-box .row .val { font-weight: 700; color: var(--gray-9); }
+    .info-box .row .lbl { color: #64748B; }
+    .info-box .row .val { font-weight: 700; color: #1E2A6E; }
 
     .preview-box {
-      background: var(--success-lt); border: 1.5px solid #86efac;
+      background: #E7F8F1; border: 1.5px solid #86efac;
       border-radius: 8px; padding: 12px 14px;
       display: flex; justify-content: space-between; align-items: center;
-      font-weight: 700; color: var(--success);
+      font-weight: 700; color: #10B981;
     }
-    .preview-box.warn { background: #FFFBEB; border-color: #FDE68A; color: var(--warning); }
-    .preview-box.danger { background: var(--danger-lt); border-color: #fca5a5; color: var(--danger); }
+    .preview-box.warn { background: #FEF3E2; border-color: #F59E0B; color: #F59E0B; }
+    .preview-box.danger { background: #FDECEC; border-color: #fca5a5; color: #EF4444; }
 
     .btn {
       padding: 10px 16px; border-radius: 8px; border: 1px solid transparent;
@@ -162,76 +183,77 @@
       display: inline-flex; align-items: center; justify-content: center; gap: 5px;
       text-decoration: none;
     }
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-success { background: var(--success); color: #fff; }
-    .btn-warning { background: var(--warning); color: #fff; }
-    .btn-outline { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
-    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-primary { background: #2D3BB5; color: #fff; }
+    .btn-success { background: #10B981; color: #fff; }
+    .btn-warning { background: #F59E0B; color: #fff; }
+    .btn-outline { background: #fff; border-color: #E2E8F0; color: #64748B; }
+    .btn-danger { background: #EF4444; color: #fff; }
     .btn:disabled { opacity: .5; cursor: default; }
 
     /* ── Mutasi timeline ───────────────────────── */
     .mutasi-item {
-      background: #fff; border: 1px solid var(--gray-3); border-radius: 10px;
+      background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(45,59,181,0.08);
       padding: 10px 12px; margin-bottom: 8px;
       display: flex; gap: 10px;
     }
     .mutasi-dot {
       width: 30px; height: 30px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      color: #fff; font-weight: 800; font-size: 14px; flex-shrink: 0;
+      color: #fff; flex-shrink: 0;
     }
-    .mt-masuk { background: var(--success); }
-    .mt-keluar { background: var(--danger); }
-    .mt-koreksi { background: var(--warning); }
+    .mt-masuk { background: #10B981; }
+    .mt-keluar { background: #EF4444; }
+    .mt-koreksi { background: #F59E0B; }
     .mutasi-info { flex: 1; min-width: 0; }
     .mutasi-line1 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-    .mutasi-jenis { font-size: 13px; font-weight: 800; color: var(--gray-9); }
+    .mutasi-jenis { font-size: 13px; font-weight: 800; color: #1E2A6E; }
     .mutasi-jml { font-size: 13px; font-weight: 800; white-space: nowrap; }
-    .mutasi-jml.plus { color: var(--success); }
-    .mutasi-jml.minus { color: var(--danger); }
-    .mutasi-meta { font-size: 11px; color: var(--gray-5); margin-top: 3px; line-height: 1.4; word-break: break-word; }
-    .mutasi-saldo { font-size: 11px; color: var(--gray-5); margin-top: 3px; }
+    .mutasi-jml.plus { color: #10B981; }
+    .mutasi-jml.minus { color: #EF4444; }
+    .mutasi-meta { font-size: 11px; color: #94A3B8; margin-top: 3px; line-height: 1.4; word-break: break-word; }
+    .mutasi-saldo { font-size: 11px; color: #64748B; margin-top: 3px; }
 
-    /* ── Desktop ═══ */
+    /* ══ DESKTOP ══ */
     .desktop-only { display: none; }
     .mobile-only { display: block; }
 
     @media (min-width: 1024px) {
       .desktop-only { display: block; }
       .mobile-only { display: none; }
-      .body-wrap { padding: 20px; }
-      .head { padding: 16px 20px; }
-      .head .ttl { font-size: 22px; }
+      .body-wrap { padding: 4px 20px 40px; }
+      .st-head { padding: 16px 20px 10px; }
+      .st-title { font-size: 22px; }
 
       .table-card {
-        background: #fff; border: 1px solid var(--gray-3); border-radius: 12px;
-        overflow: hidden; box-shadow: var(--shadow-sm);
+        background: #fff; border-radius: 12px;
+        overflow: hidden; box-shadow: 0 1px 3px rgba(45,59,181,.08);
       }
       .table-wrap { overflow-x: auto; }
       table { width: 100%; border-collapse: collapse; min-width: 800px; }
       thead th {
         padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 800;
-        text-transform: uppercase; letter-spacing: .4px; color: var(--gray-5);
-        background: var(--gray-1); border-bottom: 1px solid var(--gray-3);
+        text-transform: uppercase; letter-spacing: .4px; color: #64748B;
+        background: #F8FAFF; border-bottom: 1px solid #E2E8F0;
       }
-      tbody tr { border-bottom: 1px solid var(--gray-3); }
+      tbody tr { border-bottom: 1px solid #F1F5F9; }
       tbody tr:last-child { border-bottom: none; }
-      tbody tr:hover { background: var(--gray-1); }
-      tbody tr.low { background: #FFFBEB; }
-      tbody tr.critical { background: var(--danger-lt); }
-      tbody td { padding: 12px 14px; vertical-align: middle; font-size: 13px; }
+      tbody tr:hover { background: #F8FAFF; }
+      tbody tr.low td { background: #FEF3E2; }
+      tbody tr.critical td { background: #FDECEC; }
+      tbody td { padding: 12px 14px; vertical-align: middle; font-size: 13px; color: #1E2A6E; }
       .td-actions { display: flex; gap: 6px; justify-content: flex-end; }
       .td-actions button {
-        padding: 6px 10px; border-radius: 6px; border: 1px solid transparent;
-        font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit;
+        padding: 6px 10px; border-radius: 6px;
+        font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
+        border: 1px solid transparent;
       }
       .status-pill {
         display: inline-block; padding: 3px 10px; border-radius: 999px;
         font-size: 11px; font-weight: 700;
       }
-      .status-pill.ok { background: var(--success-lt); color: var(--success); }
-      .status-pill.low { background: #FFFBEB; color: var(--warning); }
-      .status-pill.crit { background: var(--danger-lt); color: var(--danger); }
+      .status-pill.ok { background: #E7F8F1; color: #10B981; }
+      .status-pill.low { background: #FEF3E2; color: #F59E0B; }
+      .status-pill.crit { background: #FDECEC; color: #EF4444; }
 
       .lm-bg { align-items: center; padding: 16px; }
       .lm { max-width: 520px; border-radius: 14px; }
@@ -241,17 +263,23 @@
 <body>
 
 <div class="page">
-  <div class="head">
-    <div class="ttl">Stok Bahan</div>
-    <button class="btn-add owner-only" onclick="openFormBahan()">+ Tambah Bahan</button>
+  <div class="st-head">
+    <a class="ic-btn" href="/dashboard" aria-label="Kembali">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <div class="st-title">Stok Bahan</div>
+    <button class="btn-add owner-only" onclick="openFormBahan()" aria-label="Tambah bahan">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      <span>Tambah</span>
+    </button>
   </div>
 
   <div class="body-wrap">
     <div id="alertBanner"></div>
 
     <!-- MOBILE -->
-    <div class="mobile-only" id="cardList">
-      <div style="text-align:center;color:var(--gray-5);padding:30px">Memuat...</div>
+    <div class="mobile-only" id="cardList" style="display:flex;flex-direction:column;gap:10px">
+      <div class="empty"><div class="ttl-em">Memuat…</div></div>
     </div>
 
     <!-- DESKTOP -->
@@ -271,7 +299,7 @@
               </tr>
             </thead>
             <tbody id="tableBody">
-              <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--gray-5)">Memuat...</td></tr>
+              <tr><td colspan="7" style="text-align:center;padding:40px;color:#94A3B8">Memuat…</td></tr>
             </tbody>
           </table>
         </div>
@@ -284,8 +312,10 @@
 <div class="lm-bg" id="formBahanBg">
   <div class="lm">
     <div class="lm-h">
-      <h3 id="formBahanTitle">+ Tambah Bahan Baru</h3>
-      <button class="x" onclick="closeFormBahan()">×</button>
+      <h3 id="formBahanTitle">Tambah Bahan Baru</h3>
+      <button class="x" onclick="closeFormBahan()" aria-label="Tutup">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
     </div>
     <div class="lm-b">
       <input type="hidden" id="fbId"/>
@@ -341,8 +371,10 @@
 <div class="lm-bg" id="formRestockBg">
   <div class="lm">
     <div class="lm-h">
-      <h3>+ Restock Bahan</h3>
-      <button class="x" onclick="closeFormRestock()">×</button>
+      <h3>Restock Bahan</h3>
+      <button class="x" onclick="closeFormRestock()" aria-label="Tutup">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
     </div>
     <div class="lm-b">
       <input type="hidden" id="rsId"/>
@@ -371,7 +403,7 @@
     </div>
     <div class="lm-f">
       <button class="btn btn-outline" onclick="closeFormRestock()">Batal</button>
-      <button class="btn btn-success" id="btnSimpanRestock" onclick="submitRestock()">Simpan</button>
+      <button class="btn btn-primary" id="btnSimpanRestock" onclick="submitRestock()">Simpan</button>
     </div>
   </div>
 </div>
@@ -380,8 +412,10 @@
 <div class="lm-bg" id="formKoreksiBg">
   <div class="lm">
     <div class="lm-h">
-      <h3> Koreksi Stok</h3>
-      <button class="x" onclick="closeFormKoreksi()">×</button>
+      <h3>Koreksi Stok</h3>
+      <button class="x" onclick="closeFormKoreksi()" aria-label="Tutup">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
     </div>
     <div class="lm-b">
       <input type="hidden" id="krId"/>
@@ -420,10 +454,12 @@
   <div class="lm">
     <div class="lm-h">
       <h3 id="mutasiTitle">Riwayat Mutasi</h3>
-      <button class="x" onclick="closeMutasiSheet()">×</button>
+      <button class="x" onclick="closeMutasiSheet()" aria-label="Tutup">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
     </div>
     <div class="lm-b" id="mutasiBody">
-      <div style="text-align:center;color:var(--gray-5);padding:30px">Memuat...</div>
+      <div style="text-align:center;color:#94A3B8;padding:30px">Memuat…</div>
     </div>
     <div class="lm-f">
       <button class="btn btn-outline" onclick="closeMutasiSheet()" style="flex:1">Tutup</button>
@@ -440,12 +476,18 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 
 let BAHAN_LIST = [];
 
+// SVG icons
+const SVG_ALERT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>';
+const SVG_UP    = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>';
+const SVG_DOWN  = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>';
+const SVG_EDIT  = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>';
+
 function showToast(msg, isErr) {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.toggle('err', !!isErr);
   el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2500);
+  setTimeout(() => el.classList.remove('show'), 2200);
 }
 
 /* ── Load list ────────────────────────────────── */
@@ -467,13 +509,15 @@ async function loadList() {
 function renderAlert(list) {
   const el = document.getElementById('alertBanner');
   if (!list.length) { el.innerHTML = ''; return; }
-  const danger = list.some(b => Number(b.stok_sekarang) <= 0);
   el.innerHTML = `
-    <div class="alert-banner ${danger ? 'danger' : ''}">
-      <div class="ttl">${list.length} bahan stoknya menipis!</div>
-      <ul>
-        ${list.map(b => `<li>• <b>${esc(b.nama)}</b>: ${fmtNum(b.stok_sekarang)} ${esc(b.satuan)} <span style="color:var(--gray-5)">(min ${fmtNum(b.batas_minimum)})</span></li>`).join('')}
-      </ul>
+    <div class="alert-banner">
+      <span class="ic">${SVG_ALERT}</span>
+      <div class="body">
+        <div>${list.length} bahan stoknya menipis</div>
+        <ul>
+          ${list.map(b => `<li><b>${esc(b.nama)}</b>: ${fmtNum(b.stok_sekarang)} ${esc(b.satuan)} <span style="color:#94A3B8">(min ${fmtNum(b.batas_minimum)})</span></li>`).join('')}
+        </ul>
+      </div>
     </div>`;
 }
 
@@ -490,33 +534,34 @@ function renderCards(list) {
   if (!list.length) {
     el.innerHTML = `
       <div class="empty">
-        <span class="ic"></span>
         <div class="ttl-em">Belum ada bahan baku tercatat</div>
         <div class="sub">Tambahkan bahan untuk mulai tracking stok</div>
-        <button class="btn btn-primary" onclick="openFormBahan()">+ Tambah Bahan Pertama</button>
+        <button class="btn-first" onclick="openFormBahan()">+ Tambah Bahan Pertama</button>
       </div>`;
     return;
   }
   const owner = typeof window.isOwner === 'function' ? window.isOwner() : false;
   el.innerHTML = list.map(b => {
     const st = statusOf(b);
+    const stokLow = st !== 'ok';
     const rasioTxt = Number(b.rasio_pemakaian) > 0
-      ? `Rasio: ${fmtNum(b.rasio_pemakaian)} ${esc(b.satuan)} per ${b.satuan_rasio === 'per_kg' ? 'kg cucian' : 'pcs layanan'}`
-      : '<span style="color:var(--gray-5)">Belum ada rasio pemakaian</span>';
-    // RBAC: koreksi + edit bahan → owner-only. Karyawan cuma bisa restock + lihat mutasi.
+      ? `pemakaian ${fmtNum(b.rasio_pemakaian)} ${esc(b.satuan)}/${b.satuan_rasio === 'per_kg' ? 'kg' : 'pcs'}`
+      : 'tanpa rasio pemakaian';
+    const minTxt = Number(b.batas_minimum) > 0
+      ? `Batas min ${fmtNum(b.batas_minimum)} ${esc(b.satuan)}`
+      : 'Tanpa batas min';
     return `
-      <div class="bahan-card ${st === 'low' ? 'low' : ''} ${st === 'critical' ? 'critical' : ''}">
-        <div class="bahan-body">
+      <div class="bahan-card">
+        <div class="bahan-top">
           <div class="bahan-nama">${esc(b.nama)}</div>
-          <div class="bahan-stok ${st === 'ok' ? '' : st}">Stok: ${fmtNum(b.stok_sekarang)} ${esc(b.satuan)}</div>
-          <div class="bahan-rasio">${rasioTxt}</div>
-          ${b.di_bawah_batas ? `<div class="bahan-warn ${st === 'critical' ? 'critical' : ''}">Di bawah batas (min ${fmtNum(b.batas_minimum)} ${esc(b.satuan)})</div>` : ''}
+          <div class="bahan-stok ${stokLow ? 'low' : ''}">${fmtNum(b.stok_sekarang)} ${esc(b.satuan)}</div>
         </div>
+        <div class="bahan-info">${minTxt} · ${rasioTxt}</div>
         <div class="bahan-actions">
-          <button class="btn-restock" onclick="openFormRestock(${b.id})">+ Restock</button>
-          ${owner ? `<button class="btn-koreksi" onclick="openFormKoreksi(${b.id})"> Koreksi</button>` : ''}
-          <button class="btn-ic" onclick="openMutasiSheet(${b.id})" title="Riwayat mutasi">Riwayat</button>
-          ${owner ? `<button class="btn-ic" onclick="openFormBahan(${b.id})" title="Edit bahan">Edit</button>` : ''}
+          <button class="btn-restock" onclick="openFormRestock(${b.id})">Restock</button>
+          ${owner ? `<button class="btn-koreksi" onclick="openFormKoreksi(${b.id})">Koreksi</button>` : ''}
+          <button class="btn-riwayat" onclick="openMutasiSheet(${b.id})">Riwayat</button>
+          ${owner ? `<button class="btn-edit-bahan" onclick="openFormBahan(${b.id})" aria-label="Edit">${SVG_EDIT}</button>` : ''}
         </div>
       </div>`;
   }).join('');
@@ -525,7 +570,7 @@ function renderCards(list) {
 function renderTable(list) {
   const el = document.getElementById('tableBody');
   if (!list.length) {
-    el.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:60px 20px;color:var(--gray-5)">Belum ada bahan baku tercatat</td></tr>';
+    el.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:60px 20px;color:#94A3B8">Belum ada bahan baku tercatat</td></tr>';
     return;
   }
   const owner = typeof window.isOwner === 'function' ? window.isOwner() : false;
@@ -533,7 +578,7 @@ function renderTable(list) {
     const st = statusOf(b);
     const rasio = Number(b.rasio_pemakaian) > 0
       ? `${fmtNum(b.rasio_pemakaian)} ${esc(b.satuan)}/${b.satuan_rasio === 'per_kg' ? 'kg' : 'pcs'}`
-      : '<span style="color:var(--gray-5)">—</span>';
+      : '<span style="color:#94A3B8">—</span>';
     const pill = st === 'critical' ? '<span class="status-pill crit">Kosong</span>'
               : st === 'low' ? '<span class="status-pill low">Menipis</span>'
               : '<span class="status-pill ok">Aman</span>';
@@ -547,11 +592,11 @@ function renderTable(list) {
         <td>${pill}</td>
         <td>
           <div class="td-actions">
-            <button style="background:var(--success);color:#fff" onclick="openFormRestock(${b.id})">+ Restock</button>
-            ${owner ? `<button style="background:var(--warning);color:#fff" onclick="openFormKoreksi(${b.id})">Koreksi</button>` : ''}
-            <button style="background:#fff;border:1px solid var(--gray-3);color:var(--gray-7)" onclick="openMutasiSheet(${b.id})">Riwayat</button>
-            ${owner ? `<button style="background:var(--primary);color:#fff" onclick="openFormBahan(${b.id})">Edit</button>` : ''}
-            ${owner ? `<button style="background:#fff;border:1px solid var(--danger);color:var(--danger)" onclick="hapusBahan(${b.id})">Hapus</button>` : ''}
+            <button style="background:#2D3BB5;color:#fff" onclick="openFormRestock(${b.id})">Restock</button>
+            ${owner ? `<button style="background:#fff;border:1px solid #E2E8F0;color:#64748B" onclick="openFormKoreksi(${b.id})">Koreksi</button>` : ''}
+            <button style="background:#fff;border:1px solid #E2E8F0;color:#64748B" onclick="openMutasiSheet(${b.id})">Riwayat</button>
+            ${owner ? `<button style="background:#fff;border:1px solid #E2E8F0;color:#64748B" onclick="openFormBahan(${b.id})">Edit</button>` : ''}
+            ${owner ? `<button style="background:#fff;border:1px solid #EF4444;color:#EF4444" onclick="hapusBahan(${b.id})">Hapus</button>` : ''}
           </div>
         </td>
       </tr>`;
@@ -561,7 +606,7 @@ function renderTable(list) {
 /* ── Form Bahan (add/edit) ────────────────────── */
 function openFormBahan(id) {
   const bahan = id ? BAHAN_LIST.find(b => b.id === id) : null;
-  document.getElementById('formBahanTitle').textContent = bahan ? 'Edit Bahan' : '+ Tambah Bahan Baru';
+  document.getElementById('formBahanTitle').textContent = bahan ? 'Edit Bahan' : 'Tambah Bahan Baru';
   document.getElementById('fbId').value = bahan?.id || '';
   document.getElementById('fbNama').value = bahan?.nama || '';
   document.getElementById('fbSatuan').value = bahan?.satuan || 'ml';
@@ -738,7 +783,7 @@ async function submitKoreksi() {
 async function openMutasiSheet(id) {
   const b = BAHAN_LIST.find(x => x.id === id);
   document.getElementById('mutasiTitle').textContent = b ? `Mutasi ${b.nama}` : 'Riwayat Mutasi';
-  document.getElementById('mutasiBody').innerHTML = '<div style="text-align:center;color:var(--gray-5);padding:30px">Memuat...</div>';
+  document.getElementById('mutasiBody').innerHTML = '<div style="text-align:center;color:#94A3B8;padding:30px">Memuat…</div>';
   document.getElementById('mutasiBg').classList.add('open');
   try {
     const r = await fetch(`/api/v1/stok-bahan/${id}/mutasi?limit=100`, { credentials: 'include' });
@@ -746,7 +791,7 @@ async function openMutasiSheet(id) {
     if (!r.ok) throw new Error(d.error || 'Gagal memuat mutasi');
     renderMutasi(d.data || [], b?.satuan || '');
   } catch (err) {
-    document.getElementById('mutasiBody').innerHTML = `<div class="empty">${esc(err.message)}</div>`;
+    document.getElementById('mutasiBody').innerHTML = `<div class="empty"><div class="ttl-em">${esc(err.message)}</div></div>`;
   }
 }
 function closeMutasiSheet() { document.getElementById('mutasiBg').classList.remove('open'); }
@@ -754,17 +799,17 @@ function closeMutasiSheet() { document.getElementById('mutasiBg').classList.remo
 function renderMutasi(list, satuan) {
   const el = document.getElementById('mutasiBody');
   if (!list.length) {
-    el.innerHTML = '<div style="text-align:center;color:var(--gray-5);padding:30px">Belum ada mutasi</div>';
+    el.innerHTML = '<div style="text-align:center;color:#94A3B8;padding:30px">Belum ada mutasi</div>';
     return;
   }
   el.innerHTML = list.map(m => {
     const jenis = m.jenis;
-    let label, dotClass, sign;
-    if (jenis === 'masuk') { label = 'Restock'; dotClass = 'mt-masuk'; sign = '+'; }
-    else if (jenis === 'keluar_otomatis') { label = 'Pemakaian order'; dotClass = 'mt-keluar'; sign = '−'; }
-    else if (jenis === 'keluar_manual') { label = 'Keluar manual'; dotClass = 'mt-keluar'; sign = '−'; }
-    else if (jenis === 'koreksi') { label = 'Koreksi'; dotClass = 'mt-koreksi'; sign = Number(m.jumlah) >= 0 ? '+' : ''; }
-    else { label = jenis; dotClass = 'mt-koreksi'; sign = ''; }
+    let label, dotClass, icon, sign;
+    if (jenis === 'masuk') { label = 'Restock'; dotClass = 'mt-masuk'; icon = SVG_UP; sign = '+'; }
+    else if (jenis === 'keluar_otomatis') { label = 'Pemakaian order'; dotClass = 'mt-keluar'; icon = SVG_DOWN; sign = '-'; }
+    else if (jenis === 'keluar_manual') { label = 'Keluar manual'; dotClass = 'mt-keluar'; icon = SVG_DOWN; sign = '-'; }
+    else if (jenis === 'koreksi') { label = 'Koreksi'; dotClass = 'mt-koreksi'; icon = SVG_EDIT; sign = Number(m.jumlah) >= 0 ? '+' : ''; }
+    else { label = jenis; dotClass = 'mt-koreksi'; icon = SVG_EDIT; sign = ''; }
 
     const jml = Number(m.jumlah);
     const jmlAbs = Math.abs(jml);
@@ -777,14 +822,14 @@ function renderMutasi(list, satuan) {
 
     return `
       <div class="mutasi-item">
-        <div class="mutasi-dot ${dotClass}">${sign || '·'}</div>
+        <div class="mutasi-dot ${dotClass}">${icon}</div>
         <div class="mutasi-info">
           <div class="mutasi-line1">
             <span class="mutasi-jenis">${label}</span>
             <span class="mutasi-jml ${cls}">${sign}${fmtNum(jmlAbs)} ${esc(satuan)}</span>
           </div>
-          <div class="mutasi-meta">${fmtDateTime(m.created_at)}${meta.length ? ' • ' + meta.join(' • ') : ''}</div>
-          <div class="mutasi-saldo">Stok: ${fmtNum(m.stok_sebelum)} → <b>${fmtNum(m.stok_sesudah)}</b> ${esc(satuan)}</div>
+          <div class="mutasi-meta">${fmtDateTime(m.created_at)}${meta.length ? ' · ' + meta.join(' · ') : ''}</div>
+          <div class="mutasi-saldo">Stok: ${fmtNum(m.stok_sebelum)} &rarr; <b>${fmtNum(m.stok_sesudah)}</b> ${esc(satuan)}</div>
         </div>
       </div>`;
   }).join('');
@@ -792,7 +837,6 @@ function renderMutasi(list, satuan) {
 
 /* ── Init ────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', loadList);
-// Re-render setelah role diketahui → tombol owner-only muncul untuk owner
 window.addEventListener('pos:role-loaded', () => {
   if (BAHAN_LIST.length) { renderCards(BAHAN_LIST); renderTable(BAHAN_LIST); }
 });
