@@ -6,578 +6,394 @@
   <link rel="stylesheet" href="/css/design-system.css"/>
   <link rel="stylesheet" href="/css/layout.css"/>
   <link rel="stylesheet" href="/css/responsive.css"/>
-  <title>Pusat WhatsApp — POS Laundry</title>
+  <title>Pusat WA — POS Laundry</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --wa: #25D366; --wa-dk: #128c7e; --wa-lt: #ECFDF5; }
-    body {
-      font-family: var(--font, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
-      background: var(--gray-2);
-      color: var(--gray-9);
-      font-size: 14px;
-      min-height: 100vh;
-    }
+    body { font-family: var(--font); background: #F0F7FF; color: #1E2A6E; font-size: 14px; min-height: 100vh; }
 
-    /* ── Sticky page header ── */
-    .pg-head {
-      position: sticky; top: 0; z-index: 18;
-      background: #fff;
-      border-bottom: 1px solid var(--gray-3);
-      padding: 12px 14px;
-    }
-    .pg-head-row {
+    .page { max-width: 1200px; margin: 0 auto; }
+    .pos-topbar { display: none !important; }
+
+    /* ── Header ─────────────────────────────────── */
+    .wa-head {
+      position: sticky; top: 0; z-index: 20;
+      background: #F0F7FF;
+      padding: 14px 16px 10px;
       display: flex; align-items: center; gap: 10px;
-      margin-bottom: 10px;
     }
-    .pg-title {
-      font-size: 17px; font-weight: 800; flex: 1; min-width: 0;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .ico-btn {
-      width: 38px; height: 38px;
-      border-radius: 10px;
-      border: 1px solid var(--gray-3);
-      background: #fff; cursor: pointer;
+    .wa-head .ic-btn {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: #fff; color: #2D3BB5;
+      border: none; cursor: pointer; flex-shrink: 0;
       display: inline-flex; align-items: center; justify-content: center;
-      font-size: 14px; color: var(--gray-7);
+      text-decoration: none;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
     }
-    .ico-btn:hover { background: var(--gray-1); }
+    .wa-title { flex: 1; font-size: 20px; font-weight: 800; color: #1E2A6E; letter-spacing: -.01em; }
 
-    /* ── WA Mode toggle ── */
+    /* ── Body ─────────────────────────────────── */
+    .body-wrap {
+      padding: 4px 16px 130px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    /* ── Segmented tabs (spek) ─────────────────── */
+    .tabs {
+      display: flex; gap: 3px; padding: 3px;
+      background: #E2E8F0; border-radius: 10px;
+    }
+    .tab {
+      flex: 1; height: 36px; border: none; background: transparent;
+      color: #64748B; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: inherit; border-radius: 8px;
+    }
+    .tab.active { background: #fff; color: #2D3BB5; box-shadow: 0 1px 2px rgba(45,59,181,0.08); }
+
+    /* ── WA mode ────────────────────────────────── */
     .wa-mode {
-      display: flex; gap: 0;
-      border: 1.5px solid var(--gray-3);
-      border-radius: 10px; overflow: hidden;
+      display: flex; gap: 3px; padding: 3px;
+      background: #E2E8F0; border-radius: 10px;
     }
     .wa-mode-btn {
-      flex: 1; padding: 9px 6px;
-      font-size: 12px; font-weight: 700;
-      border: none; background: var(--gray-1);
-      color: var(--gray-5); cursor: pointer;
-      transition: all .15s;
-      display: inline-flex; align-items: center; justify-content: center; gap: 4px;
-      min-height: 40px;
+      flex: 1; height: 34px; border: none; background: transparent;
+      color: #64748B; font-size: 12px; font-weight: 700;
+      cursor: pointer; font-family: inherit; border-radius: 8px;
     }
-    .wa-mode-btn:first-child { border-right: 1px solid var(--gray-3); }
-    .wa-mode-btn.active { background: var(--wa-lt); color: var(--wa-dk); }
+    .wa-mode-btn.active { background: #fff; color: #2D3BB5; box-shadow: 0 1px 2px rgba(45,59,181,0.08); }
 
-    /* ── Tab bar ── */
-    .tab-bar {
-      display: flex; gap: 0;
-      background: #fff;
-      border-bottom: 1px solid var(--gray-3);
-      position: sticky; top: 0; z-index: 17;
-      padding: 0 14px;
-    }
-    .tab-bar.is-with-header { top: 121px; }
-    .tab-btn {
-      flex: 1; padding: 12px 10px;
-      font-size: 13px; font-weight: 700;
-      border: none; background: none;
-      color: var(--gray-5); cursor: pointer;
-      border-bottom: 3px solid transparent;
-      transition: all .15s;
-      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    }
-    .tab-btn:hover { color: var(--gray-9); }
-    .tab-btn.active {
-      color: var(--wa-dk);
-      border-bottom-color: var(--wa);
-    }
-
-    /* ── Page content ── */
-    .page {
-      padding: 12px 14px 40px;
-    }
-    @media (min-width: 1024px) {
-      .page {
-        max-width: 1200px; margin: 0 auto;
-        display: grid; grid-template-columns: 1fr 360px; gap: 20px;
-        padding: 16px 20px 40px;
-      }
-    }
-
+    /* ── Tab section ────────────────────────────── */
     .tab-sec { display: none; }
-    .tab-sec.active { display: block; }
+    .tab-sec.active { display: flex; flex-direction: column; gap: 12px; }
 
-    /* ── Cards generic ── */
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      border: 1px solid var(--gray-3);
-      box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,.06));
+    .section-ttl {
+      font-size: 12px; font-weight: 700; color: #64748B;
+      text-transform: uppercase; letter-spacing: .8px;
+      padding: 0 2px;
     }
-    .card-head {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--gray-3);
-      font-weight: 700; font-size: 14px;
-      display: flex; align-items: center; justify-content: space-between; gap: 8px;
-    }
-    .card-body { padding: 14px 16px; }
 
-    /* ── Tagihan list ── */
-    .tag-list { display: flex; flex-direction: column; gap: 10px; }
+    /* ── Tagihan row ────────────────────────────── */
     .tag-card {
-      background: #fff;
-      border-radius: 12px;
-      border: 1px solid var(--gray-3);
-      border-left: 4px solid var(--danger);
-      box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,.06));
-      padding: 12px 14px;
+      background: #fff; border-radius: 10px;
+      padding: 12px 14px; box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
     }
-    .tag-card.proses { border-left-color: var(--primary); }
-    .tag-card.selesai { border-left-color: var(--success); }
-    .tag-row1 {
-      display: flex; justify-content: space-between; align-items: flex-start;
-      gap: 10px; margin-bottom: 4px;
+    .tag-info { min-width: 0; flex: 1; }
+    .tag-head {
+      font-size: 14px; font-weight: 600; color: #1E2A6E;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .tag-nama { font-size: 15px; font-weight: 700; color: var(--gray-9); }
-    .tag-phone {
-      font-size: 12px; color: var(--gray-5);
-      text-decoration: none;
-      display: inline-flex; align-items: center; gap: 4px;
+    .tag-head .nomor { color: #2D3BB5; font-weight: 700; margin-left: 4px; }
+    .tag-sub {
+      display: flex; align-items: center; gap: 6px; margin-top: 3px;
+      font-size: 12px; color: #94A3B8;
     }
-    .tag-phone:hover { color: var(--wa-dk); }
-    .tag-row2 {
-      display: flex; gap: 10px; flex-wrap: wrap;
-      align-items: center;
-      font-size: 13px; margin-bottom: 6px;
+    .tag-sisa { color: #EF4444; font-weight: 700; font-size: 12px; }
+    .btn-tagih {
+      height: 36px; padding: 0 14px; border-radius: 8px; border: none;
+      background: #2D3BB5; color: #fff; font-size: 12px; font-weight: 700;
+      cursor: pointer; font-family: inherit; flex-shrink: 0;
     }
-    .tag-nomor {
-      color: var(--primary); font-weight: 700;
-      text-decoration: none;
-    }
-    .tag-amount { color: var(--danger); font-weight: 800; }
-    .tag-row3 {
-      display: flex; gap: 8px; align-items: center;
-      font-size: 12px; color: var(--gray-5);
-      margin-bottom: 10px;
-    }
-    .tag-status {
-      display: inline-flex; align-items: center; gap: 4px;
-    }
-    .tag-status .dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      display: inline-block;
-    }
-    .tag-status.pending .dot { background: var(--warning); }
-    .tag-status.proses .dot { background: var(--primary); }
-    .tag-status.selesai .dot { background: var(--success); }
-    .tag-status.lewat .dot { background: var(--danger); }
-    .btn {
-      padding: 8px 14px; border-radius: 8px;
-      border: 1px solid transparent;
-      font-size: 13px; font-weight: 600;
-      cursor: pointer;
-      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-      transition: opacity .15s;
-    }
-    .btn:hover { opacity: .88; }
-    .btn:disabled { opacity: .4; cursor: not-allowed; }
-    .btn-sm { padding: 6px 10px; font-size: 12px; }
-    .btn-wa { background: var(--wa); color: #fff; }
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-outline { background: #fff; border-color: var(--gray-3); color: var(--gray-7); }
-    .btn-ghost { background: none; border: none; color: var(--gray-5); cursor: pointer; }
-    .btn-block { width: 100%; }
+    .btn-tagih:active { transform: scale(.97); }
 
-    /* ── Empty state ── */
-    .empty {
-      text-align: center; padding: 50px 20px;
-      color: var(--gray-5);
-    }
-    .empty .ico { font-size: 44px; margin-bottom: 10px; opacity: .5; }
-    .empty .ttl { font-size: 15px; font-weight: 700; margin-bottom: 4px; color: var(--gray-7); }
-    .empty .sub { font-size: 13px; }
-
-    /* ── Broadcast templates ── */
-    .bc-tpl-row {
-      display: flex; gap: 8px; overflow-x: auto;
-      padding-bottom: 8px;
-      margin-bottom: 12px;
-      scrollbar-width: none;
-    }
-    .bc-tpl-row::-webkit-scrollbar { display: none; }
-    .bc-tpl {
-      flex-shrink: 0;
-      padding: 8px 14px;
-      background: #fff;
-      border: 1.5px solid var(--gray-3);
-      border-radius: 99px;
-      font-size: 12px; font-weight: 600;
-      color: var(--gray-7);
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .bc-tpl.active {
-      background: var(--primary); border-color: var(--primary);
-      color: #fff;
-    }
-
-    /* Filter chips */
-    .filter-chips {
-      display: flex; gap: 6px; flex-wrap: wrap;
-      margin-top: 6px;
-    }
-    .filter-chip {
-      padding: 6px 12px;
-      background: #fff;
-      border: 1.5px solid var(--gray-3);
-      border-radius: 99px;
-      font-size: 12px; font-weight: 600;
-      color: var(--gray-7); cursor: pointer;
-    }
-    .filter-chip.active {
-      background: var(--primary-lt);
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-
-    /* Form */
-    .fg { margin-bottom: 14px; }
-    .fg label {
-      display: block; font-size: 12px; font-weight: 700;
-      color: var(--gray-7); margin-bottom: 5px;
-      text-transform: uppercase; letter-spacing: .4px;
-    }
-    .bc-textarea {
-      width: 100%; padding: 10px 12px;
-      border: 1px solid var(--gray-3);
-      border-radius: 10px;
-      font-size: 14px;
-      resize: vertical; min-height: 140px;
-      font-family: inherit; outline: none;
-      background: #fff;
-    }
-    .bc-textarea:focus { border-color: var(--primary); }
-
-    .var-chips {
-      display: flex; flex-wrap: wrap; gap: 6px;
-      margin-top: 8px;
-    }
-    .var-chip {
-      padding: 4px 10px;
-      background: var(--primary-lt);
-      color: var(--primary);
-      border-radius: 6px;
-      font-size: 11px; font-weight: 600;
-      cursor: pointer;
-      border: none;
-    }
-    .var-chip:hover { background: var(--primary); color: #fff; }
-    .preview-count { font-size: 12px; color: var(--gray-5); margin-top: 8px; }
-
-    /* Preview box */
-    .bc-preview {
-      background: var(--wa-lt);
-      border: 1px solid #c7e9d5;
-      border-radius: 12px;
+    /* ── Broadcast cards ───────────────────────── */
+    .card {
+      background: #fff; border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
       padding: 14px;
-      font-size: 13px;
-      color: var(--gray-9);
-      white-space: pre-wrap;
-      max-height: 180px; overflow-y: auto;
-      margin-bottom: 10px;
-    }
-    .bc-preview.empty {
-      color: var(--gray-5); font-style: italic;
-      background: var(--gray-1); border-color: var(--gray-3);
-    }
-    .bc-preview-h {
-      font-size: 11px; font-weight: 700; color: var(--gray-5);
-      text-transform: uppercase; letter-spacing: .4px;
-      margin-bottom: 6px;
+      display: flex; flex-direction: column; gap: 12px;
     }
 
-    /* ── Riwayat timeline ── */
-    .tl { padding: 6px 14px 14px; }
-    .tl-item {
-      display: flex; gap: 12px;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--gray-2);
+    /* Group pills */
+    .group-pills { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+    .group-pills::-webkit-scrollbar { display: none; }
+    .g-pill {
+      flex: 1 0 auto; min-width: 0; height: 36px; padding: 0 14px;
+      border-radius: 999px; border: 1px solid #E2E8F0; background: #fff;
+      color: #64748B; font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: inherit; white-space: nowrap;
+      display: inline-flex; align-items: center; justify-content: center;
     }
-    .tl-item:last-child { border-bottom: none; }
-    .tl-dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: var(--wa); margin-top: 6px;
-      flex-shrink: 0;
+    .g-pill.active { background: #2D3BB5; color: #fff; border-color: #2D3BB5; }
+
+    /* Template chips */
+    .tpl-row { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+    .tpl-row::-webkit-scrollbar { display: none; }
+    .tpl-chip {
+      flex-shrink: 0; padding: 0 14px; height: 32px;
+      border: 1px solid #E2E8F0; background: #fff;
+      color: #64748B; font-size: 12px; font-weight: 600;
+      border-radius: 999px; cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center;
     }
-    .tl-body { flex: 1; min-width: 0; }
-    .tl-line1 {
+    .tpl-chip.active { background: #E3F2FF; color: #2563EB; border-color: #2563EB; }
+
+    /* Field */
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label {
+      font-size: 12px; font-weight: 700; color: #64748B;
+      text-transform: uppercase; letter-spacing: .3px;
+    }
+    .field textarea, .field input {
+      width: 100%; padding: 10px 12px; border: 1.5px solid #E2E8F0;
+      border-radius: 8px; font-size: 14px; font-family: inherit;
+      color: #1E2A6E; outline: none; background: #fff;
+    }
+    .field textarea { resize: vertical; min-height: 120px; }
+    .field textarea:focus, .field input:focus { border-color: #2D3BB5; }
+
+    .var-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .var-lbl { font-size: 11px; color: #94A3B8; font-weight: 600; }
+    .var-chip {
+      padding: 4px 10px; background: #E3F2FF; color: #2563EB;
+      border-radius: 6px; font-size: 11px; font-weight: 700;
+      cursor: pointer; border: none; font-family: inherit;
+    }
+    .var-chip:hover { background: #2D3BB5; color: #fff; }
+
+    /* Preview */
+    .preview {
+      background: #F8FAFF; border: 1px solid #E2E8F0; border-radius: 8px;
+      padding: 12px 14px; font-size: 13px; color: #1E2A6E;
+      white-space: pre-wrap; max-height: 200px; overflow-y: auto;
+      line-height: 1.5;
+    }
+    .preview.empty { color: #94A3B8; font-style: italic; }
+    .preview-h {
+      font-size: 11px; font-weight: 700; color: #64748B;
+      text-transform: uppercase; letter-spacing: .4px;
+    }
+
+    .count-info {
+      font-size: 13px; color: #1E2A6E; font-weight: 600;
+      padding: 8px 12px; background: #E3F2FF; border-radius: 8px;
+    }
+    .count-info b { color: #2563EB; font-weight: 800; }
+
+    /* Buttons */
+    .btn {
+      padding: 10px 16px; border-radius: 8px; border: 1px solid transparent;
+      font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      min-height: 44px;
+    }
+    .btn:disabled { opacity: .5; cursor: default; }
+    .btn-primary { background: #2D3BB5; color: #fff; }
+    .btn-wa { background: #10B981; color: #fff; }
+    .btn-outline { background: #fff; border-color: #E2E8F0; color: #64748B; }
+    .btn-ghost { background: none; border: none; color: #64748B; }
+
+    .btn-refresh {
+      width: 40px; height: 36px; padding: 0; border-radius: 8px;
+      border: 1px solid #E2E8F0; background: #fff; color: #64748B;
+      cursor: pointer; font-family: inherit; display: inline-flex;
+      align-items: center; justify-content: center; flex-shrink: 0;
+    }
+
+    /* Riwayat */
+    .rw-item {
+      display: flex; gap: 10px; padding: 10px 0;
+      border-bottom: 1px solid #F1F5F9;
+    }
+    .rw-item:last-child { border-bottom: none; }
+    .rw-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #10B981; margin-top: 6px; flex-shrink: 0;
+    }
+    .rw-body { flex: 1; min-width: 0; }
+    .rw-line1 {
       display: flex; justify-content: space-between; gap: 8px;
-      font-size: 13px; font-weight: 700;
-      color: var(--gray-9);
-      margin-bottom: 2px;
+      font-size: 13px; font-weight: 700; color: #1E2A6E;
     }
-    .tl-time { font-size: 11px; color: var(--gray-5); font-weight: 600; white-space: nowrap; }
-    .tl-line2 {
-      font-size: 12px; color: var(--gray-5);
+    .rw-time { font-size: 11px; color: #94A3B8; font-weight: 600; white-space: nowrap; }
+    .rw-line2 {
+      font-size: 12px; color: #64748B; margin-top: 3px;
       overflow: hidden; text-overflow: ellipsis;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      line-clamp: 2;
     }
 
     /* Pagination */
     .pagination {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 14px;
-      border-top: 1px solid var(--gray-3);
-      font-size: 12px; color: var(--gray-5);
-      flex-wrap: wrap; gap: 6px;
+      gap: 6px; flex-wrap: wrap; padding: 8px 0 0;
+      font-size: 12px; color: #94A3B8;
     }
     .pag-btns { display: flex; gap: 4px; }
     .pag-btn {
-      padding: 4px 10px;
-      border: 1px solid var(--gray-3); border-radius: 6px;
-      background: #fff; cursor: pointer; font-size: 12px;
+      min-width: 30px; height: 30px; padding: 0 8px;
+      border: 1px solid #E2E8F0; border-radius: 6px;
+      background: #fff; color: #64748B; cursor: pointer; font-size: 12px;
+      font-family: inherit;
     }
-    .pag-btn:hover:not(:disabled) { background: var(--gray-2); }
-    .pag-btn:disabled { opacity: .4; cursor: not-allowed; }
-    .pag-btn.active {
-      background: var(--primary); color: #fff;
-      border-color: var(--primary);
-    }
+    .pag-btn:hover:not(:disabled) { background: #F8FAFF; }
+    .pag-btn:disabled { opacity: .4; cursor: default; }
+    .pag-btn.active { background: #2D3BB5; color: #fff; border-color: #2D3BB5; }
 
-    /* ── Stepper bottom sheet ── */
+    .empty {
+      text-align: center; padding: 40px 20px; color: #94A3B8;
+      background: #fff; border-radius: 10px; border: 1px dashed #E2E8F0;
+    }
+    .empty .ttl-em { font-size: 15px; font-weight: 700; color: #64748B; margin-bottom: 4px; }
+    .empty .sub { font-size: 13px; }
+
+    /* ── Toast ─────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%);
+      background: #1E2A6E; color: #fff; padding: 10px 20px; border-radius: 999px;
+      font-size: 13px; font-weight: 600; z-index: 99999;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+      max-width: calc(100vw - 32px); text-align: center;
+    }
+    #toast.show { opacity: 1; }
+    #toast.err { background: #EF4444; }
+
+    /* ── Stepper modal ─────────────────────────── */
     .lm-bg {
-      display: none; position: fixed !important;
-      inset: 0; background: rgba(0,0,0,.5);
-      z-index: 100;
+      display: none; position: fixed !important; inset: 0 !important;
+      background: rgba(30,42,110,0.45) !important; z-index: 9999 !important;
       align-items: flex-end; justify-content: center;
+      padding: 0; overflow-y: auto;
     }
-    .lm-bg.open { display: flex; }
+    .lm-bg.open { display: flex !important; }
     .lm {
-      background: #fff;
-      border-radius: 16px 16px 0 0;
-      width: 100%; max-width: 100%;
-      max-height: 92vh; overflow: hidden;
+      background: #fff; border-radius: 18px 18px 0 0;
+      width: 100%; max-width: 100%; max-height: 92vh; overflow: hidden;
       display: flex; flex-direction: column;
-      animation: lmUp .22s ease;
-    }
-    @keyframes lmUp {
-      from { transform: translateY(20px); opacity: .6; }
-      to { transform: translateY(0); opacity: 1; }
+      box-shadow: 0 -8px 32px rgba(45,59,181,.18);
     }
     .lm-h {
-      background: var(--wa); color: #fff;
-      padding: 14px 18px;
+      background: linear-gradient(135deg, #2D3BB5 0%, #2563EB 100%);
+      color: #fff; padding: 14px 18px;
     }
-    .lm-h h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .lm-h h3 { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
     .lm-progress {
       height: 5px; background: rgba(255,255,255,.3);
       border-radius: 4px; overflow: hidden;
     }
-    .lm-progress-bar {
-      height: 100%; background: #fff;
-      width: 0%; transition: width .3s;
-    }
-    .lm-b { padding: 18px; flex: 1; overflow-y: auto; }
+    .lm-progress-bar { height: 100%; background: #fff; width: 0%; transition: width .3s; }
+    .lm-b { padding: 18px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
     .lm-f {
-      padding: 12px 18px;
-      border-top: 1px solid var(--gray-3);
-      display: flex; gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
+      padding: 12px 18px; border-top: 1px solid #E2E8F0;
+      display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between;
     }
+
     @media (min-width: 1024px) {
+      .wa-head { padding: 16px 20px 10px; }
+      .wa-title { font-size: 22px; }
+      .body-wrap { padding: 4px 20px 40px; display: grid; grid-template-columns: 1fr 360px; gap: 16px; align-items: start; }
+      .body-wrap > .left-col { display: flex; flex-direction: column; gap: 12px; }
+      .body-wrap > .right-col { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 80px; }
+      .body-wrap > .right-col .card { max-height: calc(100vh - 120px); overflow-y: auto; }
       .lm-bg { align-items: center; padding: 16px; }
       .lm { max-width: 480px; border-radius: 14px; }
     }
-
-    /* Toast */
-    #toast {
-      position: fixed; bottom: 80px; left: 50%;
-      transform: translateX(-50%);
-      background: #111; color: #fff;
-      padding: 10px 20px; border-radius: 99px;
-      font-size: 13px; font-weight: 600;
-      z-index: 9999; opacity: 0; pointer-events: none;
-      transition: opacity .25s;
-      max-width: calc(100vw - 32px);
-      text-align: center;
-    }
-    #toast.show { opacity: 1; }
-    #toast.err { background: var(--danger); }
-    @media (min-width: 1024px) {
-      #toast { bottom: 24px; }
-    }
-
-    /* Desktop sidebar */
-    .right-col { display: none; }
-    @media (min-width: 1024px) {
-      .left-col { min-width: 0; }
-      .right-col { display: block; }
-      .right-col .card { position: sticky; top: 80px; }
-      .right-col .tl { max-height: calc(100vh - 200px); overflow-y: auto; }
-      .tab-bar.is-with-header { top: 0; }
-      .tab-bar.tab-bar-desktop {
-        position: static;
-        background: transparent;
-        border: none;
-        padding: 0;
-        margin-bottom: 16px;
-        border-bottom: 2px solid var(--gray-3);
-      }
-      .pg-head { padding: 14px 20px; }
-    }
-
-    /* Mobile-only / desktop-only */
-    .mobile-only { display: block; }
-    .desktop-only { display: none; }
-    @media (min-width: 1024px) {
-      .mobile-only { display: none; }
-      .desktop-only { display: block; }
+    @media (max-width: 1023px) {
+      .right-col { display: contents; }
     }
   </style>
 </head>
 <body>
 
-<!-- ── Sticky Header ── -->
-<div class="pg-head">
-  <div class="pg-head-row">
-    <div class="pg-title">Pusat WhatsApp</div>
-  </div>
-  <div class="wa-mode" role="group" aria-label="Mode WhatsApp">
-    <button class="wa-mode-btn" id="waModeRegular" onclick="setWAMode('regular')">WA Biasa</button>
-    <button class="wa-mode-btn active" id="waModeBusiness" onclick="setWAMode('business')"> WA Business</button>
-  </div>
-</div>
-
-<!-- ── Tab bar (mobile) ── -->
-<div class="tab-bar mobile-only" id="tabBar">
-  <button class="tab-btn active" data-tab="tagihan" onclick="switchTab('tagihan')">
-    Tagihan
-  </button>
-  <button class="tab-btn" data-tab="broadcast" onclick="switchTab('broadcast')">
-    Broadcast
-  </button>
-  <button class="tab-btn" data-tab="riwayat" onclick="switchTab('riwayat')">
-    Riwayat
-  </button>
-</div>
-
 <div class="page">
-  <div class="left-col">
-
-    <!-- Desktop tabs -->
-    <div class="tab-bar tab-bar-desktop desktop-only">
-      <button class="tab-btn active" data-tab="tagihan" onclick="switchTab('tagihan')">Tagihan Belum Lunas</button>
-      <button class="tab-btn" data-tab="broadcast" onclick="switchTab('broadcast')">Broadcast</button>
-    </div>
-
-    <!-- ── TAB: Tagihan ── -->
-    <div class="tab-sec active" id="sec-tagihan">
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-head">
-          Order Belum Lunas
-          <button class="btn btn-outline btn-sm" onclick="loadTagihan()">↻ Refresh</button>
-        </div>
-        <div class="card-body" id="tagihanBody">
-          <div class="empty">
-            <div class="ico">⏳</div>
-            <div class="ttl">Memuat...</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── TAB: Broadcast ── -->
-    <div class="tab-sec" id="sec-broadcast">
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-head">Broadcast Pesan WA</div>
-        <div class="card-body">
-          <!-- Template pills -->
-          <div class="fg">
-            <label>Template</label>
-            <div class="bc-tpl-row">
-              <button class="bc-tpl active" data-tpl="custom" onclick="setTemplate('custom')"> Custom</button>
-              <button class="bc-tpl" data-tpl="promo" onclick="setTemplate('promo')">Promo</button>
-              <button class="bc-tpl" data-tpl="pengingat" onclick="setTemplate('pengingat')">⏰ Pengingat</button>
-              <button class="bc-tpl" data-tpl="ucapan" onclick="setTemplate('ucapan')"> Ucapan</button>
-            </div>
-          </div>
-
-          <!-- Pesan -->
-          <div class="fg">
-            <label>Pesan Broadcast</label>
-            <textarea class="bc-textarea" id="bcMsg" placeholder="Ketik pesan broadcast...
-
-Variabel: {nama}, {poin}, {level}"
-              oninput="updatePreview()"></textarea>
-            <div class="var-chips">
-              <span style="font-size:11px;color:var(--gray-5);align-self:center">Sisipkan:</span>
-              <button class="var-chip" onclick="insertVar('{nama}')"> nama</button>
-              <button class="var-chip" onclick="insertVar('{poin}')">poin</button>
-              <button class="var-chip" onclick="insertVar('{level}')"> level</button>
-            </div>
-          </div>
-
-          <!-- Penerima -->
-          <div class="fg">
-            <label>Pilih Penerima</label>
-            <div class="filter-chips" id="bcFilterChips">
-              <button class="filter-chip active" data-f="all" onclick="setBcFilter('all')">Semua</button>
-              <button class="filter-chip" data-f="bronze" onclick="setBcFilter('bronze')"> Bronze</button>
-              <button class="filter-chip" data-f="silver" onclick="setBcFilter('silver')"> Silver</button>
-              <button class="filter-chip" data-f="gold" onclick="setBcFilter('gold')"> Gold</button>
-              <button class="filter-chip" data-f="platinum" onclick="setBcFilter('platinum')"> Platinum</button>
-            </div>
-            <div id="bcCountWrap" style="font-size:12px;color:var(--gray-5);margin-top:8px">Menghitung target...</div>
-          </div>
-
-          <!-- Preview -->
-          <div class="fg">
-            <label>Preview Pesan</label>
-            <div class="bc-preview-h">Contoh untuk pelanggan pertama:</div>
-            <div class="bc-preview empty" id="bcPreview">(Ketik pesan untuk melihat preview...)</div>
-          </div>
-
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn btn-wa btn-block" onclick="startBroadcast()" style="flex:1">Kirim Broadcast</button>
-            <button class="btn btn-outline btn-sm" onclick="loadBcCount()">↻</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── TAB: Riwayat (mobile) ── -->
-    <div class="tab-sec mobile-only" id="sec-riwayat">
-      <div class="card">
-        <div class="card-head">
-          Riwayat WA
-          <button class="btn btn-outline btn-sm" onclick="loadLog(1)">↻</button>
-        </div>
-        <div class="tl" id="logBodyMobile">
-          <div class="empty">
-            <div class="ico">⏳</div>
-            <div class="ttl">Memuat...</div>
-          </div>
-        </div>
-        <div class="pagination" id="logPagBarMobile" style="display:none">
-          <span id="logPagInfoMobile"></span>
-          <div class="pag-btns" id="logPagBtnsMobile"></div>
-        </div>
-      </div>
-    </div>
+  <div class="wa-head">
+    <a class="ic-btn" href="/dashboard" aria-label="Kembali">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <div class="wa-title">Pusat WA</div>
   </div>
 
-  <!-- ── Riwayat (desktop sidebar) ── -->
-  <div class="right-col">
-    <div class="card">
-      <div class="card-head">
-        Riwayat WA
-        <button class="btn btn-outline btn-sm" onclick="loadLog(1)">↻</button>
+  <div class="body-wrap">
+    <div class="left-col" style="display:flex;flex-direction:column;gap:12px">
+      <!-- Mode WA -->
+      <div class="wa-mode">
+        <button class="wa-mode-btn" id="waModeRegular" onclick="setWAMode('regular')">WA Biasa</button>
+        <button class="wa-mode-btn active" id="waModeBusiness" onclick="setWAMode('business')">WA Business</button>
       </div>
-      <div class="tl" id="logBodyDesktop">
-        <div class="empty">
-          <div class="ico">⏳</div>
-          <div class="ttl">Memuat...</div>
+
+      <!-- Segmented tab (spek) -->
+      <div class="tabs">
+        <button class="tab active" data-tab="tagihan" onclick="switchTab('tagihan')">Tagihan</button>
+        <button class="tab" data-tab="broadcast" onclick="switchTab('broadcast')">Broadcast</button>
+      </div>
+
+      <!-- ── TAB: Tagihan ── -->
+      <div class="tab-sec active" id="sec-tagihan">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="section-ttl" style="flex:1">Order Belum Lunas</div>
+          <button class="btn-refresh" onclick="loadTagihan()" aria-label="Refresh">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10"/><path d="M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+          </button>
+        </div>
+        <div id="tagihanBody" style="display:flex;flex-direction:column;gap:8px">
+          <div class="empty"><div class="ttl-em">Memuat…</div></div>
         </div>
       </div>
-      <div class="pagination" id="logPagBarDesktop" style="display:none">
-        <span id="logPagInfoDesktop"></span>
-        <div class="pag-btns" id="logPagBtnsDesktop"></div>
+
+      <!-- ── TAB: Broadcast ── -->
+      <div class="tab-sec" id="sec-broadcast">
+        <div class="card">
+          <div class="field">
+            <label>Template</label>
+            <div class="tpl-row">
+              <button class="tpl-chip active" data-tpl="custom" onclick="setTemplate('custom')">Custom</button>
+              <button class="tpl-chip" data-tpl="promo" onclick="setTemplate('promo')">Promo</button>
+              <button class="tpl-chip" data-tpl="pengingat" onclick="setTemplate('pengingat')">Pengingat</button>
+              <button class="tpl-chip" data-tpl="ucapan" onclick="setTemplate('ucapan')">Ucapan</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Kirim ke Grup</label>
+            <div class="group-pills" id="bcFilterChips">
+              <button class="g-pill active" data-f="all" onclick="setBcFilter('all')">Semua</button>
+              <button class="g-pill" data-f="bronze" onclick="setBcFilter('bronze')">Bronze</button>
+              <button class="g-pill" data-f="silver" onclick="setBcFilter('silver')">Silver</button>
+              <button class="g-pill" data-f="gold" onclick="setBcFilter('gold')">Gold</button>
+              <button class="g-pill" data-f="platinum" onclick="setBcFilter('platinum')">Platinum</button>
+            </div>
+            <div class="count-info" id="bcCountWrap">Menghitung target…</div>
+          </div>
+
+          <div class="field">
+            <label>Pesan</label>
+            <textarea id="bcMsg" placeholder="Ketik pesan broadcast…" oninput="updatePreview()"></textarea>
+            <div class="var-chips">
+              <span class="var-lbl">Sisipkan variabel:</span>
+              <button class="var-chip" onclick="insertVar('{nama}')">nama</button>
+              <button class="var-chip" onclick="insertVar('{poin}')">poin</button>
+              <button class="var-chip" onclick="insertVar('{level}')">level</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Preview Pesan</label>
+            <div class="preview-h">Contoh untuk pelanggan pertama</div>
+            <div class="preview empty" id="bcPreview">(Ketik pesan untuk melihat preview…)</div>
+          </div>
+
+          <button class="btn btn-primary" id="btnBroadcast" onclick="startBroadcast()">
+            <span id="btnBroadcastLabel">Kirim Broadcast</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Riwayat -->
+    <div class="right-col" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="section-ttl" style="flex:1">Riwayat Pesan</div>
+        <button class="btn-refresh" onclick="loadLog(1)" aria-label="Refresh">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10"/><path d="M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+        </button>
+      </div>
+      <div class="card">
+        <div id="logBody" style="display:flex;flex-direction:column">
+          <div class="empty" style="border:none;padding:20px 0"><div class="ttl-em">Memuat…</div></div>
+        </div>
+        <div class="pagination" id="logPagBar" style="display:none">
+          <span id="logPagInfo"></span>
+          <div class="pag-btns" id="logPagBtns"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -593,16 +409,16 @@ Variabel: {nama}, {poin}, {level}"
       </div>
     </div>
     <div class="lm-b">
-      <div style="font-size:18px;font-weight:800;margin-bottom:4px" id="stepName">–</div>
-      <div style="font-size:13px;color:var(--gray-5);margin-bottom:14px" id="stepPhone">–</div>
-      <div class="bc-preview" id="stepMsg" style="margin-bottom:0"></div>
+      <div style="font-size:16px;font-weight:800;color:#1E2A6E" id="stepName">–</div>
+      <div style="font-size:12px;color:#94A3B8" id="stepPhone">–</div>
+      <div class="preview" id="stepMsg" style="margin-top:8px"></div>
     </div>
     <div class="lm-f">
-      <div style="font-size:13px;color:var(--gray-5)" id="stepCounter"></div>
+      <div style="font-size:13px;color:#64748B" id="stepCounter"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-outline btn-sm" onclick="stepperSkip()">Lewati</button>
-        <button class="btn btn-wa" id="stepSendBtn" onclick="stepperSend()">Kirim WA</button>
-        <button class="btn btn-ghost btn-sm" onclick="stepperClose()">Tutup</button>
+        <button class="btn btn-outline" onclick="stepperSkip()" style="min-height:40px;padding:6px 12px;font-size:13px">Lewati</button>
+        <button class="btn btn-wa" id="stepSendBtn" onclick="stepperSend()" style="min-height:40px;padding:6px 14px;font-size:13px">Kirim WA</button>
+        <button class="btn btn-ghost" onclick="stepperClose()" style="min-height:40px;padding:6px 12px;font-size:13px">Tutup</button>
       </div>
     </div>
   </div>
@@ -614,27 +430,25 @@ Variabel: {nama}, {poin}, {level}"
 // ── Templates ─────────────────────────────────────────────────────────────────
 const TEMPLATES = {
   custom: '',
-  promo: `Halo {nama}! 
+  promo: `Halo {nama},
 
-Ada promo spesial untukmu di Nala Laundry minggu ini:
+Ada promo spesial minggu ini di Nala Laundry:
 - Cuci kiloan diskon 20%
 - Free antar jemput untuk wilayah sekitar
 
-Yuk pesan sekarang. Tunjukkan WA ini ke kasir untuk klaim promo.
+Tunjukkan pesan ini ke kasir untuk klaim promo.
 
 Terima kasih,
 Nala Laundry`,
   pengingat: `Halo {nama},
 
-Kami mengingatkan bahwa orderan Anda di Nala Laundry sudah siap diambil. Mohon dijemput agar tidak menumpuk di toko ya.
+Kami mengingatkan bahwa cucian Anda di Nala Laundry sudah siap diambil. Mohon dijemput agar tidak menumpuk di toko ya.
 
 Terima kasih,
 Nala Laundry`,
-  ucapan: `Halo {nama}! 
+  ucapan: `Halo {nama},
 
 Terima kasih sudah jadi pelanggan setia kami. Saldo poin Anda saat ini: {poin} (level {level}).
-
-Selalu kami siap melayani cucian Anda 
 
 Salam,
 Nala Laundry`
@@ -647,15 +461,15 @@ let stepIdx = 0;
 let bcMsg = '';
 let waMode = 'business';
 let bcFilter = 'all';
+let bcCurrentCount = 0;
 
 // ── Tab switching ─────────────────────────────────────────────────────────────
 function switchTab(tab) {
   document.querySelectorAll('.tab-sec').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => {
+  document.querySelectorAll('.tab').forEach(b => {
     b.classList.toggle('active', b.dataset.tab === tab);
   });
   document.getElementById('sec-' + tab).classList.add('active');
-  if (tab === 'riwayat') loadLog(1);
 }
 
 // ── WA Mode ───────────────────────────────────────────────────────────────────
@@ -701,47 +515,39 @@ async function loadTagihan() {
     const el = document.getElementById('tagihanBody');
     if (!data.length) {
       el.innerHTML = `<div class="empty">
-        <div class="ico"></div>
-        <div class="ttl">Semua tagihan sudah lunas!</div>
+        <div class="ttl-em">Semua tagihan sudah lunas</div>
         <div class="sub">Tidak ada order yang perlu ditagih.</div>
       </div>`;
       return;
     }
     const today = new Date(); today.setHours(0,0,0,0);
-    el.innerHTML = `<div class="tag-list">` + data.map(r => {
+    el.innerHTML = data.map(r => {
       const created = new Date(r.created_at || r.tanggal_terima || Date.now());
       const diffDays = Math.floor((today - created) / (1000 * 60 * 60 * 24));
-      const ageTxt = diffDays === 0 ? 'hari ini'
+      const ageTxt = diffDays <= 0 ? 'hari ini'
                   : diffDays === 1 ? '1 hari lalu'
                   : `${diffDays} hari lalu`;
-      const statusCls = (r.status || 'pending').toLowerCase();
       return `
-        <div class="tag-card ${statusCls}">
-          <div class="tag-row1">
-            <div class="tag-nama">${esc(r.pelanggan_nama || 'Tanpa Nama')}</div>
-            ${r.pelanggan_telepon
-              ? `<a class="tag-phone" href="https://wa.me/${esc(r.pelanggan_telepon)}" target="_blank">${esc(r.pelanggan_telepon)}</a>`
-              : '<span class="tag-phone">—</span>'}
+        <div class="tag-card">
+          <div class="tag-info">
+            <div class="tag-head">
+              ${esc(r.pelanggan_nama || 'Tanpa Nama')}
+              <span class="nomor">· ${esc(r.nomor_transaksi || '')}</span>
+            </div>
+            <div class="tag-sub">
+              <span class="tag-sisa">${rupiah(r.sisa_tagihan)}</span>
+              <span>·</span>
+              <span>${ageTxt}</span>
+            </div>
           </div>
-          <div class="tag-row2">
-            <a href="/api/v1/transaksi/${r.id}/struk" target="_blank" class="tag-nomor">${esc(r.nomor_transaksi)}</a>
-            <span>·</span>
-            <span class="tag-amount">${rupiah(r.sisa_tagihan)}</span>
-          </div>
-          <div class="tag-row3">
-            <span class="tag-status ${statusCls}"><span class="dot"></span> ${esc(r.status || 'pending').toUpperCase()}</span>
-            <span>·</span>
-            <span>${ageTxt}</span>
-          </div>
-          <button class="btn btn-wa btn-block" onclick="kirimTagihanWA(${r.id})">Kirim Tagihan WA</button>
+          <button class="btn-tagih" onclick="kirimTagihanWA(${r.id})">Tagih</button>
         </div>
       `;
-    }).join('') + `</div>`;
+    }).join('');
   } catch (e) {
     toast(e.message, true);
     document.getElementById('tagihanBody').innerHTML = `<div class="empty">
-      <div class="ico"></div>
-      <div class="ttl" style="color:var(--danger)">Gagal memuat tagihan</div>
+      <div class="ttl-em" style="color:#EF4444">Gagal memuat tagihan</div>
     </div>`;
   }
 }
@@ -766,7 +572,7 @@ async function kirimTagihanWA(id) {
 
 // ── Broadcast ─────────────────────────────────────────────────────────────────
 function setTemplate(key) {
-  document.querySelectorAll('.bc-tpl').forEach(b => {
+  document.querySelectorAll('.tpl-chip').forEach(b => {
     b.classList.toggle('active', b.dataset.tpl === key);
   });
   if (key !== 'custom') {
@@ -777,7 +583,7 @@ function setTemplate(key) {
 
 function setBcFilter(f) {
   bcFilter = f;
-  document.querySelectorAll('.filter-chip').forEach(c => {
+  document.querySelectorAll('.g-pill').forEach(c => {
     c.classList.toggle('active', c.dataset.f === f);
   });
   loadBcCount();
@@ -789,10 +595,14 @@ async function loadBcCount() {
       method: 'POST',
       body: JSON.stringify({ pesan: 'x', level_filter: bcFilter })
     });
-    document.getElementById('bcCountWrap').textContent =
-      ` ${total} pelanggan akan menerima pesan`;
+    bcCurrentCount = total || 0;
+    document.getElementById('bcCountWrap').innerHTML =
+      `<b>${bcCurrentCount}</b> pelanggan akan menerima pesan`;
+    document.getElementById('btnBroadcastLabel').textContent =
+      `Kirim ke ${bcCurrentCount} Pelanggan`;
   } catch {
-    document.getElementById('bcCountWrap').textContent = '—';
+    document.getElementById('bcCountWrap').textContent = 'Gagal menghitung target';
+    document.getElementById('btnBroadcastLabel').textContent = 'Kirim Broadcast';
   }
 }
 
@@ -809,12 +619,11 @@ function updatePreview() {
   const msg = document.getElementById('bcMsg').value.trim();
   const el = document.getElementById('bcPreview');
   if (!msg) {
-    el.textContent = '(Ketik pesan untuk melihat preview...)';
+    el.textContent = '(Ketik pesan untuk melihat preview…)';
     el.classList.add('empty');
     return;
   }
   el.classList.remove('empty');
-  // Demo preview with sample data
   const resolved = msg
     .replace(/\{nama\}/g, 'Pelanggan')
     .replace(/\{poin\}/g, '1250')
@@ -842,7 +651,7 @@ async function startBroadcast() {
 function updateStepper() {
   if (stepIdx >= bcData.length) {
     document.getElementById('stepperModal').classList.remove('open');
-    toast(`Broadcast selesai! ${bcData.length} pesan diproses`);
+    toast(`Broadcast selesai. ${bcData.length} pesan diproses`);
     return;
   }
   const target = bcData[stepIdx];
@@ -852,7 +661,7 @@ function updateStepper() {
     .replace(/\{poin\}/g, p.total_poin || 0)
     .replace(/\{level\}/g, getLevel(p.total_poin || 0));
   document.getElementById('stepName').textContent = p.nama;
-  document.getElementById('stepPhone').textContent = '' + p.telepon;
+  document.getElementById('stepPhone').textContent = p.telepon || '';
   document.getElementById('stepMsg').textContent = resolved;
   document.getElementById('stepCounter').textContent = `${stepIdx + 1} / ${bcData.length}`;
   document.getElementById('stepperBar').style.width = ((stepIdx / bcData.length) * 100) + '%';
@@ -888,46 +697,40 @@ async function loadLog(p) {
   try {
     const d = await api(`/api/v1/wa/log-list?page=${p}&limit=20`);
     const items = d.data;
-    const renderTl = (containerId, pagBarId, pagInfoId, pagBtnsId) => {
-      const el = document.getElementById(containerId);
-      if (!items.length) {
-        el.innerHTML = `<div class="empty">
-          <div class="ico"></div>
-          <div class="ttl">Belum ada riwayat WA</div>
-          <div class="sub">Pesan yang dikirim akan muncul di sini.</div>
-        </div>`;
-        document.getElementById(pagBarId).style.display = 'none';
-        return;
-      }
-      el.innerHTML = items.map(r => `
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-body">
-            <div class="tl-line1">
-              <span>${r.pelanggan_nama ? esc(r.pelanggan_nama) : (r.telepon ? esc(r.telepon) : '—')}</span>
-              <span class="tl-time">${fmtDt(r.created_at)}</span>
-            </div>
-            <div class="tl-line2">${esc(r.pesan || '')}</div>
+    const el = document.getElementById('logBody');
+    if (!items.length) {
+      el.innerHTML = `<div class="empty" style="border:none;padding:20px 0">
+        <div class="ttl-em">Belum ada riwayat WA</div>
+        <div class="sub">Pesan yang dikirim akan muncul di sini.</div>
+      </div>`;
+      document.getElementById('logPagBar').style.display = 'none';
+      return;
+    }
+    el.innerHTML = items.map(r => `
+      <div class="rw-item">
+        <div class="rw-dot"></div>
+        <div class="rw-body">
+          <div class="rw-line1">
+            <span>${r.pelanggan_nama ? esc(r.pelanggan_nama) : (r.telepon ? esc(r.telepon) : '—')}</span>
+            <span class="rw-time">${fmtDt(r.created_at)}</span>
           </div>
+          <div class="rw-line2">${esc(r.pesan || '')}</div>
         </div>
-      `).join('');
+      </div>
+    `).join('');
 
-      const bar = document.getElementById(pagBarId);
-      bar.style.display = 'flex';
-      logTotal = Math.ceil(d.meta.total / d.meta.limit) || 1;
-      document.getElementById(pagInfoId).textContent =
-        `${(p-1)*d.meta.limit+1}–${Math.min(p*d.meta.limit, d.meta.total)} / ${d.meta.total}`;
+    const bar = document.getElementById('logPagBar');
+    bar.style.display = 'flex';
+    logTotal = Math.ceil(d.meta.total / d.meta.limit) || 1;
+    document.getElementById('logPagInfo').textContent =
+      `${(p-1)*d.meta.limit+1}–${Math.min(p*d.meta.limit, d.meta.total)} / ${d.meta.total}`;
 
-      let pbtns = `<button class="pag-btn" onclick="loadLog(${p-1})" ${p<=1?'disabled':''}>‹</button>`;
-      for (let i = Math.max(1,p-2); i <= Math.min(logTotal,p+2); i++) {
-        pbtns += `<button class="pag-btn${i===p?' active':''}" onclick="loadLog(${i})">${i}</button>`;
-      }
-      pbtns += `<button class="pag-btn" onclick="loadLog(${p+1})" ${p>=logTotal?'disabled':''}>›</button>`;
-      document.getElementById(pagBtnsId).innerHTML = pbtns;
-    };
-
-    renderTl('logBodyMobile', 'logPagBarMobile', 'logPagInfoMobile', 'logPagBtnsMobile');
-    renderTl('logBodyDesktop', 'logPagBarDesktop', 'logPagInfoDesktop', 'logPagBtnsDesktop');
+    let pbtns = `<button class="pag-btn" onclick="loadLog(${p-1})" ${p<=1?'disabled':''}>‹</button>`;
+    for (let i = Math.max(1,p-2); i <= Math.min(logTotal,p+2); i++) {
+      pbtns += `<button class="pag-btn${i===p?' active':''}" onclick="loadLog(${i})">${i}</button>`;
+    }
+    pbtns += `<button class="pag-btn" onclick="loadLog(${p+1})" ${p>=logTotal?'disabled':''}>›</button>`;
+    document.getElementById('logPagBtns').innerHTML = pbtns;
   } catch (e) { toast(e.message, true); }
 }
 
@@ -949,12 +752,11 @@ function esc(s) {
 function toast(msg, err = false) {
   const el = document.getElementById('toast');
   el.textContent = msg;
-  el.className = 'show' + (err ? ' err' : '');
   el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
+  el.classList.toggle('err', !!err);
+  setTimeout(() => el.classList.remove('show'), 2500);
 }
 
-// Close stepper on backdrop click
 document.getElementById('stepperModal').addEventListener('click', e => {
   if (e.target.id === 'stepperModal') stepperClose();
 });

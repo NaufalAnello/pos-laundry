@@ -871,18 +871,21 @@ function renderAll(d) {
     </table>
   `;
 
-  // Distribusi layanan — card list (mobile)
-  const distCards = distList.slice(0, 10).map((r, i) => {
-    const rankCls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+  // Distribusi layanan — card list (mobile): progress bar per spek README
+  const distTop = distList.slice(0, 10);
+  const maxOmset = distTop.length ? Number(distTop[0].total_omset) || 1 : 1;
+  const distCards = distTop.map(r => {
+    const omset = Number(r.total_omset);
+    const pct = Math.max(4, Math.round((omset / maxOmset) * 100));
     return `<div class="rep-item">
-      <div class="rep-item-head">
-        <span class="rep-rank ${rankCls}">${i+1}</span>
-        <div class="rep-item-title">${esc(r.nama_layanan)}</div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+        <span class="rep-item-title" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.nama_layanan)}</span>
+        <span class="rep-item-omset" style="white-space:nowrap">${rupiah(r.total_omset)}</span>
       </div>
-      <div class="rep-item-meta">
-        <span class="rep-item-sub">${Number(r.total_jumlah).toLocaleString('id-ID')} order</span>
-        <span class="rep-item-omset">${rupiah(r.total_omset)}</span>
+      <div style="height:6px;background:#F1F5F9;border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:#4BB8FA;border-radius:3px"></div>
       </div>
+      <div class="rep-item-sub">${Number(r.total_jumlah).toLocaleString('id-ID')} order</div>
     </div>`;
   }).join('') || '<div style="text-align:center;color:var(--gray-5);padding:20px;font-size:13px">Tidak ada data</div>';
   document.getElementById('distribusiCardList').innerHTML = `<div class="card-body"><div class="rep-list">${distCards}</div></div>`;
