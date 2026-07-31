@@ -211,6 +211,31 @@
       .page-header .btn { width: 100%; min-height: 44px; }
       .page-title { font-size: 18px; }
 
+      /* Fix overflow KPI profitabilitas layanan di mobile */
+      .profit-kpi-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+      }
+      .profit-kpi-grid .chip {
+        min-width: 0 !important;
+        padding: 10px 8px !important;
+      }
+      .profit-kpi-grid .chip .cv {
+        font-size: 13px !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        hyphens: auto !important;
+        line-height: 1.3 !important;
+      }
+      .profit-kpi-grid .chip .cl {
+        font-size: 10px !important;
+        line-height: 1.2 !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+      }
+
       /* Tabs — pill scroll horizontal, hilangkan border-bottom yg seperti underline */
       .tabs {
         gap: 8px; padding: 4px 2px 8px;
@@ -265,8 +290,12 @@
       .rep-list-wrap { display: block !important; }
 
       /* card-body lebih ramping di HP */
-      .card-body { padding: 14px; }
+      .card-body { padding: 14px; overflow-x: hidden; max-width: 100%; }
       .card-head { padding: 12px 14px; font-size: 13px; }
+
+      /* Profitabilitas card — pastikan tidak overflow */
+      #profitCard { overflow-x: hidden; max-width: 100%; }
+      #profitBody, #profitCardList { overflow-x: hidden; max-width: 100%; }
 
       /* Tabel yg memang masih tampil di HP (mis. detail modal) tetap bisa scroll */
       #profitBody table, #distribusiBody table, #layananTableBody table, #pelangganTableBody table {
@@ -974,7 +1003,7 @@ function renderProfitabilitas(distribusi) {
   const totalProfit = rows.reduce((s, r) => s + r.estProfit, 0);
 
   const cards = `
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+    <div class="profit-kpi-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;width:100%;box-sizing:border-box">
       <div class="chip">
         <div class="cv" style="color:var(--green);font-size:14px">${esc(best.nama_layanan)}</div>
         <div class="cl">Margin tertinggi (${best.marginPct.toFixed(0)}%)</div>
