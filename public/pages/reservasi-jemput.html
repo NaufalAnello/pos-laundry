@@ -9,214 +9,279 @@
   <link rel="stylesheet" href="/css/responsive.css"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:var(--font);background:var(--bg-page);min-height:100vh}
+    body{font-family:var(--font);background:#F0F7FF;color:#1E2A6E;font-size:14px;min-height:100vh}
 
-    /* sticky header */
-    .pg-head{
-      position:sticky; top:0; z-index:10;
-      background:#fff; border-bottom:1px solid var(--gray-2);
-      padding:14px 16px;
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    .page{max-width:1200px;margin:0 auto}
+
+    .pos-topbar{display:none !important}
+
+    /* ── Header ─────────────────────────────────── */
+    .rj-head{
+      position:sticky;top:0;z-index:20;
+      background:#F0F7FF;
+      padding:14px 16px 10px;
+      display:flex;align-items:center;gap:10px;
     }
-    .pg-head h1{font-size:18px;font-weight:800;color:var(--gray-9)}
-    .pg-head .sub{font-size:12px;color:var(--gray-5)}
+    .rj-head .ic-btn{
+      width:40px;height:40px;border-radius:10px;
+      background:#fff;color:#2D3BB5;
+      border:none;cursor:pointer;flex-shrink:0;
+      display:inline-flex;align-items:center;justify-content:center;
+      text-decoration:none;
+      box-shadow:0 1px 3px rgba(45,59,181,0.08);
+    }
+    .rj-title{flex:1;font-size:20px;font-weight:800;color:#1E2A6E;letter-spacing:-.01em}
     .btn-add{
-      background:var(--primary); color:#fff; border:none;
-      padding:10px 14px; border-radius:var(--radius-md);
-      font-size:13px; font-weight:700; cursor:pointer;
-      display:inline-flex; align-items:center; gap:6px;
+      height:36px;padding:0 14px;border:none;border-radius:8px;
+      background:#2D3BB5;color:#fff;font-size:13px;font-weight:700;
+      cursor:pointer;font-family:inherit;
+      display:inline-flex;align-items:center;gap:4px;
     }
+    .btn-add:active{transform:scale(.97)}
 
-    /* filter pills */
+    /* ── Filter pills ─────────────────────────── */
     .pill-row{
-      display:flex; gap:8px; padding:12px 16px;
-      overflow-x:auto; scrollbar-width:none; background:#fff;
-      border-bottom:1px solid var(--gray-2);
+      display:flex;gap:6px;padding:0 16px 6px;
+      overflow-x:auto;scrollbar-width:none;
     }
     .pill-row::-webkit-scrollbar{display:none}
     .pill{
-      padding:8px 14px; border:1px solid var(--gray-3);
-      background:#fff; color:var(--gray-7);
-      border-radius:999px; font-size:13px; font-weight:600;
-      cursor:pointer; white-space:nowrap; flex-shrink:0;
+      flex-shrink:0;padding:0 14px;height:36px;
+      border:1px solid #E2E8F0;background:#fff;color:#64748B;
+      border-radius:999px;font-size:12px;font-weight:600;
+      cursor:pointer;white-space:nowrap;font-family:inherit;
+      display:inline-flex;align-items:center;
     }
-    .pill.active{ background:var(--primary); color:#fff; border-color:var(--primary); }
+    .pill.active{background:#2D3BB5;color:#fff;border-color:#2D3BB5}
 
-    /* list */
-    .list{ padding:14px 16px; display:grid; gap:12px; }
+    .info-line{font-size:12px;color:#64748B;padding:0 18px 4px}
+
+    /* ── List ─────────────────────────────────── */
+    .list{padding:4px 16px 130px;display:flex;flex-direction:column;gap:10px}
+
     .card{
-      background:#fff; border-radius:14px; padding:14px;
-      border:1px solid var(--gray-2);
-      box-shadow:0 1px 2px rgba(0,0,0,.04);
+      background:#fff;border-radius:10px;padding:12px 14px;
+      box-shadow:0 1px 3px rgba(45,59,181,0.08);
+      display:flex;flex-direction:column;gap:8px;
     }
-    .card.terjadwal{ border-left:4px solid var(--primary); }
-    .card.selesai{ border-left:4px solid var(--success); opacity:.85; }
-    .card.batal{ border-left:4px solid var(--gray-4); opacity:.7; }
+    .card.selesai{opacity:.75}
+    .card.batal{opacity:.6}
 
-    .c-row1{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
-    .c-date{ font-size:13px; font-weight:700; color:var(--gray-8); }
-    .c-jam{ font-size:14px; font-weight:800; color:var(--primary); }
-    .c-nama{ font-size:15px; font-weight:700; color:var(--gray-9); margin-top:6px; }
-    .c-meta{ font-size:12px; color:var(--gray-6); margin-top:2px; }
-    .c-catatan{
-      font-size:12px; color:var(--gray-7); margin-top:6px;
-      padding:6px 8px; background:var(--gray-1); border-radius:8px;
+    .c-row1{
+      display:flex;justify-content:space-between;align-items:flex-start;gap:8px;
     }
+    .c-nama{font-size:14px;font-weight:700;color:#1E2A6E;line-height:1.25}
+    .c-tglJam{font-size:12px;font-weight:700;color:#2563EB;white-space:nowrap;flex-shrink:0}
+    .c-alamat{font-size:13px;color:#64748B;line-height:1.4}
+    .c-catatan{font-size:12px;color:#94A3B8;font-style:italic;line-height:1.4}
+    .c-tel{font-size:12px;color:#94A3B8}
+
     .c-status{
-      display:inline-flex; align-items:center; gap:4px;
-      padding:3px 8px; border-radius:999px;
-      font-size:11px; font-weight:700; margin-top:8px;
+      display:inline-flex;align-items:center;gap:4px;
+      padding:2px 8px;border-radius:6px;
+      font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;
+      align-self:flex-start;
     }
-    .c-status.terjadwal{ background:var(--primary-lt); color:var(--primary); }
-    .c-status.selesai{ background:var(--success-lt); color:var(--success); }
-    .c-status.batal{ background:var(--gray-2); color:var(--gray-6); }
-    .c-act{ display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+    .c-status.terjadwal{background:#E3F2FF;color:#2563EB}
+    .c-status.selesai{background:#E7F8F1;color:#10B981}
+    .c-status.batal{background:#F1F5F9;color:#94A3B8}
+
+    .c-order-link{
+      font-size:12px;color:#2D3BB5;text-decoration:none;font-weight:700;
+    }
+    .c-alasan{font-size:12px;color:#EF4444;font-style:italic}
+
+    .c-act{display:flex;gap:6px}
     .c-act button, .c-act a{
-      flex:1; min-height:36px; padding:8px 10px;
-      border:none; border-radius:8px; font-size:12px; font-weight:700;
-      cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px;
+      flex:1;height:36px;padding:0 10px;
+      border-radius:8px;font-size:12px;font-weight:600;
+      cursor:pointer;font-family:inherit;
+      display:inline-flex;align-items:center;justify-content:center;gap:4px;
       text-decoration:none;
     }
-    .btn-ok{ background:var(--success); color:#fff; }
-    .btn-edit{ background:var(--gray-2); color:var(--gray-8); }
-    .btn-del{ background:var(--danger); color:#fff; flex:0 0 44px; }
+    .btn-ok{background:#10B981;color:#fff;border:none}
+    .btn-ok:active{transform:scale(.97)}
+    .btn-edit{background:#fff;color:#64748B;border:1px solid #E2E8F0}
+    .btn-del{background:#fff;color:#EF4444;border:1px solid #FDECEC}
 
     .empty{
-      text-align:center; padding:60px 20px; color:var(--gray-5);
+      text-align:center;padding:40px 20px;color:#94A3B8;
+      background:#fff;border-radius:10px;border:1px dashed #E2E8F0;
     }
-    .empty .ic{ font-size:48px; display:block; margin-bottom:10px; }
-    .empty .ttl{ font-weight:700; color:var(--gray-7); margin-bottom:6px; }
+    .empty .ttl{font-size:15px;font-weight:700;color:#64748B;margin-bottom:12px}
+    .empty .btn-first{
+      height:40px;padding:0 18px;border-radius:8px;border:none;
+      background:#2D3BB5;color:#fff;font-size:13px;font-weight:700;
+      cursor:pointer;font-family:inherit;
+      display:inline-flex;align-items:center;gap:5px;
+    }
 
-    /* modal sheet — pattern aman, hindari .modal-body */
+    /* ── Toast ────────────────────────────────── */
+    #toast{
+      position:fixed;bottom:96px;left:50%;transform:translateX(-50%);
+      background:#1E2A6E;color:#fff;padding:10px 20px;border-radius:999px;
+      font-size:13px;font-weight:600;z-index:99999;
+      opacity:0;pointer-events:none;transition:opacity .25s;
+    }
+    #toast.show{opacity:1}
+    #toast.err{background:#EF4444}
+
+    /* ── Bottom sheet modal ────────────────────── */
     .lm-bg{
-      position:fixed!important; inset:0; background:rgba(0,0,0,.5);
-      display:none; align-items:flex-end; justify-content:center; z-index:9999;
+      position:fixed !important; inset:0 !important; background:rgba(30,42,110,0.45) !important;
+      z-index:9999 !important; display:none;align-items:flex-end;justify-content:center;
+      padding:0;overflow-y:auto;
     }
-    .lm-bg.open{ display:flex; }
+    .lm-bg.open{display:flex !important}
     .lm{
-      background:#fff; width:100%; max-width:560px;
-      border-radius:16px 16px 0 0; max-height:92vh;
-      display:flex; flex-direction:column;
+      position:relative;background:#fff;border-radius:18px 18px 0 0;
+      width:100%;max-width:100%;max-height:92vh;overflow-y:auto;
+      box-shadow:0 -8px 32px rgba(45,59,181,.18);
     }
-    .lm-h{ padding:14px 16px; border-bottom:1px solid var(--gray-2);
-      display:flex; justify-content:space-between; align-items:center; }
-    .lm-h h3{ font-size:16px; font-weight:800; }
-    .lm-x{ background:none; border:none; font-size:22px; cursor:pointer; color:var(--gray-6); }
-    .lm-b{ padding:16px; overflow-y:auto; flex:1; }
-    .lm-f{ padding:12px 16px; border-top:1px solid var(--gray-2);
-      display:flex; gap:8px; }
+    .lm-h{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:14px 18px;border-bottom:1px solid #E2E8F0;
+      position:sticky;top:0;background:#fff;z-index:2;
+    }
+    .lm-h h3{font-size:16px;font-weight:800;color:#1E2A6E}
+    .lm-x{
+      width:32px;height:32px;border-radius:8px;
+      background:#F1F5F9;border:none;cursor:pointer;color:#64748B;
+      display:inline-flex;align-items:center;justify-content:center;
+    }
+    .lm-b{padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+    .lm-f{
+      padding:12px 18px;border-top:1px solid #E2E8F0;
+      display:flex;gap:8px;position:sticky;bottom:0;background:#fff;
+    }
     .lm-f button{
-      flex:1; padding:12px; border:none; border-radius:var(--radius-md);
-      font-size:14px; font-weight:700; cursor:pointer;
+      flex:1;min-height:44px;padding:10px;border:none;border-radius:8px;
+      font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;
     }
-    .lm-f .cancel{ background:var(--gray-2); color:var(--gray-8); }
-    .lm-f .save{ background:var(--primary); color:#fff; }
+    .lm-f .cancel{background:#fff;border:1px solid #E2E8F0;color:#64748B}
+    .lm-f .save{background:#2D3BB5;color:#fff}
+    .lm-f button:disabled{opacity:.5;cursor:default}
 
-    .field{ margin-bottom:14px; }
-    .field label{ display:block; font-size:12px; font-weight:700; color:var(--gray-7);
-      margin-bottom:6px; text-transform:uppercase; letter-spacing:.3px; }
+    .field label{
+      display:block;font-size:12px;font-weight:700;color:#64748B;
+      margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px;
+    }
     .field input, .field textarea, .field select{
-      width:100%; padding:10px 12px; border:1px solid var(--gray-3);
-      border-radius:var(--radius-md); font-size:14px; background:#fff;
-      font-family:var(--font);
+      width:100%;padding:10px 12px;border:1.5px solid #E2E8F0;
+      border-radius:8px;font-size:14px;font-family:inherit;
+      background:#fff;color:#1E2A6E;outline:none;min-height:44px;
     }
-    .field input:focus, .field textarea:focus, .field select:focus{
-      outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.12);
-    }
-    .field textarea{ min-height:60px; resize:vertical; }
+    .field input:focus, .field textarea:focus{border-color:#2D3BB5}
+    .field textarea{min-height:60px;resize:vertical}
+
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
     /* pelanggan picker */
     .pl-result{
-      border:1px solid var(--gray-2); border-top:none;
-      border-radius:0 0 8px 8px; max-height:200px; overflow-y:auto;
-      background:#fff; display:none;
+      border:1px solid #E2E8F0;border-top:none;
+      border-radius:0 0 8px 8px;max-height:220px;overflow-y:auto;
+      background:#fff;display:none;
     }
-    .pl-result.open{ display:block; }
-    .pl-item{ padding:10px 12px; cursor:pointer; border-bottom:1px solid var(--gray-1); font-size:13px; }
-    .pl-item:hover{ background:var(--gray-1); }
+    .pl-result.open{display:block}
+    .pl-item{padding:10px 12px;cursor:pointer;border-bottom:1px solid #F1F5F9;font-size:13px}
+    .pl-item:last-child{border-bottom:none}
+    .pl-item:hover{background:#F8FAFF}
     .pl-selected{
-      padding:10px 12px; background:var(--primary-lt); border:1px solid var(--primary);
-      border-radius:var(--radius-md); margin-bottom:8px;
-      display:flex; justify-content:space-between; align-items:center;
+      padding:10px 12px;background:#E3F2FF;border:1px solid #2563EB;
+      border-radius:8px;margin-bottom:8px;
+      display:flex;justify-content:space-between;align-items:center;
     }
-    .pl-selected .ttl{ font-weight:700; color:var(--primary-dk, #1E2A8A); font-size:13px; }
-    .pl-selected .meta{ font-size:11px; color:var(--gray-7); margin-top:2px; }
-    .pl-selected .x{
-      background:none; border:none; cursor:pointer;
-      color:var(--danger); font-size:18px; font-weight:700;
+    .pl-selected .ttl{font-weight:700;color:#2563EB;font-size:13px}
+    .pl-selected .meta{font-size:11px;color:#64748B;margin-top:2px}
+    .pl-selected .xbtn{
+      width:28px;height:28px;border-radius:6px;
+      background:transparent;border:none;cursor:pointer;color:#EF4444;
+      display:inline-flex;align-items:center;justify-content:center;
     }
 
-    .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-
-    /* desktop centered modal */
     @media (min-width:1024px){
-      .lm-bg{ align-items:center; padding:16px; }
-      .lm{ border-radius:16px; max-width:520px; }
+      .rj-head{padding:16px 20px 10px}
+      .rj-title{font-size:22px}
+      .pill-row{padding:0 20px 6px}
+      .list{padding:4px 20px 40px}
+      .lm-bg{align-items:center;padding:16px}
+      .lm{max-width:520px;border-radius:14px}
     }
   </style>
 </head>
 <body>
-  <main>
-    <div class="pg-head">
-      <div>
-        <h1>Jadwal Penjemputan</h1>
-        <div class="sub" id="subInfo">Memuat...</div>
-      </div>
-      <button class="btn-add" onclick="openForm()">＋ Tambah</button>
-    </div>
 
-    <div class="pill-row">
-      <button class="pill active" data-f="hari-ini" onclick="setFilter('hari-ini')">Hari Ini</button>
-      <button class="pill" data-f="besok" onclick="setFilter('besok')">Besok</button>
-      <button class="pill" data-f="minggu-ini" onclick="setFilter('minggu-ini')">Minggu Ini</button>
-      <button class="pill" data-f="semua" onclick="setFilter('semua')">Semua</button>
-      <button class="pill" data-f="selesai" onclick="setFilter('selesai')">Selesai</button>
-    </div>
+<div class="page">
+  <!-- HEADER -->
+  <div class="rj-head">
+    <a class="ic-btn" href="/dashboard" aria-label="Kembali">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <div class="rj-title">Jadwal Jemput</div>
+    <button class="btn-add" onclick="openForm()" aria-label="Tambah jadwal">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      <span>Jadwal</span>
+    </button>
+  </div>
 
-    <div class="list" id="list">
-      <div class="empty"><span class="ic">⏳</span>Memuat...</div>
-    </div>
-  </main>
+  <div class="pill-row">
+    <button class="pill active" data-f="hari-ini" onclick="setFilter('hari-ini')">Hari Ini</button>
+    <button class="pill" data-f="besok" onclick="setFilter('besok')">Besok</button>
+    <button class="pill" data-f="minggu-ini" onclick="setFilter('minggu-ini')">Minggu Ini</button>
+    <button class="pill" data-f="semua" onclick="setFilter('semua')">Semua</button>
+    <button class="pill" data-f="selesai" onclick="setFilter('selesai')">Selesai</button>
+  </div>
 
-  <!-- Modal form -->
-  <div class="lm-bg" id="formModal">
-    <div class="lm">
-      <div class="lm-h">
-        <h3 id="formTitle">Tambah Jadwal Jemput</h3>
-        <button class="lm-x" onclick="closeForm()">×</button>
+  <div class="info-line" id="subInfo">Memuat…</div>
+
+  <div class="list" id="list">
+    <div class="empty"><div class="ttl">Memuat…</div></div>
+  </div>
+</div>
+
+<!-- Modal form -->
+<div class="lm-bg" id="formModal">
+  <div class="lm">
+    <div class="lm-h">
+      <h3 id="formTitle">Tambah Jadwal Jemput</h3>
+      <button class="lm-x" onclick="closeForm()" aria-label="Tutup">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
+    </div>
+    <div class="lm-b">
+      <div class="field">
+        <label>Pelanggan *</label>
+        <div id="plSelectedWrap"></div>
+        <input type="text" id="plSearch" placeholder="Cari nama atau nomor telepon…" oninput="onSearchPelanggan()" autocomplete="off"/>
+        <div class="pl-result" id="plResult"></div>
       </div>
-      <div class="lm-b">
+      <div class="row2">
         <div class="field">
-          <label>Pelanggan *</label>
-          <div id="plSelectedWrap"></div>
-          <input type="text" id="plSearch" placeholder="Cari nama atau no. telepon..." oninput="onSearchPelanggan()" autocomplete="off"/>
-          <div class="pl-result" id="plResult"></div>
-        </div>
-        <div class="row2">
-          <div class="field">
-            <label>Tanggal Jemput *</label>
-            <input type="date" id="fTanggal"/>
-          </div>
-          <div class="field">
-            <label>Jam (opsional)</label>
-            <input type="time" id="fJam"/>
-          </div>
+          <label>Tanggal Jemput *</label>
+          <input type="date" id="fTanggal"/>
         </div>
         <div class="field">
-          <label>Alamat</label>
-          <textarea id="fAlamat" placeholder="Otomatis dari profil pelanggan jika kosong"></textarea>
-        </div>
-        <div class="field">
-          <label>Catatan</label>
-          <textarea id="fCatatan" placeholder="Contoh: 2 kantong besar, tunggu di teras"></textarea>
+          <label>Jam (opsional)</label>
+          <input type="time" id="fJam"/>
         </div>
       </div>
-      <div class="lm-f">
-        <button class="cancel" onclick="closeForm()">Batal</button>
-        <button class="save" id="btnSave" onclick="simpan()">Simpan Jadwal</button>
+      <div class="field">
+        <label>Alamat</label>
+        <textarea id="fAlamat" placeholder="Otomatis dari profil pelanggan jika kosong"></textarea>
       </div>
+      <div class="field">
+        <label>Catatan</label>
+        <textarea id="fCatatan" placeholder='Contoh: "2 kantong besar, tunggu di teras"'></textarea>
+      </div>
+    </div>
+    <div class="lm-f">
+      <button class="cancel" onclick="closeForm()">Batal</button>
+      <button class="save" id="btnSave" onclick="simpan()">Simpan Jadwal</button>
     </div>
   </div>
+</div>
+
+<div id="toast"></div>
 
 <script>
 const state = {
@@ -228,18 +293,13 @@ const state = {
 };
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function showToast(msg) {
-  let t = document.getElementById('__toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = '__toast';
-    t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1E2A6E;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;z-index:99999;box-shadow:0 4px 16px rgba(0,0,0,.2)';
-    document.body.appendChild(t);
-  }
-  t.textContent = msg;
-  t.style.display = '';
-  clearTimeout(window.__toastT);
-  window.__toastT = setTimeout(() => t.style.display = 'none', 2500);
+
+function showToast(msg, err) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  el.classList.toggle('err', !!err);
+  setTimeout(() => el.classList.remove('show'), 2200);
 }
 
 const todayISO = () => new Date().toISOString().slice(0,10);
@@ -247,10 +307,19 @@ function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); retu
 
 const HARI = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 const BULAN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-function fmtTanggal(iso) {
+function fmtTanggalPendek(iso) {
+  if (!iso) return '';
+  const d = new Date(iso + 'T00:00:00');
+  return `${HARI[d.getDay()]}, ${d.getDate()} ${BULAN[d.getMonth()]}`;
+}
+function fmtTanggalPanjang(iso) {
   if (!iso) return '-';
   const d = new Date(iso + 'T00:00:00');
   return `${HARI[d.getDay()]}, ${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
+}
+function fmtJam(jam) {
+  if (!jam) return '';
+  return jam.slice(0, 5).replace(':', '.');
 }
 
 /* ── Filter ──────────────────────────────────── */
@@ -263,7 +332,7 @@ function setFilter(f) {
 /* ── Load list ───────────────────────────────── */
 async function load() {
   const listEl = document.getElementById('list');
-  listEl.innerHTML = '<div class="empty"><span class="ic">⏳</span>Memuat...</div>';
+  listEl.innerHTML = '<div class="empty"><div class="ttl">Memuat…</div></div>';
 
   let url = '/api/v1/reservasi-jemput';
   const params = new URLSearchParams();
@@ -286,26 +355,31 @@ async function load() {
 
   try {
     const r = await fetch(url, { credentials:'include' });
+    if (r.status === 401) { location.href = '/login'; return; }
     if (!r.ok) throw new Error('Gagal memuat');
     const d = await r.json();
     state.items = d.data || [];
     render();
   } catch (e) {
-    listEl.innerHTML = `<div class="empty"><span class="ic"></span><div class="ttl">Gagal memuat</div>${esc(e.message)}</div>`;
+    listEl.innerHTML = `<div class="empty"><div class="ttl">Gagal memuat</div><div>${esc(e.message)}</div></div>`;
   }
 }
 
 function render() {
   const listEl = document.getElementById('list');
   const items = state.items;
-  document.getElementById('subInfo').textContent = `${items.length} jadwal`;
+  document.getElementById('subInfo').textContent = items.length
+    ? `${items.length} jadwal`
+    : '';
 
   if (items.length === 0) {
     listEl.innerHTML = `
       <div class="empty">
-        <span class="ic"></span>
         <div class="ttl">Tidak ada jadwal penjemputan</div>
-        <button class="btn-add" style="margin-top:14px" onclick="openForm()">＋ Tambah Jadwal Jemput</button>
+        <button class="btn-first" onclick="openForm()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Tambah Jadwal
+        </button>
       </div>`;
     return;
   }
@@ -314,27 +388,31 @@ function render() {
     const status = r.status;
     const alamat = r.alamat || r.pelanggan_alamat || '';
     const isOpen = status === 'terjadwal';
+    const jam = fmtJam(r.jam_jemput);
+    const tglJam = jam
+      ? `${fmtTanggalPendek(r.tanggal_jemput)} · ${jam}`
+      : fmtTanggalPendek(r.tanggal_jemput);
+    const statusLabel = status === 'terjadwal' ? 'Terjadwal'
+                      : status === 'selesai' ? 'Selesai'
+                      : status === 'batal' ? 'Dibatalkan' : status;
     return `
       <div class="card ${status}">
         <div class="c-row1">
-          <div>
-            <div class="c-date">${esc(fmtTanggal(r.tanggal_jemput))}</div>
-            <div class="c-jam">⏰ ${esc(r.jam_jemput || '--:--')}</div>
-          </div>
+          <div class="c-nama">${esc(r.pelanggan_nama || '-')}</div>
+          <div class="c-tglJam">${esc(tglJam)}</div>
         </div>
-        <div class="c-nama">${esc(r.pelanggan_nama || '-')}</div>
-        ${r.pelanggan_telepon ? `<div class="c-meta">${esc(r.pelanggan_telepon)}</div>` : ''}
-        ${alamat ? `<div class="c-meta">${esc(alamat)}</div>` : ''}
+        ${r.pelanggan_telepon ? `<div class="c-tel">${esc(r.pelanggan_telepon)}</div>` : ''}
+        ${alamat ? `<div class="c-alamat">${esc(alamat)}</div>` : ''}
         ${r.catatan ? `<div class="c-catatan">${esc(r.catatan)}</div>` : ''}
-        <div class="c-status ${status}">● ${status.toUpperCase()}</div>
-        ${r.nomor_transaksi ? `<div class="c-meta" style="margin-top:4px"> <a href="/order/detail?id=${r.transaksi_id}" style="color:var(--primary)">${esc(r.nomor_transaksi)}</a></div>` : ''}
+        ${!isOpen ? `<span class="c-status ${status}">${statusLabel}</span>` : ''}
+        ${r.nomor_transaksi ? `<a class="c-order-link" href="/order/detail?id=${r.transaksi_id}">Order ${esc(r.nomor_transaksi)}</a>` : ''}
+        ${r.alasan_batal ? `<div class="c-alasan">Alasan: ${esc(r.alasan_batal)}</div>` : ''}
         ${isOpen ? `
         <div class="c-act">
           <button class="btn-ok" onclick="markSelesai(${r.id}, ${r.pelanggan_id || 'null'})">Selesai</button>
           <button class="btn-edit" onclick="openForm(${r.id})">Edit</button>
           <button class="btn-del" onclick="batalkan(${r.id})">Hapus</button>
         </div>` : ''}
-        ${r.alasan_batal ? `<div class="c-meta" style="margin-top:6px;color:var(--danger)"> ${esc(r.alasan_batal)}</div>` : ''}
       </div>`;
   }).join('');
 }
@@ -369,7 +447,7 @@ async function openForm(id) {
       document.getElementById('fAlamat').value = data.alamat || '';
       document.getElementById('fCatatan').value = data.catatan || '';
     } catch (e) {
-      showToast('Gagal memuat data edit');
+      showToast('Gagal memuat data edit', true);
       return;
     }
   }
@@ -392,7 +470,9 @@ function renderSelectedPelanggan() {
         <div class="ttl">${esc(state.pelanggan.nama)}</div>
         <div class="meta">${esc(state.pelanggan.telepon || '-')}</div>
       </div>
-      <button class="x" onclick="clearPelanggan()">×</button>
+      <button class="xbtn" onclick="clearPelanggan()" aria-label="Hapus pelanggan">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
     </div>`;
   if (state.pelanggan.alamat && !document.getElementById('fAlamat').value) {
     document.getElementById('fAlamat').value = state.pelanggan.alamat;
@@ -420,17 +500,17 @@ async function searchPelanggan() {
     const d = await r.json();
     const items = d.data || [];
     if (items.length === 0) {
-      res.innerHTML = '<div class="pl-item" style="color:var(--gray-5)">Tidak ditemukan</div>';
+      res.innerHTML = '<div class="pl-item" style="color:#94A3B8">Tidak ditemukan</div>';
     } else {
       res.innerHTML = items.map(p => `
         <div class="pl-item" onclick='pickPelanggan(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
           <div style="font-weight:700">${esc(p.nama)}</div>
-          <div style="font-size:11px;color:var(--gray-6)">${esc(p.telepon || '-')}</div>
+          <div style="font-size:11px;color:#94A3B8">${esc(p.telepon || '-')}</div>
         </div>`).join('');
     }
     res.classList.add('open');
   } catch {
-    res.innerHTML = '<div class="pl-item" style="color:var(--danger)">Error</div>';
+    res.innerHTML = '<div class="pl-item" style="color:#EF4444">Error</div>';
     res.classList.add('open');
   }
 }
@@ -444,9 +524,9 @@ function pickPelanggan(p) {
 
 /* ── Simpan ──────────────────────────────────── */
 async function simpan() {
-  if (!state.pelanggan) { showToast('Pilih pelanggan dulu'); return; }
+  if (!state.pelanggan) { showToast('Pilih pelanggan dulu', true); return; }
   const tanggal = document.getElementById('fTanggal').value;
-  if (!tanggal) { showToast('Tanggal wajib diisi'); return; }
+  if (!tanggal) { showToast('Tanggal wajib diisi', true); return; }
 
   const body = {
     pelanggan_id: state.pelanggan.id,
@@ -458,7 +538,7 @@ async function simpan() {
 
   const btn = document.getElementById('btnSave');
   btn.disabled = true;
-  btn.textContent = 'Menyimpan...';
+  btn.textContent = 'Menyimpan…';
   try {
     const url = state.editId
       ? `/api/v1/reservasi-jemput/${state.editId}`
@@ -470,13 +550,13 @@ async function simpan() {
       body: JSON.stringify(body)
     });
     const d = await r.json();
-    if (!r.ok) { showToast(d.error || 'Gagal menyimpan'); return; }
+    if (!r.ok) { showToast(d.error || 'Gagal menyimpan', true); return; }
     showToast(state.editId ? 'Reservasi diperbarui' : 'Reservasi dibuat');
     closeForm();
     load();
     if (window.posRefreshBadges) window.posRefreshBadges();
   } catch (e) {
-    showToast('Gagal: ' + e.message);
+    showToast('Gagal: ' + e.message, true);
   } finally {
     btn.disabled = false;
     btn.textContent = 'Simpan Jadwal';
@@ -485,7 +565,6 @@ async function simpan() {
 
 /* ── Aksi card ───────────────────────────────── */
 async function markSelesai(id, pelangganId) {
-  // Aksi ringan → langsung eksekusi + toast
   try {
     const r = await fetch(`/api/v1/reservasi-jemput/${id}/selesai`, {
       method: 'PUT', credentials:'include',
@@ -493,14 +572,14 @@ async function markSelesai(id, pelangganId) {
       body: JSON.stringify({})
     });
     const d = await r.json();
-    if (!r.ok) { showToast(d.error || 'Gagal'); return; }
+    if (!r.ok) { showToast(d.error || 'Gagal', true); return; }
     showToast('Reservasi selesai');
     load();
     if (window.posRefreshBadges) window.posRefreshBadges();
     if (pelangganId && confirm('Langsung buat order untuk pelanggan ini sekarang?')) {
       location.href = `/order/baru?pelanggan_id=${pelangganId}&reservasi_id=${id}`;
     }
-  } catch (e) { showToast('Gagal: ' + e.message); }
+  } catch (e) { showToast('Gagal: ' + e.message, true); }
 }
 
 async function batalkan(id) {
@@ -513,11 +592,11 @@ async function batalkan(id) {
       body: JSON.stringify({ alasan })
     });
     const d = await r.json();
-    if (!r.ok) { showToast(d.error || 'Gagal'); return; }
+    if (!r.ok) { showToast(d.error || 'Gagal', true); return; }
     showToast('Reservasi dibatalkan');
     load();
     if (window.posRefreshBadges) window.posRefreshBadges();
-  } catch (e) { showToast('Gagal: ' + e.message); }
+  } catch (e) { showToast('Gagal: ' + e.message, true); }
 }
 
 /* ── Init: cek query param ?edit= ─────────────── */
