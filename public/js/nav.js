@@ -80,11 +80,13 @@
         { href: '/stok-bahan', mono: 'SB', label: 'Stok Bahan' },
         { href: '/ai-insight', mono: 'AI', label: 'AI Insight',  ownerOnly: true },
         { href: '/pengaturan', mono: 'PG', label: 'Pengaturan',  ownerOnly: true },
+        // Master hub — konsolidasi aksi sensitif owner
+        { href: '/master',     mono: 'MS', label: 'Master',       ownerOnly: true },
       ]
     }
   ];
 
-  // Menu Lainnya (bottom sheet mobile) — 13 item, grid 4 kolom, monogram tile 50×50
+  // Menu Lainnya (bottom sheet mobile) — grid 4 kolom, monogram tile 50×50
   const MORE_ITEMS = [
     { href: '/kas',              mono: 'BK', label: 'Buku Kas',     ownerOnly: true },
     { href: '/deposit',          mono: 'DP', label: 'Deposit' },
@@ -99,6 +101,7 @@
     { href: '/stok-bahan',       mono: 'SB', label: 'Stok Bahan' },
     { href: '/ai-insight',       mono: 'AI', label: 'AI Insight',   ownerOnly: true },
     { href: '/pengaturan',       mono: 'PG', label: 'Pengaturan',   ownerOnly: true },
+    { href: '/master',           mono: 'MS', label: 'Master',       ownerOnly: true },
   ];
 
   /* ── Page title from <title> ──────────────────────────── */
@@ -111,18 +114,31 @@
   const a = (cls, active) => active ? cls + ' active' : cls;
   const ownAttr = (own) => own ? ' data-owner-only="1"' : '';
 
-  const sidebarHTML = `
+  // Filter items ownerOnly → tidak dirender ke DOM kalau bukan owner.
+  // Bootstrap awal pakai localStorage; kalau ternyata role beda saat fetch
+  // selesai, nav di-rebuild via `pos:role-loaded` handler di bawah.
+  const isOwnerSync = () => {
+    if (window.currentUserRole) return window.currentUserRole === 'owner';
+    try { return localStorage.getItem('pos_user_role') === 'owner'; } catch (_) { return false; }
+  };
+  const filterItems = (items) => items.filter(it => !it.ownerOnly || isOwnerSync());
+  const filterGroups = (groups) => groups
+    .filter(g => !g.ownerOnly || isOwnerSync())
+    .map(g => ({ ...g, items: filterItems(g.items) }))
+    .filter(g => g.items.length > 0);
+
+  const buildSidebar = () => `
 <aside class="pos-sidebar" id="pos-sidebar">
   <div class="sb-brand">
     <span class="sb-brand-mono">NL</span>
     <span class="sb-brand-text">nala laundry</span>
   </div>
   <nav class="sb-nav">
-    ${NAV.map(g => `
-      <div class="sb-group"${ownAttr(g.ownerOnly)}>
+    ${filterGroups(NAV).map(g => `
+      <div class="sb-group">
         <div class="sb-group-label">${g.group}</div>
         ${g.items.map(it => `
-          <a href="${it.href}" class="${a('sb-item', sbActive(it.href))}"${ownAttr(it.ownerOnly)}>
+          <a href="${it.href}" class="${a('sb-item', sbActive(it.href))}">
             <span class="sb-mono">${it.mono}</span>
             <span class="sb-lbl">${it.label}</span>
           </a>`).join('')}
@@ -134,6 +150,7 @@
     <button class="sb-logout" onclick="posLogout()">${SVG.logout} Keluar</button>
   </div>
 </aside>`;
+  const sidebarHTML = buildSidebar();
 
   const topbarHTML = `
 <div class="pos-topbar">
@@ -175,14 +192,14 @@
 </nav>
 <a href="/order/baru" class="pos-fab-order" aria-label="Order Baru">${SVG.plus}</a>`;
 
-  const moreSheetHTML = `
+  const buildMoreSheet = () => `
 <div class="more-overlay" id="moreOverlay" onclick="closeMoreSheet()"></div>
 <div class="more-sheet" id="moreSheet">
   <div class="more-sheet-handle"></div>
   <div class="more-sheet-title">Menu Lainnya</div>
   <div class="more-sheet-grid">
-    ${MORE_ITEMS.map(it => `
-      <a href="${it.href}" class="${a('more-grid-item', sbActive(it.href))}"${ownAttr(it.ownerOnly)} style="position:relative">
+    ${filterItems(MORE_ITEMS).map(it => `
+      <a href="${it.href}" class="${a('more-grid-item', sbActive(it.href))}" style="position:relative">
         <span class="mgi-tile">${it.mono}</span>
         <span class="mgi-label">${it.label}</span>
         ${it.badge ? `<span class="bn-badge" id="miBadge-${it.badge}" style="display:none;position:absolute;top:0;right:6px">0</span>` : ''}
@@ -193,6 +210,7 @@
     <button class="more-sheet-logout" onclick="posLogout()">Keluar</button>
   </div>
 </div>`;
+  const moreSheetHTML = buildMoreSheet();
 
   /* ── Ensure auth-helper.js is loaded FIRST (RBAC bootstrap) ── */
   // Kalau auth-helper.js sudah di-load via <script> di halaman, skip.
@@ -227,6 +245,9 @@
   document.getElementById('pos-sidebar').insertAdjacentElement('afterend', wrap);
 
   /* ── Sync UI dengan role (dari auth-helper.js) ─────────── */
+  // Simpan snapshot: apakah render awal treat user sebagai owner?
+  const bootstrappedAsOwner = isOwnerSync();
+
   const applyUiRole = (payload) => {
     const role = payload?.role || window.currentUserRole || 'karyawan';
     const name = payload?.name || payload?.user?.nama || '–';
@@ -238,6 +259,35 @@
     if (roleEl) roleEl.textContent = role === 'owner' ? 'Owner' : 'Karyawan';
     const legacy = document.getElementById('userName');
     if (legacy) legacy.textContent = name;
+
+    // Kalau role real beda dgn asumsi bootstrap → rebuild nav supaya
+    // item ownerOnly benar-benar muncul/hilang dari DOM (bukan cuma CSS).
+    const isOwnerNow = role === 'owner';
+    if (isOwnerNow !== bootstrappedAsOwner) {
+      // Hapus DOM lama
+      ['pos-sidebar','moreSheet','moreOverlay'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+      });
+      document.querySelector('.pos-topbar')?.remove();
+      document.querySelector('.pos-pill-nav')?.remove();
+      document.querySelector('.pos-fab-order')?.remove();
+      // Inject ulang
+      document.body.insertAdjacentHTML('afterbegin', buildSidebar() + topbarHTML);
+      const rebuiltPill = hideBottom ? '' : pillNavHTML;
+      document.body.insertAdjacentHTML('beforeend', rebuiltPill + buildMoreSheet());
+      // Re-wire dependency layout
+      const oldMain = document.querySelector('.pos-main');
+      const newSidebar = document.getElementById('pos-sidebar');
+      if (oldMain && newSidebar) newSidebar.insertAdjacentElement('afterend', oldMain);
+      // Re-apply nama user pada elemen baru
+      ['sbUserName','tbUserName','moreUserName'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = name;
+      });
+      const roleEl2 = document.getElementById('sbUserRole');
+      if (roleEl2) roleEl2.textContent = role === 'owner' ? 'Owner' : 'Karyawan';
+    }
   };
 
   // authReady di-set oleh auth-helper.js

@@ -421,25 +421,9 @@
       </div>
     </div>
 
-    <!-- ACTIONS (import/export) — owner-only, hidden untuk karyawan -->
-    <div class="action-bar mobile-only" data-owner-only="1">
-      <button class="btn-act" onclick="openImportModal()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
-        Import
-      </button>
-      <button class="btn-act" onclick="exportPelanggan('xlsx')">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M17 14l-5-5-5 5"/><path d="M5 3h14"/></svg>
-        Export
-      </button>
-    </div>
+    <!-- Import/Export dipindah ke halaman Master (owner-only) -->
+    <!-- Modal import tetap ada di bawah supaya bisa di-trigger dari Master via ?action=import -->
 
-    <!-- DESKTOP TOOLBAR -->
-    <div class="desktop-toolbar desktop-only">
-      <div class="action-bar desktop-only" style="margin-left:auto" data-owner-only="1">
-        <button class="btn-act" onclick="openImportModal()">Import</button>
-        <button class="btn-act" onclick="exportPelanggan('xlsx')">Export</button>
-      </div>
-    </div>
 
     <!-- FILTER PILLS -->
     <div class="pills" id="pills">
@@ -1162,6 +1146,21 @@ async function exportPelanggan(format = 'xlsx') {
 
 // ── Init ─────────────────────────────────────────────
 load();
+
+// Auto-trigger dari Master via query string (?action=import / ?action=export)
+(function () {
+  const qs = new URLSearchParams(location.search);
+  const action = qs.get('action');
+  if (!action) return;
+  // Hilangkan query dari URL supaya reload tidak trigger ulang
+  history.replaceState(null, '', location.pathname);
+  if (action === 'import' && typeof openImportModal === 'function') {
+    setTimeout(openImportModal, 200);
+  } else if (action === 'export') {
+    const fmt = qs.get('format') || 'xlsx';
+    if (typeof exportPelanggan === 'function') exportPelanggan(fmt);
+  }
+})();
 </script>
 <script src="/js/import-pelanggan.js"></script>
 <script src="/js/nav.js"></script>

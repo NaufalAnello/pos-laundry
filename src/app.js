@@ -231,6 +231,11 @@ app.get('/pengaturan', gateOwnerPage, (req, res) => {
   res.sendFile(path.join(__dirname, '../public/pages/pengaturan.html'));
 });
 
+// Master — hub konsolidasi fitur sensitif owner
+app.get('/master', gateOwnerPage, (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/pages/master.html'));
+});
+
 // Deposit
 app.get('/deposit', (req, res) => {
   if (!req.session?.userId) return res.redirect('/login');

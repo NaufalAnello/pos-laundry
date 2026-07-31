@@ -1111,8 +1111,162 @@ document.querySelectorAll('.lm-bg').forEach(bg => {
   bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
 });
 
+// Alias yg dipakai import-layanan.js untuk reload data setelah import selesai
+window.loadData = loadLayanan;
+
 loadLayanan();
+
+// Auto-trigger dari Master via query string (?action=import / ?action=export)
+(function () {
+  const qs = new URLSearchParams(location.search);
+  const action = qs.get('action');
+  if (!action) return;
+  history.replaceState(null, '', location.pathname);
+  if (action === 'import' && typeof openImportModal === 'function') {
+    setTimeout(openImportModal, 200);
+  } else if (action === 'export') {
+    const fmt = qs.get('format') || 'xlsx';
+    if (typeof exportLayanan === 'function') exportLayanan(fmt);
+  }
+})();
 </script>
+
+<!-- ── Modal Import (dipicu dari halaman Master via ?action=import) ── -->
+<div class="lm-bg" id="importModal">
+  <div class="lm" style="max-width:900px">
+    <div class="lm-h">
+      <div class="ttl">Import Layanan</div>
+      <button class="lm-x" onclick="closeImportModal()" aria-label="Tutup">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
+    </div>
+    <div class="lm-b">
+      <div id="uploadStep">
+        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFileSelect(event)"/>
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()"
+             style="border:2px dashed #E2E8F0;border-radius:12px;padding:40px 20px;text-align:center;background:#F8FAFF;cursor:pointer">
+          <div style="width:44px;height:44px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;color:#94A3B8">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>
+          </div>
+          <div style="font-size:14px;font-weight:700;color:#64748B;margin-bottom:4px">Klik untuk pilih file atau drag &amp; drop</div>
+          <div style="font-size:12px;color:#94A3B8">Format: CSV atau Excel (.xlsx, .xls) · Maksimal 5MB</div>
+        </div>
+        <div style="display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap">
+          <a href="/api/v1/layanan/template?format=xlsx" style="color:#2D3BB5;text-decoration:none;font-size:12px;font-weight:700">Template Excel</a>
+          <a href="/api/v1/layanan/template?format=csv" style="color:#2D3BB5;text-decoration:none;font-size:12px;font-weight:700">Template CSV</a>
+        </div>
+      </div>
+
+      <div id="previewStep" style="display:none">
+        <div id="sectionBaru" style="display:none;margin-bottom:12px;border-radius:8px;overflow:hidden">
+          <div onclick="togglePreviewSection('sectionBaru')" style="padding:12px 16px;background:#E7F8F1;color:#10B981;font-weight:700;font-size:13px;cursor:pointer">
+            Layanan Baru (<span id="countBaru">0</span> item)
+          </div>
+          <div style="max-height:220px;overflow-y:auto">
+            <table style="width:100%;font-size:12px">
+              <thead>
+                <tr style="background:#F8FAFF">
+                  <th style="padding:8px;text-align:left">Nama</th>
+                  <th style="padding:8px;text-align:left">Kategori</th>
+                  <th style="padding:8px;text-align:left">Harga</th>
+                  <th style="padding:8px;text-align:left">Satuan</th>
+                  <th style="padding:8px;text-align:left">HPP</th>
+                  <th style="padding:8px;text-align:left">Margin %</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyBaru"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="sectionDuplikat" style="display:none;margin-bottom:12px;border-radius:8px;overflow:hidden">
+          <div onclick="togglePreviewSection('sectionDuplikat')" style="padding:12px 16px;background:#FEF3E2;color:#F59E0B;font-weight:700;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">
+            <span>Duplikat (<span id="countDuplikat">0</span> item)</span>
+            <div onclick="event.stopPropagation()" style="display:flex;gap:8px;font-size:11px">
+              <a onclick="setSemuaDuplikat('skip')" style="color:#F59E0B;cursor:pointer">Skip Semua</a>
+              <span>·</span>
+              <a onclick="setSemuaDuplikat('update')" style="color:#F59E0B;cursor:pointer">Update Semua</a>
+            </div>
+          </div>
+          <div style="max-height:220px;overflow-y:auto">
+            <table style="width:100%;font-size:12px">
+              <thead>
+                <tr style="background:#F8FAFF">
+                  <th style="padding:8px;text-align:left">Nama</th>
+                  <th style="padding:8px;text-align:left">Kategori</th>
+                  <th style="padding:8px;text-align:left">Harga Lama</th>
+                  <th style="padding:8px;text-align:left">Harga Baru</th>
+                  <th style="padding:8px;text-align:left">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyDuplikat"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="sectionError" style="display:none;margin-bottom:12px;border-radius:8px;overflow:hidden">
+          <div onclick="togglePreviewSection('sectionError')" style="padding:12px 16px;background:#FDECEC;color:#EF4444;font-weight:700;font-size:13px;cursor:pointer">
+            Error (<span id="countError">0</span> item)
+          </div>
+          <div style="max-height:220px;overflow-y:auto">
+            <table style="width:100%;font-size:12px">
+              <thead>
+                <tr style="background:#F8FAFF">
+                  <th style="padding:8px;width:60px">Baris</th>
+                  <th style="padding:8px;text-align:left">Nama</th>
+                  <th style="padding:8px;text-align:left">Pesan Error</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyError"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style="padding:14px;background:#F8FAFF;border-radius:8px">
+          <div style="font-weight:700;font-size:13px;margin-bottom:8px;color:#1E2A6E">Ringkasan</div>
+          <div style="font-size:12px;color:#64748B;line-height:1.7">
+            <div>· Akan ditambahkan: <strong id="summaryBaru">0</strong> layanan baru</div>
+            <div>· Akan diupdate: <strong id="summaryUpdate">0</strong> layanan</div>
+            <div>· Akan diskip: <strong id="summarySkip">0</strong> layanan</div>
+            <div>· Error (tidak diimport): <strong id="summaryError">0</strong> baris</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resultStep" style="display:none">
+        <div style="text-align:center;margin-bottom:18px">
+          <div style="font-size:16px;font-weight:800;margin-bottom:4px;color:#1E2A6E">Import Selesai</div>
+          <div style="font-size:12px;color:#94A3B8">Data layanan berhasil diimport</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+          <div style="padding:14px;background:#E7F8F1;border-radius:8px;text-align:center">
+            <div style="font-size:24px;font-weight:800;color:#10B981" id="resultBerhasil">0</div>
+            <div style="font-size:11px;font-weight:700;color:#64748B">Ditambahkan</div>
+          </div>
+          <div style="padding:14px;background:#E3F2FF;border-radius:8px;text-align:center">
+            <div style="font-size:24px;font-weight:800;color:#2D3BB5" id="resultUpdate">0</div>
+            <div style="font-size:11px;font-weight:700;color:#64748B">Diupdate</div>
+          </div>
+          <div style="padding:14px;background:#FEF3E2;border-radius:8px;text-align:center">
+            <div style="font-size:24px;font-weight:800;color:#F59E0B" id="resultSkip">0</div>
+            <div style="font-size:11px;font-weight:700;color:#64748B">Diskip</div>
+          </div>
+          <div style="padding:14px;background:#FDECEC;border-radius:8px;text-align:center">
+            <div style="font-size:24px;font-weight:800;color:#EF4444" id="resultGagal">0</div>
+            <div style="font-size:11px;font-weight:700;color:#64748B">Gagal</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="lm-f">
+      <button class="btn btn-outline" onclick="closeImportModal()">Batal</button>
+      <button class="btn btn-primary" id="btnJalankanImport" style="display:none" onclick="jalankanImport()">Jalankan Import</button>
+      <button class="btn btn-primary" id="btnSelesai" style="display:none" onclick="selesaiImport()">Selesai</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/import-layanan.js"></script>
 <script src="/js/nav.js"></script>
 </body>
 </html>

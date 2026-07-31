@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="/css/design-system.css"/>
+  <link rel="stylesheet" href="/css/layout.css"/>
+  <link rel="stylesheet" href="/css/responsive.css"/>
+  <title>Master — POS Laundry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: #F0F7FF; color: #1E2A6E; font-size: 14px; min-height: 100vh; }
+
+    .page { max-width: 880px; margin: 0 auto; }
+    .pos-topbar { display: none !important; }
+
+    /* ── Header ─────────────────────────────────── */
+    .ms-head {
+      position: sticky; top: 0; z-index: 20;
+      background: #F0F7FF;
+      padding: 14px 16px 10px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .ms-head .ic-btn {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: #fff; color: #2D3BB5;
+      border: none; cursor: pointer; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      text-decoration: none;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+    }
+    .ms-title { flex: 1; font-size: 20px; font-weight: 800; color: #1E2A6E; letter-spacing: -.01em; }
+
+    .body-wrap {
+      padding: 4px 16px 130px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+
+    /* ── Section ────────────────────────────────── */
+    .section-ttl {
+      font-size: 12px; font-weight: 800; color: #64748B;
+      text-transform: uppercase; letter-spacing: .8px;
+      padding: 0 2px 6px;
+    }
+
+    /* ── Tile list ──────────────────────────────── */
+    .tile-list {
+      background: #fff; border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+      overflow: hidden;
+    }
+    .tile-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px;
+      border-bottom: 1px solid #F1F5F9;
+      cursor: pointer; text-decoration: none;
+      background: #fff;
+      transition: background .12s;
+      color: inherit;
+    }
+    .tile-row:last-child { border-bottom: none; }
+    .tile-row:hover, .tile-row:active { background: #F8FAFF; }
+    .tile-mono {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: #E3F2FF; color: #2D3BB5;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800;
+      flex-shrink: 0;
+    }
+    .tile-mono.warn { background: #FEF3E2; color: #F59E0B; }
+    .tile-mono.danger { background: #FDECEC; color: #EF4444; }
+    .tile-mono.success { background: #E7F8F1; color: #10B981; }
+    .tile-body { flex: 1; min-width: 0; }
+    .tile-label { font-size: 14px; font-weight: 600; color: #1E2A6E; }
+    .tile-sub { font-size: 12px; color: #94A3B8; margin-top: 2px; line-height: 1.4; }
+    .tile-chev { color: #94A3B8; flex-shrink: 0; display: inline-flex; align-items: center; }
+
+    /* ── User management ───────────────────────── */
+    .card {
+      background: #fff; border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+    }
+    .card-head {
+      padding: 14px 16px; border-bottom: 1px solid #F1F5F9;
+      font-weight: 700; font-size: 13px; color: #1E2A6E;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .card-body { padding: 16px; }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: #F8FAFF; }
+    th { padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 700;
+         color: #64748B; text-transform: uppercase; letter-spacing: .4px;
+         border-bottom: 1px solid #F1F5F9; }
+    td { padding: 10px 12px; border-bottom: 1px solid #F1F5F9; font-size: 13px; color: #1E2A6E; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+
+    /* ── Buttons ────────────────────────────────── */
+    .btn {
+      padding: 10px 16px; border-radius: 8px; border: 1px solid transparent;
+      font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      min-height: 44px;
+    }
+    .btn:disabled { opacity: .5; cursor: default; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; min-height: 32px; }
+    .btn-primary { background: #2D3BB5; color: #fff; }
+    .btn-outline { background: #fff; border-color: #E2E8F0; color: #64748B; }
+    .btn-danger { background: #EF4444; color: #fff; }
+
+    /* ── Field ────────────────────────────────── */
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label {
+      font-size: 12px; font-weight: 700; color: #64748B;
+      text-transform: uppercase; letter-spacing: .3px;
+    }
+    .field input, .field select {
+      width: 100%; padding: 10px 12px; border: 1.5px solid #E2E8F0;
+      border-radius: 8px; font-size: 14px; font-family: inherit;
+      background: #fff; color: #1E2A6E; outline: none; min-height: 44px;
+    }
+    .field input:focus, .field select:focus { border-color: #2D3BB5; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
+    /* ── Modal ────────────────────────────────── */
+    .modal-bg {
+      display: none; position: fixed; inset: 0;
+      background: rgba(30,42,110,0.45); z-index: 9999;
+      align-items: flex-end; justify-content: center; padding: 0; overflow-y: auto;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 18px 18px 0 0;
+      width: 100%; max-width: 100%; max-height: 92vh; overflow-y: auto;
+      box-shadow: 0 -8px 32px rgba(45,59,181,.18);
+    }
+    .modal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; border-bottom: 1px solid #E2E8F0;
+      position: sticky; top: 0; background: #fff; z-index: 2;
+    }
+    .modal-head h3 { font-size: 16px; font-weight: 800; color: #1E2A6E; }
+    .modal-close {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: #F1F5F9; border: none; cursor: pointer; color: #64748B;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .modal-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+    .modal-foot {
+      padding: 12px 18px; border-top: 1px solid #E2E8F0;
+      display: flex; gap: 8px; position: sticky; bottom: 0; background: #fff;
+    }
+    .modal-foot .btn { flex: 1; min-height: 44px; }
+
+    .err-msg { color: #EF4444; font-size: 12px; }
+
+    /* ── Toast ────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%);
+      background: #1E2A6E; color: #fff; padding: 10px 20px; border-radius: 999px;
+      font-size: 13px; font-weight: 600; z-index: 99999;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    #toast.show { opacity: 1; }
+    #toast.err { background: #EF4444; }
+    @media (min-width: 1024px) { #toast { bottom: 24px; } }
+
+    @media (min-width: 1024px) {
+      .ms-head { padding: 16px 20px 10px; }
+      .ms-title { font-size: 22px; }
+      .body-wrap { padding: 4px 20px 40px; }
+      .modal-bg { align-items: center; padding: 16px; }
+      .modal { max-width: 480px; border-radius: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div class="ms-head">
+    <a class="ic-btn" href="/" aria-label="Kembali">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <div class="ms-title">Master</div>
+  </div>
+
+  <div class="body-wrap">
+    <!-- ══ Data Master ══ -->
+    <div>
+      <div class="section-ttl">Data Master</div>
+      <div class="tile-list">
+        <a class="tile-row" href="/pelanggan?action=import">
+          <div class="tile-mono">IP</div>
+          <div class="tile-body">
+            <div class="tile-label">Import Pelanggan</div>
+            <div class="tile-sub">Upload data pelanggan dari file CSV atau Excel</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </a>
+        <div class="tile-row" onclick="exportData('pelanggan')">
+          <div class="tile-mono">EP</div>
+          <div class="tile-body">
+            <div class="tile-label">Export Pelanggan</div>
+            <div class="tile-sub">Unduh daftar pelanggan sebagai file Excel</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M17 14l-5-5-5 5"/><path d="M5 3h14"/></svg></span>
+        </div>
+        <a class="tile-row" href="/layanan?action=import">
+          <div class="tile-mono">IL</div>
+          <div class="tile-body">
+            <div class="tile-label">Import Layanan</div>
+            <div class="tile-sub">Upload daftar layanan dari file CSV atau Excel</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </a>
+        <div class="tile-row" onclick="exportData('layanan')">
+          <div class="tile-mono">EL</div>
+          <div class="tile-body">
+            <div class="tile-label">Export Layanan</div>
+            <div class="tile-sub">Unduh daftar layanan sebagai file Excel</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M17 14l-5-5-5 5"/><path d="M5 3h14"/></svg></span>
+        </div>
+        <a class="tile-row" href="/stok-bahan">
+          <div class="tile-mono">BB</div>
+          <div class="tile-body">
+            <div class="tile-label">Kelola Bahan Baku</div>
+            <div class="tile-sub">Tambah, edit, atau nonaktifkan bahan baku laundry</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </a>
+        <a class="tile-row" href="/promo">
+          <div class="tile-mono">PR</div>
+          <div class="tile-body">
+            <div class="tile-label">Kelola Promo</div>
+            <div class="tile-sub">Tambah, edit, aktifkan/nonaktifkan promo</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ══ Aksi Sensitif ══ -->
+    <div>
+      <div class="section-ttl">Aksi Sensitif</div>
+      <div class="tile-list">
+        <a class="tile-row" href="/order">
+          <div class="tile-mono danger">HO</div>
+          <div class="tile-body">
+            <div class="tile-label">Hapus Order Permanen</div>
+            <div class="tile-sub">Buka Antrian &rarr; Detail Order untuk hapus order permanen</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </a>
+        <a class="tile-row" href="/deposit">
+          <div class="tile-mono warn">BT</div>
+          <div class="tile-body">
+            <div class="tile-label">Batalkan Topup Deposit</div>
+            <div class="tile-sub">Buka Deposit &rarr; Mutasi pelanggan untuk batalkan topup (&le; 7 hari)</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </a>
+        <a class="tile-row" href="/stok-bahan">
+          <div class="tile-mono warn">KS</div>
+          <div class="tile-body">
+            <div class="tile-label">Koreksi Stok Bahan</div>
+            <div class="tile-sub">Buka Stok Bahan &rarr; pilih bahan &rarr; tombol Koreksi (opname manual)</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ══ Laporan & Export ══ -->
+    <div>
+      <div class="section-ttl">Laporan &amp; Export</div>
+      <div class="tile-list">
+        <a class="tile-row" href="/laporan">
+          <div class="tile-mono success">LP</div>
+          <div class="tile-body">
+            <div class="tile-label">Buka Laporan</div>
+            <div class="tile-sub">Ringkasan bisnis, laporan layanan, pelanggan, antar jemput</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </a>
+        <div class="tile-row" onclick="exportLaporan('csv')">
+          <div class="tile-mono success">EC</div>
+          <div class="tile-body">
+            <div class="tile-label">Export Laporan (CSV)</div>
+            <div class="tile-sub">Unduh transaksi periode ini sebagai CSV</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M17 14l-5-5-5 5"/><path d="M5 3h14"/></svg></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Manajemen User ══ -->
+    <div>
+      <div class="section-ttl">Manajemen User</div>
+      <div class="card">
+        <div class="card-head">
+          Akun Aplikasi
+          <button class="btn btn-primary btn-sm" onclick="openAddUser()">+ Tambah User</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nama</th>
+                  <th>Username</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="userBody">
+                <tr><td colspan="5" style="text-align:center;padding:24px;color:#94A3B8">Memuat…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#94A3B8;padding:8px 4px 0">
+        Hanya owner yang dapat mengelola user. Menonaktifkan user membuatnya tidak bisa login (data tetap tersimpan).
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal User ── -->
+<div class="modal-bg" id="userModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="userModalTitle">Tambah User</h3>
+      <button class="modal-close" onclick="closeUserModal()" aria-label="Tutup">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="uEditId"/>
+      <div class="form-row">
+        <div class="field"><label>Nama *</label><input id="uNama" type="text" placeholder="Nama lengkap"/></div>
+        <div class="field"><label>Username *</label><input id="uUsername" type="text" placeholder="username"/></div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Password <span id="uPwHint" style="color:#94A3B8;text-transform:none;letter-spacing:0;font-weight:400">(wajib)</span></label>
+          <input id="uPassword" type="password" placeholder="Min. 6 karakter"/>
+        </div>
+        <div class="field">
+          <label>Role</label>
+          <select id="uRole">
+            <option value="karyawan">Karyawan — operasional harian</option>
+            <option value="owner">Owner — akses penuh</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" id="uAktifWrap" style="display:none">
+        <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font-weight:700;color:#1E2A6E">
+          <input type="checkbox" id="uAktif" checked style="width:18px;height:18px;min-height:auto;padding:0"/>
+          Aktif
+        </label>
+      </div>
+      <div class="err-msg" id="uErr"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeUserModal()">Batal</button>
+      <button class="btn btn-primary" id="uSaveBtn" onclick="saveUser()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+let myUserId = 0;
+
+function showToast(msg, err = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  el.classList.toggle('err', !!err);
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+async function api(url, opts = {}) {
+  const r = await fetch(url, { credentials:'include', headers:{'Content-Type':'application/json'}, ...opts });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || 'Error');
+  return j;
+}
+
+// ── Export utilities ─────────────────────────────────────────────────────────
+async function exportData(kind) {
+  const url = `/api/v1/${kind}/export?format=xlsx`;
+  try {
+    showToast('Mengunduh…');
+    const r = await fetch(url, { credentials: 'include' });
+    if (!r.ok) {
+      const e = await r.json().catch(() => ({}));
+      throw new Error(e.error || 'Export gagal');
+    }
+    const blob = await r.blob();
+    const objUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const now = new Date().toISOString().slice(0, 10);
+    a.href = objUrl;
+    a.download = `${kind}-${now}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(objUrl);
+    showToast('Export selesai');
+  } catch (e) { showToast(e.message, true); }
+}
+
+async function exportLaporan(format) {
+  // Default: bulan ini
+  const today = new Date();
+  const end = today.toISOString().slice(0, 10);
+  const start = end.slice(0, 7) + '-01';
+  const url = `/api/v1/laporan/export?start=${start}&end=${end}&format=${format}`;
+  try {
+    showToast('Mengunduh laporan…');
+    const r = await fetch(url, { credentials: 'include' });
+    if (!r.ok) {
+      const e = await r.json().catch(() => ({}));
+      throw new Error(e.error || 'Export gagal');
+    }
+    const blob = await r.blob();
+    const objUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objUrl;
+    a.download = `laporan-${start}-${end}.${format}`;
+    a.click();
+    URL.revokeObjectURL(objUrl);
+    showToast('Laporan diunduh');
+  } catch (e) { showToast(e.message, true); }
+}
+
+// ── Manajemen User ───────────────────────────────────────────────────────────
+async function loadUsers() {
+  const tb = document.getElementById('userBody');
+  try {
+    const me = await api('/api/v1/auth/me');
+    myUserId = me.user?.id || 0;
+    const { data } = await api('/api/v1/users');
+    if (!data.length) {
+      tb.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:#94A3B8">Belum ada user</td></tr>';
+      return;
+    }
+    const roleBadge = r => r === 'owner'
+      ? '<span style="padding:2px 8px;border-radius:6px;background:#FEF3E2;color:#F59E0B;font-size:11px;font-weight:700">Owner</span>'
+      : '<span style="padding:2px 8px;border-radius:6px;background:#E3F2FF;color:#2563EB;font-size:11px;font-weight:700">Karyawan</span>';
+    tb.innerHTML = data.map(u => `
+      <tr>
+        <td style="font-weight:700">${esc(u.nama)}</td>
+        <td style="font-family:monospace;color:#64748B">${esc(u.username)}</td>
+        <td>${roleBadge(u.role)}</td>
+        <td>${u.aktif
+          ? '<span style="color:#10B981;font-weight:700">Aktif</span>'
+          : '<span style="color:#EF4444;font-weight:700">Nonaktif</span>'}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-outline btn-sm" onclick="openEditUser(${u.id})">Edit</button>
+          ${u.id !== myUserId
+            ? `<button class="btn btn-outline btn-sm" onclick="toggleUser(${u.id},${u.aktif ? 1 : 0})">${u.aktif ? 'Nonaktifkan' : 'Aktifkan'}</button>`
+            : ''}
+        </td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    tb.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:#EF4444">${esc(e.message)}</td></tr>`;
+  }
+}
+
+function openAddUser() {
+  document.getElementById('uEditId').value = '';
+  document.getElementById('userModalTitle').textContent = 'Tambah User';
+  document.getElementById('uNama').value = '';
+  document.getElementById('uUsername').value = '';
+  document.getElementById('uPassword').value = '';
+  document.getElementById('uRole').value = 'karyawan';
+  document.getElementById('uPwHint').textContent = '(wajib)';
+  document.getElementById('uAktifWrap').style.display = 'none';
+  document.getElementById('uErr').textContent = '';
+  document.getElementById('userModal').classList.add('open');
+  setTimeout(() => document.getElementById('uNama').focus(), 100);
+}
+
+async function openEditUser(id) {
+  try {
+    const { data } = await api('/api/v1/users');
+    const u = data.find(x => x.id === id);
+    if (!u) return;
+    document.getElementById('uEditId').value = u.id;
+    document.getElementById('userModalTitle').textContent = 'Edit User';
+    document.getElementById('uNama').value = u.nama;
+    document.getElementById('uUsername').value = u.username;
+    document.getElementById('uPassword').value = '';
+    document.getElementById('uRole').value = u.role || 'karyawan';
+    document.getElementById('uPwHint').textContent = '(kosongkan jika tidak ubah)';
+    document.getElementById('uAktifWrap').style.display = '';
+    document.getElementById('uAktif').checked = !!u.aktif;
+    document.getElementById('uErr').textContent = '';
+    document.getElementById('userModal').classList.add('open');
+  } catch (e) { showToast(e.message, true); }
+}
+
+function closeUserModal() {
+  document.getElementById('userModal').classList.remove('open');
+}
+
+async function saveUser() {
+  const id = document.getElementById('uEditId').value;
+  const body = {
+    nama: document.getElementById('uNama').value.trim(),
+    username: document.getElementById('uUsername').value.trim(),
+    role: document.getElementById('uRole').value
+  };
+  const pw = document.getElementById('uPassword').value;
+  if (pw) body.password = pw;
+  if (id) body.aktif = document.getElementById('uAktif').checked;
+
+  document.getElementById('uErr').textContent = '';
+  const btn = document.getElementById('uSaveBtn');
+  btn.disabled = true;
+  try {
+    if (id) {
+      await api(`/api/v1/users/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+      showToast('User diperbarui');
+    } else {
+      if (!body.password) {
+        document.getElementById('uErr').textContent = 'Password wajib diisi';
+        btn.disabled = false;
+        return;
+      }
+      await api('/api/v1/users', { method: 'POST', body: JSON.stringify(body) });
+      showToast('User dibuat');
+    }
+    closeUserModal();
+    loadUsers();
+  } catch (e) {
+    document.getElementById('uErr').textContent = e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function toggleUser(id, aktif) {
+  const action = aktif ? 'nonaktifkan' : 'aktifkan';
+  if (!confirm(`Yakin ${action} user ini?`)) return;
+  try {
+    await api(`/api/v1/users/${id}`, { method: 'PUT', body: JSON.stringify({ aktif: !aktif }) });
+    showToast(`User ${action}`);
+    loadUsers();
+  } catch (e) { showToast(e.message, true); }
+}
+
+document.getElementById('userModal').addEventListener('click', (e) => {
+  if (e.target.id === 'userModal') closeUserModal();
+});
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+loadUsers();
+</script>
+<script src="/js/nav.js"></script>
+</body>
+</html>
