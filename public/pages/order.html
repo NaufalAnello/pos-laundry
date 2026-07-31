@@ -947,6 +947,16 @@
       border-color: #2D3BB5;
       box-shadow: 0 0 0 2px rgba(45,59,181,.12);
     }
+    /* Sembunyikan native spinner arrows (sudah ada tombol − + custom) */
+    input.isr-qty-val::-webkit-outer-spin-button,
+    input.isr-qty-val::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input.isr-qty-val[type=number] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
     .isr-remove {
       width: 36px; height: 36px; flex-shrink: 0;
       background: #fff; border: 1px solid #E2E8F0; border-radius: 8px;
