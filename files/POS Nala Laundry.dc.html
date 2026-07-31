@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>
+body{margin:0;background:#EBF1FB;font-family:-apple-system,"Segoe UI",Roboto,sans-serif;color:#1E2A6E}
+a{color:#2D3BB5;text-decoration:none}a:hover{color:#2563EB}
+</style>
+</helmet>
+<section style="padding:40px;display:flex;flex-direction:column;gap:24px;border-bottom:1px dashed #C7D4EC">
+  <div>
+    <div style="font-size:26px;font-weight:800;letter-spacing:-0.3px">Model terpilih: 1b Pill Ramping — lengkap dengan halaman Lainnya</div>
+    <div style="font-size:14px;color:#64748B;margin-top:6px;max-width:720px">Semua 13 menu Lainnya kini punya halaman sendiri: Pelanggan, Deposit, Buku Kas, Stok Bahan, Jadwal Jemput, Laporan, Antar Jemput, Promo, Poin, Pusat WA, Layanan, AI Insight, dan Pengaturan — buka lewat ikon titik tiga.</div>
+  </div>
+  <div id="2a" style="display:flex;flex-direction:column;gap:12px;width:375px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="background:#2D3BB5;color:#fff;font-size:13px;font-weight:800;padding:4px 10px;border-radius:8px">2a</div>
+      <div style="font-size:15px;font-weight:700">Pill Ramping + 6 halaman tambahan</div>
+    </div>
+    <dc-import name="PosApp" nav-variant="pill" hint-size="375px,780px"></dc-import>
+  </div>
+</section>
+<section style="padding:40px;display:flex;flex-direction:column;gap:24px">
+  <div>
+    <div style="font-size:26px;font-weight:800;letter-spacing:-0.3px">Nala Laundry POS — 3 variasi navigasi</div>
+    <div style="font-size:14px;color:#64748B;margin-top:6px;max-width:720px">Semua variasi memakai aplikasi yang sama (interaktif penuh: filter, bottom sheet, toast, order baru). Bedanya hanya cara navigasi. Coba klik-klik langsung di tiap HP.</div>
+  </div>
+  <div style="display:flex;gap:36px;align-items:flex-start;flex-wrap:wrap">
+    <div id="1a" style="display:flex;flex-direction:column;gap:12px;width:375px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="background:#2D3BB5;color:#fff;font-size:13px;font-weight:800;padding:4px 10px;border-radius:8px">1a</div>
+        <div>
+          <div style="font-size:15px;font-weight:700">Klasik 5 Tab</div>
+          <div style="font-size:12px;color:#64748B">Sesuai brief — FAB Order kotak di tengah bar</div>
+        </div>
+      </div>
+      <dc-import name="PosApp" nav-variant="tabs5" hint-size="375px,780px"></dc-import>
+    </div>
+    <div id="1b" style="display:flex;flex-direction:column;gap:12px;width:375px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="background:#2D3BB5;color:#fff;font-size:13px;font-weight:800;padding:4px 10px;border-radius:8px">1b</div>
+        <div>
+          <div style="font-size:15px;font-weight:700">Pill Ramping</div>
+          <div style="font-size:12px;color:#64748B">Nav mengambang minimalis + FAB Order terpisah di kanan</div>
+        </div>
+      </div>
+      <dc-import name="PosApp" nav-variant="pill" hint-size="375px,780px"></dc-import>
+    </div>
+    <div id="1c" style="display:flex;flex-direction:column;gap:12px;width:375px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="background:#2D3BB5;color:#fff;font-size:13px;font-weight:800;padding:4px 10px;border-radius:8px">1c</div>
+        <div>
+          <div style="font-size:15px;font-weight:700">Aksi Cepat + Cari</div>
+          <div style="font-size:12px;color:#64748B">Tombol Order besar + pencarian global (order, pelanggan, menu)</div>
+        </div>
+      </div>
+      <dc-import name="PosApp" nav-variant="quick" hint-size="375px,780px"></dc-import>
+    </div>
+  </div>
+</section>
+</x-dc>
+</body>
+</html>

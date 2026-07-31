@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;background:transparent;font-family:-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:#2D3BB5;text-decoration:none}a:hover{color:#2563EB}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes toastUp{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+*{box-sizing:border-box}
+::-webkit-scrollbar{width:0;height:0}
+</style>
+</helmet>
+<div style="width:375px;height:780px;position:relative;overflow:hidden;background:#F0F7FF;border-radius:24px;border:1px solid #E2E8F0;box-shadow:0 8px 30px rgba(45,59,181,0.10);color:#1E2A6E;font-size:14px">
+
+  <!-- ===================== HOME ===================== -->
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 130px 16px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:20px;font-weight:800;color:#2D3BB5;letter-spacing:-0.3px">nala laundry</div>
+          <div style="font-size:12px;color:#64748B;margin-top:2px">{{ today }}</div>
+        </div>
+        <div style="width:40px;height:40px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;align-items:center;justify-content:center;color:#2D3BB5;cursor:pointer" onClick="{{ bellTap }}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"></path><path d="M10.5 20a1.8 1.8 0 0 0 3 0"></path></svg>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div style="background:#fff;border-radius:10px;padding:12px 10px;box-shadow:0 1px 3px rgba(45,59,181,0.08)">
+          <div style="font-size:11px;color:#64748B;text-transform:uppercase;letter-spacing:0.6px">Order</div>
+          <div style="font-size:20px;font-weight:800;margin-top:4px">8</div>
+        </div>
+        <div style="background:#fff;border-radius:10px;padding:12px 10px;box-shadow:0 1px 3px rgba(45,59,181,0.08)">
+          <div style="font-size:11px;color:#64748B;text-transform:uppercase;letter-spacing:0.6px">Omset</div>
+          <div style="font-size:16px;font-weight:800;margin-top:7px">214rb</div>
+        </div>
+        <div style="background:#fff;border-radius:10px;padding:12px 10px;box-shadow:0 1px 3px rgba(45,59,181,0.08)">
+          <div style="font-size:11px;color:#64748B;text-transform:uppercase;letter-spacing:0.6px">Proses</div>
+          <div style="font-size:20px;font-weight:800;margin-top:4px">{{ prosesCount }}</div>
+        </div>
+      </div>
+      <sc-if value="{{ hasUnpaid }}" hint-placeholder-val="{{ true }}">
+        <div style="background:linear-gradient(135deg,#EF4444,#DC2626);border-radius:12px;padding:16px;color:#fff;cursor:pointer" onClick="{{ goTagihan }}">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.8px;opacity:0.85">Tagihan belum lunas</div>
+              <div style="font-size:24px;font-weight:800;margin-top:4px">{{ unpaidTotalFmt }}</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.2);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700">{{ unpaidCount }} order</div>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ hasActionNeeded }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.8px">Perlu tindakan</div>
+          <sc-for list="{{ actionNeeded }}" as="item" hint-placeholder-count="2">
+            <div style="background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;justify-content:space-between;align-items:center;gap:10px;border-left:4px solid {{ item.bar }};cursor:pointer" onClick="{{ item.onDetail }}">
+              <div style="min-width:0">
+                <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ item.cust }} · {{ item.id }}</div>
+                <div style="font-size:12px;color:{{ item.noteCol }};margin-top:2px">{{ item.note }}</div>
+              </div>
+              <div style="color:#94A3B8;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg></div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.8px">Antrian aktif</div>
+          <div style="font-size:12px;font-weight:600;color:#2563EB;cursor:pointer" onClick="{{ goAntrian }}">Lihat semua</div>
+        </div>
+        <sc-for list="{{ homeOrders }}" as="item" hint-placeholder-count="3">
+          <div style="background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;overflow:hidden">
+            <div style="width:4px;background:{{ item.bar }};flex-shrink:0"></div>
+            <div style="flex:1;padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+                <div style="font-size:12px;font-weight:700;color:#94A3B8;letter-spacing:0.4px;cursor:pointer" onClick="{{ item.onDetail }}">{{ item.id }}</div>
+                <div style="display:flex;gap:5px">
+                  <span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;background:{{ item.statusBg }};color:{{ item.statusCol }}">{{ item.statusLabel }}</span>
+                  <span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;background:{{ item.payBg }};color:{{ item.payCol }}">{{ item.payLabel }}</span>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer" onClick="{{ item.onDetail }}">
+                <div style="min-width:0">
+                  <div style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ item.cust }}</div>
+                  <div style="font-size:13px;color:#64748B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ item.svc }}</div>
+                </div>
+                <div style="font-size:15px;font-weight:700;flex-shrink:0">{{ item.totalFmt }}</div>
+              </div>
+              <div style="display:flex;gap:6px">
+                <sc-if value="{{ item.hasAction }}" hint-placeholder-val="{{ true }}">
+                  <button style="flex:1;height:36px;border:none;border-radius:8px;background:#2D3BB5;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onAction }}">{{ item.actionLabel }}</button>
+                </sc-if>
+                <sc-if value="{{ item.showLunasi }}" hint-placeholder-val="{{ true }}">
+                  <button style="flex:1;height:36px;border:1px solid #10B981;border-radius:8px;background:#fff;color:#10B981;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onLunasi }}">Lunasi</button>
+                </sc-if>
+                <button style="width:56px;height:36px;border:1px solid #E2E8F0;border-radius:8px;background:#fff;color:#64748B;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onWA }}">WA</button>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===================== ANTRIAN ===================== -->
+  <sc-if value="{{ isAntrian }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 130px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:20px;font-weight:800">Antrian</div>
+      <div style="display:flex;gap:5px">
+        <sc-for list="{{ antrianPills }}" as="item" hint-placeholder-count="4">
+          <button style="flex:1;height:36px;padding:0;border-radius:999px;border:1px solid {{ item.border }};background:{{ item.bg }};color:{{ item.col }};font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap" onClick="{{ item.onTap }}">{{ item.label }}</button>
+        </sc-for>
+      </div>
+      <sc-for list="{{ antrianList }}" as="item" hint-placeholder-count="4">
+        <div style="background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;overflow:hidden">
+          <div style="width:4px;background:{{ item.bar }};flex-shrink:0"></div>
+          <div style="flex:1;padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+              <div style="font-size:12px;font-weight:700;color:#94A3B8;letter-spacing:0.4px">{{ item.id }}</div>
+              <div style="display:flex;gap:5px">
+                <span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;background:{{ item.statusBg }};color:{{ item.statusCol }}">{{ item.statusLabel }}</span>
+                <span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;background:{{ item.payBg }};color:{{ item.payCol }}">{{ item.payLabel }}</span>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer" onClick="{{ item.onDetail }}">
+              <div style="min-width:0">
+                <div style="font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ item.cust }}</div>
+                <div style="font-size:13px;color:#64748B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ item.svc }}</div>
+              </div>
+              <div style="font-size:15px;font-weight:700;flex-shrink:0">{{ item.totalFmt }}</div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <sc-if value="{{ item.hasAction }}" hint-placeholder-val="{{ true }}">
+                <button style="flex:1;height:36px;border:none;border-radius:8px;background:#2D3BB5;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onAction }}">{{ item.actionLabel }}</button>
+              </sc-if>
+              <sc-if value="{{ item.showLunasi }}" hint-placeholder-val="{{ true }}">
+                <button style="flex:1;height:36px;border:1px solid #10B981;border-radius:8px;background:#fff;color:#10B981;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onLunasi }}">Lunasi</button>
+              </sc-if>
+              <button style="width:52px;height:36px;border:1px solid #E2E8F0;border-radius:8px;background:#fff;color:#64748B;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onWA }}">WA</button>
+              <button style="width:60px;height:36px;border:1px solid #E2E8F0;border-radius:8px;background:#fff;color:#8B5CF6;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onLabel }}">Label</button>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ antrianEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align:center;color:#94A3B8;padding:40px 0;font-size:13px">Tidak ada order di filter ini</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- ===================== TAGIHAN ===================== -->
+  <sc-if value="{{ isTagihan }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 130px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:20px;font-weight:800">Tagihan</div>
+      <div style="background:linear-gradient(135deg,#EF4444,#DC2626);border-radius:12px;padding:16px;color:#fff">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.8px;opacity:0.85">Total belum lunas</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:4px">
+          <div style="font-size:26px;font-weight:800">{{ unpaidTotalFmt }}</div>
+          <div style="font-size:13px;font-weight:600;opacity:0.9">{{ unpaidCount }} order</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <sc-for list="{{ tagihanPills }}" as="item" hint-placeholder-count="3">
+          <button style="height:34px;padding:0 14px;border-radius:999px;border:1px solid {{ item.border }};background:{{ item.bg }};color:{{ item.col }};font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onTap }}">{{ item.label }}</button>
+        </sc-for>
+      </div>
+      <sc-for list="{{ tagihanList }}" as="item" hint-placeholder-count="3">
+        <div style="background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(45,59,181,0.08);padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:12px;font-weight:700;color:#94A3B8">{{ item.id }} · {{ item.age }}</div>
+            <span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;background:{{ item.payBg }};color:{{ item.payCol }}">{{ item.payLabel }}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onClick="{{ item.onDetail }}">
+            <div>
+              <div style="font-size:15px;font-weight:600">{{ item.cust }}</div>
+              <div style="font-size:13px;color:#64748B">{{ item.svc }}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:15px;font-weight:700;color:#EF4444">{{ item.sisaFmt }}</div>
+              <div style="font-size:11px;color:#94A3B8">{{ item.subNote }}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button style="flex:1;height:38px;border:none;border-radius:8px;background:#10B981;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onLunasi }}">Lunasi</button>
+            <button style="flex:1;height:38px;border:1px solid #E2E8F0;border-radius:8px;background:#fff;color:#2D3BB5;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onWA }}">Tagih via WA</button>
+          </div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ tagihanEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align:center;color:#94A3B8;padding:40px 0;font-size:13px">Semua lunas. Mantap!</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- ===================== ORDER BARU ===================== -->
+  <sc-if value="{{ isOrder }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 190px 16px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;align-items:center;justify-content:center;color:#2D3BB5;cursor:pointer" onClick="{{ goHome }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg>
+        </div>
+        <div style="font-size:20px;font-weight:800">Order Baru</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.8px">1 · Pelanggan</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <sc-for list="{{ custChips }}" as="item" hint-placeholder-count="4">
+            <button style="height:38px;padding:0 14px;border-radius:999px;border:1.5px solid {{ item.border }};background:{{ item.bg }};color:{{ item.col }};font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onTap }}">{{ item.label }}</button>
+          </sc-for>
+        </div>
+        <sc-if value="{{ showRepeat }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#E3F2FF;border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <div style="font-size:13px;color:#2563EB;min-width:0"><b>Ulangi order terakhir?</b><br>{{ repeatLabel }}</div>
+            <button style="flex-shrink:0;height:36px;padding:0 14px;border:none;border-radius:8px;background:#2563EB;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ applyRepeat }}">Ulangi</button>
+          </div>
+        </sc-if>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.8px">2 · Layanan</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <sc-for list="{{ svcChips }}" as="item" hint-placeholder-count="6">
+            <button style="min-height:54px;padding:8px 12px;border-radius:10px;border:1.5px solid {{ item.border }};background:{{ item.bg }};text-align:left;cursor:pointer;font-family:inherit" onClick="{{ item.onTap }}">
+              <div style="font-size:13px;font-weight:600;color:{{ item.col }}">{{ item.name }}</div>
+              <div style="font-size:12px;color:#94A3B8;margin-top:2px">{{ item.priceLabel }}</div>
+            </button>
+          </sc-for>
+        </div>
+        <sc-for list="{{ selRows }}" as="item" hint-placeholder-count="0">
+          <div style="background:#fff;border-radius:10px;padding:10px 14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <div style="min-width:0">
+              <div style="font-size:13px;font-weight:600">{{ item.name }}</div>
+              <div style="font-size:12px;color:#64748B">{{ item.qtyLabel }} · {{ item.amountFmt }}</div>
+            </div>
+            <sc-if value="{{ item.stepper }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+                <button style="width:32px;height:32px;border-radius:8px;border:1px solid #E2E8F0;background:#fff;color:#2D3BB5;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit" onClick="{{ item.onMinus }}">−</button>
+                <div style="font-size:14px;font-weight:700;min-width:20px;text-align:center">{{ item.qty }}</div>
+                <button style="width:32px;height:32px;border-radius:8px;border:1px solid #E2E8F0;background:#fff;color:#2D3BB5;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit" onClick="{{ item.onPlus }}">+</button>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.8px">3 · Pembayaran</div>
+        <div style="display:flex;background:#E2E8F0;border-radius:10px;padding:3px;gap:3px">
+          <sc-for list="{{ payTabs }}" as="item" hint-placeholder-count="3">
+            <button style="flex:1;height:36px;border:none;border-radius:8px;background:{{ item.bg }};color:{{ item.col }};font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onTap }}">{{ item.label }}</button>
+          </sc-for>
+        </div>
+        <sc-if value="{{ showMethods }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ methodChips }}" as="item" hint-placeholder-count="4">
+              <button style="height:36px;padding:0 12px;border-radius:8px;border:1.5px solid {{ item.border }};background:{{ item.bg }};color:{{ item.col }};font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onTap }}">{{ item.label }}</button>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #E2E8F0;padding:12px 16px 16px 16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 -4px 16px rgba(45,59,181,0.08)">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:13px;color:#64748B">{{ orderSummaryLabel }}</div>
+        <div style="font-size:20px;font-weight:800">{{ orderTotalFmt }}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button style="flex:2;height:48px;border:none;border-radius:10px;background:#2D3BB5;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit" onClick="{{ saveCetak }}">Simpan &amp; Cetak</button>
+        <button style="flex:1;height:48px;border:1px solid #E2E8F0;border-radius:10px;background:#fff;color:#2D3BB5;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ saveWA }}">Kirim WA</button>
+        <button style="width:74px;height:48px;border:1px solid #E2E8F0;border-radius:10px;background:#fff;color:#64748B;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ saveOnly }}">Simpan</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===================== DETAIL ORDER ===================== -->
+  <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 130px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;align-items:center;justify-content:center;color:#2D3BB5;cursor:pointer" onClick="{{ backFromDetail }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg>
+        </div>
+        <div style="font-size:20px;font-weight:800">{{ det.id }}</div>
+        <div style="display:flex;gap:5px;margin-left:auto">
+          <span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;background:{{ det.statusBg }};color:{{ det.statusCol }}">{{ det.statusLabel }}</span>
+          <span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;background:{{ det.payBg }};color:{{ det.payCol }}">{{ det.payLabel }}</span>
+        </div>
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;flex-direction:column;gap:4px">
+        <div style="font-size:15px;font-weight:700">{{ det.cust }}</div>
+        <div style="font-size:13px;color:#64748B">{{ det.wa }}</div>
+        <div style="font-size:12px;color:#94A3B8">{{ det.custNote }}</div>
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.8px">Layanan</div>
+        <div style="display:flex;justify-content:space-between;font-size:14px">
+          <span>{{ det.svc }}</span><span style="font-weight:700">{{ det.totalFmt }}</span>
+        </div>
+        <div style="border-top:1px solid #F1F5F9;padding-top:8px;display:flex;justify-content:space-between;font-size:15px;font-weight:800">
+          <span>Total</span><span>{{ det.totalFmt }}</span>
+        </div>
+        <sc-if value="{{ det.showSisa }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;justify-content:space-between;font-size:13px;color:#EF4444;font-weight:600">
+            <span>Sisa tagihan</span><span>{{ det.sisaFmt }}</span>
+          </div>
+        </sc-if>
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.8px">Timeline</div>
+        <sc-for list="{{ det.timeline }}" as="item" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:10px;height:10px;border-radius:50%;background:{{ item.dot }};flex-shrink:0"></div>
+            <div style="font-size:13px;flex:1;color:{{ item.col }}">{{ item.label }}</div>
+            <div style="font-size:12px;color:#94A3B8">{{ item.time }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <sc-if value="{{ det.hasAction }}" hint-placeholder-val="{{ false }}">
+          <button style="height:44px;border:none;border-radius:10px;background:#2D3BB5;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ det.onAction }}">{{ det.actionLabel }}</button>
+        </sc-if>
+        <sc-if value="{{ det.showLunasi }}" hint-placeholder-val="{{ false }}">
+          <button style="height:44px;border:none;border-radius:10px;background:#10B981;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ det.onLunasi }}">Lunasi</button>
+        </sc-if>
+        <button style="height:44px;border:1px solid #E2E8F0;border-radius:10px;background:#fff;color:#2D3BB5;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ det.onWA }}">Kirim WA</button>
+        <button style="height:44px;border:1px solid #E2E8F0;border-radius:10px;background:#fff;color:#8B5CF6;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ det.onLabel }}">Cetak Label</button>
+        <button style="height:44px;border:1px solid #E2E8F0;border-radius:10px;background:#fff;color:#64748B;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ det.onStruk }}">Cetak Struk</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===================== PELANGGAN ===================== -->
+  <sc-if value="{{ isPelanggan }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 130px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;align-items:center;justify-content:center;color:#2D3BB5;cursor:pointer" onClick="{{ goHome }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg>
+        </div>
+        <div style="font-size:20px;font-weight:800">Pelanggan</div>
+        <button style="margin-left:auto;height:36px;padding:0 14px;border:none;border-radius:8px;background:#2D3BB5;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ addCust }}">+ Tambah</button>
+      </div>
+      <input style="width:100%;height:42px;border:1.5px solid #E2E8F0;border-radius:10px;padding:0 14px;font-size:14px;font-family:inherit;color:#1E2A6E;outline:none;background:#fff" placeholder="Cari nama atau nomor WA…" value="{{ custQ }}" onChange="{{ setCustQ }}"></input>
+      <sc-for list="{{ peopleList }}" as="item" hint-placeholder-count="4">
+        <div style="background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:15px;font-weight:700">{{ item.name }}</div>
+              <div style="font-size:12px;color:#64748B">{{ item.wa }}</div>
+            </div>
+            <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:{{ item.levelBg }};color:{{ item.levelCol }}">{{ item.level }}</span>
+          </div>
+          <div style="display:flex;gap:14px;border-top:1px solid #F1F5F9;padding-top:8px">
+            <div><div style="font-size:11px;color:#94A3B8">Order</div><div style="font-size:13px;font-weight:700">{{ item.orders }}</div></div>
+            <div><div style="font-size:11px;color:#94A3B8">Belanja</div><div style="font-size:13px;font-weight:700">{{ item.spendFmt }}</div></div>
+            <div><div style="font-size:11px;color:#94A3B8">Poin</div><div style="font-size:13px;font-weight:700">{{ item.poin }}</div></div>
+            <button style="margin-left:auto;height:32px;padding:0 12px;border:1px solid #E2E8F0;border-radius:8px;background:#fff;color:#64748B;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onWA }}">WA</button>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ===================== DEPOSIT ===================== -->
+  <sc-if value="{{ isDeposit }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 130px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;align-items:center;justify-content:center;color:#2D3BB5;cursor:pointer" onClick="{{ goHome }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg>
+        </div>
+        <div style="font-size:20px;font-weight:800">Deposit</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#2D3BB5,#2563EB);border-radius:12px;padding:16px;color:#fff">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.8px;opacity:0.85">Saldo beredar</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:4px">
+          <div style="font-size:26px;font-weight:800">{{ depositTotalFmt }}</div>
+          <div style="font-size:13px;font-weight:600;opacity:0.9">{{ depositCount }} pelanggan</div>
+        </div>
+      </div>
+      <sc-for list="{{ depositList }}" as="item" hint-placeholder-count="3">
+        <div style="background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;justify-content:space-between;align-items:center;gap:10px">
+          <div>
+            <div style="font-size:14px;font-weight:600">{{ item.name }}</div>
+            <div style="font-size:13px;font-weight:700;color:{{ item.saldoCol }}">{{ item.saldoFmt }}</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button style="height:36px;padding:0 12px;border:none;border-radius:8px;background:#10B981;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onTopup }}">+ Topup</button>
+            <button style="height:36px;padding:0 12px;border:1px solid #E2E8F0;border-radius:8px;background:#fff;color:#64748B;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onMutasi }}">Mutasi</button>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ===================== BUKU KAS ===================== -->
+  <sc-if value="{{ isBukuKas }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 130px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;align-items:center;justify-content:center;color:#2D3BB5;cursor:pointer" onClick="{{ goHome }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg>
+        </div>
+        <div style="font-size:20px;font-weight:800">Buku Kas</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#2D3BB5,#2563EB);border-radius:12px;padding:16px;color:#fff;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div><div style="font-size:11px;opacity:0.85;text-transform:uppercase;letter-spacing:0.5px">Masuk</div><div style="font-size:15px;font-weight:800;margin-top:2px">{{ kasInFmt }}</div></div>
+        <div><div style="font-size:11px;opacity:0.85;text-transform:uppercase;letter-spacing:0.5px">Keluar</div><div style="font-size:15px;font-weight:800;margin-top:2px">{{ kasOutFmt }}</div></div>
+        <div><div style="font-size:11px;opacity:0.85;text-transform:uppercase;letter-spacing:0.5px">Bersih</div><div style="font-size:15px;font-weight:800;margin-top:2px">{{ kasNetFmt }}</div></div>
+      </div>
+      <div style="display:flex;gap:5px">
+        <sc-for list="{{ kasPills }}" as="item" hint-placeholder-count="3">
+          <button style="flex:1;height:36px;border-radius:999px;border:1px solid {{ item.border }};background:{{ item.bg }};color:{{ item.col }};font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onTap }}">{{ item.label }}</button>
+        </sc-for>
+      </div>
+      <sc-for list="{{ kasList }}" as="item" hint-placeholder-count="4">
+        <div style="background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;justify-content:space-between;align-items:center;gap:10px">
+          <div style="min-width:0">
+            <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ item.label }}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+              <span style="font-size:11px;color:#94A3B8">{{ item.sub }}</span>
+              <span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:5px;background:{{ item.badgeBg }};color:{{ item.badgeCol }}">{{ item.badge }}</span>
+            </div>
+          </div>
+          <div style="font-size:14px;font-weight:800;color:{{ item.amtCol }};flex-shrink:0">{{ item.amtFmt }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ===================== STOK BAHAN ===================== -->
+  <sc-if value="{{ isStok }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 130px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;align-items:center;justify-content:center;color:#2D3BB5;cursor:pointer" onClick="{{ goHome }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg>
+        </div>
+        <div style="font-size:20px;font-weight:800">Stok Bahan</div>
+      </div>
+      <sc-if value="{{ stokLowAny }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#FDECEC;border:1px solid #EF4444;border-radius:10px;padding:12px 14px;font-size:13px;color:#EF4444;font-weight:600">{{ stokLowLabel }}</div>
+      </sc-if>
+      <sc-for list="{{ stokList }}" as="item" hint-placeholder-count="3">
+        <div style="background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:14px;font-weight:700">{{ item.name }}</div>
+            <div style="font-size:14px;font-weight:800;color:{{ item.nowCol }}">{{ item.now }}</div>
+          </div>
+          <div style="font-size:12px;color:#94A3B8">{{ item.min }} · pemakaian {{ item.rate }}</div>
+          <div style="display:flex;gap:6px">
+            <button style="flex:1;height:36px;border:none;border-radius:8px;background:#2D3BB5;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onRestock }}">Restock</button>
+            <button style="flex:1;height:36px;border:1px solid #E2E8F0;border-radius:8px;background:#fff;color:#64748B;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onKoreksi }}">Koreksi</button>
+            <button style="flex:1;height:36px;border:1px solid #E2E8F0;border-radius:8px;background:#fff;color:#64748B;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onRiwayat }}">Riwayat</button>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ===================== JADWAL JEMPUT ===================== -->
+  <sc-if value="{{ isJadwal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 130px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;align-items:center;justify-content:center;color:#2D3BB5;cursor:pointer" onClick="{{ goHome }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg>
+        </div>
+        <div style="font-size:20px;font-weight:800">Jadwal Jemput</div>
+        <button style="margin-left:auto;height:36px;padding:0 14px;border:none;border-radius:8px;background:#2D3BB5;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ addJadwal }}">+ Jadwal</button>
+      </div>
+      <sc-for list="{{ jadwalList }}" as="item" hint-placeholder-count="2">
+        <div style="background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:14px;font-weight:700">{{ item.cust }}</div>
+            <div style="font-size:12px;font-weight:700;color:#2563EB">{{ item.tgl }} · {{ item.jam }}</div>
+          </div>
+          <div style="font-size:13px;color:#64748B">{{ item.alamat }}</div>
+          <sc-if value="{{ item.hasCat }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px;color:#94A3B8;font-style:italic">{{ item.cat }}</div>
+          </sc-if>
+          <div style="display:flex;gap:6px">
+            <button style="flex:1;height:36px;border:none;border-radius:8px;background:#10B981;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onDone }}">Selesai</button>
+            <button style="flex:1;height:36px;border:1px solid #E2E8F0;border-radius:8px;background:#fff;color:#64748B;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onEdit }}">Edit</button>
+            <button style="flex:1;height:36px;border:1px solid #FDECEC;border-radius:8px;background:#fff;color:#EF4444;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onHapus }}">Hapus</button>
+          </div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ jadwalEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align:center;color:#94A3B8;padding:40px 0;font-size:13px">Tidak ada jadwal jemput</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- ===================== LAPORAN ===================== -->
+  <sc-if value="{{ isLaporan }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 130px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;align-items:center;justify-content:center;color:#2D3BB5;cursor:pointer" onClick="{{ goHome }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg>
+        </div>
+        <div style="font-size:20px;font-weight:800">Laporan</div>
+        <div style="margin-left:auto;font-size:12px;color:#94A3B8">Minggu ini</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div style="background:#fff;border-radius:10px;padding:12px 10px;box-shadow:0 1px 3px rgba(45,59,181,0.08)">
+          <div style="font-size:11px;color:#64748B;text-transform:uppercase;letter-spacing:0.5px">Omset</div>
+          <div style="font-size:16px;font-weight:800;margin-top:4px">1,42jt</div>
+        </div>
+        <div style="background:#fff;border-radius:10px;padding:12px 10px;box-shadow:0 1px 3px rgba(45,59,181,0.08)">
+          <div style="font-size:11px;color:#64748B;text-transform:uppercase;letter-spacing:0.5px">Order</div>
+          <div style="font-size:16px;font-weight:800;margin-top:4px">52</div>
+        </div>
+        <div style="background:#fff;border-radius:10px;padding:12px 10px;box-shadow:0 1px 3px rgba(45,59,181,0.08)">
+          <div style="font-size:11px;color:#64748B;text-transform:uppercase;letter-spacing:0.5px">Margin</div>
+          <div style="font-size:16px;font-weight:800;margin-top:4px;color:#10B981">540rb</div>
+        </div>
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.8px">Top layanan</div>
+        <sc-for list="{{ topSvc }}" as="item" hint-placeholder-count="4">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;justify-content:space-between;font-size:13px">
+              <span style="font-weight:600">{{ item.name }}</span><span style="font-weight:700">{{ item.val }}</span>
+            </div>
+            <div style="height:6px;background:#F1F5F9;border-radius:3px;overflow:hidden">
+              <div style="height:100%;border-radius:3px;background:#4BB8FA;width:{{ item.pct }}"></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="font-size:12px;color:#94A3B8;text-align:center">Versi lengkap (tabel + export CSV) tersedia di laptop</div>
+    </div>
+  </sc-if>
+
+  <!-- ===================== ANTAR JEMPUT ===================== -->
+  <sc-if value="{{ isAJ }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 130px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;align-items:center;justify-content:center;color:#2D3BB5;cursor:pointer" onClick="{{ goHome }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg>
+        </div>
+        <div style="font-size:20px;font-weight:800">Antar Jemput</div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.8px">Dijemput hari ini</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <sc-for list="{{ ajChips }}" as="item" hint-placeholder-count="4">
+          <button style="height:38px;padding:0 14px;border-radius:999px;border:1.5px solid {{ item.border }};background:{{ item.bg }};color:{{ item.col }};font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onTap }}">{{ item.label }}</button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ ajHasSel }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.8px">Rute optimal</div>
+          <div style="font-size:13px;font-weight:600;color:#2563EB">{{ ajRoute }}</div>
+          <div style="border-top:1px solid #F1F5F9;padding-top:8px;display:flex;flex-direction:column;gap:4px;font-size:13px;color:#64748B">
+            <div style="display:flex;justify-content:space-between"><span>BBM</span><span style="font-weight:700;color:#1E2A6E">{{ ajBbm }}</span></div>
+            <div style="display:flex;justify-content:space-between"><span>Waktu operator</span><span style="font-weight:700;color:#1E2A6E">{{ ajWaktu }}</span></div>
+            <div style="display:flex;justify-content:space-between"><span>Aus kendaraan</span><span style="font-weight:700;color:#1E2A6E">{{ ajAus }}</span></div>
+            <div style="display:flex;justify-content:space-between;border-top:1px solid #F1F5F9;padding-top:4px"><span style="font-weight:700;color:#1E2A6E">Total HPP</span><span style="font-weight:800;color:#1E2A6E">{{ ajHpp }}</span></div>
+          </div>
+          <div style="background:#E3F2FF;border-radius:8px;padding:10px 12px;font-size:13px;color:#2563EB">Saran tarif AI: <b>{{ ajSaran }}</b> per pelanggan</div>
+          <button style="height:44px;border:none;border-radius:10px;background:#2D3BB5;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit" onClick="{{ ajApply }}">Terapkan Tarif</button>
+        </div>
+      </sc-if>
+      <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.8px">Riwayat rute</div>
+      <sc-for list="{{ ajHistory }}" as="item" hint-placeholder-count="2">
+        <div style="background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:13px;font-weight:600">{{ item.route }}</div>
+            <div style="font-size:12px;color:#94A3B8">{{ item.date }}</div>
+          </div>
+          <div style="font-size:13px;font-weight:800">{{ item.tarif }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ===================== PROMO ===================== -->
+  <sc-if value="{{ isPromo }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 130px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;align-items:center;justify-content:center;color:#2D3BB5;cursor:pointer" onClick="{{ goHome }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg>
+        </div>
+        <div style="font-size:20px;font-weight:800">Promo</div>
+        <button style="margin-left:auto;height:36px;padding:0 14px;border:none;border-radius:8px;background:#2D3BB5;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ addPromo }}">+ Promo</button>
+      </div>
+      <sc-for list="{{ promoList }}" as="item" hint-placeholder-count="2">
+        <div style="background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:14px;font-weight:700">{{ item.name }}</div>
+            <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:{{ item.stBg }};color:{{ item.stCol }}">{{ item.stLabel }}</span>
+          </div>
+          <div style="font-size:13px;color:#64748B">{{ item.desc }}</div>
+          <div style="display:flex;gap:6px">
+            <button style="flex:1;height:36px;border:none;border-radius:8px;background:{{ item.tglBg }};color:{{ item.tglCol }};font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onToggle }}">{{ item.tglLabel }}</button>
+            <button style="flex:1;height:36px;border:1px solid #E2E8F0;border-radius:8px;background:#fff;color:#64748B;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onEdit }}">Edit</button>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ===================== POIN ===================== -->
+  <sc-if value="{{ isPoin }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 130px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;align-items:center;justify-content:center;color:#2D3BB5;cursor:pointer" onClick="{{ goHome }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg>
+        </div>
+        <div style="font-size:20px;font-weight:800">Poin</div>
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:12px;color:#64748B;text-transform:uppercase;letter-spacing:0.5px">Rasio poin</div>
+          <div style="font-size:14px;font-weight:700;margin-top:2px">1 poin per Rp5.000</div>
+        </div>
+        <button style="height:36px;padding:0 14px;border:1px solid #E2E8F0;border-radius:8px;background:#fff;color:#2D3BB5;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ editRasio }}">Ubah</button>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.8px">Poin pelanggan</div>
+      <sc-for list="{{ poinList }}" as="item" hint-placeholder-count="5">
+        <div style="background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:14px;font-weight:600">{{ item.name }}</div>
+            <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px;background:{{ item.levelBg }};color:{{ item.levelCol }}">{{ item.level }}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="font-size:16px;font-weight:800;color:#F59E0B">{{ item.poin }}</div>
+            <button style="height:32px;padding:0 12px;border:1px solid #E2E8F0;border-radius:8px;background:#fff;color:#64748B;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onTukar }}">Tukar</button>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ===================== PUSAT WA ===================== -->
+  <sc-if value="{{ isPusatWA }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 130px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;align-items:center;justify-content:center;color:#2D3BB5;cursor:pointer" onClick="{{ goHome }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg>
+        </div>
+        <div style="font-size:20px;font-weight:800">Pusat WA</div>
+      </div>
+      <div style="display:flex;background:#E2E8F0;border-radius:10px;padding:3px;gap:3px">
+        <sc-for list="{{ waTabs }}" as="item" hint-placeholder-count="2">
+          <button style="flex:1;height:36px;border:none;border-radius:8px;background:{{ item.bg }};color:{{ item.col }};font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onTap }}">{{ item.label }}</button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ waTagihanTab }}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{ waTagihList }}" as="item" hint-placeholder-count="3">
+          <div style="background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <div style="min-width:0">
+              <div style="font-size:14px;font-weight:600">{{ item.cust }} · {{ item.id }}</div>
+              <div style="font-size:12px;color:#EF4444;font-weight:700">{{ item.sisaFmt }}</div>
+            </div>
+            <button style="height:36px;padding:0 14px;border:none;border-radius:8px;background:#2D3BB5;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0" onClick="{{ item.onTagih }}">Tagih</button>
+          </div>
+        </sc-for>
+      </sc-if>
+      <sc-if value="{{ waBroadcastTab }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.8px">Kirim ke grup</div>
+        <div style="display:flex;gap:6px">
+          <sc-for list="{{ waGroups }}" as="item" hint-placeholder-count="3">
+            <button style="flex:1;height:36px;border-radius:999px;border:1px solid {{ item.border }};background:{{ item.bg }};color:{{ item.col }};font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onTap }}">{{ item.label }}</button>
+          </sc-for>
+        </div>
+        <div style="background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(45,59,181,0.08)">
+          <div style="font-size:12px;color:#94A3B8;text-transform:uppercase;letter-spacing:0.5px">Template</div>
+          <div style="font-size:13px;color:#64748B;margin-top:4px">Halo kak! Ada promo spesial minggu ini di Nala Laundry, cuci+setrika diskon 10%…</div>
+        </div>
+        <button style="height:48px;border:none;border-radius:10px;background:#2D3BB5;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit" onClick="{{ sendBroadcast }}">Kirim Broadcast ({{ waGroupCount }} pelanggan)</button>
+      </sc-if>
+      <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.8px">Riwayat terkirim</div>
+      <sc-for list="{{ waHistory }}" as="item" hint-placeholder-count="2">
+        <div style="background:#fff;border-radius:10px;padding:10px 14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:13px;font-weight:600">{{ item.label }}</div>
+          <div style="font-size:11px;color:#94A3B8">{{ item.time }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ===================== LAYANAN (MASTER) ===================== -->
+  <sc-if value="{{ isLayanan }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 130px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;align-items:center;justify-content:center;color:#2D3BB5;cursor:pointer" onClick="{{ goHome }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg>
+        </div>
+        <div style="font-size:20px;font-weight:800">Layanan</div>
+        <button style="margin-left:auto;height:36px;padding:0 14px;border:none;border-radius:8px;background:#2D3BB5;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ addLayanan }}">+ Tambah</button>
+      </div>
+      <sc-for list="{{ layananList }}" as="item" hint-placeholder-count="6">
+        <div style="background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:14px;font-weight:700">{{ item.name }}</div>
+            <div style="font-size:14px;font-weight:800">{{ item.priceLabel }}</div>
+          </div>
+          <div style="display:flex;gap:14px;border-top:1px solid #F1F5F9;padding-top:8px;align-items:center">
+            <div><div style="font-size:11px;color:#94A3B8">HPP</div><div style="font-size:12px;font-weight:700">{{ item.hppFmt }}</div></div>
+            <div><div style="font-size:11px;color:#94A3B8">Margin</div><div style="font-size:12px;font-weight:700;color:#10B981">{{ item.marginLabel }}</div></div>
+            <div><div style="font-size:11px;color:#94A3B8">Estimasi</div><div style="font-size:12px;font-weight:700">{{ item.est }}</div></div>
+            <button style="margin-left:auto;height:32px;padding:0 12px;border:1px solid #E2E8F0;border-radius:8px;background:#fff;color:#64748B;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ item.onEdit }}">Edit</button>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ===================== AI INSIGHT ===================== -->
+  <sc-if value="{{ isAI }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 200px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;align-items:center;justify-content:center;color:#2D3BB5;cursor:pointer" onClick="{{ goHome }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg>
+        </div>
+        <div style="font-size:20px;font-weight:800">AI Insight</div>
+      </div>
+      <sc-for list="{{ aiInsights }}" as="item" hint-placeholder-count="3">
+        <div style="background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(45,59,181,0.08);border-left:4px solid {{ item.bar }}">
+          <div style="font-size:13px;font-weight:700;color:{{ item.titleCol }}">{{ item.title }}</div>
+          <div style="font-size:13px;color:#64748B;margin-top:2px">{{ item.body }}</div>
+        </div>
+      </sc-for>
+      <div style="font-size:12px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.8px;margin-top:4px">Tanya data bisnis</div>
+      <sc-for list="{{ aiMsgs }}" as="item" hint-placeholder-count="1">
+        <div style="align-self:{{ item.align }};max-width:290px;background:{{ item.bg }};color:{{ item.col }};border-radius:12px;padding:10px 14px;font-size:13px;line-height:1.4">{{ item.text }}</div>
+      </sc-for>
+    </div>
+    <div style="position:absolute;left:0;right:0;bottom:92px;padding:0 16px;display:flex;gap:8px">
+      <input style="flex:1;height:46px;border:1.5px solid #E2E8F0;border-radius:12px;padding:0 14px;font-size:14px;font-family:inherit;color:#1E2A6E;outline:none;background:#fff;box-shadow:0 1px 3px rgba(45,59,181,0.08)" placeholder="Misal: layanan apa paling laku?" value="{{ aiInput }}" onChange="{{ setAiInput }}"></input>
+      <button style="width:46px;height:46px;border:none;border-radius:12px;background:#2D3BB5;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center" onClick="{{ aiSend }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
+      </button>
+    </div>
+  </sc-if>
+
+  <!-- ===================== PENGATURAN ===================== -->
+  <sc-if value="{{ isSetting }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;overflow-y:auto;padding:18px 16px 130px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:#fff;box-shadow:0 1px 3px rgba(45,59,181,0.08);display:flex;align-items:center;justify-content:center;color:#2D3BB5;cursor:pointer" onClick="{{ goHome }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"></path></svg>
+        </div>
+        <div style="font-size:20px;font-weight:800">Pengaturan</div>
+      </div>
+      <div style="background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(45,59,181,0.08);overflow:hidden">
+        <sc-for list="{{ settingList }}" as="item" hint-placeholder-count="8">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:14px;border-bottom:1px solid #F1F5F9;cursor:pointer" style-hover="background:#F8FAFF" onClick="{{ item.onTap }}">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:34px;height:34px;border-radius:9px;background:#E3F2FF;color:#2D3BB5;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">{{ item.mono }}</div>
+              <div>
+                <div style="font-size:14px;font-weight:600">{{ item.label }}</div>
+                <div style="font-size:12px;color:#94A3B8">{{ item.sub }}</div>
+              </div>
+            </div>
+            <div style="color:#94A3B8"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"></path></svg></div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===================== BOTTOM NAV: VARIAN 5 TAB ===================== -->
+  <sc-if value="{{ navTabs5 }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute;left:0;right:0;bottom:0;height:68px;background:#fff;border-top:1px solid #E2E8F0;display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;align-items:center">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:{{ homeCol }};cursor:pointer;height:100%;justify-content:center" onClick="{{ goHome }}">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg>
+        <div style="font-size:10px;font-weight:600">Home</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:{{ antrianCol }};cursor:pointer;height:100%;justify-content:center" onClick="{{ goAntrian }}">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h10"></path></svg>
+        <div style="font-size:10px;font-weight:600">Antrian</div>
+      </div>
+      <div style="display:flex;justify-content:center">
+        <div style="width:52px;height:52px;border-radius:16px;background:#4BB8FA;display:flex;align-items:center;justify-content:center;color:#fff;transform:translateY(-16px);box-shadow:0 6px 14px rgba(75,184,250,0.45);cursor:pointer" onClick="{{ goOrder }}">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:{{ tagihanCol }};cursor:pointer;position:relative;height:100%;justify-content:center" onClick="{{ goTagihan }}">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="7" width="18" height="13" rx="3"></rect><path d="M15 13h3"></path></svg>
+        <div style="font-size:10px;font-weight:600">Tagihan</div>
+        <sc-if value="{{ hasUnpaid }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;top:10px;right:20px;min-width:16px;height:16px;border-radius:8px;background:#EF4444;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px">{{ unpaidCount }}</div>
+        </sc-if>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#94A3B8;cursor:pointer;height:100%;justify-content:center" onClick="{{ openLainnya }}">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg>
+        <div style="font-size:10px;font-weight:600">Lainnya</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===================== BOTTOM NAV: VARIAN PILL ===================== -->
+  <sc-if value="{{ navPill }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:14px;right:84px;bottom:16px;height:58px;background:#fff;border-radius:999px;box-shadow:0 6px 20px rgba(45,59,181,0.18);display:flex;align-items:center;justify-content:space-around;padding:0 8px">
+      <div style="display:flex;align-items:center;gap:6px;padding:9px 12px;border-radius:999px;background:{{ homePillBg }};color:{{ homeCol }};cursor:pointer" onClick="{{ goHome }}">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg>
+        <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}"><span style="font-size:12px;font-weight:700">Home</span></sc-if>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;padding:9px 12px;border-radius:999px;background:{{ antrianPillBg }};color:{{ antrianCol }};cursor:pointer" onClick="{{ goAntrian }}">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h10"></path></svg>
+        <sc-if value="{{ isAntrian }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:700">Antrian</span></sc-if>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;padding:9px 12px;border-radius:999px;background:{{ tagihanPillBg }};color:{{ tagihanCol }};cursor:pointer;position:relative" onClick="{{ goTagihan }}">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="7" width="18" height="13" rx="3"></rect><path d="M15 13h3"></path></svg>
+        <sc-if value="{{ isTagihan }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:700">Tagihan</span></sc-if>
+        <sc-if value="{{ hasUnpaid }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;top:2px;right:2px;min-width:15px;height:15px;border-radius:8px;background:#EF4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px">{{ unpaidCount }}</div>
+        </sc-if>
+      </div>
+      <div style="display:flex;align-items:center;padding:9px 12px;border-radius:999px;color:#94A3B8;cursor:pointer" onClick="{{ openLainnya }}">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg>
+      </div>
+    </div>
+    <div style="position:absolute;right:14px;bottom:16px;width:58px;height:58px;border-radius:20px;background:#4BB8FA;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 6px 16px rgba(75,184,250,0.5);cursor:pointer" onClick="{{ goOrder }}">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+    </div>
+  </sc-if>
+
+  <!-- ===================== BOTTOM NAV: VARIAN COMMAND ===================== -->
+  <sc-if value="{{ navQuick }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #E2E8F0;padding:8px 12px 12px 12px;display:flex;flex-direction:column;gap:8px">
+      <div style="height:42px;background:#F1F5F9;border-radius:10px;display:flex;align-items:center;gap:8px;padding:0 12px;color:#94A3B8;cursor:pointer" onClick="{{ openSearch }}">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20.5 20.5 16.7 16.7"></path></svg>
+        <span style="font-size:13px">Cari order, pelanggan, atau menu…</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1.3fr 1fr 1fr;align-items:center;gap:4px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;color:{{ homeCol }};cursor:pointer;padding:4px 0" onClick="{{ goHome }}">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg>
+          <div style="font-size:10px;font-weight:600">Home</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;color:{{ antrianCol }};cursor:pointer;padding:4px 0" onClick="{{ goAntrian }}">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h10"></path></svg>
+          <div style="font-size:10px;font-weight:600">Antrian</div>
+        </div>
+        <button style="height:44px;border:none;border-radius:12px;background:#4BB8FA;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px" onClick="{{ goOrder }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>Order
+        </button>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;color:{{ tagihanCol }};cursor:pointer;position:relative;padding:4px 0" onClick="{{ goTagihan }}">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="7" width="18" height="13" rx="3"></rect><path d="M15 13h3"></path></svg>
+          <div style="font-size:10px;font-weight:600">Tagihan</div>
+          <sc-if value="{{ hasUnpaid }}" hint-placeholder-val="{{ true }}">
+            <div style="position:absolute;top:0;right:12px;min-width:15px;height:15px;border-radius:8px;background:#EF4444;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px">{{ unpaidCount }}</div>
+          </sc-if>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;color:#94A3B8;cursor:pointer;padding:4px 0" onClick="{{ openLainnya }}">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg>
+          <div style="font-size:10px;font-weight:600">Lainnya</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===================== OVERLAY + SHEETS ===================== -->
+  <sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:rgba(30,42,110,0.45);animation:fadeIn 0.2s ease" onClick="{{ closeSheet }}"></div>
+    <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:18px 18px 0 0;padding:10px 16px 24px 16px;animation:sheetUp 0.25s ease;max-height:560px;overflow-y:auto">
+      <div style="width:40px;height:4px;border-radius:2px;background:#E2E8F0;margin:0 auto 14px auto"></div>
+
+      <sc-if value="{{ sheetLainnya }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:16px;font-weight:800;margin-bottom:14px">Menu lainnya</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px 8px">
+          <sc-for list="{{ moreMenu }}" as="item" hint-placeholder-count="8">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer" onClick="{{ item.onTap }}">
+              <div style="width:50px;height:50px;border-radius:14px;background:#E3F2FF;color:#2D3BB5;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;letter-spacing:0.5px">{{ item.mono }}</div>
+              <div style="font-size:11px;color:#64748B;text-align:center;line-height:1.2">{{ item.label }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sheetLunasi }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:16px;font-weight:800">Lunasi {{ sheetOrderId }}</div>
+        <div style="font-size:13px;color:#64748B;margin:4px 0 14px 0">{{ sheetOrderCust }} · sisa <b style="color:#EF4444">{{ sheetOrderSisa }}</b></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ lunasiMethods }}" as="item" hint-placeholder-count="4">
+            <button style="height:50px;border:1.5px solid #E2E8F0;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font-size:14px;font-weight:600;color:#1E2A6E;cursor:pointer;font-family:inherit" onClick="{{ item.onTap }}">
+              <span>{{ item.label }}</span><span style="font-size:12px;color:#94A3B8;font-weight:500">{{ item.note }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sheetWA }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:16px;font-weight:800">Kirim WA · {{ sheetOrderCust }}</div>
+        <div style="font-size:13px;color:#64748B;margin:4px 0 14px 0">{{ sheetOrderWaNum }}</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ waTemplates }}" as="item" hint-placeholder-count="3">
+            <button style="min-height:50px;border:1.5px solid #E2E8F0;border-radius:10px;background:#fff;text-align:left;padding:10px 14px;cursor:pointer;font-family:inherit" onClick="{{ item.onTap }}">
+              <div style="font-size:13px;font-weight:700;color:#1E2A6E">{{ item.title }}</div>
+              <div style="font-size:12px;color:#64748B;margin-top:2px">{{ item.preview }}</div>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sheetLabel }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:16px;font-weight:800">Cetak label · {{ sheetOrderId }}</div>
+        <div style="font-size:13px;color:#64748B;margin:4px 0 14px 0">Pilih layanan yang mau dicetak</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button style="height:50px;border:1.5px solid #8B5CF6;border-radius:10px;background:#F5F3FF;color:#8B5CF6;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit" onClick="{{ printLabel }}">{{ sheetOrderSvc }}</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sheetSearch }}" hint-placeholder-val="{{ false }}">
+        <input style="width:100%;height:44px;border:1.5px solid #E2E8F0;border-radius:10px;padding:0 14px;font-size:14px;font-family:inherit;color:#1E2A6E;outline:none;background:#F8FAFF" placeholder="Ketik nama, nomor order, atau menu…" value="{{ q }}" onChange="{{ setQ }}" autoFocus="{{ true }}"></input>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-top:12px">
+          <sc-for list="{{ searchResults }}" as="item" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 8px;border-radius:8px;cursor:pointer" style-hover="background:#F1F5F9" onClick="{{ item.onTap }}">
+              <div style="width:34px;height:34px;border-radius:9px;background:{{ item.tileBg }};color:{{ item.tileCol }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">{{ item.mono }}</div>
+              <div style="min-width:0">
+                <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ item.title }}</div>
+                <div style="font-size:12px;color:#94A3B8">{{ item.sub }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:50%;bottom:96px;transform:translateX(-50%);background:#1E2A6E;color:#fff;font-size:13px;font-weight:600;padding:10px 18px;border-radius:999px;box-shadow:0 4px 14px rgba(30,42,110,0.35);animation:toastUp 0.2s ease;white-space:nowrap;max-width:330px;overflow:hidden;text-overflow:ellipsis;z-index:5">{{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 420, &quot;height&quot;: 820}, &quot;navVariant&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;tabs5&quot;, &quot;options&quot;: [&quot;tabs5&quot;, &quot;pill&quot;, &quot;quick&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Navigasi&quot;}}">
+class Component extends DCLogic {
+  state = {
+    page: 'home', sheet: null, sheetOrderIdx: null, toast: null,
+    antrianFilter: 'Semua', tagihanFilter: 'Semua', detailIdx: 0, q: '', custQ: '', kasFilter: 'Semua',
+    ajSel: {}, promoOn: { p1: true, p2: false }, waTab: 'Tagihan', waGroup: 'Semua', aiInput: '',
+    aiMsgs: [{ who: 'ai', text: 'Halo Naufal! Tanya apa saja soal data bisnis — omset, pelanggan, stok, jam sibuk.' }],
+    promos: [
+      { id: 'p1', name: 'Paket Hemat 10 kg', desc: 'Cuci + Setrika min 10 kg diskon 10% otomatis' },
+      { id: 'p2', name: 'Sprei + Selimut', desc: 'Ambil keduanya, hemat Rp5.000' },
+    ],
+    jadwal: [
+      { id: 1, tgl: 'Kamis, 31 Jul', jam: '09.00', cust: 'Bu Ratna', alamat: 'Jl. Merdeka No. 12, Mempawah Hilir', cat: 'Sekalian antar order yang selesai' },
+      { id: 2, tgl: 'Jumat, 1 Agu', jam: '15.30', cust: 'Pak Hendra', alamat: 'Komp. Griya Permai Blok B4', cat: '' },
+    ],
+    form: { custId: null, sel: {}, payTab: 'now', method: 'Tunai' },
+    orders: [
+      { id: 'NL-0247', cust: 'Bu Ratna', wa: '0813-4521-8890', svc: 'Cuci + Setrika · 4 kg', total: 28000, paid: 0, status: 'proses', pay: 'belum', age: 'hari ini', masuk: 'Hari ini 08.15', est: 'Besok 17.00', note: 'Parfum lavender, jangan dicampur' },
+      { id: 'NL-0246', cust: 'Pak Hendra', wa: '0857-2210-3345', svc: 'Cuci Kering · 3 kg', total: 15000, paid: 5000, status: 'proses', pay: 'dp', age: 'hari ini', masuk: 'Hari ini 09.40', est: 'Besok 12.00', note: '' },
+      { id: 'NL-0245', cust: 'Mbak Sari', wa: '0821-6633-1204', svc: 'Setrika Saja · 5 kg', total: 20000, paid: 0, status: 'selesai', pay: 'belum', age: 'kemarin', masuk: 'Kemarin 14.20', est: 'Hari ini 10.00', note: 'Deposit Rp25.000' },
+      { id: 'NL-0244', cust: 'Ibu Yuni', wa: '0896-7754-2318', svc: 'Sprei King + Selimut', total: 35000, paid: 35000, status: 'selesai', pay: 'lunas', age: 'kemarin', masuk: 'Kemarin 10.05', est: 'Hari ini 10.00', note: '' },
+      { id: 'NL-0243', cust: 'Pak Dedi', wa: '0812-9902-4471', svc: 'Cuci + Setrika · 6 kg', total: 42000, paid: 0, status: 'proses', pay: 'belum', late: true, age: '3 hari', masuk: 'Senin 16.30', est: 'Kemarin 16.00', note: '' },
+      { id: 'NL-0242', cust: 'Bu Ratna', wa: '0813-4521-8890', svc: 'Cuci + Setrika · 5 kg', total: 35000, paid: 35000, status: 'diambil', pay: 'lunas', age: '4 hari', masuk: 'Minggu 11.00', est: 'Selasa 11.00', note: '' },
+    ],
+  };
+  customers = [
+    { id: 'c1', name: 'Bu Ratna', deposit: 50000, last: { label: 'Cuci + Setrika · 4 kg', sel: { cs: 4 } } },
+    { id: 'c2', name: 'Pak Hendra', deposit: 0, last: { label: 'Cuci Kering · 3 kg', sel: { ck: 3 } } },
+    { id: 'c3', name: 'Mbak Sari', deposit: 25000, last: { label: 'Setrika Saja · 5 kg', sel: { st: 5 } } },
+    { id: 'c4', name: 'Ibu Yuni', deposit: 0, last: null },
+    { id: 'guest', name: 'Tamu / Walk-in', deposit: 0, last: null },
+  ];
+  services = [
+    { id: 'cs', name: 'Cuci + Setrika', price: 7000, unit: 'kg' },
+    { id: 'ck', name: 'Cuci Kering', price: 5000, unit: 'kg' },
+    { id: 'st', name: 'Setrika Saja', price: 4000, unit: 'kg' },
+    { id: 'sp', name: 'Sprei', price: 15000, unit: 'pcs' },
+    { id: 'sl', name: 'Selimut', price: 20000, unit: 'pcs' },
+    { id: 'bn', name: 'Boneka', price: 10000, unit: 'pcs' },
+  ];
+  moreItems = ['Buku Kas', 'Deposit', 'Antar Jemput', 'Jadwal Jemput', 'Promo', 'Poin', 'Pelanggan', 'Pusat WA', 'Laporan', 'Layanan', 'Stok Bahan', 'AI Insight', 'Pengaturan'];
+  pageMap = { 'Pelanggan': 'pelanggan', 'Deposit': 'deposit', 'Buku Kas': 'bukukas', 'Stok Bahan': 'stok', 'Jadwal Jemput': 'jadwal', 'Laporan': 'laporan', 'Antar Jemput': 'aj', 'Promo': 'promo', 'Poin': 'poin', 'Pusat WA': 'pusatwa', 'Layanan': 'layanan', 'AI Insight': 'ai', 'Pengaturan': 'setting' };
+  svcMeta = { cs: { hpp: 4200, est: '1 hari' }, ck: { hpp: 3000, est: '1 hari' }, st: { hpp: 2400, est: '8 jam' }, sp: { hpp: 9000, est: '1 hari' }, sl: { hpp: 12000, est: '1 hari 4 jam' }, bn: { hpp: 6000, est: '2 hari' } };
+  ajHistoryData = [
+    { route: 'Bu Ratna → Mbak Sari (2 titik)', date: 'Senin, 28 Jul', tarif: 'Rp7.000/org' },
+    { route: 'Pak Dedi (1 titik)', date: 'Sabtu, 26 Jul', tarif: 'Rp8.000' },
+  ];
+  waHistoryData = [
+    { label: 'Tagihan → Pak Dedi', time: 'Hari ini 08.30' },
+    { label: 'Broadcast promo → 12 pelanggan', time: 'Senin 10.00' },
+  ];
+  settingItems = [
+    { label: 'Profil Usaha', sub: 'Nama, alamat, jam buka' },
+    { label: 'WhatsApp', sub: 'Nomor & template pesan' },
+    { label: 'Printer', sub: 'Struk & label' },
+    { label: 'Margin & HPP', sub: 'Parameter biaya' },
+    { label: 'AI Assistant', sub: 'API & perilaku' },
+    { label: 'Manajemen User', sub: 'Role Owner / Karyawan' },
+    { label: 'Backup & Restore', sub: 'Data usaha' },
+    { label: 'Template Cetak', sub: 'Susunan elemen + preview' },
+  ];
+  people = [
+    { name: 'Bu Ratna', wa: '0813-4521-8890', orders: 12, spend: 420000, poin: 84, level: 'Gold', deposit: 50000 },
+    { name: 'Pak Hendra', wa: '0857-2210-3345', orders: 8, spend: 260000, poin: 52, level: 'Silver', deposit: 0 },
+    { name: 'Mbak Sari', wa: '0821-6633-1204', orders: 6, spend: 180000, poin: 36, level: 'Silver', deposit: 25000 },
+    { name: 'Ibu Yuni', wa: '0896-7754-2318', orders: 3, spend: 95000, poin: 19, level: 'Bronze', deposit: 0 },
+    { name: 'Pak Dedi', wa: '0812-9902-4471', orders: 4, spend: 120000, poin: 24, level: 'Bronze', deposit: 0 },
+  ];
+  levelMap = { Gold: { bg: '#FEF3E2', col: '#F59E0B' }, Silver: { bg: '#E2E8F0', col: '#64748B' }, Bronze: { bg: '#F1F5F9', col: '#94A3B8' } };
+  kas = [
+    { label: 'Pembayaran NL-0244', sub: 'Hari ini 10.12', amt: 35000, auto: true },
+    { label: 'Topup deposit Bu Ratna', sub: 'Hari ini 09.30', amt: 50000, auto: true },
+    { label: 'Beli deterjen 5L', sub: 'Kemarin 16.40', amt: -38000, auto: false },
+    { label: 'Pembayaran NL-0242', sub: 'Selasa 11.20', amt: 35000, auto: true },
+    { label: 'BBM antar jemput', sub: 'Selasa 08.15', amt: -15000, auto: false },
+  ];
+  stokItems = [
+    { name: 'Deterjen cair', now: '2,4 L', min: 'Batas min 3 L', low: true, rate: '0,05 L/kg' },
+    { name: 'Pewangi lavender', now: '5,1 L', min: 'Batas min 2 L', low: false, rate: '0,03 L/kg' },
+    { name: 'Plastik packing', now: '140 pcs', min: 'Batas min 50 pcs', low: false, rate: '1 pcs/order' },
+  ];
+  statusMap = {
+    pending: { label: 'Pending', bg: '#F1F5F9', col: '#64748B', bar: '#94A3B8' },
+    proses: { label: 'Proses', bg: '#E3F2FF', col: '#2563EB', bar: '#4BB8FA' },
+    selesai: { label: 'Selesai', bg: '#E7F8F1', col: '#10B981', bar: '#10B981' },
+    diambil: { label: 'Diambil', bg: '#2D3BB5', col: '#FFFFFF', bar: '#2D3BB5' },
+  };
+  payMap = {
+    lunas: { label: 'Lunas', bg: '#E7F8F1', col: '#10B981' },
+    belum: { label: 'Belum Lunas', bg: '#FDECEC', col: '#EF4444' },
+    dp: { label: 'DP', bg: '#FEF3E2', col: '#F59E0B' },
+  };
+  rp(n) { return 'Rp' + n.toLocaleString('id-ID'); }
+  showToast(msg) {
+    clearTimeout(this._tt);
+    this.setState({ toast: msg });
+    this._tt = setTimeout(() => this.setState({ toast: null }), 2200);
+  }
+  orderView(o, i) {
+    const s = this.statusMap[o.status], p = this.payMap[o.pay];
+    const next = { pending: 'Proses', proses: 'Selesai', selesai: 'Diambil' }[o.status];
+    return {
+      ...o, totalFmt: this.rp(o.total), sisaFmt: this.rp(o.total - o.paid),
+      statusLabel: s.label, statusBg: s.bg, statusCol: s.col, bar: s.bar,
+      payLabel: p.label, payBg: p.bg, payCol: p.col,
+      subNote: o.pay === 'dp' ? 'DP ' + this.rp(o.paid) : 'menunggak ' + o.age,
+      hasAction: !!next, actionLabel: next || '',
+      onAction: () => this.advance(i),
+      showLunasi: o.pay !== 'lunas',
+      onLunasi: () => this.setState({ sheet: 'lunasi', sheetOrderIdx: i }),
+      onWA: () => this.setState({ sheet: 'wa', sheetOrderIdx: i }),
+      onLabel: () => this.setState({ sheet: 'label', sheetOrderIdx: i }),
+      onDetail: () => this.setState({ page: 'detail', detailIdx: i, sheet: null }),
+    };
+  }
+  advance(i) {
+    const orders = this.state.orders.map((o, j) => {
+      if (j !== i) return o;
+      const next = { pending: 'proses', proses: 'selesai', selesai: 'diambil' }[o.status];
+      return next ? { ...o, status: next } : o;
+    });
+    const lbl = { pending: 'diproses', proses: 'selesai', selesai: 'diambil' }[this.state.orders[i].status];
+    this.setState({ orders });
+    this.showToast(this.state.orders[i].id + ' ditandai ' + lbl);
+  }
+  doLunasi(method) {
+    const i = this.state.sheetOrderIdx;
+    const orders = this.state.orders.map((o, j) => j === i ? { ...o, pay: 'lunas', paid: o.total } : o);
+    this.setState({ orders, sheet: null });
+    this.showToast('Pembayaran ' + this.state.orders[i].id + ' dicatat (' + method + ')');
+  }
+  resetForm() { return { custId: null, sel: {}, payTab: 'now', method: 'Tunai' }; }
+  saveOrder(mode) {
+    const f = this.state.form;
+    const rows = Object.keys(f.sel);
+    if (!f.custId || rows.length === 0) { this.showToast('Pilih pelanggan dan minimal 1 layanan dulu'); return; }
+    const cust = this.customers.find(c => c.id === f.custId);
+    const total = rows.reduce((t, id) => { const s = this.services.find(x => x.id === id); return t + s.price * f.sel[id]; }, 0);
+    const label = rows.map(id => { const s = this.services.find(x => x.id === id); return s.name + (s.unit === 'kg' ? ' · ' + f.sel[id] + ' kg' : f.sel[id] > 1 ? ' × ' + f.sel[id] : ''); }).join(', ');
+    const pay = f.payTab === 'now' ? 'lunas' : f.payTab === 'dp' ? 'dp' : 'belum';
+    const paid = pay === 'lunas' ? total : pay === 'dp' ? Math.round(total / 2 / 1000) * 1000 : 0;
+    const order = { id: 'NL-0248', cust: cust.name, wa: '0812-0000-1234', svc: label, total, paid, status: 'pending', pay, age: 'baru', masuk: 'Hari ini ' + new Date().toTimeString().slice(0, 5).replace(':', '.'), est: 'Besok 17.00', note: '' };
+    this.setState({ orders: [order, ...this.state.orders], form: this.resetForm(), page: 'antrian', antrianFilter: 'Semua' });
+    this.showToast(mode === 'cetak' ? 'Order tersimpan · struk dicetak' : mode === 'wa' ? 'Order tersimpan · WA terkirim' : 'Order tersimpan');
+  }
+  renderVals() {
+    const st = this.state, f = st.form;
+    const nav = this.props.navVariant ?? 'tabs5';
+    const unpaid = st.orders.filter(o => o.pay !== 'lunas');
+    const views = st.orders.map((o, i) => this.orderView(o, i));
+    const active = views.filter(o => o.status === 'pending' || o.status === 'proses');
+    const aF = st.antrianFilter;
+    const antrianList = views.filter(o =>
+      aF === 'Semua' ? true :
+      aF === 'Aktif' ? (o.status === 'pending' || o.status === 'proses') :
+      aF === 'Selesai' ? o.status === 'selesai' :
+      aF === 'Lewat Waktu' ? !!o.late : o.pay !== 'lunas');
+    const tF = st.tagihanFilter;
+    const tagihanList = views.filter(o => o.pay !== 'lunas').filter(o => tF === 'Semua' ? true : tF === 'DP' ? o.pay === 'dp' : o.pay === 'belum');
+    const pill = (label, cur, key) => ({
+      label, bg: label === cur ? '#2D3BB5' : '#fff', col: label === cur ? '#fff' : '#64748B',
+      border: label === cur ? '#2D3BB5' : '#E2E8F0', onTap: () => this.setState({ [key]: label }),
+    });
+    const cust = f.custId ? this.customers.find(c => c.id === f.custId) : null;
+    const selIds = Object.keys(f.sel);
+    const orderTotal = selIds.reduce((t, id) => { const s = this.services.find(x => x.id === id); return t + s.price * f.sel[id]; }, 0);
+    const so = st.sheetOrderIdx != null ? st.orders[st.sheetOrderIdx] : null;
+    const activeCol = '#2D3BB5', idleCol = '#94A3B8';
+    const q = st.q.toLowerCase();
+    const searchResults = st.sheet !== 'search' ? [] : [
+      ...(q === '' ? [{ mono: '+', title: 'Order Baru', sub: 'Buat order baru', tileBg: '#4BB8FA', tileCol: '#fff', onTap: () => this.setState({ sheet: null, page: 'order', q: '' }) }] : []),
+      ...views.filter(o => (o.id + ' ' + o.cust).toLowerCase().includes(q)).slice(0, 3).map(o => ({
+        mono: o.cust.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(), title: o.cust + ' · ' + o.id, sub: o.svc + ' · ' + o.totalFmt,
+        tileBg: '#E3F2FF', tileCol: '#2D3BB5', onTap: () => this.setState({ sheet: null, page: 'detail', detailIdx: st.orders.indexOf(st.orders.find(x => x.id === o.id)), q: '' }),
+      })),
+      ...this.moreItems.filter(m => m.toLowerCase().includes(q)).slice(0, q === '' ? 4 : 6).map(m => ({
+        mono: m.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(), title: m, sub: 'Menu', tileBg: '#F1F5F9', tileCol: '#64748B',
+        onTap: () => { this.setState({ sheet: null, q: '' }); this.showToast('Halaman ' + m + ' — di luar demo ini'); },
+      })),
+    ];
+    const d = st.orders[st.detailIdx] ? this.orderView(st.orders[st.detailIdx], st.detailIdx) : null;
+    return {
+      today: 'Rabu, 30 Juli 2026',
+      isHome: st.page === 'home', isAntrian: st.page === 'antrian', isTagihan: st.page === 'tagihan',
+      isOrder: st.page === 'order', isDetail: st.page === 'detail',
+      navTabs5: nav === 'tabs5' && st.page !== 'order', navPill: nav === 'pill' && st.page !== 'order', navQuick: nav === 'quick' && st.page !== 'order',
+      goHome: () => this.setState({ page: 'home' }),
+      goAntrian: () => this.setState({ page: 'antrian' }),
+      goTagihan: () => this.setState({ page: 'tagihan' }),
+      goOrder: () => this.setState({ page: 'order' }),
+      openLainnya: () => this.setState({ sheet: 'lainnya' }),
+      openSearch: () => this.setState({ sheet: 'search', q: '' }),
+      closeSheet: () => this.setState({ sheet: null }),
+      backFromDetail: () => this.setState({ page: 'home' }),
+      bellTap: () => this.showToast('Tidak ada notifikasi baru'),
+      homeCol: st.page === 'home' ? activeCol : idleCol,
+      antrianCol: st.page === 'antrian' ? activeCol : idleCol,
+      tagihanCol: st.page === 'tagihan' ? activeCol : idleCol,
+      homePillBg: st.page === 'home' ? '#E3F2FF' : 'transparent',
+      antrianPillBg: st.page === 'antrian' ? '#E3F2FF' : 'transparent',
+      tagihanPillBg: st.page === 'tagihan' ? '#E3F2FF' : 'transparent',
+      prosesCount: st.orders.filter(o => o.status === 'proses').length,
+      hasUnpaid: unpaid.length > 0, unpaidCount: unpaid.length,
+      unpaidTotalFmt: this.rp(unpaid.reduce((t, o) => t + o.total - o.paid, 0)),
+      homeOrders: active.slice(0, 3),
+      hasActionNeeded: views.some(o => o.late || o.status === 'selesai'),
+      actionNeeded: views.filter(o => o.late || o.status === 'selesai').slice(0, 3).map(o => ({
+        ...o,
+        note: o.late ? 'Lewat estimasi (' + o.est + ')' : 'Selesai, belum diambil',
+        noteCol: o.late ? '#EF4444' : '#F59E0B',
+        bar: o.late ? '#EF4444' : '#F59E0B',
+      })),
+      antrianPills: ['Semua', 'Aktif', 'Selesai', 'Lewat Waktu'].map(l => pill(l, aF, 'antrianFilter')),
+      antrianList, antrianEmpty: antrianList.length === 0,
+      tagihanPills: ['Semua', 'Belum Bayar', 'DP'].map(l => pill(l, tF, 'tagihanFilter')),
+      tagihanList, tagihanEmpty: tagihanList.length === 0,
+      custChips: this.customers.map(c => ({
+        label: c.id === 'guest' ? c.name : c.name,
+        bg: f.custId === c.id ? '#2D3BB5' : '#fff', col: f.custId === c.id ? '#fff' : '#1E2A6E',
+        border: f.custId === c.id ? '#2D3BB5' : '#E2E8F0',
+        onTap: () => this.setState({ form: { ...f, custId: c.id } }),
+      })),
+      showRepeat: !!(cust && cust.last && selIds.length === 0),
+      repeatLabel: cust && cust.last ? cust.last.label : '',
+      applyRepeat: () => this.setState({ form: { ...f, sel: { ...cust.last.sel } } }),
+      svcChips: this.services.map(s => {
+        const on = !!f.sel[s.id];
+        return {
+          name: s.name, priceLabel: this.rp(s.price) + '/' + s.unit,
+          bg: on ? '#E3F2FF' : '#fff', border: on ? '#2563EB' : '#E2E8F0', col: on ? '#2563EB' : '#1E2A6E',
+          onTap: () => {
+            const sel = { ...f.sel };
+            if (on) delete sel[s.id]; else sel[s.id] = s.unit === 'kg' ? 3 : 1;
+            this.setState({ form: { ...f, sel } });
+          },
+        };
+      }),
+      selRows: selIds.map(id => {
+        const s = this.services.find(x => x.id === id), qv = f.sel[id];
+        const step = (d2) => {
+          const sel = { ...f.sel }, nv = qv + d2;
+          if (nv <= 0) delete sel[id]; else sel[id] = nv;
+          this.setState({ form: { ...f, sel } });
+        };
+        return {
+          name: s.name, qty: qv, qtyLabel: qv + ' ' + s.unit, amountFmt: this.rp(s.price * qv),
+          stepper: true, onMinus: () => step(-1), onPlus: () => step(1),
+        };
+      }),
+      payTabs: [['now', 'Bayar Sekarang'], ['dp', 'DP'], ['later', 'Bayar Nanti']].map(([k, label]) => ({
+        label, bg: f.payTab === k ? '#fff' : 'transparent', col: f.payTab === k ? '#2D3BB5' : '#64748B',
+        onTap: () => this.setState({ form: { ...f, payTab: k } }),
+      })),
+      showMethods: f.payTab !== 'later',
+      methodChips: ['Tunai', 'Transfer', 'QRIS', 'Deposit'].map(m => ({
+        label: m === 'Deposit' && cust ? 'Deposit (' + this.rp(cust.deposit) + ')' : m,
+        bg: f.method === m ? '#E3F2FF' : '#fff', col: f.method === m ? '#2563EB' : '#64748B',
+        border: f.method === m ? '#2563EB' : '#E2E8F0',
+        onTap: () => this.setState({ form: { ...f, method: m } }),
+      })),
+      orderSummaryLabel: cust ? cust.name + ' · ' + selIds.length + ' layanan' : 'Belum ada pelanggan',
+      orderTotalFmt: this.rp(orderTotal),
+      saveCetak: () => this.saveOrder('cetak'), saveWA: () => this.saveOrder('wa'), saveOnly: () => this.saveOrder('saja'),
+      det: d ? {
+        ...d, custNote: d.note || 'Tanpa catatan',
+        showSisa: d.pay !== 'lunas',
+        timeline: [
+          { label: 'Masuk', time: d.masuk, dot: '#2D3BB5', col: '#1E2A6E' },
+          { label: 'Estimasi selesai', time: d.est, dot: d.late ? '#EF4444' : '#94A3B8', col: d.late ? '#EF4444' : '#64748B' },
+          { label: 'Diambil', time: d.status === 'diambil' ? 'Sudah' : '—', dot: d.status === 'diambil' ? '#10B981' : '#E2E8F0', col: '#64748B' },
+        ],
+        onStruk: () => this.showToast('Struk ' + d.id + ' dicetak'),
+      } : {},
+      sheetOpen: !!st.sheet,
+      sheetLainnya: st.sheet === 'lainnya', sheetLunasi: st.sheet === 'lunasi',
+      sheetWA: st.sheet === 'wa', sheetLabel: st.sheet === 'label', sheetSearch: st.sheet === 'search',
+      sheetOrderId: so ? so.id : '', sheetOrderCust: so ? so.cust : '',
+      sheetOrderSisa: so ? this.rp(so.total - so.paid) : '', sheetOrderWaNum: so ? so.wa : '', sheetOrderSvc: so ? so.svc : '',
+      moreMenu: this.moreItems.map(m => ({
+        label: m, mono: m.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+        onTap: () => {
+          if (this.pageMap[m]) this.setState({ sheet: null, page: this.pageMap[m] });
+          else { this.setState({ sheet: null }); this.showToast('Halaman ' + m + ' — di luar demo ini'); }
+        },
+      })),
+      lunasiMethods: ['Tunai', 'Transfer', 'QRIS', 'Deposit'].map(m => ({
+        label: m, note: m === 'Deposit' ? 'saldo pelanggan' : '',
+        onTap: () => this.doLunasi(m),
+      })),
+      waTemplates: [
+        { title: 'Tagih pembayaran', preview: 'Halo kak, cucian sudah bisa dilunasi ya…' },
+        { title: 'Cucian selesai', preview: 'Cucian kakak sudah selesai, bisa diambil…' },
+        { title: 'Konfirmasi order', preview: 'Order diterima, estimasi selesai besok…' },
+      ].map(t => ({ ...t, onTap: () => { this.setState({ sheet: null }); this.showToast('Pesan WA terkirim ke ' + (so ? so.cust : '')); } })),
+      printLabel: () => { this.setState({ sheet: null }); this.showToast('Label dicetak'); },
+      q: st.q, setQ: (e) => this.setState({ q: e.target.value }),
+      searchResults,
+      isPelanggan: st.page === 'pelanggan', isDeposit: st.page === 'deposit', isBukuKas: st.page === 'bukukas',
+      isStok: st.page === 'stok', isJadwal: st.page === 'jadwal', isLaporan: st.page === 'laporan',
+      custQ: st.custQ, setCustQ: (e) => this.setState({ custQ: e.target.value }),
+      addCust: () => this.showToast('Form tambah pelanggan — di luar demo ini'),
+      peopleList: this.people.filter(p => (p.name + ' ' + p.wa).toLowerCase().includes(st.custQ.toLowerCase())).map(p => ({
+        ...p, spendFmt: this.rp(p.spend),
+        levelBg: this.levelMap[p.level].bg, levelCol: this.levelMap[p.level].col,
+        onWA: () => this.showToast('Buka chat WA ' + p.name),
+      })),
+      depositTotalFmt: this.rp(this.people.reduce((t, p) => t + p.deposit, 0)),
+      depositCount: this.people.filter(p => p.deposit > 0).length,
+      depositList: this.people.map(p => ({
+        name: p.name, saldoFmt: this.rp(p.deposit),
+        saldoCol: p.deposit > 0 ? '#10B981' : '#94A3B8',
+        onTopup: () => this.showToast('Topup deposit ' + p.name + ' — form di luar demo'),
+        onMutasi: () => this.showToast('Riwayat mutasi ' + p.name + ' — di luar demo'),
+      })),
+      kasInFmt: this.rp(this.kas.filter(k => k.amt > 0).reduce((t, k) => t + k.amt, 0)),
+      kasOutFmt: this.rp(-this.kas.filter(k => k.amt < 0).reduce((t, k) => t + k.amt, 0)),
+      kasNetFmt: this.rp(this.kas.reduce((t, k) => t + k.amt, 0)),
+      kasPills: ['Semua', 'Masuk', 'Keluar'].map(l => pill(l, st.kasFilter, 'kasFilter')),
+      kasList: this.kas.filter(k => st.kasFilter === 'Semua' ? true : st.kasFilter === 'Masuk' ? k.amt > 0 : k.amt < 0).map(k => ({
+        ...k, amtFmt: (k.amt > 0 ? '+' : '−') + this.rp(Math.abs(k.amt)),
+        amtCol: k.amt > 0 ? '#10B981' : '#EF4444',
+        badge: k.auto ? 'Otomatis' : 'Manual',
+        badgeBg: k.auto ? '#E3F2FF' : '#F1F5F9', badgeCol: k.auto ? '#2563EB' : '#64748B',
+      })),
+      stokLowAny: this.stokItems.some(s => s.low),
+      stokLowLabel: this.stokItems.filter(s => s.low).map(s => s.name).join(', ') + ' di bawah batas minimum',
+      stokList: this.stokItems.map(s => ({
+        ...s, nowCol: s.low ? '#EF4444' : '#1E2A6E',
+        onRestock: () => this.showToast('Restock ' + s.name + ' dicatat'),
+        onKoreksi: () => this.showToast('Koreksi stok ' + s.name + ' — di luar demo'),
+        onRiwayat: () => this.showToast('Riwayat mutasi ' + s.name + ' — di luar demo'),
+      })),
+      addJadwal: () => this.showToast('Form jadwal baru — di luar demo ini'),
+      jadwalList: st.jadwal.map(j => ({
+        ...j, hasCat: !!j.cat,
+        onDone: () => { this.setState({ jadwal: st.jadwal.filter(x => x.id !== j.id) }); this.showToast('Jemput ' + j.cust + ' selesai'); },
+        onEdit: () => this.showToast('Edit jadwal ' + j.cust + ' — di luar demo'),
+        onHapus: () => { this.setState({ jadwal: st.jadwal.filter(x => x.id !== j.id) }); this.showToast('Jadwal ' + j.cust + ' dihapus'); },
+      })),
+      jadwalEmpty: st.jadwal.length === 0,
+      topSvc: [
+        { name: 'Cuci + Setrika', val: 'Rp820.000', pct: '100%' },
+        { name: 'Cuci Kering', val: 'Rp310.000', pct: '38%' },
+        { name: 'Setrika Saja', val: 'Rp180.000', pct: '22%' },
+        { name: 'Item satuan', val: 'Rp110.000', pct: '13%' },
+      ],
+      isAJ: st.page === 'aj', isPromo: st.page === 'promo', isPoin: st.page === 'poin',
+      isPusatWA: st.page === 'pusatwa', isLayanan: st.page === 'layanan', isAI: st.page === 'ai', isSetting: st.page === 'setting',
+      ajChips: this.people.slice(0, 4).map(p => {
+        const on = !!st.ajSel[p.name];
+        return {
+          label: p.name, bg: on ? '#2D3BB5' : '#fff', col: on ? '#fff' : '#1E2A6E', border: on ? '#2D3BB5' : '#E2E8F0',
+          onTap: () => { const s = { ...st.ajSel }; if (on) delete s[p.name]; else s[p.name] = true; this.setState({ ajSel: s }); },
+        };
+      }),
+      ajHasSel: Object.keys(st.ajSel).length > 0,
+      ajRoute: 'Workshop → ' + Object.keys(st.ajSel).join(' → ') + ' → Workshop',
+      ajBbm: this.rp(4000 * Object.keys(st.ajSel).length),
+      ajWaktu: this.rp(3000 * Object.keys(st.ajSel).length),
+      ajAus: this.rp(1000 * Object.keys(st.ajSel).length),
+      ajHpp: this.rp(8000 * Object.keys(st.ajSel).length),
+      ajSaran: this.rp(Math.max(5000, Math.round(8000 * 1.5 / 500) * 500)),
+      ajApply: () => { this.setState({ ajSel: {} }); this.showToast('Tarif antar jemput diterapkan'); },
+      ajHistory: this.ajHistoryData,
+      addPromo: () => this.showToast('Form promo baru — di luar demo ini'),
+      promoList: st.promos.map(p => {
+        const on = !!st.promoOn[p.id];
+        return {
+          ...p, stLabel: on ? 'Aktif' : 'Nonaktif',
+          stBg: on ? '#E7F8F1' : '#F1F5F9', stCol: on ? '#10B981' : '#94A3B8',
+          tglLabel: on ? 'Nonaktifkan' : 'Aktifkan',
+          tglBg: on ? '#F1F5F9' : '#10B981', tglCol: on ? '#64748B' : '#fff',
+          onToggle: () => { this.setState({ promoOn: { ...st.promoOn, [p.id]: !on } }); this.showToast('Promo ' + p.name + (on ? ' dinonaktifkan' : ' diaktifkan')); },
+          onEdit: () => this.showToast('Edit promo — di luar demo ini'),
+        };
+      }),
+      editRasio: () => this.showToast('Ubah rasio poin — di luar demo ini'),
+      poinList: [...this.people].sort((a, b) => b.poin - a.poin).map(p => ({
+        ...p, levelBg: this.levelMap[p.level].bg, levelCol: this.levelMap[p.level].col,
+        onTukar: () => this.showToast('Tukar poin ' + p.name + ' — di luar demo'),
+      })),
+      waTabs: ['Tagihan', 'Broadcast'].map(l => ({
+        label: l, bg: st.waTab === l ? '#fff' : 'transparent', col: st.waTab === l ? '#2D3BB5' : '#64748B',
+        onTap: () => this.setState({ waTab: l }),
+      })),
+      waTagihanTab: st.waTab === 'Tagihan', waBroadcastTab: st.waTab === 'Broadcast',
+      waTagihList: views.filter(o => o.pay !== 'lunas').map(o => ({
+        ...o, onTagih: () => this.showToast('Tagihan ' + o.id + ' dikirim ke ' + o.cust),
+      })),
+      waGroups: ['Semua', 'Gold', 'Silver'].map(g => ({
+        label: g, bg: st.waGroup === g ? '#2D3BB5' : '#fff', col: st.waGroup === g ? '#fff' : '#64748B',
+        border: st.waGroup === g ? '#2D3BB5' : '#E2E8F0',
+        onTap: () => this.setState({ waGroup: g }),
+      })),
+      waGroupCount: st.waGroup === 'Semua' ? this.people.length : this.people.filter(p => p.level === st.waGroup).length,
+      sendBroadcast: () => this.showToast('Broadcast terkirim ke grup ' + st.waGroup),
+      waHistory: this.waHistoryData,
+      addLayanan: () => this.showToast('Form layanan baru — di luar demo ini'),
+      layananList: this.services.map(s => {
+        const m = this.svcMeta[s.id];
+        return {
+          name: s.name, priceLabel: this.rp(s.price) + '/' + s.unit,
+          hppFmt: this.rp(m.hpp), marginLabel: Math.round((s.price - m.hpp) / s.price * 100) + '%', est: m.est,
+          onEdit: () => this.showToast('Edit ' + s.name + ' — di luar demo ini'),
+        };
+      }),
+      aiInsights: [
+        { title: 'Tren naik', body: 'Omset minggu ini +12% dibanding minggu lalu. Cuci + Setrika penyumbang terbesar.', bar: '#10B981', titleCol: '#10B981' },
+        { title: 'Stok menipis', body: 'Deterjen cair tersisa 2,4 L (batas min 3 L). Perkiraan habis 3 hari lagi.', bar: '#EF4444', titleCol: '#EF4444' },
+        { title: 'Prediksi sibuk', body: 'Sabtu 09.00–11.00 biasanya jam paling ramai. Siapkan stok & tenaga.', bar: '#F59E0B', titleCol: '#F59E0B' },
+      ],
+      aiMsgs: st.aiMsgs.map(m => ({
+        text: m.text,
+        align: m.who === 'me' ? 'flex-end' : 'flex-start',
+        bg: m.who === 'me' ? '#2D3BB5' : '#fff', col: m.who === 'me' ? '#fff' : '#1E2A6E',
+      })),
+      aiInput: st.aiInput, setAiInput: (e) => this.setState({ aiInput: e.target.value }),
+      aiSend: () => {
+        const t = st.aiInput.trim();
+        if (!t) return;
+        this.setState({ aiMsgs: [...st.aiMsgs, { who: 'me', text: t }], aiInput: '' });
+        setTimeout(() => this.setState({ aiMsgs: [...this.state.aiMsgs, { who: 'ai', text: 'Cuci + Setrika paling laku: 58% dari omset minggu ini (Rp820.000, 31 order). Margin rata-ratanya 40%.' }] }), 600);
+      },
+      settingList: this.settingItems.map(s2 => ({
+        ...s2, mono: s2.label.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+        onTap: () => this.showToast(s2.label + ' — di luar demo ini'),
+      })),
+      hasToast: !!st.toast, toast: st.toast || '',
+    };
+  }
+}
+</script>
+</body>
+</html>

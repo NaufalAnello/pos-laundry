@@ -937,8 +937,15 @@
     .isr-btn:hover { background: #F8FAFF; border-color: #2D3BB5; }
     .isr-btn:active { transform: scale(.95); }
     .isr-qty-val {
-      min-width: 34px; text-align: center; font-weight: 700; color: #1E2A6E;
-      font-size: 14px;
+      min-width: 50px; width: 50px; text-align: center; font-weight: 700; color: #1E2A6E;
+      font-size: 14px; border: 1px solid #E2E8F0; border-radius: 8px;
+      padding: 6px 4px; background: #fff; outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      font-family: inherit;
+    }
+    .isr-qty-val:focus {
+      border-color: #2D3BB5;
+      box-shadow: 0 0 0 2px rgba(45,59,181,.12);
     }
     .isr-remove {
       width: 36px; height: 36px; flex-shrink: 0;
@@ -1853,7 +1860,7 @@ function addItemRow(defaults = {}) {
       </div>
       <div class="isr-stepper">
         <button type="button" class="isr-btn isr-dec" aria-label="Kurangi">−</button>
-        <span class="isr-qty-val">${initialQty}</span>
+        <input type="number" class="isr-qty-val" value="${initialQty}" min="0" step="${step}" aria-label="Kuantitas" />
         <button type="button" class="isr-btn isr-inc" aria-label="Tambah">+</button>
       </div>
       <button type="button" class="btn-remove isr-remove" aria-label="Hapus layanan">
@@ -1903,7 +1910,7 @@ function addItemRow(defaults = {}) {
     const harga = layanan.harga || 0;
     const sub = harga * jumlah;
     const qtyTxt = formatQty(jumlah);
-    qtyValEl.textContent = qtyTxt;
+    qtyValEl.value = qtyTxt;
     summaryEl.textContent = `${qtyTxt} ${satuan} · Rp ${fmtRp(sub)}`;
 
     const existing = state.items.find(i => i.id === id);
@@ -1948,6 +1955,39 @@ function addItemRow(defaults = {}) {
     updateRow();
   });
   btnRemoveEl.addEventListener('click', removeSelf);
+
+  // Manual input: ketik langsung angka, validasi saat blur atau tekan Enter
+  let lastValidQty = jumlah;
+  function handleManualInput() {
+    const inputVal = parseFloat(qtyValEl.value);
+
+    // Validasi: harus angka valid
+    if (isNaN(inputVal) || inputVal < 0) {
+      // Invalid input: reset ke nilai terakhir yang valid
+      qtyValEl.value = formatQty(lastValidQty);
+      showToast('Masukkan angka valid untuk kuantitas', 'error');
+      return;
+    }
+
+    // Jika 0: hapus layanan (sesuai behavior stepper)
+    if (inputVal === 0) {
+      removeSelf();
+      return;
+    }
+
+    // Update jumlah & row
+    jumlah = +inputVal.toFixed(2);
+    lastValidQty = jumlah;
+    updateRow();
+  }
+
+  qtyValEl.addEventListener('blur', handleManualInput);
+  qtyValEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      qtyValEl.blur(); // trigger validasi via blur
+    }
+  });
 
   // ── Rincian Item Functions with Master Items ──
   function renderMasterItemGrid() {
