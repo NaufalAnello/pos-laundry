@@ -375,7 +375,7 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </a>
     <div class="ly-title">Layanan</div>
-    <button class="btn-add" onclick="openKategoriModal()" aria-label="Tambah kategori">
+    <button class="btn-add" onclick="openKategoriModal()" aria-label="Tambah kategori" data-owner-only="1">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       <span>Kategori</span>
     </button>
@@ -955,13 +955,13 @@ function renderMobile() {
         <div class="lay-foot">
           <div class="lay-est">Est: ${formatEstimasi(getEstimasiJam(l))}</div>
           <div class="lay-actions">
-            <label class="toggle" title="${l.aktif ? 'Nonaktifkan' : 'Aktifkan'}">
+            <label class="toggle" title="${l.aktif ? 'Nonaktifkan' : 'Aktifkan'}" data-owner-only="1">
               <input type="checkbox" ${l.aktif ? 'checked' : ''}
                 onchange="toggleLayanan(${l.id}, ${!!l.aktif}, this)"/>
               <span class="slider"></span>
             </label>
-            <button class="btn btn-sm btn-outline" onclick='openLayananModal(${JSON.stringify(l)})'>Edit</button>
-            <button class="btn-ghost" onclick="deleteLayanan(${l.id}, '${nameEsc}')" style="color:#EF4444">Hapus</button>
+            <button class="btn btn-sm btn-outline" onclick='openLayananModal(${JSON.stringify(l)})' data-owner-only="1">Edit</button>
+            <button class="btn-ghost" onclick="deleteLayanan(${l.id}, '${nameEsc}')" style="color:#EF4444" data-owner-only="1">Hapus</button>
           </div>
         </div>
       </div>
@@ -1021,14 +1021,14 @@ function renderAkordion() {
         <td>${mar !== null ? mar + '%' : '—'}</td>
         <td>${formatEstimasi(getEstimasiJam(l))}</td>
         <td>
-          <label class="toggle">
+          <label class="toggle" data-owner-only="1">
             <input type="checkbox" ${l.aktif ? 'checked' : ''}
               onchange="toggleLayanan(${l.id}, ${!!l.aktif}, this)"/>
             <span class="slider"></span>
           </label>
         </td>
         <td>
-          <div class="td-actions">
+          <div class="td-actions" data-owner-only="1">
             <button class="btn btn-sm btn-outline" onclick='openLayananModal(${JSON.stringify(l)})'>Edit</button>
             <button class="btn-ghost" style="color:#EF4444" onclick="deleteLayanan(${l.id}, '${nameEsc}')">Hapus</button>
           </div>
@@ -1051,7 +1051,7 @@ function renderAkordion() {
           </div>
           <div class="cat-meta">${k.jumlah_layanan || 0} layanan · ${k.jumlah_aktif || 0} aktif</div>
         </div>
-        <div class="cat-actions" onclick="event.stopPropagation()">
+        <div class="cat-actions" onclick="event.stopPropagation()" data-owner-only="1">
           <button class="btn btn-sm btn-primary" onclick="openLayananModal(null, ${k.id})">${SVG_PLUS} Layanan</button>
           <button class="btn btn-sm btn-outline" onclick='openKategoriModal(${JSON.stringify({
             id:k.id, nama:k.nama, deskripsi:k.deskripsi, ikon:k.ikon, warna:k.warna, aktif:k.aktif

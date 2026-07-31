@@ -65,7 +65,8 @@
     {
       group: 'Marketing',
       items: [
-        { href: '/promo',     mono: 'PR', label: 'Promo',     ownerOnly: true },
+        // Karyawan boleh LIHAT promo — kelola (CRUD) di-guard di halaman
+        { href: '/promo',     mono: 'PR', label: 'Promo'    },
         { href: '/poin',      mono: 'PN', label: 'Poin',      ownerOnly: true },
         { href: '/pelanggan', mono: 'PL', label: 'Pelanggan' },
         { href: '/wa-center', mono: 'PW', label: 'Pusat WA'  },
@@ -74,7 +75,8 @@
     {
       group: 'Master',
       items: [
-        { href: '/layanan',    mono: 'LY', label: 'Layanan',     ownerOnly: true },
+        // Karyawan boleh lihat + edit harga satuan; import/export di-guard di halaman
+        { href: '/layanan',    mono: 'LY', label: 'Layanan'    },
         { href: '/stok-bahan', mono: 'SB', label: 'Stok Bahan' },
         { href: '/ai-insight', mono: 'AI', label: 'AI Insight',  ownerOnly: true },
         { href: '/pengaturan', mono: 'PG', label: 'Pengaturan',  ownerOnly: true },
@@ -88,12 +90,12 @@
     { href: '/deposit',          mono: 'DP', label: 'Deposit' },
     { href: '/antar-jemput',     mono: 'AJ', label: 'Antar Jemput' },
     { href: '/reservasi-jemput', mono: 'JJ', label: 'Jadwal Jemput', badge: 'reservasi' },
-    { href: '/promo',            mono: 'PR', label: 'Promo',        ownerOnly: true },
+    { href: '/promo',            mono: 'PR', label: 'Promo'    },
     { href: '/poin',             mono: 'PN', label: 'Poin',         ownerOnly: true },
     { href: '/pelanggan',        mono: 'PL', label: 'Pelanggan' },
     { href: '/wa-center',        mono: 'PW', label: 'Pusat WA' },
     { href: '/laporan',          mono: 'LP', label: 'Laporan',      ownerOnly: true },
-    { href: '/layanan',          mono: 'LY', label: 'Layanan',      ownerOnly: true },
+    { href: '/layanan',          mono: 'LY', label: 'Layanan'   },
     { href: '/stok-bahan',       mono: 'SB', label: 'Stok Bahan' },
     { href: '/ai-insight',       mono: 'AI', label: 'AI Insight',   ownerOnly: true },
     { href: '/pengaturan',       mono: 'PG', label: 'Pengaturan',   ownerOnly: true },
@@ -192,10 +194,15 @@
   </div>
 </div>`;
 
-  /* ── Inject RBAC CSS (hide owner-only sampai role diketahui) ─── */
-  const rbacStyle = document.createElement('style');
-  rbacStyle.textContent = `[data-owner-only="1"] { display: none !important; }`;
-  document.head.appendChild(rbacStyle);
+  /* ── Ensure auth-helper.js is loaded FIRST (RBAC bootstrap) ── */
+  // Kalau auth-helper.js sudah di-load via <script> di halaman, skip.
+  // Kalau belum, load synchronous supaya window.authReady tersedia.
+  if (!window.__authHelperLoaded && !document.querySelector('script[src="/js/auth-helper.js"]')) {
+    const s = document.createElement('script');
+    s.src = '/js/auth-helper.js';
+    s.async = false;
+    document.head.appendChild(s);
+  }
 
   /* ── Inject ke DOM ─────────────────────────────────────── */
   document.body.insertAdjacentHTML('afterbegin', sidebarHTML + topbarHTML);
@@ -219,35 +226,27 @@
   toWrap.forEach(el => wrap.appendChild(el));
   document.getElementById('pos-sidebar').insertAdjacentElement('afterend', wrap);
 
-  /* ── Load user info + role ─────────────────────────────── */
-  fetch('/api/v1/auth/me', { credentials: 'include' })
-    .then(r => r.ok ? r.json() : null)
-    .then(d => {
-      const name = d?.user?.nama || '–';
-      const role = d?.user?.role || 'karyawan';
-      window.currentUserRole = role;
-      try { localStorage.setItem('pos_user_role', role); } catch (_) {}
+  /* ── Sync UI dengan role (dari auth-helper.js) ─────────── */
+  const applyUiRole = (payload) => {
+    const role = payload?.role || window.currentUserRole || 'karyawan';
+    const name = payload?.name || payload?.user?.nama || '–';
+    ['sbUserName','tbUserName','moreUserName'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = name;
+    });
+    const roleEl = document.getElementById('sbUserRole');
+    if (roleEl) roleEl.textContent = role === 'owner' ? 'Owner' : 'Karyawan';
+    const legacy = document.getElementById('userName');
+    if (legacy) legacy.textContent = name;
+  };
 
-      ['sbUserName','tbUserName','moreUserName'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = name;
+  // authReady di-set oleh auth-helper.js
+  const pending = window.authReady && typeof window.authReady.then === 'function'
+    ? window.authReady
+    : new Promise((resolve) => {
+        window.addEventListener('pos:role-loaded', (e) => resolve(e.detail || {}), { once: true });
       });
-      const roleEl = document.getElementById('sbUserRole');
-      if (roleEl) roleEl.textContent = role === 'owner' ? 'Owner' : 'Karyawan';
-      const legacy = document.getElementById('userName');
-      if (legacy) legacy.textContent = name;
-
-      document.body.classList.add(`role-${role}`);
-
-      if (role === 'owner') {
-        document.querySelectorAll('[data-owner-only="1"]').forEach(el => {
-          el.removeAttribute('data-owner-only');
-        });
-      }
-
-      window.dispatchEvent(new CustomEvent('pos:role-loaded', { detail: { role } }));
-    })
-    .catch(() => {});
+  pending.then(applyUiRole).catch(() => {});
 
   /* ── Badge tagihan belum lunas + AJ + reservasi ─────────── */
   const refreshTagihanBadge = () => {
@@ -300,10 +299,14 @@
   };
   if (!window.logout) window.logout = window.posLogout;
 
-  window.isOwner = function () {
-    if (window.currentUserRole) return window.currentUserRole === 'owner';
-    try { return localStorage.getItem('pos_user_role') === 'owner'; } catch (_) { return false; }
-  };
+  // window.isOwner sudah di-set oleh auth-helper.js. Kalau belum (mis. helper
+  // gagal load), sediakan fallback minimal supaya kode halaman tidak crash.
+  if (typeof window.isOwner !== 'function') {
+    window.isOwner = function () {
+      if (window.currentUserRole) return window.currentUserRole === 'owner';
+      try { return localStorage.getItem('pos_user_role') === 'owner'; } catch (_) { return false; }
+    };
+  }
 
   window.openMoreSheet = () => {
     document.getElementById('moreOverlay').classList.add('open');

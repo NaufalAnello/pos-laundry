@@ -340,6 +340,14 @@
           </div>
           <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
         </div>
+        <div class="tile-row" onclick="openSec('user')">
+          <div class="tile-mono">MU</div>
+          <div class="tile-body">
+            <div class="tile-label">Manajemen User</div>
+            <div class="tile-sub">Kelola akun owner &amp; karyawan (aktifkan / nonaktifkan)</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </div>
       </div>
     </div>
 
@@ -663,6 +671,37 @@
       </div>
     </div>
 
+    <!-- Manajemen User -->
+    <div class="sec-view" id="sec-user" data-title="Manajemen User">
+      <div class="card">
+        <div class="card-head">
+          User Aplikasi
+          <button class="btn btn-primary btn-sm" onclick="openAddUser()">+ Tambah User</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nama</th>
+                  <th>Username</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="userBody">
+                <tr><td colspan="5" style="text-align:center;padding:24px;color:#94A3B8">Memuat…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#94A3B8;padding:0 4px">
+        Hanya owner yang dapat mengelola user. Menghapus user akan menonaktifkan (bukan hapus permanen).
+      </div>
+    </div>
+
     <!-- Template Cetak -->
     <div class="sec-view" id="sec-template" data-title="Template Cetak">
       <div class="card">
@@ -705,6 +744,49 @@
   </div>
 </div>
 
+<!-- Modal User -->
+<div class="modal-bg" id="userModal" style="display:none;position:fixed;inset:0;background:rgba(30,42,110,0.45);z-index:9999;align-items:flex-end;justify-content:center;padding:0">
+  <div class="modal-content" style="background:#fff;border-radius:18px 18px 0 0;width:100%;max-width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 -8px 32px rgba(45,59,181,.18)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #E2E8F0;position:sticky;top:0;background:#fff;z-index:2">
+      <h3 id="userModalTitle" style="font-size:16px;font-weight:800;color:#1E2A6E">Tambah User</h3>
+      <button onclick="closeUserModal()" aria-label="Tutup" style="width:32px;height:32px;border-radius:8px;background:#F1F5F9;border:none;cursor:pointer;color:#64748B;display:inline-flex;align-items:center;justify-content:center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
+    </div>
+    <div style="padding:16px 18px;display:flex;flex-direction:column;gap:14px">
+      <input type="hidden" id="uEditId"/>
+      <div class="form-row">
+        <div class="field"><label>Nama *</label><input id="uNama" type="text" placeholder="Nama lengkap"/></div>
+        <div class="field"><label>Username *</label><input id="uUsername" type="text" placeholder="username"/></div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Password <span id="uPwHint" style="color:#94A3B8;text-transform:none;letter-spacing:0;font-weight:400">(isi untuk ubah)</span></label>
+          <input id="uPassword" type="password" placeholder="Min. 6 karakter"/>
+        </div>
+        <div class="field">
+          <label>Role</label>
+          <select id="uRole">
+            <option value="karyawan">Karyawan — operasional harian</option>
+            <option value="owner">Owner — akses penuh</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" id="uAktifWrap" style="display:none">
+        <label style="display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font-weight:700;color:#1E2A6E">
+          <input type="checkbox" id="uAktif" checked style="width:18px;height:18px;min-height:auto;padding:0"/>
+          Aktif
+        </label>
+      </div>
+      <div style="color:#EF4444;font-size:12px" id="uErr"></div>
+    </div>
+    <div style="padding:12px 18px;border-top:1px solid #E2E8F0;display:flex;gap:8px;position:sticky;bottom:0;background:#fff">
+      <button class="btn btn-outline" onclick="closeUserModal()" style="flex:1">Batal</button>
+      <button class="btn btn-primary" id="uSaveBtn" onclick="saveUser()" style="flex:1">Simpan</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -741,6 +823,7 @@ function openSec(id) {
   if (id === 'printer') cekPrinter();
   if (id === 'margin') loadMarginSummary();
   if (id === 'template') loadTpl();
+  if (id === 'user') loadUsers();
   window.scrollTo(0, 0);
 }
 
@@ -1479,6 +1562,132 @@ async function resetTpl() {
     toast('Template ' + j + ' direset ke default');
   } catch (e) { toast(e.message, true); }
 }
+
+// ── Manajemen User ────────────────────────────────────────────────────────────
+let myUserId = 0;
+
+async function loadUsers() {
+  const tb = document.getElementById('userBody');
+  try {
+    const me = await api('/api/v1/auth/me');
+    myUserId = me.user?.id || 0;
+    const { data } = await api('/api/v1/users');
+    if (!data.length) {
+      tb.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:#94A3B8">Belum ada user</td></tr>';
+      return;
+    }
+    const roleLabel = r => r === 'owner' ? 'Owner' : 'Karyawan';
+    const roleBadge = r => r === 'owner'
+      ? '<span style="padding:2px 8px;border-radius:6px;background:#FEF3E2;color:#F59E0B;font-size:11px;font-weight:700">Owner</span>'
+      : '<span style="padding:2px 8px;border-radius:6px;background:#E3F2FF;color:#2563EB;font-size:11px;font-weight:700">Karyawan</span>';
+    tb.innerHTML = data.map(u => `
+      <tr>
+        <td style="font-weight:700">${esc(u.nama)}</td>
+        <td style="font-family:monospace;color:#64748B">${esc(u.username)}</td>
+        <td>${roleBadge(u.role)}</td>
+        <td>${u.aktif
+          ? '<span style="color:#10B981;font-weight:700">Aktif</span>'
+          : '<span style="color:#EF4444;font-weight:700">Nonaktif</span>'}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-outline btn-sm" onclick="openEditUser(${u.id})">Edit</button>
+          ${u.id !== myUserId
+            ? `<button class="btn btn-outline btn-sm" onclick="toggleUser(${u.id},${u.aktif ? 1 : 0})">${u.aktif ? 'Nonaktifkan' : 'Aktifkan'}</button>`
+            : ''}
+        </td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    tb.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:#EF4444">${esc(e.message)}</td></tr>`;
+  }
+}
+
+function openAddUser() {
+  document.getElementById('uEditId').value = '';
+  document.getElementById('userModalTitle').textContent = 'Tambah User';
+  document.getElementById('uNama').value = '';
+  document.getElementById('uUsername').value = '';
+  document.getElementById('uPassword').value = '';
+  document.getElementById('uRole').value = 'karyawan';
+  document.getElementById('uPwHint').textContent = '(wajib)';
+  document.getElementById('uAktifWrap').style.display = 'none';
+  document.getElementById('uErr').textContent = '';
+  document.getElementById('userModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('uNama').focus(), 100);
+}
+
+async function openEditUser(id) {
+  try {
+    const { data } = await api('/api/v1/users');
+    const u = data.find(x => x.id === id);
+    if (!u) return;
+    document.getElementById('uEditId').value = u.id;
+    document.getElementById('userModalTitle').textContent = 'Edit User';
+    document.getElementById('uNama').value = u.nama;
+    document.getElementById('uUsername').value = u.username;
+    document.getElementById('uPassword').value = '';
+    document.getElementById('uRole').value = u.role || 'karyawan';
+    document.getElementById('uPwHint').textContent = '(kosongkan jika tidak ubah)';
+    document.getElementById('uAktifWrap').style.display = '';
+    document.getElementById('uAktif').checked = !!u.aktif;
+    document.getElementById('uErr').textContent = '';
+    document.getElementById('userModal').style.display = 'flex';
+  } catch (e) { toast(e.message, true); }
+}
+
+function closeUserModal() {
+  document.getElementById('userModal').style.display = 'none';
+}
+
+async function saveUser() {
+  const id = document.getElementById('uEditId').value;
+  const body = {
+    nama: document.getElementById('uNama').value.trim(),
+    username: document.getElementById('uUsername').value.trim(),
+    role: document.getElementById('uRole').value
+  };
+  const pw = document.getElementById('uPassword').value;
+  if (pw) body.password = pw;
+  if (id) body.aktif = document.getElementById('uAktif').checked;
+
+  document.getElementById('uErr').textContent = '';
+  const btn = document.getElementById('uSaveBtn');
+  btn.disabled = true;
+  try {
+    if (id) {
+      await api(`/api/v1/users/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+      toast('User diperbarui');
+    } else {
+      if (!body.password) {
+        document.getElementById('uErr').textContent = 'Password wajib diisi';
+        btn.disabled = false;
+        return;
+      }
+      await api('/api/v1/users', { method: 'POST', body: JSON.stringify(body) });
+      toast('User dibuat');
+    }
+    closeUserModal();
+    loadUsers();
+  } catch (e) {
+    document.getElementById('uErr').textContent = e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function toggleUser(id, aktif) {
+  const action = aktif ? 'nonaktifkan' : 'aktifkan';
+  if (!confirm(`Yakin ${action} user ini?`)) return;
+  try {
+    await api(`/api/v1/users/${id}`, { method: 'PUT', body: JSON.stringify({ aktif: !aktif }) });
+    toast(`User ${action}`);
+    loadUsers();
+  } catch (e) { toast(e.message, true); }
+}
+
+// Close modal saat click backdrop
+document.getElementById('userModal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'userModal') closeUserModal();
+});
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function esc(s) {

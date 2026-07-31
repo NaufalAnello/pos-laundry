@@ -262,7 +262,7 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
     </a>
     <div class="pr-title">Promo</div>
-    <button class="btn-add" onclick="openModal()" aria-label="Tambah promo">
+    <button class="btn-add" onclick="openModal()" aria-label="Tambah promo" data-owner-only="1">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       <span>Promo</span>
     </button>
@@ -477,7 +477,7 @@ function renderList(data) {
       ${p.deskripsi ? `<div class="promo-desc">${esc(p.deskripsi)}</div>` : ''}
       ${metaBits.length ? `<div class="promo-meta">${metaBits.map(m => `<span>${esc(m)}</span>`).join('')}</div>` : ''}
       ${hariStr}
-      <div class="promo-actions">
+      <div class="promo-actions" data-owner-only="1">
         <button class="${tglCls}" onclick="togglePromo(${p.id})">${tglLabel}</button>
         <button class="btn-edit" onclick='editPromo(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Edit</button>
         <button class="btn-del" onclick="deletePromo(${p.id},'${namaEsc.replace(/'/g,"\\'")}')" aria-label="Hapus">

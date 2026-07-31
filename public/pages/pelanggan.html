@@ -421,8 +421,8 @@
       </div>
     </div>
 
-    <!-- ACTIONS (import/export) -->
-    <div class="action-bar mobile-only">
+    <!-- ACTIONS (import/export) — owner-only, hidden untuk karyawan -->
+    <div class="action-bar mobile-only" data-owner-only="1">
       <button class="btn-act" onclick="openImportModal()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
         Import
@@ -435,7 +435,7 @@
 
     <!-- DESKTOP TOOLBAR -->
     <div class="desktop-toolbar desktop-only">
-      <div class="action-bar desktop-only" style="margin-left:auto">
+      <div class="action-bar desktop-only" style="margin-left:auto" data-owner-only="1">
         <button class="btn-act" onclick="openImportModal()">Import</button>
         <button class="btn-act" onclick="exportPelanggan('xlsx')">Export</button>
       </div>
@@ -496,7 +496,7 @@
     <button class="btn btn-edit" onclick="editCurrent()">Edit</button>
     <button class="btn btn-wa-grn" id="btnPanelWa" onclick="panelWa()" style="display:none">WA</button>
     <a class="btn btn-order" id="btnPanelOrder" href="#">+ Order</a>
-    <button class="btn btn-del" onclick="deleteCurrent()">Hapus</button>
+    <button class="btn btn-del" onclick="deleteCurrent()" data-owner-only="1">Hapus</button>
   </div>
 </aside>
 

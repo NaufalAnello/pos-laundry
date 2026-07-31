@@ -180,8 +180,10 @@ app.get('/order/detail', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/pages/detail-order.html'));
 });
 
-// Layanan & Kategori (owner-only)
-app.get('/layanan', gateOwnerPage, (req, res) => {
+// Layanan & Kategori — karyawan boleh lihat + edit harga satuan.
+// CRUD kategori & import/export dilindungi requireOwner di route API.
+app.get('/layanan', (req, res) => {
+  if (!req.session?.userId) return res.redirect('/login');
   res.sendFile(path.join(__dirname, '../public/pages/layanan.html'));
 });
 
@@ -190,8 +192,9 @@ app.get('/kas', gateOwnerPage, (req, res) => {
   res.sendFile(path.join(__dirname, '../public/pages/kas.html'));
 });
 
-// Promo (owner-only)
-app.get('/promo', gateOwnerPage, (req, res) => {
+// Promo — karyawan boleh lihat; CRUD dilindungi requireOwner di route API.
+app.get('/promo', (req, res) => {
+  if (!req.session?.userId) return res.redirect('/login');
   res.sendFile(path.join(__dirname, '../public/pages/promo.html'));
 });
 
