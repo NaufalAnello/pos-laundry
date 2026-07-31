@@ -9,805 +9,698 @@
   <title>Pengaturan — POS Laundry</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --blue:#2D3BB5; --blue-lt:#EEF2FF;
-      --green:#10B981; --green-lt:#ECFDF5;
-      --yellow:#F59E0B; --yellow-lt:#fffbeb;
-      --red:#EF4444; --red-lt:#FEF2F2;
-      --purple:#8B5CF6; --purple-lt:#f5f3ff;
-      --wa:#25D366; --wa-lt:#ECFDF5;
-      --gray-1:#f8fafc; --gray-2:#f1f5f9; --gray-3:#e2e8f0;
-      --gray-5:#64748b; --gray-7:#374151; --gray-9:#1E2A6E;
-      --radius:10px; --shadow:0 1px 4px rgba(0,0,0,.08);
+    body { font-family: var(--font); background: #F0F7FF; color: #1E2A6E; font-size: 14px; min-height: 100vh; }
+
+    .page { max-width: 880px; margin: 0 auto; }
+    .pos-topbar { display: none !important; }
+
+    /* ── Header ─────────────────────────────────── */
+    .st-head {
+      position: sticky; top: 0; z-index: 20;
+      background: #F0F7FF;
+      padding: 14px 16px 10px;
+      display: flex; align-items: center; gap: 10px;
     }
-    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-           background:var(--bg-page); color:var(--gray-9); font-size:14px; min-height:100vh; }
+    .st-head .ic-btn {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: #fff; color: #2D3BB5;
+      border: none; cursor: pointer; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      text-decoration: none;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+    }
+    .st-title { flex: 1; font-size: 20px; font-weight: 800; color: #1E2A6E; letter-spacing: -.01em; }
 
-    header { background:#fff; border-bottom:1px solid var(--gray-3); padding:0 20px; height:56px;
-             display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:20; box-shadow:var(--shadow); }
-    .logo { font-size:16px; font-weight:800; color:var(--blue); white-space:nowrap; }
-    nav { display:flex; gap:4px; flex:1; overflow-x:auto; }
-    nav a { padding:6px 12px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;
-             color:var(--gray-7); transition:background .15s; white-space:nowrap; }
-    nav a:hover { background:var(--gray-2); }
-    nav a.active { background:var(--blue-lt); color:var(--blue); }
-    .header-user { font-size:13px; color:var(--gray-5); display:flex; align-items:center; gap:8px; white-space:nowrap; }
-    .logout-btn { padding:5px 12px; border:1px solid var(--gray-3); border-radius:7px; background:none; font-size:13px; cursor:pointer; color:var(--gray-7); }
-    .logout-btn:hover { background:var(--gray-2); }
+    /* ── Body ─────────────────────────────────── */
+    .body-wrap {
+      padding: 4px 16px 130px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
 
-    .page { max-width:880px; margin:0 auto; padding:20px 16px; }
-    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; flex-wrap:wrap; }
-    .page-title { font-size:20px; font-weight:800; }
+    /* ── Tile list (landing) ──────────────────── */
+    .tile-list {
+      background: #fff; border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+      overflow: hidden;
+    }
+    .tile-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px;
+      border-bottom: 1px solid #F1F5F9;
+      cursor: pointer; text-decoration: none;
+      background: #fff;
+      transition: background .12s;
+    }
+    .tile-row:last-child { border-bottom: none; }
+    .tile-row:hover, .tile-row:active { background: #F8FAFF; }
+    .tile-mono {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: #E3F2FF; color: #2D3BB5;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800;
+      flex-shrink: 0;
+    }
+    .tile-body { flex: 1; min-width: 0; }
+    .tile-label { font-size: 14px; font-weight: 600; color: #1E2A6E; }
+    .tile-sub { font-size: 12px; color: #94A3B8; margin-top: 2px; }
+    .tile-chev { color: #94A3B8; flex-shrink: 0; display: inline-flex; align-items: center; }
 
-    /* ── Tabs ── */
-    .tabs { display:flex; gap:4px; border-bottom:2px solid var(--gray-3); margin-bottom:20px; }
-    .tab { padding:10px 18px; border-radius:8px 8px 0 0; font-size:13px; font-weight:700;
-            cursor:pointer; color:var(--gray-5); border:none; background:none; transition:all .15s;
-            position:relative; bottom:-2px; border-bottom:2px solid transparent; }
-    .tab:hover { color:var(--gray-9); background:var(--gray-1); }
-    .tab.active { color:var(--blue); border-bottom-color:var(--blue); background:#fff; }
-    .tab-section { display:none; }
-    .tab-section.active { display:block; }
+    /* ── Section view ─────────────────────────── */
+    .sec-view { display: none; }
+    .sec-view.active { display: flex; flex-direction: column; gap: 12px; }
+    body.viewing .tile-list-wrap { display: none; }
 
-    /* ── Card ── */
-    .card { background:#fff; border-radius:var(--radius); border:1px solid var(--gray-3); box-shadow:var(--shadow); }
-    .card + .card { margin-top:16px; }
-    .card-head { padding:14px 18px; border-bottom:1px solid var(--gray-3); font-weight:700; font-size:14px; }
-    .card-body { padding:20px; display:flex; flex-direction:column; gap:16px; }
+    .card {
+      background: #fff; border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+    }
+    .card + .card { margin-top: 12px; }
+    .card-head {
+      padding: 14px 16px; border-bottom: 1px solid #F1F5F9;
+      font-weight: 700; font-size: 13px; color: #1E2A6E;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .card-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
 
-    /* ── Form ── */
-    .field { display:flex; flex-direction:column; gap:5px; }
-    .field label { font-size:12px; font-weight:600; color:var(--gray-7); }
-    .field input, .field textarea, .field select {
-      padding:8px 12px; border:1px solid var(--gray-3); border-radius:8px; font-size:13px;
-      font-family:inherit; background:#fff; }
-    .field input:focus, .field textarea:focus, .field select:focus { outline:none; border-color:var(--blue); }
-    .field textarea { resize:vertical; min-height:120px; }
-    .field small { font-size:11px; color:var(--gray-5); }
+    /* ── Field ────────────────────────────────── */
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label, .form-label {
+      font-size: 12px; font-weight: 700; color: #64748B;
+      text-transform: uppercase; letter-spacing: .3px;
+    }
+    .field input, .field textarea, .field select,
+    .form-input, .form-select {
+      width: 100%; padding: 10px 12px; border: 1.5px solid #E2E8F0;
+      border-radius: 8px; font-size: 14px; font-family: inherit;
+      background: #fff; color: #1E2A6E; outline: none; min-height: 44px;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus,
+    .form-input:focus, .form-select:focus { border-color: #2D3BB5; }
+    .field textarea { resize: vertical; min-height: 120px; }
+    .field small { font-size: 11px; color: #94A3B8; }
+    .form-hint { font-size: 11px; color: #94A3B8; margin-top: 4px; }
 
-    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-    @media(max-width:600px){ .form-row { grid-template-columns:1fr; } }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
 
-    /* ── Buttons ── */
-    .btn { padding:9px 18px; border-radius:8px; border:1px solid transparent; font-size:13px;
-           font-weight:600; cursor:pointer; transition:opacity .15s; display:inline-flex; align-items:center; gap:6px; }
-    .btn:hover { opacity:.85; }
-    .btn:disabled { opacity:.4; cursor:default; }
-    .btn-sm { padding:5px 10px; font-size:12px; }
-    .btn-blue { background:var(--blue); color:#fff; }
-    .btn-green { background:var(--green); color:#fff; }
-    .btn-green:disabled { background:var(--gray-3); color:var(--gray-5); }
-    .btn-red { background:var(--red); color:#fff; }
-    .btn-outline { background:#fff; border-color:var(--gray-3); color:var(--gray-7); }
-    .btn-ghost { background:none; border:none; color:var(--gray-5); padding:4px 8px; cursor:pointer; font-size:12px; }
-    .btn-ghost:hover { background:var(--gray-2); border-radius:6px; }
+    /* ── Buttons ──────────────────────────────── */
+    .btn {
+      padding: 10px 16px; border-radius: 8px; border: 1px solid transparent;
+      font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      min-height: 44px;
+    }
+    .btn:disabled { opacity: .5; cursor: default; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; min-height: 32px; }
+    .btn-primary { background: #2D3BB5; color: #fff; }
+    .btn-success { background: #10B981; color: #fff; }
+    .btn-outline { background: #fff; border-color: #E2E8F0; color: #64748B; }
+    .btn-danger { background: #EF4444; color: #fff; }
+    .btn-ghost {
+      background: none; border: none; color: #64748B; cursor: pointer;
+      padding: 6px 8px; font-size: 12px; font-weight: 700; font-family: inherit;
+    }
 
-    /* ── Toggle ── */
-    .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--gray-3); }
-    .toggle-row:last-child { border-bottom:none; }
-    .toggle-info .tl { font-size:14px; font-weight:600; }
-    .toggle-info .td { font-size:12px; color:var(--gray-5); margin-top:2px; }
-    .toggle { position:relative; width:44px; height:24px; flex-shrink:0; }
-    .toggle input { opacity:0; width:0; height:0; }
-    .toggle-slider { position:absolute; inset:0; background:var(--gray-3); border-radius:24px;
-                     cursor:pointer; transition:background .2s; }
-    .toggle-slider::before { content:''; position:absolute; width:18px; height:18px; background:#fff;
-                              border-radius:50%; left:3px; top:3px; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
-    .toggle input:checked + .toggle-slider { background:var(--blue); }
-    .toggle input:checked + .toggle-slider::before { transform:translateX(20px); }
+    /* ── Toggle ───────────────────────────────── */
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid #F1F5F9; gap: 10px;
+    }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-info .tl { font-size: 14px; font-weight: 700; color: #1E2A6E; }
+    .toggle-info .td { font-size: 12px; color: #94A3B8; margin-top: 2px; }
+    .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0; background: #E2E8F0; border-radius: 24px;
+      cursor: pointer; transition: background .2s;
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute; width: 18px; height: 18px; background: #fff;
+      border-radius: 50%; left: 3px; top: 3px; transition: transform .2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .toggle input:checked + .toggle-slider { background: #2D3BB5; }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
 
-    /* ── User table ── */
-    table { width:100%; border-collapse:collapse; }
-    thead { background:var(--gray-1); }
-    th { padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:var(--gray-5);
-         text-transform:uppercase; letter-spacing:.4px; border-bottom:1px solid var(--gray-3); }
-    td { padding:10px 12px; border-bottom:1px solid var(--gray-3); font-size:13px; vertical-align:middle; }
-    tr:last-child td { border-bottom:none; }
-    .empty-row td { text-align:center; padding:32px; color:var(--gray-5); }
+    /* Small square toggle for margin */
+    .slider {
+      position: absolute; inset: 0; background: #E2E8F0; border-radius: 99px;
+      cursor: pointer; transition: .2s;
+    }
+    .slider::before {
+      content: ''; position: absolute;
+      width: 14px; height: 14px; left: 3px; bottom: 3px;
+      background: #fff; border-radius: 50%; transition: .2s;
+    }
+    .toggle input:checked + .slider { background: #10B981; }
+    .toggle input:checked + .slider::before { transform: translateX(16px); }
 
-    .role-badge { display:inline-flex; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; text-transform:uppercase; }
-    .role-owner { background:#fef3c7; color:#92400e; }
-    .role-karyawan { background:#C7D2FE; color:#1E2A8A; }
-    /* Legacy aliases — untuk data lama yang belum ter-migrasi (tidak seharusnya muncul) */
-    .role-admin { background:#fef3c7; color:#92400e; }
-    .role-kasir { background:#C7D2FE; color:#1E2A8A; }
-    .role-operator { background:#D1FAE5; color:#166534; }
+    /* ── Save row ─────────────────────────────── */
+    .save-bar {
+      display: flex; align-items: center; gap: 12px; padding-top: 14px;
+      border-top: 1px solid #F1F5F9; margin-top: 4px; flex-wrap: wrap;
+    }
+    .save-ok { font-size: 13px; color: #10B981; }
 
-    /* ── Modal ── */
-    .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:50; display:none;
-                align-items:center; justify-content:center; padding:16px; }
-    .modal-bg.open { display:flex; }
-    .modal { background:#fff; border-radius:12px; width:100%; max-width:440px; box-shadow:0 8px 32px rgba(0,0,0,.18); }
-    .modal-head { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--gray-3); }
-    .modal-head h3 { font-size:16px; font-weight:700; }
-    .modal-body { padding:20px; display:flex; flex-direction:column; gap:14px; }
-    .modal-foot { display:flex; gap:8px; justify-content:flex-end; padding:14px 20px; border-top:1px solid var(--gray-3); }
-    .err-msg { color:var(--red); font-size:12px; }
+    /* ── Table (backup, tpl) ──────────────────── */
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: #F8FAFF; }
+    th { padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 700;
+         color: #64748B; text-transform: uppercase; letter-spacing: .4px;
+         border-bottom: 1px solid #F1F5F9; }
+    td { padding: 10px 12px; border-bottom: 1px solid #F1F5F9; font-size: 13px; color: #1E2A6E; }
+    tr:last-child td { border-bottom: none; }
 
-    /* ── Backup ── */
-    .backup-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-    @media(max-width:600px){ .backup-grid { grid-template-columns:1fr; } }
-    .backup-card { background:var(--gray-1); border:1px solid var(--gray-3); border-radius:10px; padding:20px; text-align:center; }
-    .backup-card .icon { font-size:36px; margin-bottom:10px; }
-    .backup-card h4 { font-size:14px; font-weight:700; margin-bottom:6px; }
-    .backup-card p { font-size:12px; color:var(--gray-5); margin-bottom:16px; line-height:1.5; }
+    /* ── Backup ───────────────────────────────── */
+    .backup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 600px) { .backup-grid { grid-template-columns: 1fr; } }
+    .backup-card {
+      background: #F8FAFF; border-radius: 10px; padding: 18px;
+      text-align: center; display: flex; flex-direction: column; gap: 8px;
+    }
+    .backup-card h4 { font-size: 14px; font-weight: 800; color: #1E2A6E; }
+    .backup-card p { font-size: 12px; color: #94A3B8; line-height: 1.5; margin-bottom: 4px; }
 
-    /* ── Template vars ── */
-    .var-ref { background:var(--gray-1); border-radius:8px; padding:12px; font-size:12px; line-height:1.8; }
-    .var-ref code { background:var(--blue-lt); color:var(--blue); padding:1px 5px; border-radius:4px; font-family:monospace; }
+    /* ── WA mode selector ────────────────────── */
+    .wa-mode-list { display: flex; flex-direction: column; gap: 10px; }
+    .wa-mode-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 12px; border: 1.5px solid #E2E8F0; border-radius: 8px; cursor: pointer;
+    }
+    .wa-mode-item input { margin-top: 3px; flex-shrink: 0; }
+    .wa-mode-item .lbl { font-size: 13px; font-weight: 700; color: #1E2A6E; }
+    .wa-mode-item .sub { font-size: 12px; color: #94A3B8; margin-top: 2px; }
+    .wa-mode-item.active { border-color: #2D3BB5; background: #E3F2FF; }
 
-    /* ── Template Cetak editor ── */
-    .tpl-subtabs { display:flex; gap:6px; }
+    /* ── Var reference ───────────────────────── */
+    .var-ref {
+      background: #F8FAFF; border-radius: 8px; padding: 12px 14px;
+      font-size: 12px; line-height: 1.8; color: #64748B;
+    }
+    .var-ref code {
+      background: #E3F2FF; color: #2D3BB5; padding: 1px 5px;
+      border-radius: 4px; font-family: monospace; font-size: 11px;
+    }
+
+    /* ── Template Cetak editor ───────────────── */
+    .tpl-subtabs { display: flex; gap: 3px; padding: 3px; background: #E2E8F0; border-radius: 8px; }
     .tpl-sub-btn {
-      padding:6px 14px; border:1px solid var(--gray-3); background:#fff; color:var(--gray-7);
-      border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;
-      min-height:32px;
+      flex: 1; height: 32px; padding: 0 14px; border: none; background: transparent;
+      color: #64748B; font-size: 12px; font-weight: 700;
+      cursor: pointer; font-family: inherit; border-radius: 6px;
     }
-    .tpl-sub-btn.active { background:var(--blue); color:#fff; border-color:var(--blue); }
-    .tpl-grid {
-      display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start;
+    .tpl-sub-btn.active { background: #fff; color: #2D3BB5; box-shadow: 0 1px 2px rgba(45,59,181,0.08); }
+
+    .tpl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+    @media (max-width: 768px) { .tpl-grid { grid-template-columns: 1fr; } }
+    .tpl-list {
+      list-style: none; padding: 0; margin: 0;
+      border-radius: 10px; overflow: hidden; background: #fff;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
     }
-    @media(max-width:768px){ .tpl-grid { grid-template-columns:1fr; } }
-    .tpl-list { list-style:none; padding:0; margin:0; border:1px solid var(--gray-3); border-radius:10px; overflow:hidden; background:#fff; }
     .tpl-list li {
-      display:flex; align-items:center; gap:10px;
-      padding:10px 12px; border-bottom:1px solid var(--gray-3);
-      background:#fff; transition:background .12s;
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-bottom: 1px solid #F1F5F9;
+      transition: background .12s;
     }
-    .tpl-list li:last-child { border-bottom:none; }
-    .tpl-list li.dragging { opacity:.4; }
-    .tpl-list li.drag-over { background:var(--blue-lt); }
+    .tpl-list li:last-child { border-bottom: none; }
+    .tpl-list li.dragging { opacity: .4; }
+    .tpl-list li.drag-over { background: #E3F2FF; }
     .tpl-list li .handle {
-      cursor:grab; color:var(--gray-5); font-size:18px; user-select:none;
-      padding:4px 2px; line-height:1;
+      cursor: grab; color: #94A3B8; user-select: none;
+      padding: 4px 2px; line-height: 1; flex-shrink: 0;
+      display: inline-flex;
     }
-    .tpl-list li .handle:active { cursor:grabbing; }
-    .tpl-list li .lbl { flex:1; font-size:13px; color:var(--gray-9); font-weight:600; }
-    .tpl-list li .wajib-badge { font-size:10px; font-weight:700; color:var(--gray-5); background:var(--gray-1); padding:2px 6px; border-radius:99px; }
-    .tpl-list li input[type=checkbox] { width:18px; height:18px; cursor:pointer; flex-shrink:0; }
-    .tpl-list li input[type=checkbox]:disabled { cursor:not-allowed; opacity:.6; }
+    .tpl-list li .handle:active { cursor: grabbing; }
+    .tpl-list li .lbl { flex: 1; font-size: 13px; color: #1E2A6E; font-weight: 600; }
+    .tpl-list li .wajib-badge {
+      font-size: 10px; font-weight: 700; color: #64748B;
+      background: #F1F5F9; padding: 2px 6px; border-radius: 99px;
+    }
+    .tpl-list li input[type=checkbox] {
+      width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;
+    }
+    .tpl-list li input[type=checkbox]:disabled { cursor: not-allowed; opacity: .6; }
     .tpl-preview {
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      background:#f8fafc; color:#0f172a; border:1px solid var(--gray-3); border-radius:10px;
-      padding:12px; min-height:280px; max-height:520px; overflow:auto;
-      font-size:12px; line-height:1.45; white-space:pre; margin:0;
+      background: #F8FAFF; color: #0f172a; border-radius: 10px;
+      padding: 12px; min-height: 280px; max-height: 520px; overflow: auto;
+      font-size: 12px; line-height: 1.45; white-space: pre; margin: 0;
     }
 
-    .save-bar { display:flex; align-items:center; gap:12px; padding:14px 0; border-top:1px solid var(--gray-3); margin-top:4px; }
-    .save-ok { font-size:13px; color:var(--green); }
+    /* ── Toast ────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%);
+      background: #1E2A6E; color: #fff; padding: 10px 20px; border-radius: 999px;
+      font-size: 13px; font-weight: 600; z-index: 99999;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+      max-width: calc(100vw - 32px); text-align: center;
+    }
+    .toast.show { opacity: 1; }
+    .toast.err { background: #EF4444; }
+    @media (min-width: 1024px) {
+      .toast { bottom: 24px; }
+    }
 
-    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
-             background:#1E2A6E; color:#fff; padding:10px 20px; border-radius:8px;
-             font-size:13px; font-weight:600; z-index:99; transition:transform .3s; white-space:nowrap; }
-    .toast.show { transform:translateX(-50%) translateY(0); }
-    .toast.err { background:var(--red); }
-
-    /* ══ MOBILE pengaturan ══ */
-    @media (max-width: 767px) {
-      .page { padding: 12px 10px 80px; }
-      body > header { display: none !important; }
-      .page-header { flex-direction: column; align-items: stretch; gap: 10px; }
-      .tabs {
-        overflow-x: auto;
-        gap: 0;
-        -webkit-overflow-scrolling: touch;
-        margin: 0 -10px 16px;
-        padding: 0 10px;
-      }
-      .tab {
-        flex: 1 0 auto;
-        white-space: nowrap;
-        min-height: 44px;
-        padding: 10px 14px;
-      }
-      .form-row, .backup-grid { grid-template-columns: 1fr !important; }
-      .save-bar { flex-direction: column; align-items: stretch; }
-      .save-bar .btn { width: 100%; min-height: 44px; }
-
-      /* Modal mobile = bottom sheet */
-      .modal-bg { padding: 0; align-items: flex-end; }
-      .modal {
-        max-width: 100%;
-        width: 100%;
-        max-height: 92vh;
-        overflow-y: auto;
-        border-radius: 16px 16px 0 0;
-      }
-
-      /* Table di settings — wrap dengan scroll, font lebih kecil */
-      #masterItemTableContainer,
-      .card .card-body table,
-      .card table { display: table; }
-      .card-body { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      .card-body table { min-width: 0; width: 100%; font-size: 12px; }
-      .card-body th, .card-body td { padding: 8px 10px !important; }
-      .save-bar { gap: 8px; }
-
-      /* Form: input/select min height 44px (sebagian sudah dari responsive.css global,
-         pertegas untuk #marginDefault yang punya inline max-width:160px) */
-      input[type=number], input[type=text], select { width: 100%; }
-      input[style*="max-width:160px"] { max-width: 100% !important; }
+    @media (min-width: 1024px) {
+      .st-head { padding: 16px 20px 10px; }
+      .st-title { font-size: 22px; }
+      .body-wrap { padding: 4px 20px 40px; }
     }
   </style>
 </head>
 <body>
 
 <div class="page">
-  <div class="page-header">
-    <div class="page-title">Pengaturan</div>
+  <div class="st-head">
+    <a class="ic-btn" href="/dashboard" id="btnHeaderBack" aria-label="Kembali">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <div class="st-title" id="stTitle">Pengaturan</div>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('umum',this)"> Profil Usaha</button>
-    <button class="tab" onclick="switchTab('wa',this)">WhatsApp</button>
-    <button class="tab" onclick="switchTab('printer',this)">Printer</button>
-    <button class="tab" onclick="switchTab('template',this)"> Template Cetak</button>
-    <button class="tab" onclick="switchTab('margin',this)">Margin & HPP</button>
-    <button class="tab" onclick="switchTab('antar-jemput',this)">Antar Jemput</button>
-    <button class="tab" onclick="switchTab('master-item',this)">Master Pakaian</button>
-    <button class="tab" onclick="switchTab('ai',this)">AI Assistant</button>
-    <button class="tab" onclick="switchTab('user',this)">Manajemen User</button>
-    <button class="tab" onclick="switchTab('backup',this)"> Backup & Restore</button>
-  </div>
-
-  <!-- ── TAB: Umum ── -->
-  <div id="sec-umum" class="tab-section active">
-    <div class="card">
-      <div class="card-head"> Profil Usaha</div>
-      <div class="card-body">
-        <div class="form-row">
-          <div class="field"><label>Nama Toko *</label><input id="sNamaToko" type="text" placeholder="Nama Laundry"/></div>
-          <div class="field"><label>Telepon / WA Usaha</label><input id="sTelepon" type="text" placeholder="08xxx"/></div>
+  <div class="body-wrap">
+    <!-- ── Tile list (landing) ── -->
+    <div class="tile-list-wrap" id="tileWrap">
+      <div class="tile-list" id="tileList">
+        <div class="tile-row" onclick="openSec('umum')">
+          <div class="tile-mono">PU</div>
+          <div class="tile-body">
+            <div class="tile-label">Profil Usaha</div>
+            <div class="tile-sub">Nama toko, alamat, telepon, jam operasional, footer struk</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
         </div>
-        <div class="field"><label>Alamat</label><input id="sAlamat" type="text" placeholder="Jl. ..."/></div>
-        <div class="field"><label>Email</label><input id="sEmail" type="email" placeholder="email@contoh.com"/></div>
-        <div class="form-row">
-          <div class="field"><label>Jam Operasional</label><input id="sJam" type="text" placeholder="08.00 – 21.00 WIB"/></div>
+        <div class="tile-row" onclick="openSec('wa')">
+          <div class="tile-mono">WA</div>
+          <div class="tile-body">
+            <div class="tile-label">WhatsApp</div>
+            <div class="tile-sub">Mode kirim, otomasi notifikasi, template pesan</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </div>
+        <div class="tile-row" onclick="openSec('printer')">
+          <div class="tile-mono">PR</div>
+          <div class="tile-body">
+            <div class="tile-label">Printer</div>
+            <div class="tile-sub">Status, port USB, tipe printer thermal</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </div>
+        <div class="tile-row" onclick="openSec('margin')">
+          <div class="tile-mono">MH</div>
+          <div class="tile-body">
+            <div class="tile-label">Margin &amp; HPP</div>
+            <div class="tile-sub">Pembulatan harga, target margin default, ringkasan HPP</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </div>
+        <div class="tile-row" onclick="openSec('ai')">
+          <div class="tile-mono">AI</div>
+          <div class="tile-body">
+            <div class="tile-label">AI Assistant</div>
+            <div class="tile-sub">DeepSeek API key, model, aktifkan analitik otomatis</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </div>
+        <div class="tile-row" onclick="openSec('backup')">
+          <div class="tile-mono">BR</div>
+          <div class="tile-body">
+            <div class="tile-label">Backup &amp; Restore</div>
+            <div class="tile-sub">Download salinan database, upload restore</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </div>
+        <div class="tile-row" onclick="openSec('template')">
+          <div class="tile-mono">TC</div>
+          <div class="tile-body">
+            <div class="tile-label">Template Cetak</div>
+            <div class="tile-sub">Susun elemen struk &amp; label thermal, drag untuk reorder</div>
+          </div>
+          <span class="tile-chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Sections ══ -->
+
+    <!-- Profil Usaha -->
+    <div class="sec-view" id="sec-umum" data-title="Profil Usaha">
+      <div class="card">
+        <div class="card-body">
+          <div class="form-row">
+            <div class="field"><label>Nama Toko *</label><input id="sNamaToko" type="text" placeholder="Nama Laundry"/></div>
+            <div class="field"><label>Telepon / WA Usaha</label><input id="sTelepon" type="text" placeholder="08xxx"/></div>
+          </div>
+          <div class="field"><label>Alamat</label><input id="sAlamat" type="text" placeholder="Jl. ..."/></div>
+          <div class="field"><label>Email</label><input id="sEmail" type="email" placeholder="email@contoh.com"/></div>
+          <div class="form-row">
+            <div class="field"><label>Jam Operasional</label><input id="sJam" type="text" placeholder="08.00 – 21.00 WIB"/></div>
+            <div class="field">
+              <label>Lebar Struk</label>
+              <select id="sStrukLebar">
+                <option value="58mm">58 mm (narrow)</option>
+                <option value="80mm">80 mm (standard)</option>
+                <option value="A5">A5</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>Footer Struk</label><input id="sFooter" type="text" placeholder="Terima kasih!"/></div>
+          <div class="save-bar">
+            <button class="btn btn-primary" onclick="saveUmum()">Simpan Pengaturan</button>
+            <span class="save-ok" id="umumOk" style="display:none">Tersimpan</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WhatsApp -->
+    <div class="sec-view" id="sec-wa" data-title="WhatsApp">
+      <div class="card">
+        <div class="card-head">Mode Pengiriman Default</div>
+        <div class="card-body">
+          <div class="wa-mode-list">
+            <label class="wa-mode-item" id="modeRegularLabel">
+              <input type="radio" name="waModeDefault" id="rModeRegular" value="regular" onchange="onWAModeChange()"/>
+              <div>
+                <div class="lbl">WhatsApp Biasa</div>
+                <div class="sub">Membuka via wa.me — kompatibel dengan semua perangkat</div>
+              </div>
+            </label>
+            <label class="wa-mode-item" id="modeBusinessLabel">
+              <input type="radio" name="waModeDefault" id="rModeBusiness" value="business" onchange="onWAModeChange()"/>
+              <div>
+                <div class="lbl">WhatsApp Business</div>
+                <div class="sub">Membuka via api.whatsapp.com — jika WA Business terinstall</div>
+              </div>
+            </label>
+          </div>
+          <div class="save-bar">
+            <button class="btn btn-primary" onclick="saveWAMode()">Simpan Mode WA</button>
+            <span class="save-ok" id="waModeOk" style="display:none">Tersimpan</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">Otomasi Notifikasi</div>
+        <div class="card-body" style="gap:0;padding:0 16px">
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="tl">Auto Nota Baru</div>
+              <div class="td">Buka WA otomatis ketika order baru dibuat</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="tAutoNota"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="tl">Auto Notif Selesai</div>
+              <div class="td">Buka WA otomatis ketika status berubah ke Selesai</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="tAutoNotif"/><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="tl">Pengingat Tagihan</div>
+              <div class="td">Tampilkan pengingat tagihan belum lunas setelah N hari</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input type="number" id="tReminderHari" min="1" max="30" value="3"
+                     style="width:60px;padding:6px 8px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;text-align:center;min-height:auto"/>
+              <span style="font-size:12px;color:#94A3B8">hari</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">Template Pesan</div>
+        <div class="card-body">
+          <div class="var-ref">
+            Variabel: <code>{nama}</code> <code>{nomor}</code> <code>{tanggal_masuk}</code> <code>{tanggal_selesai}</code>
+            <code>{items}</code> <code>{subtotal}</code> <code>{diskon}</code> <code>{total}</code>
+            <code>{bayar}</code> <code>{kembalian}</code> <code>{poin_dapat}</code> <code>{poin_total}</code>
+            <code>{nama_toko}</code> <code>{alamat_toko}</code> <code>{telepon_toko}</code>
+          </div>
           <div class="field">
-            <label>Lebar Struk</label>
-            <select id="sStrukLebar">
-              <option value="58mm">58 mm (narrow)</option>
-              <option value="80mm">80 mm (standard)</option>
-              <option value="A5">A5</option>
+            <label>Template Nota (Order Baru)</label>
+            <textarea id="tplNota" rows="8"></textarea>
+          </div>
+          <div class="field">
+            <label>Template Tagihan (Pengingat Lunas)</label>
+            <textarea id="tplTagihan" rows="6"></textarea>
+          </div>
+          <div class="field">
+            <label>Template Notifikasi Selesai</label>
+            <textarea id="tplNotif" rows="6"></textarea>
+          </div>
+          <div class="save-bar">
+            <button class="btn btn-primary" onclick="saveWA()">Simpan Pengaturan WA</button>
+            <span class="save-ok" id="waOk" style="display:none">Tersimpan</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Printer -->
+    <div class="sec-view" id="sec-printer" data-title="Printer">
+      <div class="card">
+        <div class="card-head">
+          Status Printer Thermal
+          <button class="btn btn-outline btn-sm" onclick="cekPrinter()">Cek Ulang</button>
+        </div>
+        <div class="card-body">
+          <div style="display:flex;align-items:center;gap:12px;padding:14px;background:#F8FAFF;border-radius:8px">
+            <div id="printerStatusDot" style="width:14px;height:14px;border-radius:50%;background:#E2E8F0;flex-shrink:0"></div>
+            <div>
+              <div id="printerStatusTxt" style="font-size:14px;font-weight:700">Memeriksa…</div>
+              <div id="printerStatusPort" style="font-size:12px;color:#94A3B8;margin-top:2px"></div>
+            </div>
+          </div>
+          <button class="btn btn-success" id="testPrintBtn" onclick="testPrint()" disabled>Test Print</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">Konfigurasi Printer</div>
+        <div class="card-body">
+          <div class="field">
+            <label>Port Printer (USB)</label>
+            <input id="pPrinterPort" type="text" placeholder="/dev/usb/lp0"/>
+            <small>Linux: /dev/usb/lp0 · macOS: /dev/usb/printer0 · Windows: \\.\COM3</small>
+          </div>
+          <div class="field">
+            <label>Tipe Printer</label>
+            <select id="pPrinterType">
+              <option value="EPSON">EPSON (Xantri BT-58D, Epson TM-T20)</option>
+              <option value="STAR">STAR (Star TSP100)</option>
+              <option value="TANCA">TANCA</option>
             </select>
           </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div style="background:#F8FAFF;border-radius:8px;padding:12px">
+              <div style="font-size:11px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">Lebar Kertas</div>
+              <div style="font-size:14px;font-weight:700;color:#1E2A6E">58mm (fixed)</div>
+              <div style="font-size:11px;color:#94A3B8">32 karakter per baris</div>
+            </div>
+            <div style="background:#F8FAFF;border-radius:8px;padding:12px">
+              <div style="font-size:11px;color:#94A3B8;font-weight:700;text-transform:uppercase;margin-bottom:4px">Auto Cutter</div>
+              <div style="font-size:14px;font-weight:700;color:#EF4444">Tidak ada</div>
+              <div style="font-size:11px;color:#94A3B8">Sobek manual setelah cetak</div>
+            </div>
+          </div>
+          <div class="save-bar">
+            <button class="btn btn-primary" onclick="savePrinterSettings()">Simpan Pengaturan Printer</button>
+            <span class="save-ok" id="printerOk" style="display:none">Tersimpan</span>
+          </div>
         </div>
-        <div class="field"><label>Footer Struk</label><input id="sFooter" type="text" placeholder="Terima kasih!"/></div>
-        <div class="save-bar">
-          <button class="btn btn-blue" onclick="saveUmum()"> Simpan Pengaturan</button>
-          <span class="save-ok" id="umumOk" style="display:none">Tersimpan</span>
+      </div>
+
+      <div class="card">
+        <div class="card-head">Panduan Akses USB di Linux</div>
+        <div class="card-body">
+          <div style="font-size:12px;line-height:1.7;color:#64748B">
+            <p>Jika muncul error <code style="background:#F1F5F9;padding:1px 5px;border-radius:4px">EACCES: permission denied</code> saat cetak:</p>
+            <ol style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:4px">
+              <li>Cek device: <code style="background:#F1F5F9;padding:1px 5px;border-radius:4px">ls -la /dev/usb/</code></li>
+              <li>Tambah user ke grup: <code style="background:#F1F5F9;padding:1px 5px;border-radius:4px">sudo usermod -a -G lp $USER</code></li>
+              <li>Logout dan login ulang, atau: <code style="background:#F1F5F9;padding:1px 5px;border-radius:4px">newgrp lp</code></li>
+              <li>Alternatif sementara: <code style="background:#F1F5F9;padding:1px 5px;border-radius:4px">sudo chmod 666 /dev/usb/lp0</code></li>
+            </ol>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ── TAB: WhatsApp ── -->
-  <div id="sec-wa" class="tab-section">
+    <!-- Margin & HPP -->
+    <div class="sec-view" id="sec-margin" data-title="Margin & HPP">
+      <div class="card">
+        <div class="card-head">Pengaturan Margin &amp; HPP</div>
+        <div class="card-body">
+          <div class="field">
+            <label>Pembulatan Harga Otomatis</label>
+            <select id="marginPembulatan" class="form-select">
+              <option value="ratusan">Ke ratusan terdekat (Rp 5.880 &rarr; Rp 6.000)</option>
+              <option value="ribuan">Ke ribuan terdekat</option>
+              <option value="tanpa">Tanpa pembulatan</option>
+            </select>
+            <small>Berlaku saat harga dihitung otomatis dari HPP + Margin</small>
+          </div>
+          <div class="field">
+            <label>Target Margin Default (%)</label>
+            <input type="number" id="marginDefault" placeholder="40" min="0" max="1000" style="max-width:160px"/>
+            <small>Nilai awal margin saat menambah layanan baru</small>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <label class="toggle">
+              <input type="checkbox" id="marginTampilkan" checked/>
+              <span class="slider"></span>
+            </label>
+            <span style="font-size:13px;font-weight:700;color:#1E2A6E">Tampilkan info margin di daftar layanan</span>
+          </div>
+          <div class="save-bar">
+            <button class="btn btn-primary" onclick="saveMarginSettings()">Simpan Pengaturan Margin</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">Ringkasan HPP Layanan</div>
+        <div class="card-body" id="marginSummaryBody">
+          <div style="color:#94A3B8;text-align:center;padding:16px;font-size:13px">Memuat…</div>
+        </div>
+      </div>
+    </div>
 
-    <!-- Mode Pengiriman Default -->
-    <div class="card">
-      <div class="card-head"> Mode Pengiriman Default</div>
-      <div class="card-body" style="gap:12px">
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--gray-3);border-radius:8px"
-                 id="modeRegularLabel">
-            <input type="radio" name="waModeDefault" id="rModeRegular" value="regular"
-                   onchange="onWAModeChange()" style="margin-top:2px;flex-shrink:0"/>
+    <!-- AI Assistant -->
+    <div class="sec-view" id="sec-ai" data-title="AI Assistant">
+      <div class="card">
+        <div class="card-head">AI Assistant dengan DeepSeek</div>
+        <div class="card-body">
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="tl">Aktifkan AI Assistant</div>
+              <div class="td">Menggunakan DeepSeek API untuk chat dan analitik otomatis</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="aiEnabled"/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="field">
+            <label>DeepSeek API Key</label>
+            <input id="deepseekApiKey" type="password" placeholder="sk-xxxxxxxxxxxx"/>
+            <small>Dapatkan API key di <a href="https://platform.deepseek.com" target="_blank" style="color:#2D3BB5">platform.deepseek.com</a></small>
+          </div>
+          <div class="field">
+            <label>API URL (opsional)</label>
+            <input id="deepseekApiUrl" type="text" placeholder="https://api.deepseek.com/v1/chat/completions"/>
+            <small>Kosongkan untuk menggunakan default DeepSeek API</small>
+          </div>
+          <div class="field">
+            <label>Model</label>
+            <select id="deepseekModel">
+              <option value="deepseek-chat">deepseek-chat (recommended)</option>
+              <option value="deepseek-reasoner">deepseek-reasoner</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-outline" onclick="testAIConnection()" id="btnTestAI">Test Koneksi</button>
+            <span id="aiTestResult" style="font-size:12px"></span>
+          </div>
+          <div class="save-bar">
+            <button class="btn btn-primary" onclick="saveAISettings()">Simpan Pengaturan AI</button>
+            <span class="save-ok" id="aiOk" style="display:none">Tersimpan</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">Cara Menggunakan</div>
+        <div class="card-body">
+          <p style="font-size:13px;line-height:1.6;color:#1E2A6E">
+            <strong>1. AI Chat</strong><br/>
+            Buka menu <strong>AI Insight</strong> untuk bertanya tentang data bisnis lewat chat.
+          </p>
+          <p style="font-size:13px;line-height:1.6;color:#1E2A6E">
+            <strong>2. AI Insight (Analitik Otomatis)</strong><br/>
+            Kartu insight di halaman AI Insight menganalisis tren, stok, dan jam sibuk otomatis.
+          </p>
+          <p style="font-size:12px;line-height:1.6;color:#94A3B8">
+            Cache insight diperbarui setiap 1 jam untuk menghemat biaya API.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Backup & Restore -->
+    <div class="sec-view" id="sec-backup" data-title="Backup & Restore">
+      <div class="card">
+        <div class="card-head">Backup &amp; Restore Database</div>
+        <div class="card-body">
+          <div class="backup-grid">
+            <div class="backup-card">
+              <h4>Download Backup</h4>
+              <p>Download salinan database SQLite. Simpan di tempat aman sebagai cadangan data.</p>
+              <button class="btn btn-primary" onclick="downloadBackup()">Download Backup</button>
+            </div>
+            <div class="backup-card">
+              <h4>Restore dari Backup</h4>
+              <p>Upload file backup .db. File disimpan sementara. Server perlu direstart untuk menerapkan restore.</p>
+              <div style="margin-bottom:8px">
+                <input type="file" id="restoreFile" accept=".db" style="font-size:12px;width:100%"/>
+              </div>
+              <button class="btn btn-outline" onclick="uploadRestore()">Upload &amp; Restore</button>
+            </div>
+          </div>
+          <div style="background:#FEF3E2;border:1px solid #F59E0B;border-radius:8px;padding:14px;margin-top:14px;font-size:13px;color:#1E2A6E;line-height:1.6">
+            <strong>Perhatian Restore:</strong><br/>
+            1. Download backup terbaru sebelum restore.<br/>
+            2. Upload file .db backup yang valid.<br/>
+            3. Setelah upload, hentikan server dan rename <code style="background:#F1F5F9;padding:1px 5px;border-radius:4px">laundry.db.restore</code> ke <code style="background:#F1F5F9;padding:1px 5px;border-radius:4px">laundry.db</code>.<br/>
+            4. Jalankan ulang server.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Template Cetak -->
+    <div class="sec-view" id="sec-template" data-title="Template Cetak">
+      <div class="card">
+        <div class="card-head" style="flex-wrap:wrap;gap:8px">
+          <span>Template Cetak</span>
+          <div class="tpl-subtabs" role="tablist" style="max-width:220px">
+            <button id="tplSubStrukBtn" class="tpl-sub-btn active" onclick="switchTplSub('struk')">Struk</button>
+            <button id="tplSubLabelBtn" class="tpl-sub-btn" onclick="switchTplSub('label')">Label</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="background:#E3F2FF;border-radius:8px;padding:12px;font-size:12px;line-height:1.6;color:#2563EB">
+            Atur elemen apa saja yang tampil dan urutannya. Geser handle untuk reorder.
+            Elemen bertanda <strong>(wajib)</strong> selalu aktif.
+            Klik <strong>Simpan</strong> untuk menerapkan ke cetakan struk/label.
+          </div>
+
+          <div class="tpl-grid">
             <div>
-              <div style="font-size:13px;font-weight:600">WhatsApp Biasa</div>
-              <div style="font-size:12px;color:var(--gray-5);margin-top:2px">Membuka via wa.me — kompatibel dengan semua perangkat</div>
+              <div style="font-size:12px;font-weight:700;color:#64748B;margin-bottom:8px;text-transform:uppercase;letter-spacing:.3px">Elemen yang Ditampilkan</div>
+              <ul id="tplList" class="tpl-list">
+                <li style="padding:24px;text-align:center;color:#94A3B8;font-size:13px;justify-content:center">Memuat…</li>
+              </ul>
             </div>
-          </label>
-          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid var(--gray-3);border-radius:8px"
-                 id="modeBusinessLabel">
-            <input type="radio" name="waModeDefault" id="rModeBusiness" value="business"
-                   onchange="onWAModeChange()" style="margin-top:2px;flex-shrink:0"/>
             <div>
-              <div style="font-size:13px;font-weight:600"> WhatsApp Business</div>
-              <div style="font-size:12px;color:var(--gray-5);margin-top:2px">Membuka via api.whatsapp.com — terbuka jika WA Business terinstall di perangkat</div>
+              <div style="font-size:12px;font-weight:700;color:#64748B;margin-bottom:8px;text-transform:uppercase;letter-spacing:.3px">Preview Live</div>
+              <pre id="tplPreview" class="tpl-preview">Memuat preview…</pre>
             </div>
-          </label>
-        </div>
-        <div class="save-bar">
-          <button class="btn btn-blue" onclick="saveWAMode()"> Simpan Mode WA</button>
-          <span class="save-ok" id="waModeOk" style="display:none">Tersimpan</span>
-        </div>
-      </div>
-    </div>
+          </div>
 
-    <!-- Toggle otomasi -->
-    <div class="card">
-      <div class="card-head">Otomasi Notifikasi</div>
-      <div class="card-body" style="padding:0 20px">
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <div class="tl">Auto Nota Baru</div>
-            <div class="td">Buka WA otomatis ketika order baru dibuat</div>
-          </div>
-          <label class="toggle"><input type="checkbox" id="tAutoNota"/><span class="toggle-slider"></span></label>
-        </div>
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <div class="tl">Auto Notif Selesai</div>
-            <div class="td">Buka WA otomatis ketika status berubah ke Selesai</div>
-          </div>
-          <label class="toggle"><input type="checkbox" id="tAutoNotif"/><span class="toggle-slider"></span></label>
-        </div>
-        <div class="toggle-row" style="border-bottom:none">
-          <div class="toggle-info">
-            <div class="tl">Pengingat Tagihan</div>
-            <div class="td">Tampilkan pengingat tagihan belum lunas di dashboard setelah N hari</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <input type="number" id="tReminderHari" min="1" max="30" value="3"
-                   style="width:60px;padding:6px 8px;border:1px solid var(--gray-3);border-radius:8px;font-size:13px;text-align:center"/>
-            <span style="font-size:12px;color:var(--gray-5)">hari</span>
+          <div class="save-bar" style="flex-wrap:wrap">
+            <button class="btn btn-outline" onclick="resetTpl()">Reset ke Default</button>
+            <button class="btn btn-primary" onclick="saveTpl()">Simpan Template</button>
+            <span class="save-ok" id="tplOk" style="display:none">Tersimpan</span>
+            <span id="tplStatusLabel" style="font-size:12px;color:#94A3B8;margin-left:auto"></span>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Templates -->
-    <div class="card">
-      <div class="card-head">
-        Template Pesan
-        <div class="var-ref" style="font-size:11px;padding:6px 10px">
-          Variabel: <code>{nama}</code> <code>{nomor}</code> <code>{tanggal_masuk}</code> <code>{tanggal_selesai}</code>
-          <code>{items}</code> <code>{subtotal}</code> <code>{diskon}</code> <code>{total}</code>
-          <code>{bayar}</code> <code>{kembalian}</code> <code>{poin_dapat}</code> <code>{poin_total}</code>
-          <code>{nama_toko}</code> <code>{alamat_toko}</code> <code>{telepon_toko}</code>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="field">
-          <label>Template Nota (Order Baru)</label>
-          <textarea id="tplNota" rows="8"></textarea>
-        </div>
-        <div class="field">
-          <label>Template Tagihan (Pengingat Lunas)</label>
-          <textarea id="tplTagihan" rows="6"></textarea>
-        </div>
-        <div class="field">
-          <label>Template Notifikasi Selesai</label>
-          <textarea id="tplNotif" rows="6"></textarea>
-        </div>
-        <div class="save-bar">
-          <button class="btn btn-blue" onclick="saveWA()"> Simpan Pengaturan WA</button>
-          <span class="save-ok" id="waOk" style="display:none">Tersimpan</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── TAB: Printer ── -->
-  <div id="sec-printer" class="tab-section">
-
-    <!-- Status printer -->
-    <div class="card">
-      <div class="card-head">
-        Status Printer Thermal
-        <button class="btn btn-outline btn-sm" onclick="cekPrinter()">↻ Cek Ulang</button>
-      </div>
-      <div class="card-body" style="gap:12px">
-        <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--gray-1);border-radius:8px;border:1px solid var(--gray-3)">
-          <div id="printerStatusDot" style="width:14px;height:14px;border-radius:50%;background:var(--gray-3);flex-shrink:0"></div>
-          <div>
-            <div id="printerStatusTxt" style="font-size:14px;font-weight:700">Memeriksa...</div>
-            <div id="printerStatusPort" style="font-size:12px;color:var(--gray-5);margin-top:2px"></div>
-          </div>
-        </div>
-        <button class="btn btn-green" id="testPrintBtn" onclick="testPrint()" disabled>
-          Test Print
-        </button>
-      </div>
-    </div>
-
-    <!-- Konfigurasi -->
-    <div class="card">
-      <div class="card-head">Konfigurasi Printer</div>
-      <div class="card-body">
-        <div class="field">
-          <label>Port Printer (USB)</label>
-          <input id="pPrinterPort" type="text" placeholder="/dev/usb/lp0"/>
-          <small>Linux: /dev/usb/lp0 · macOS: /dev/usb/printer0 · Windows: \\.\COM3</small>
-        </div>
-        <div class="field">
-          <label>Tipe Printer</label>
-          <select id="pPrinterType">
-            <option value="EPSON">EPSON (Xantri BT-58D, Epson TM-T20)</option>
-            <option value="STAR">STAR (Star TSP100)</option>
-            <option value="TANCA">TANCA</option>
-          </select>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div style="background:var(--gray-1);border-radius:8px;padding:12px;border:1px solid var(--gray-3)">
-            <div style="font-size:11px;color:var(--gray-5);font-weight:600;text-transform:uppercase;margin-bottom:4px">Lebar Kertas</div>
-            <div style="font-size:14px;font-weight:700">58mm (fixed)</div>
-            <div style="font-size:11px;color:var(--gray-5)">32 karakter per baris</div>
-          </div>
-          <div style="background:var(--gray-1);border-radius:8px;padding:12px;border:1px solid var(--gray-3)">
-            <div style="font-size:11px;color:var(--gray-5);font-weight:600;text-transform:uppercase;margin-bottom:4px">Auto Cutter</div>
-            <div style="font-size:14px;font-weight:700;color:var(--red)">Tidak ada</div>
-            <div style="font-size:11px;color:var(--gray-5)">Sobek manual setelah cetak</div>
-          </div>
-        </div>
-        <div class="save-bar">
-          <button class="btn btn-blue" onclick="savePrinterSettings()"> Simpan Pengaturan Printer</button>
-          <span class="save-ok" id="printerOk" style="display:none">Tersimpan</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Panduan akses USB Linux -->
-    <div class="card">
-      <div class="card-head">Panduan Akses USB di Linux</div>
-      <div class="card-body" style="gap:8px">
-        <div style="font-size:12px;line-height:1.7;color:var(--gray-7)">
-          <p>Jika muncul error <code style="background:var(--gray-2);padding:1px 5px;border-radius:4px">EACCES: permission denied</code> saat cetak:</p>
-          <ol style="margin:8px 0 0 16px;display:flex;flex-direction:column;gap:4px">
-            <li>Cek device: <code style="background:var(--gray-2);padding:1px 5px;border-radius:4px">ls -la /dev/usb/</code></li>
-            <li>Tambah user ke grup: <code style="background:var(--gray-2);padding:1px 5px;border-radius:4px">sudo usermod -a -G lp $USER</code></li>
-            <li>Logout dan login ulang, atau: <code style="background:var(--gray-2);padding:1px 5px;border-radius:4px">newgrp lp</code></li>
-            <li>Alternatif sementara: <code style="background:var(--gray-2);padding:1px 5px;border-radius:4px">sudo chmod 666 /dev/usb/lp0</code></li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── TAB: Template Cetak ── -->
-  <div id="sec-template" class="tab-section">
-    <div class="card">
-      <div class="card-head" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-        <span> Template Cetak</span>
-        <div class="tpl-subtabs" role="tablist">
-          <button id="tplSubStrukBtn" class="tpl-sub-btn active" onclick="switchTplSub('struk')">Struk</button>
-          <button id="tplSubLabelBtn" class="tpl-sub-btn" onclick="switchTplSub('label')">Label</button>
-        </div>
-      </div>
-      <div class="card-body">
-        <div style="background:var(--blue-lt);border-radius:8px;padding:12px;font-size:12px;line-height:1.6;color:var(--gray-7)">
-          Atur elemen apa saja yang tampil dan urutannya. Geser ⠿ untuk reorder.
-          Elemen bertanda <strong>(wajib)</strong> selalu aktif.
-          Klik <strong>Simpan</strong> untuk menerapkan ke cetakan struk/label.
-        </div>
-
-        <div class="tpl-grid">
-          <div class="tpl-list-wrap">
-            <div style="font-size:12px;font-weight:700;color:var(--gray-7);margin-bottom:8px">Elemen yang Ditampilkan</div>
-            <ul id="tplList" class="tpl-list">
-              <li style="padding:24px;text-align:center;color:var(--gray-5);font-size:13px">Memuat...</li>
-            </ul>
-          </div>
-          <div class="tpl-preview-wrap">
-            <div style="font-size:12px;font-weight:700;color:var(--gray-7);margin-bottom:8px"> Preview Live</div>
-            <pre id="tplPreview" class="tpl-preview">Memuat preview...</pre>
-          </div>
-        </div>
-
-        <div class="save-bar" style="flex-wrap:wrap">
-          <button class="btn btn-outline" onclick="resetTpl()">↺ Reset ke Default</button>
-          <button class="btn btn-blue" onclick="saveTpl()"> Simpan Template</button>
-          <span class="save-ok" id="tplOk" style="display:none">Tersimpan</span>
-          <span id="tplStatusLabel" style="font-size:12px;color:var(--gray-5);margin-left:auto"></span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── TAB: Margin & HPP ── -->
-  <div id="sec-margin" class="tab-section">
-    <div class="card">
-      <div class="card-head">Pengaturan Margin & HPP</div>
-      <div class="card-body">
-        <div class="form-group">
-          <label class="form-label">Pembulatan Harga Otomatis</label>
-          <select id="marginPembulatan" class="form-select">
-            <option value="ratusan">Ke ratusan terdekat (Rp 5.880 → Rp 6.000)</option>
-            <option value="ribuan">Ke ribuan terdekat (Rp 5.880 → Rp 6.000)</option>
-            <option value="tanpa">Tanpa pembulatan (Rp 5.880)</option>
-          </select>
-          <div class="form-hint">Berlaku saat harga dihitung otomatis dari HPP + Margin</div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Target Margin Default (%)</label>
-          <input type="number" id="marginDefault" class="form-input" placeholder="40" min="0" max="1000" style="max-width:160px"/>
-          <div class="form-hint">Nilai awal margin saat menambah layanan baru</div>
-        </div>
-        <div class="form-group" style="display:flex;align-items:center;gap:10px">
-          <label class="toggle">
-            <input type="checkbox" id="marginTampilkan" checked/>
-            <span class="slider"></span>
-          </label>
-          <span style="font-size:13px;font-weight:600">Tampilkan info margin di daftar layanan</span>
-        </div>
-        <button class="btn btn-blue" onclick="saveMarginSettings()"> Simpan Pengaturan Margin</button>
-      </div>
-    </div>
-    <div class="card" style="margin-top:12px">
-      <div class="card-head">Ringkasan HPP Layanan</div>
-      <div class="card-body" id="marginSummaryBody">
-        <div style="color:var(--gray-5);text-align:center;padding:16px">Memuat...</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── TAB: Antar Jemput ── -->
-  <div id="sec-antar-jemput" class="tab-section">
-    <div class="card">
-      <div class="card-head">Parameter Kalkulator Antar Jemput</div>
-      <div class="card-body">
-        <div class="form-group">
-          <label class="form-label">Harga Pertalite saat ini (Rp/liter)</label>
-          <input type="number" id="ajHargaBBM" class="form-input" min="0" style="max-width:200px"/>
-          <div class="form-hint">Terakhir diupdate: <span id="ajUpdatedAt">–</span> · Update manual saat harga BBM berubah</div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Konsumsi BBM motor (km/liter)</label>
-          <input type="number" id="ajKonsumsi" class="form-input" min="1" step="0.1" style="max-width:200px"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Biaya aus kendaraan (Rp/km)</label>
-          <input type="number" id="ajBiayaAus" class="form-input" min="0" style="max-width:200px"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Kecepatan rata-rata di Mempawah (km/jam)</label>
-          <input type="number" id="ajKecepatan" class="form-input" min="1" step="0.1" style="max-width:200px"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Jam kerja per hari (untuk hitung nilai waktu)</label>
-          <input type="number" id="ajJamKerja" class="form-input" min="1" max="24" step="0.5" style="max-width:200px"/>
-        </div>
-
-        <div style="background:var(--yellow-lt);border:1px solid #fde68a;border-radius:8px;padding:12px;font-size:12px;line-height:1.6;color:var(--gray-7)">
-          <strong>Catatan:</strong> Mengubah pengaturan ini <strong>tidak akan</strong> mengubah data rute yang sudah disimpan sebelumnya. Data lama tetap menggunakan parameter saat rute tersebut dibuat (historical pricing).
-        </div>
-
-        <div class="save-bar" style="margin-top:8px">
-          <button class="btn btn-blue" onclick="saveAJSettings()"> Simpan Pengaturan AJ</button>
-          <span class="save-ok" id="ajOk" style="display:none">Tersimpan</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── TAB: Master Item ── -->
-  <div id="sec-master-item" class="tab-section">
-    <div class="card">
-      <div class="card-head" style="display:flex;align-items:center;justify-content:space-between;">
-        <span>Master Pakaian</span>
-        <button class="btn btn-sm btn-blue" onclick="openMasterItemModal()">+ Tambah Pakaian</button>
-      </div>
-      <div class="card-body" style="padding:0;">
-        <div id="masterItemTableContainer">
-          <table>
-            <thead>
-              <tr>
-                <th style="text-align:left;padding:10px 18px;">NAMA</th>
-                <th style="text-align:left;padding:10px 18px;">SATUAN</th>
-                <th style="text-align:center;padding:10px 18px;width:180px;">AKSI</th>
-              </tr>
-            </thead>
-            <tbody id="masterItemTableBody">
-              <tr>
-                <td colspan="3" style="text-align:center;padding:40px;color:var(--gray-5);">
-                  <div style="font-size:40px;margin-bottom:10px;"></div>
-                  Memuat data...
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── TAB: AI Assistant ── -->
-  <div id="sec-ai" class="tab-section">
-    <div class="card">
-      <div class="card-head">AI Assistant dengan DeepSeek</div>
-      <div class="card-body">
-
-        <!-- Toggle AI -->
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <div class="tl">Aktifkan AI Assistant</div>
-            <div class="td">Menggunakan DeepSeek API untuk chat dan analitik otomatis</div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="aiEnabled"/>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-
-        <!-- API Key -->
-        <div class="field" style="margin-top:12px">
-          <label>DeepSeek API Key</label>
-          <input id="deepseekApiKey" type="password" placeholder="sk-xxxxxxxxxxxx"/>
-          <small>Dapatkan API key di <a href="https://platform.deepseek.com" target="_blank" style="color:var(--blue)">platform.deepseek.com</a></small>
-        </div>
-
-        <!-- API URL (optional) -->
-        <div class="field">
-          <label>API URL (opsional)</label>
-          <input id="deepseekApiUrl" type="text" placeholder="https://api.deepseek.com/v1/chat/completions"/>
-          <small>Kosongkan untuk menggunakan default DeepSeek API</small>
-        </div>
-
-        <!-- Model -->
-        <div class="field">
-          <label>Model</label>
-          <select id="deepseekModel">
-            <option value="deepseek-chat">deepseek-chat (recommended)</option>
-            <option value="deepseek-reasoner">deepseek-reasoner</option>
-          </select>
-        </div>
-
-        <!-- Test Connection -->
-        <div style="display:flex;gap:8px;align-items:center">
-          <button class="btn btn-outline" onclick="testAIConnection()" id="btnTestAI">
-             Test Koneksi
-          </button>
-          <span id="aiTestResult" style="font-size:12px"></span>
-        </div>
-
-        <!-- Save -->
-        <div class="save-bar">
-          <button class="btn btn-blue" onclick="saveAISettings()"> Simpan Pengaturan AI</button>
-          <span class="save-ok" id="aiOk" style="display:none">Tersimpan</span>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Info -->
-    <div class="card" style="margin-top:12px">
-      <div class="card-head">ℹ️ Cara Menggunakan</div>
-      <div class="card-body" style="gap:8px">
-        <p style="font-size:13px;line-height:1.6">
-          <strong>1. AI Chat di Dashboard</strong><br/>
-          Klik tombol <strong>[Tanya AI]</strong> di dashboard untuk bertanya tentang data bisnis.
-        </p>
-        <p style="font-size:13px;line-height:1.6">
-          <strong>2. AI Insight (Analitik Otomatis)</strong><br/>
-          Akses menu <strong>[AI Insight]</strong> untuk melihat analisis tren dan rekomendasi bisnis otomatis.
-        </p>
-        <p style="font-size:13px;line-height:1.6;color:var(--gray-5)">
-          Cache insight akan diperbarui setiap 1 jam untuk menghemat biaya API.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── TAB: User ── -->
-  <div id="sec-user" class="tab-section">
-    <div class="card">
-      <div class="card-head">
-        Manajemen User
-        <button class="btn btn-blue btn-sm" onclick="openAddUser()">+ Tambah User</button>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Nama</th>
-            <th>Username</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="userBody">
-          <tr class="empty-row"><td colspan="5">Memuat…</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div style="margin-top:10px;font-size:12px;color:var(--gray-5);padding:0 4px">
-      * Hanya admin yang dapat mengelola user. Menghapus user akan menonaktifkan (bukan hapus permanen).
-    </div>
-  </div>
-
-  <!-- ── TAB: Backup ── -->
-  <div id="sec-backup" class="tab-section">
-    <div class="card">
-      <div class="card-head"> Backup & Restore Database</div>
-      <div class="card-body">
-        <div class="backup-grid">
-          <div class="backup-card">
-            <div class="icon">⬇️</div>
-            <h4>Download Backup</h4>
-            <p>Download salinan database SQLite. Simpan di tempat aman sebagai cadangan data.</p>
-            <button class="btn btn-blue" onclick="downloadBackup()">⬇️ Download Backup</button>
-          </div>
-          <div class="backup-card">
-            <div class="icon">⬆️</div>
-            <h4>Restore dari Backup</h4>
-            <p>Upload file backup .db. File akan disimpan sementara. <strong>Server perlu direstart</strong> untuk menerapkan restore.</p>
-            <div style="margin-bottom:12px">
-              <input type="file" id="restoreFile" accept=".db" style="font-size:12px;width:100%"/>
-            </div>
-            <button class="btn btn-outline" onclick="uploadRestore()">⬆️ Upload & Restore</button>
-          </div>
-        </div>
-        <div style="background:var(--yellow-lt);border:1px solid #fde68a;border-radius:8px;padding:14px;margin-top:16px;font-size:13px">
-          <strong>Perhatian Restore:</strong><br/>
-          1. Download backup terbaru sebelum restore.<br/>
-          2. Upload file .db backup yang valid.<br/>
-          3. Setelah upload berhasil, hentikan server dan rename file <code>laundry.db.restore</code> ke <code>laundry.db</code>.<br/>
-          4. Jalankan ulang server.
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- User Modal -->
-<div class="modal-bg" id="userModal">
-  <div class="modal">
-    <div class="modal-head">
-      <h3 id="userModalTitle">Tambah User</h3>
-      <button class="btn-ghost" onclick="closeUserModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="uEditId"/>
-      <div class="form-row">
-        <div class="field"><label>Nama *</label><input id="uNama" type="text" placeholder="Nama lengkap"/></div>
-        <div class="field"><label>Username *</label><input id="uUsername" type="text" placeholder="username (huruf+angka)"/></div>
-      </div>
-      <div class="form-row">
-        <div class="field">
-          <label>Password <span id="uPwHint" style="color:var(--gray-5)">(isi untuk ubah)</span></label>
-          <input id="uPassword" type="password" placeholder="Min. 6 karakter"/>
-        </div>
-        <div class="field">
-          <label>Role</label>
-          <select id="uRole">
-            <option value="karyawan">Karyawan — akses operasional harian</option>
-            <option value="owner">Owner — akses penuh (laporan, keuangan, pengaturan)</option>
-          </select>
-        </div>
-      </div>
-      <div class="field" id="uAktifWrap" style="display:none">
-        <label style="display:flex;align-items:center;gap:8px">
-          <input type="checkbox" id="uAktif" checked/> Aktif
-        </label>
-      </div>
-      <div class="err-msg" id="uErr"></div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-outline" onclick="closeUserModal()">Batal</button>
-      <button class="btn btn-blue" id="uSaveBtn" onclick="saveUser()">Simpan</button>
-    </div>
-  </div>
-</div>
-
-<!-- Master Pakaian Modal -->
-<div class="modal-bg" id="masterItemModal">
-  <div class="modal">
-    <div class="modal-head">
-      <h3 id="masterItemModalTitle">Tambah Master Pakaian</h3>
-      <button class="btn-ghost" onclick="closeMasterItemModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="miEditId"/>
-      <div class="field">
-        <label>Nama Pakaian *</label>
-        <input id="miNama" type="text" placeholder="Contoh: Baju, Celana, Handuk..." maxlength="100"/>
-      </div>
-      <div class="field">
-        <label>Satuan</label>
-        <select id="miSatuan">
-          <option value="pcs">pcs</option>
-          <option value="pasang">pasang</option>
-          <option value="set">set</option>
-          <option value="lembar">lembar</option>
-          <option value="buah">buah</option>
-        </select>
-      </div>
-      <div class="err-msg" id="miErr"></div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-outline" onclick="closeMasterItemModal()">Batal</button>
-      <button class="btn btn-blue" id="miSaveBtn" onclick="saveMasterItem()">Simpan</button>
     </div>
   </div>
 </div>
@@ -817,17 +710,10 @@
 <script>
 // ── State ─────────────────────────────────────────────────────────────────────
 let settings = {};
-let myRole = '';
-let myId = 0;
+let currentSec = null;
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 (async () => {
-  try {
-    const d = await api('/api/v1/auth/me');
-    document.getElementById('userName').textContent = d.user?.nama || '–';
-    myRole = d.user?.role || '';
-    myId = d.user?.id || 0;
-  } catch {}
   await loadSettings();
 })();
 
@@ -838,56 +724,35 @@ async function api(url, opts = {}) {
   return j;
 }
 
-async function logout() {
-  await fetch('/api/v1/auth/logout', { method:'POST', credentials:'include' });
-  location.href = '/login';
-}
+// ── Section navigation ───────────────────────────────────────────────────────
+function openSec(id) {
+  currentSec = id;
+  document.body.classList.add('viewing');
+  document.querySelectorAll('.sec-view').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('sec-' + id);
+  el?.classList.add('active');
+  const title = el?.getAttribute('data-title') || 'Pengaturan';
+  document.getElementById('stTitle').textContent = title;
+  const backBtn = document.getElementById('btnHeaderBack');
+  backBtn.setAttribute('href', 'javascript:void(0)');
+  backBtn.onclick = (e) => { e.preventDefault(); closeSec(); };
 
-// ── Tab ───────────────────────────────────────────────────────────────────────
-function switchTab(id, btn) {
-  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-  document.getElementById('sec-' + id).classList.add('active');
-  btn.classList.add('active');
-  if (id === 'user') loadUsers();
+  // Load section data
   if (id === 'printer') cekPrinter();
   if (id === 'margin') loadMarginSummary();
-  if (id === 'master-item') loadMasterItems();
-  if (id === 'antar-jemput') loadAJSettings();
   if (id === 'template') loadTpl();
+  window.scrollTo(0, 0);
 }
 
-// ── Antar Jemput settings ────────────────────────────────────────────────────
-async function loadAJSettings() {
-  try {
-    const { data } = await api('/api/v1/antar-jemput/settings');
-    document.getElementById('ajHargaBBM').value = data.aj_harga_bbm;
-    document.getElementById('ajKonsumsi').value = data.aj_konsumsi_bbm;
-    document.getElementById('ajBiayaAus').value = data.aj_biaya_aus;
-    document.getElementById('ajKecepatan').value = data.aj_kecepatan;
-    document.getElementById('ajJamKerja').value = data.aj_jam_kerja;
-    document.getElementById('ajUpdatedAt').textContent = data.updated_at
-      ? new Date(data.updated_at).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' })
-      : '–';
-  } catch (e) { toast('Gagal memuat pengaturan AJ: ' + e.message, true); }
-}
-
-async function saveAJSettings() {
-  try {
-    await api('/api/v1/antar-jemput/settings', {
-      method: 'PUT',
-      body: JSON.stringify({
-        aj_harga_bbm: Number(document.getElementById('ajHargaBBM').value),
-        aj_konsumsi_bbm: Number(document.getElementById('ajKonsumsi').value),
-        aj_biaya_aus: Number(document.getElementById('ajBiayaAus').value),
-        aj_kecepatan: Number(document.getElementById('ajKecepatan').value),
-        aj_jam_kerja: Number(document.getElementById('ajJamKerja').value),
-      })
-    });
-    showOk('ajOk');
-    toast('Pengaturan antar jemput disimpan');
-    loadAJSettings();
-  } catch (e) { toast(e.message, true); }
+function closeSec() {
+  currentSec = null;
+  document.body.classList.remove('viewing');
+  document.querySelectorAll('.sec-view').forEach(s => s.classList.remove('active'));
+  document.getElementById('stTitle').textContent = 'Pengaturan';
+  const backBtn = document.getElementById('btnHeaderBack');
+  backBtn.setAttribute('href', '/dashboard');
+  backBtn.onclick = null;
+  window.scrollTo(0, 0);
 }
 
 // ── Load settings ─────────────────────────────────────────────────────────────
@@ -898,7 +763,6 @@ async function loadSettings() {
 
     // Umum
     document.getElementById('sNamaToko').value = data.nama_toko || '';
-    // Konversi 628xxx → 08xxx untuk tampilan
     let telepon = data.telepon_toko || '';
     if (telepon.startsWith('62')) telepon = '0' + telepon.slice(2);
     document.getElementById('sTelepon').value = telepon;
@@ -906,8 +770,7 @@ async function loadSettings() {
     document.getElementById('sEmail').value = data.email_toko || '';
     document.getElementById('sJam').value = data.jam_operasional || '';
     document.getElementById('sFooter').value = data.footer_struk || '';
-    const lebar = data.struk_lebar || '80mm';
-    document.getElementById('sStrukLebar').value = lebar;
+    document.getElementById('sStrukLebar').value = data.struk_lebar || '80mm';
 
     // WA toggles
     document.getElementById('tAutoNota').checked = data.wa_auto_nota === 'true';
@@ -919,7 +782,7 @@ async function loadSettings() {
     document.getElementById(waMode === 'business' ? 'rModeBusiness' : 'rModeRegular').checked = true;
     highlightWAMode(waMode);
 
-    // Printer settings
+    // Printer
     document.getElementById('pPrinterPort').value = data.printer_port || '/dev/usb/lp0';
     const pt = data.printer_type || 'EPSON';
     const ptSel = document.getElementById('pPrinterType');
@@ -930,12 +793,12 @@ async function loadSettings() {
     document.getElementById('tplTagihan').value = data.wa_template_tagihan || '';
     document.getElementById('tplNotif').value = data.wa_template_notif_selesai || '';
 
-    // Margin settings
+    // Margin
     document.getElementById('marginPembulatan').value = data.margin_pembulatan || 'ratusan';
     document.getElementById('marginDefault').value = data.margin_default_persen || '40';
     document.getElementById('marginTampilkan').checked = data.margin_tampilkan_info !== '0';
 
-    // AI settings
+    // AI
     document.getElementById('aiEnabled').checked = data.ai_enabled === 1 || data.ai_enabled === '1' || data.ai_enabled === 'true' || data.ai_enabled === true;
     document.getElementById('deepseekApiKey').value = data.deepseek_api_key || '';
     document.getElementById('deepseekApiUrl').value = data.deepseek_api_url || '';
@@ -946,17 +809,12 @@ async function loadSettings() {
 // ── Save Umum ─────────────────────────────────────────────────────────────────
 async function saveUmum() {
   try {
-    // Konversi 08xxx → 628xxx untuk API
     let telepon = document.getElementById('sTelepon').value.trim();
     if (telepon) {
       telepon = telepon.replace(/\D/g, '');
-      if (telepon.startsWith('0')) {
-        telepon = '62' + telepon.slice(1);
-      } else if (!telepon.startsWith('62')) {
-        telepon = '62' + telepon;
-      }
+      if (telepon.startsWith('0')) telepon = '62' + telepon.slice(1);
+      else if (!telepon.startsWith('62')) telepon = '62' + telepon;
     }
-
     await api('/api/v1/pengaturan', {
       method: 'PUT',
       body: JSON.stringify({
@@ -981,8 +839,8 @@ function onWAModeChange() {
 }
 
 function highlightWAMode(mode) {
-  document.getElementById('modeRegularLabel').style.borderColor = mode === 'regular' ? 'var(--wa)' : 'var(--gray-3)';
-  document.getElementById('modeBusinessLabel').style.borderColor = mode === 'business' ? 'var(--wa)' : 'var(--gray-3)';
+  document.getElementById('modeRegularLabel').classList.toggle('active', mode === 'regular');
+  document.getElementById('modeBusinessLabel').classList.toggle('active', mode === 'business');
 }
 
 async function saveWAMode() {
@@ -1001,10 +859,10 @@ async function cekPrinter() {
   const txt = document.getElementById('printerStatusTxt');
   const port = document.getElementById('printerStatusPort');
   const btn = document.getElementById('testPrintBtn');
-  if (!dot) return; // tab belum dirender
+  if (!dot) return;
 
-  dot.style.background = '#94a3b8';
-  txt.textContent = 'Memeriksa...';
+  dot.style.background = '#94A3B8';
+  txt.textContent = 'Memeriksa…';
 
   try {
     const d = await api('/api/v1/printer/status');
@@ -1019,7 +877,7 @@ async function cekPrinter() {
       btn.disabled = true;
     }
   } catch (e) {
-    dot.style.cssText = 'width:14px;height:14px;border-radius:50%;flex-shrink:0;background:#f59e0b';
+    dot.style.cssText = 'width:14px;height:14px;border-radius:50%;flex-shrink:0;background:#F59E0B';
     txt.textContent = 'Gagal cek printer: ' + e.message;
     if (btn) btn.disabled = true;
   }
@@ -1028,13 +886,12 @@ async function cekPrinter() {
 async function testPrint() {
   const btn = document.getElementById('testPrintBtn');
   btn.disabled = true;
-  btn.textContent = '⏳ Mencetak...';
+  btn.textContent = 'Mencetak…';
   try {
     await api('/api/v1/printer/test', { method: 'POST' });
-    toast('Test print berhasil dicetak!');
-  } catch (e) {
-    toast(e.message, true);
-  } finally {
+    toast('Test print berhasil dicetak');
+  } catch (e) { toast(e.message, true); }
+  finally {
     btn.textContent = 'Test Print';
     cekPrinter();
   }
@@ -1079,110 +936,6 @@ function showOk(id) {
   setTimeout(() => el.style.display = 'none', 3000);
 }
 
-// ── Users ─────────────────────────────────────────────────────────────────────
-async function loadUsers() {
-  try {
-    const { data } = await api('/api/v1/users');
-    const tb = document.getElementById('userBody');
-    if (!data.length) {
-      tb.innerHTML = '<tr class="empty-row"><td colspan="5">Belum ada user</td></tr>';
-      return;
-    }
-    const roleLabel = r => r === 'owner' ? 'Owner' : (r === 'karyawan' ? 'Karyawan' : r);
-    tb.innerHTML = data.map(u => `
-      <tr>
-        <td style="font-weight:600">${esc(u.nama)}</td>
-        <td style="font-family:monospace;color:var(--gray-5)">${esc(u.username)}</td>
-        <td><span class="role-badge role-${esc(u.role)}">${roleLabel(u.role)}</span></td>
-        <td>${u.aktif ? '<span style="color:var(--green);font-weight:600">Aktif</span>' : '<span style="color:var(--red)"> Nonaktif</span>'}</td>
-        <td style="white-space:nowrap">
-          <button class="btn btn-outline btn-sm" onclick="openEditUser(${u.id})">Edit</button>
-          ${u.id !== myId ? `<button class="btn btn-ghost btn-sm" onclick="toggleUser(${u.id},${u.aktif})">${u.aktif ? 'Nonaktifkan' : 'Aktifkan'}</button>` : ''}
-        </td>
-      </tr>
-    `).join('');
-  } catch (e) { toast(e.message, true); }
-}
-
-function openAddUser() {
-  document.getElementById('uEditId').value = '';
-  document.getElementById('userModalTitle').textContent = 'Tambah User';
-  document.getElementById('uNama').value = '';
-  document.getElementById('uUsername').value = '';
-  document.getElementById('uPassword').value = '';
-  document.getElementById('uRole').value = 'karyawan';
-  document.getElementById('uPwHint').textContent = '';
-  document.getElementById('uAktifWrap').style.display = 'none';
-  document.getElementById('uErr').textContent = '';
-  document.getElementById('userModal').classList.add('open');
-  setTimeout(() => document.getElementById('uNama').focus(), 100);
-}
-
-async function openEditUser(id) {
-  try {
-    const { data } = await api('/api/v1/users');
-    const u = data.find(x => x.id === id);
-    if (!u) return;
-
-    document.getElementById('uEditId').value = u.id;
-    document.getElementById('userModalTitle').textContent = 'Edit User';
-    document.getElementById('uNama').value = u.nama;
-    document.getElementById('uUsername').value = u.username;
-    document.getElementById('uPassword').value = '';
-    document.getElementById('uRole').value = u.role;
-    document.getElementById('uPwHint').textContent = '(kosongkan jika tidak ubah)';
-    document.getElementById('uAktifWrap').style.display = 'block';
-    document.getElementById('uAktif').checked = u.aktif;
-    document.getElementById('uErr').textContent = '';
-    document.getElementById('userModal').classList.add('open');
-  } catch (e) { toast(e.message, true); }
-}
-
-function closeUserModal() { document.getElementById('userModal').classList.remove('open'); }
-
-async function saveUser() {
-  const id = document.getElementById('uEditId').value;
-  const body = {
-    nama: document.getElementById('uNama').value.trim(),
-    username: document.getElementById('uUsername').value.trim(),
-    role: document.getElementById('uRole').value
-  };
-  const pw = document.getElementById('uPassword').value;
-  if (pw) body.password = pw;
-  if (id) body.aktif = document.getElementById('uAktif').checked;
-
-  document.getElementById('uErr').textContent = '';
-  const btn = document.getElementById('uSaveBtn');
-  btn.disabled = true;
-
-  try {
-    if (id) {
-      await api(`/api/v1/users/${id}`, { method:'PUT', body: JSON.stringify(body) });
-      toast('User berhasil diperbarui');
-    } else {
-      if (!body.password) { document.getElementById('uErr').textContent = 'Password wajib diisi'; btn.disabled = false; return; }
-      await api('/api/v1/users', { method:'POST', body: JSON.stringify(body) });
-      toast('User berhasil dibuat');
-    }
-    closeUserModal();
-    loadUsers();
-  } catch (e) {
-    document.getElementById('uErr').textContent = e.message;
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-async function toggleUser(id, aktif) {
-  const action = aktif ? 'nonaktifkan' : 'aktifkan';
-  if (!confirm(`Yakin ${action} user ini?`)) return;
-  try {
-    await api(`/api/v1/users/${id}`, { method:'PUT', body: JSON.stringify({ aktif: !aktif }) });
-    toast(`User berhasil di${action}`);
-    loadUsers();
-  } catch (e) { toast(e.message, true); }
-}
-
 // ── Backup ────────────────────────────────────────────────────────────────────
 function downloadBackup() {
   const a = document.createElement('a');
@@ -1200,20 +953,17 @@ async function uploadRestore() {
   if (!file.name.endsWith('.db') && !file.name.endsWith('.sqlite')) {
     toast('File harus berekstensi .db', true); return;
   }
-
   if (!confirm('Upload file restore? Server perlu direstart setelah upload untuk menerapkan perubahan.')) return;
-
   try {
     const buf = await file.arrayBuffer();
     const r = await fetch('/api/v1/pengaturan/restore', {
-      method: 'POST',
-      credentials: 'include',
+      method: 'POST', credentials: 'include',
       headers: { 'Content-Type': 'application/octet-stream' },
       body: buf
     });
     const j = await r.json();
     if (!r.ok) throw new Error(j.error);
-    alert(' ' + j.message + '\n\n' + (j.note || ''));
+    alert(j.message + '\n\n' + (j.note || ''));
     toast('File backup berhasil diupload');
   } catch (e) { toast(e.message, true); }
 }
@@ -1237,34 +987,33 @@ async function loadMarginSummary() {
   const el = document.getElementById('marginSummaryBody');
   if (!el) return;
   try {
-    const r = await fetch('/api/v1/layanan/all');
+    const r = await fetch('/api/v1/layanan/all', { credentials:'include' });
     const d = await r.json();
     const rows = (d.data || []).filter(l => l.aktif);
     const withHpp = rows.filter(l => Number(l.hpp) > 0);
     if (!withHpp.length) {
-      el.innerHTML = '<div style="color:var(--gray-5);font-size:13px">Belum ada layanan dengan HPP yang diisi. <a href="/layanan" style="color:var(--blue)">Isi di halaman Layanan →</a></div>';
+      el.innerHTML = '<div style="color:#94A3B8;font-size:13px">Belum ada layanan dengan HPP yang diisi. <a href="/layanan" style="color:#2D3BB5;text-decoration:none;font-weight:700">Isi di halaman Layanan &rarr;</a></div>';
       return;
     }
     const tableRows = withHpp.map(l => {
       const hpp = Number(l.hpp);
-      // Rumus margin: (harga - hpp) / harga × 100
       const mar = hpp > 0 ? ((l.harga - hpp) / l.harga * 100).toFixed(0) : 0;
       const untung = l.harga - hpp;
-      const mc = mar >= 30 ? 'var(--green)' : mar >= 20 ? 'var(--yellow)' : 'var(--red)';
+      const mc = mar >= 30 ? '#10B981' : mar >= 20 ? '#F59E0B' : '#EF4444';
       return `<tr>
-        <td style="font-weight:600">${esc(l.nama)}</td>
+        <td style="font-weight:700">${esc(l.nama)}</td>
         <td>Rp ${Number(hpp).toLocaleString('id-ID')}</td>
         <td>Rp ${Number(l.harga).toLocaleString('id-ID')}</td>
         <td style="color:${mc};font-weight:700">${mar}%</td>
-        <td style="color:var(--green)">Rp ${Number(untung).toLocaleString('id-ID')}</td>
+        <td style="color:#10B981">Rp ${Number(untung).toLocaleString('id-ID')}</td>
       </tr>`;
     }).join('');
-    el.innerHTML = `<table>
+    el.innerHTML = `<div style="overflow-x:auto"><table>
       <thead><tr><th>Layanan</th><th>HPP</th><th>Harga Jual</th><th>Margin</th><th>Untung/unit</th></tr></thead>
       <tbody>${tableRows}</tbody>
-    </table>
-    <div style="margin-top:8px;font-size:12px;color:var(--gray-5)">${rows.length - withHpp.length} layanan aktif belum ada HPP</div>`;
-  } catch { el.innerHTML = '<div style="color:var(--red)">Gagal memuat data</div>'; }
+    </table></div>
+    <div style="margin-top:8px;font-size:12px;color:#94A3B8">${rows.length - withHpp.length} layanan aktif belum ada HPP</div>`;
+  } catch { el.innerHTML = '<div style="color:#EF4444">Gagal memuat data</div>'; }
 }
 
 // ── AI Settings ───────────────────────────────────────────────────────────────
@@ -1288,13 +1037,9 @@ async function saveAISettings() {
         deepseek_model: model
       })
     });
-
-    document.getElementById('aiOk').style.display = 'inline';
-    setTimeout(() => document.getElementById('aiOk').style.display = 'none', 3000);
+    showOk('aiOk');
     toast('Pengaturan AI berhasil disimpan');
-  } catch (e) {
-    toast('Gagal menyimpan: ' + e.message, true);
-  }
+  } catch (e) { toast('Gagal menyimpan: ' + e.message, true); }
 }
 
 async function testAIConnection() {
@@ -1303,7 +1048,7 @@ async function testAIConnection() {
 
   try {
     btn.disabled = true;
-    btn.textContent = '⏳ Testing...';
+    btn.textContent = 'Testing…';
     result.textContent = '';
     result.style.color = '';
 
@@ -1311,155 +1056,22 @@ async function testAIConnection() {
     const apiUrl = document.getElementById('deepseekApiUrl').value.trim();
     const model = document.getElementById('deepseekModel').value;
 
-    if (!apiKey) {
-      throw new Error('API Key harus diisi');
-    }
+    if (!apiKey) throw new Error('API Key harus diisi');
 
     const res = await api('/api/v1/ai/test-connection', {
       method: 'POST',
       body: JSON.stringify({ apiKey, apiUrl, model })
     });
-
-    result.textContent = '' + res.message;
-    result.style.color = 'var(--green)';
-    toast('Koneksi berhasil!');
+    result.textContent = res.message || 'Koneksi berhasil';
+    result.style.color = '#10B981';
+    toast('Koneksi berhasil');
   } catch (e) {
-    result.textContent = ' ' + e.message;
-    result.style.color = 'var(--red)';
+    result.textContent = e.message;
+    result.style.color = '#EF4444';
     toast('Koneksi gagal: ' + e.message, true);
   } finally {
     btn.disabled = false;
-    btn.textContent = ' Test Koneksi';
-  }
-}
-
-// ── Master Item ───────────────────────────────────────────────────────────────
-let masterItems = [];
-
-async function loadMasterItems() {
-  try {
-    const res = await api('/api/v1/master-item');
-    masterItems = res.data || [];
-    renderMasterItemsTable();
-  } catch (err) {
-    console.error('[loadMasterItems]', err);
-    toast('Gagal memuat master item', true);
-  }
-}
-
-function renderMasterItemsTable() {
-  const tbody = document.getElementById('masterItemTableBody');
-
-  if (masterItems.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="3" style="text-align:center;padding:40px;color:var(--gray-5);">
-          <div style="font-size:40px;margin-bottom:10px;"></div>
-          Belum ada master pakaian.<br/>
-          <button class="btn btn-sm btn-blue" onclick="openMasterItemModal()" style="margin-top:12px;">+ Tambah Pakaian Pertama</button>
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  tbody.innerHTML = masterItems.map(item => `
-    <tr>
-      <td style="padding:12px 18px;font-weight:600;">${esc(item.nama)}</td>
-      <td style="padding:12px 18px;color:var(--gray-5);">${esc(item.satuan)}</td>
-      <td style="padding:12px 18px;text-align:center;">
-        <button class="btn btn-sm btn-outline" onclick="editMasterItem(${item.id})">Edit</button>
-        <button class="btn btn-sm btn-red" onclick="deleteMasterItem(${item.id}, '${esc(item.nama)}')">Hapus</button>
-      </td>
-    </tr>
-  `).join('');
-}
-
-function openMasterItemModal(editId = null) {
-  const modal = document.getElementById('masterItemModal');
-  const title = document.getElementById('masterItemModalTitle');
-  const idInput = document.getElementById('miEditId');
-  const namaInput = document.getElementById('miNama');
-  const satuanSelect = document.getElementById('miSatuan');
-  const errDiv = document.getElementById('miErr');
-
-  errDiv.textContent = '';
-
-  if (editId) {
-    const item = masterItems.find(m => m.id === editId);
-    if (!item) return;
-
-    title.textContent = 'Edit Master Pakaian';
-    idInput.value = item.id;
-    namaInput.value = item.nama;
-    satuanSelect.value = item.satuan;
-  } else {
-    title.textContent = 'Tambah Master Pakaian';
-    idInput.value = '';
-    namaInput.value = '';
-    satuanSelect.value = 'pcs';
-  }
-
-  modal.classList.add('open');
-  namaInput.focus();
-}
-
-function closeMasterItemModal() {
-  document.getElementById('masterItemModal').classList.remove('open');
-}
-
-async function saveMasterItem() {
-  const idInput = document.getElementById('miEditId');
-  const namaInput = document.getElementById('miNama');
-  const satuanSelect = document.getElementById('miSatuan');
-  const errDiv = document.getElementById('miErr');
-  const saveBtn = document.getElementById('miSaveBtn');
-
-  const nama = namaInput.value.trim();
-  const satuan = satuanSelect.value;
-
-  errDiv.textContent = '';
-
-  if (!nama) {
-    errDiv.textContent = 'Nama pakaian harus diisi';
-    return;
-  }
-
-  const isEdit = !!idInput.value;
-  const url = isEdit ? `/api/v1/master-item/${idInput.value}` : '/api/v1/master-item';
-  const method = isEdit ? 'PUT' : 'POST';
-
-  saveBtn.disabled = true;
-  saveBtn.textContent = 'Menyimpan...';
-
-  try {
-    await api(url, { method, body: JSON.stringify({ nama, satuan }) });
-    toast(isEdit ? 'Master pakaian berhasil diperbarui' : 'Master pakaian berhasil ditambahkan');
-    closeMasterItemModal();
-    loadMasterItems();
-  } catch (err) {
-    errDiv.textContent = err.message || 'Gagal menyimpan master pakaian';
-  } finally {
-    saveBtn.disabled = false;
-    saveBtn.textContent = 'Simpan';
-  }
-}
-
-function editMasterItem(id) {
-  openMasterItemModal(id);
-}
-
-async function deleteMasterItem(id, nama) {
-  if (!confirm(`Hapus master pakaian "${nama}"?\n\nPakaian ini tidak akan muncul lagi di grid rincian order baru.`)) {
-    return;
-  }
-
-  try {
-    await api(`/api/v1/master-item/${id}`, { method: 'DELETE' });
-    toast('Master item berhasil dihapus');
-    loadMasterItems();
-  } catch (err) {
-    toast(err.message || 'Gagal menghapus master item', true);
+    btn.textContent = 'Test Koneksi';
   }
 }
 
@@ -1469,9 +1081,9 @@ const tplState = {
   config: { elemen: [] },
   meta: { labels: {}, wajib: [] },
   tersimpan: false,
-  loaded: { struk: false, label: false },
-  cache: { struk: null, label: null },
 };
+
+const SVG_HANDLE = '<svg width="14" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>';
 
 function switchTplSub(jenis) {
   tplState.jenis = jenis;
@@ -1487,15 +1099,11 @@ async function loadTpl() {
     tplState.config = r.config;
     tplState.meta = r.meta || tplState.meta;
     tplState.tersimpan = !!r.tersimpan;
-    tplState.cache[j] = r.config;
-    tplState.loaded[j] = true;
     renderTplList();
     renderTplPreview();
     document.getElementById('tplStatusLabel').textContent =
       r.tersimpan ? 'Pakai template tersimpan' : 'Pakai default (belum disimpan)';
-  } catch (e) {
-    toast('Gagal memuat template: ' + e.message, true);
-  }
+  } catch (e) { toast('Gagal memuat template: ' + e.message, true); }
 }
 
 function renderTplList() {
@@ -1511,7 +1119,7 @@ function renderTplList() {
     const lbl = labels[el.id] || el.id;
     return `
       <li draggable="true" data-id="${el.id}" data-idx="${idx}">
-        <span class="handle" aria-label="Drag" title="Geser untuk urutkan">⠿</span>
+        <span class="handle" aria-label="Drag" title="Geser untuk urutkan">${SVG_HANDLE}</span>
         <input type="checkbox" ${checked} ${disabled}
                onchange="onTplToggle('${el.id}', this.checked)"/>
         <span class="lbl">${esc(lbl)}</span>
@@ -1520,7 +1128,6 @@ function renderTplList() {
     `;
   }).join('');
 
-  // Wire drag-and-drop (native HTML5)
   let dragId = null;
   ul.querySelectorAll('li').forEach(li => {
     li.addEventListener('dragstart', (e) => {
@@ -1550,35 +1157,28 @@ function renderTplList() {
     });
   });
 
-  // Touch fallback — simple long-press swap via handle (mobile)
   ul.querySelectorAll('li').forEach(li => {
     const handle = li.querySelector('.handle');
     if (!handle) return;
-    let startY = 0;
     let activeLi = null;
-    handle.addEventListener('touchstart', (e) => {
+    handle.addEventListener('touchstart', () => {
       activeLi = li;
-      startY = e.touches[0].clientY;
       li.classList.add('dragging');
     }, { passive: true });
     handle.addEventListener('touchmove', (e) => {
       if (!activeLi) return;
-      const y = e.touches[0].clientY;
-      const target = document.elementFromPoint(e.touches[0].clientX, y);
+      const target = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
       const overLi = target && target.closest('#tplList li');
       ul.querySelectorAll('li').forEach(x => x.classList.remove('drag-over'));
       if (overLi && overLi !== activeLi) overLi.classList.add('drag-over');
     }, { passive: true });
     handle.addEventListener('touchend', (e) => {
       if (!activeLi) return;
-      const y = e.changedTouches[0].clientY;
-      const target = document.elementFromPoint(e.changedTouches[0].clientX, y);
+      const target = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
       const overLi = target && target.closest('#tplList li');
       activeLi.classList.remove('dragging');
       ul.querySelectorAll('li').forEach(x => x.classList.remove('drag-over'));
-      if (overLi && overLi !== activeLi) {
-        reorderTpl(activeLi.dataset.id, overLi.dataset.id);
-      }
+      if (overLi && overLi !== activeLi) reorderTpl(activeLi.dataset.id, overLi.dataset.id);
       activeLi = null;
     });
   });
@@ -1606,7 +1206,7 @@ function onTplToggle(id, aktif) {
   }
 }
 
-// Data dummy untuk preview live
+// Data dummy untuk preview
 const TPL_SAMPLE = {
   pengaturan: {
     nama_toko: 'Nala Laundry',
@@ -1641,12 +1241,8 @@ function renderTplPreview() {
   const pre = document.getElementById('tplPreview');
   if (!pre) return;
   const jenis = tplState.jenis;
-  const elements = (tplState.config.elemen || [])
-    .filter(e => e.aktif)
-    .slice().sort((a,b) => a.urutan - b.urutan);
-  pre.textContent = (jenis === 'label'
-    ? buildLabelPreview(elements)
-    : buildStrukPreview(elements));
+  const elements = (tplState.config.elemen || []).filter(e => e.aktif).slice().sort((a,b) => a.urutan - b.urutan);
+  pre.textContent = jenis === 'label' ? buildLabelPreview(elements) : buildStrukPreview(elements);
 }
 
 const LEBAR = 32;
@@ -1662,12 +1258,10 @@ function center(s) {
 }
 function fmtRp(n) { return Number(n||0).toLocaleString('id-ID'); }
 function fmtTglJam(d) {
-  return new Date(d).toLocaleString('id-ID', { timeZone:'Asia/Makassar',
-    day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  return new Date(d).toLocaleString('id-ID', { timeZone:'Asia/Makassar', day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
 }
 function fmtTgl(d) {
-  return new Date(d).toLocaleDateString('id-ID', { timeZone:'Asia/Makassar',
-    weekday:'short', day:'2-digit', month:'short', year:'numeric' });
+  return new Date(d).toLocaleDateString('id-ID', { timeZone:'Asia/Makassar', weekday:'short', day:'2-digit', month:'short', year:'numeric' });
 }
 function fmtTel(n) {
   if (!n) return '';
@@ -1714,7 +1308,7 @@ function buildStrukPreview(elements) {
       case 'nomor_order': out.push('No : ' + transaksi.nomor_transaksi); break;
       case 'tanggal': out.push('Tgl: ' + fmtTglJam(transaksi.tanggal_masuk)); break;
       case 'kasir': if (transaksi.kasir_nama) out.push('Kasir: ' + transaksi.kasir_nama); break;
-      case 'nama_pelanggan':out.push('Plg: ' + (transaksi.pelanggan_nama || 'Non-member')); break;
+      case 'nama_pelanggan': out.push('Plg: ' + (transaksi.pelanggan_nama || 'Non-member')); break;
       case 'nomor_wa': if (transaksi.pelanggan_telepon) out.push('WA : ' + transaksi.pelanggan_telepon); break;
       case 'daftar_layanan':
         out.push('LAYANAN:');
@@ -1765,7 +1359,7 @@ function buildStrukPreview(elements) {
         }
         break;
       case 'footer': out.push(center(pengaturan.footer_struk || 'Terima kasih!')); break;
-      case 'instruksi_ambil':out.push(center('Tunjukkan struk saat ambil.')); break;
+      case 'instruksi_ambil': out.push(center('Tunjukkan struk saat ambil.')); break;
     }
     lastGroup = g;
   }
@@ -1794,7 +1388,7 @@ function buildLabelPreview(elements) {
       case 'nomor_order': out.push('ORDER: ' + transaksi.nomor_transaksi); break;
       case 'tanggal': out.push('Tgl: ' + fmtTglJam(transaksi.tanggal_masuk)); break;
       case 'kasir': if (transaksi.kasir_nama) out.push('Kasir: ' + transaksi.kasir_nama); break;
-      case 'nama_pelanggan':out.push(transaksi.pelanggan_nama || 'Non-member'); break;
+      case 'nama_pelanggan': out.push(transaksi.pelanggan_nama || 'Non-member'); break;
       case 'nomor_wa': {
         const t = fmtTel(transaksi.pelanggan_telepon);
         if (t) out.push('WA: ' + t);
@@ -1845,7 +1439,7 @@ function buildLabelPreview(elements) {
         break;
       }
       case 'footer': out.push(center(pengaturan.footer_struk || 'Terima kasih!')); break;
-      case 'instruksi_ambil':out.push(center('Tunjukkan label saat ambil')); break;
+      case 'instruksi_ambil': out.push(center('Tunjukkan label saat ambil')); break;
     }
     lastGroup = g;
   }
@@ -1861,10 +1455,7 @@ async function saveTpl() {
         id: e.id, aktif: !!e.aktif, urutan: e.urutan
       })),
     };
-    const r = await api(`/api/v1/pengaturan/template/${j}`, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    });
+    const r = await api(`/api/v1/pengaturan/template/${j}`, { method: 'PUT', body: JSON.stringify(body) });
     tplState.config = r.config;
     tplState.tersimpan = true;
     document.getElementById('tplStatusLabel').textContent = 'Pakai template tersimpan';
@@ -1897,8 +1488,9 @@ function esc(s) {
 function toast(msg, err = false) {
   const el = document.getElementById('toast');
   el.textContent = msg;
-  el.className = 'toast show' + (err ? ' err' : '');
-  setTimeout(() => el.classList.remove('show'), 3500);
+  el.classList.add('show');
+  el.classList.toggle('err', !!err);
+  setTimeout(() => el.classList.remove('show'), 2500);
 }
 </script>
 <script src="/js/nav.js"></script>
