@@ -45,12 +45,10 @@
     .search-bar input:focus { border-color: #2D3BB5; }
 
     /* ── Filter pills ──────────────────────────────────── */
-    /* Spek: 4 pill SAMA LEBAR, Semua / Aktif / Selesai / Lewat Waktu.
-       Filter "Belum Lunas" SENGAJA tidak ada — urusan bayar hanya di Tagihan. */
     .pill-wrap { padding: 0 16px 12px; }
-    .pills { display: flex; gap: 6px; }
+    .pills { display: flex; gap: 6px; overflow-x: auto; }
     .pill {
-      flex: 1; height: 36px; padding: 0 8px; border-radius: 999px;
+      flex: 1; min-width: max-content; height: 36px; padding: 0 12px; border-radius: 999px;
       border: 1px solid #E2E8F0; background: #fff;
       font-size: 12px; font-weight: 600; cursor: pointer;
       color: #64748B; font-family: inherit;
@@ -112,6 +110,13 @@
     .oc-svc {
       font-size: 13px; color: #64748B; margin-top: 2px; line-height: 1.3;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .oc-dates {
+      font-size: 12px; color: #64748B; margin-top: 4px; line-height: 1.3;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .oc-dates svg {
+      flex-shrink: 0;
     }
     .oc-total {
       font-size: 15px; font-weight: 700; color: #1E2A6E; white-space: nowrap;
@@ -244,6 +249,7 @@
       <button class="pill active" data-quick="semua">Semua</button>
       <button class="pill" data-quick="aktif">Aktif</button>
       <button class="pill" data-quick="selesai">Selesai</button>
+      <button class="pill" data-quick="selesai_hari_ini">Selesai Hari Ini</button>
       <button class="pill" data-quick="lewat">Lewat Waktu</button>
     </div>
   </div>
@@ -267,12 +273,13 @@
                 <th>Total</th>
                 <th>Bayar</th>
                 <th>Status</th>
-                <th>Est. Selesai</th>
+                <th>Masuk</th>
+                <th>Selesai</th>
                 <th>Aksi</th>
               </tr>
             </thead>
             <tbody id="tableBody">
-              <tr><td colspan="8" style="text-align:center;padding:40px;color:#94A3B8">Memuat...</td></tr>
+              <tr><td colspan="9" style="text-align:center;padding:40px;color:#94A3B8">Memuat...</td></tr>
             </tbody>
           </table>
         </div>
@@ -351,23 +358,27 @@ async function loadOrders(page = 1) {
   let status = '';
   let sortParam = '';
   let clientFilter = null;
+  let selesaiHariIni = false;
 
   if (quickFilter === 'aktif') {
     clientFilter = t => ['pending','proses'].includes(t.status);
   } else if (quickFilter === 'selesai') {
     status = 'selesai';
+  } else if (quickFilter === 'selesai_hari_ini') {
+    selesaiHariIni = true;
   } else if (quickFilter === 'lewat') {
     clientFilter = isLewat;
   }
 
   const params = new URLSearchParams({ page, limit: clientFilter ? 200 : 20 });
-  if (q)         params.set('q', q);
-  if (status)    params.set('status', status);
-  if (sortParam) params.set('sort', sortParam);
+  if (q)              params.set('q', q);
+  if (status)         params.set('status', status);
+  if (selesaiHariIni) params.set('selesai_hari_ini', '1');
+  if (sortParam)      params.set('sort', sortParam);
 
   document.getElementById('cardList').innerHTML = '<div class="empty">Memuat…</div>';
   document.getElementById('tableBody').innerHTML =
-    '<tr><td colspan="8" style="text-align:center;padding:40px;color:#94A3B8">Memuat...</td></tr>';
+    '<tr><td colspan="9" style="text-align:center;padding:40px;color:#94A3B8">Memuat...</td></tr>';
 
   try {
     const r = await fetch('/api/v1/transaksi?' + params, { credentials: 'include' });
@@ -429,6 +440,13 @@ function renderCards(rows) {
       ? '<span class="badge b-lunas">Lunas</span>'
       : (isDP ? '<span class="badge b-dp">DP</span>' : '<span class="badge b-belum">Belum Lunas</span>');
 
+    // Format tanggal masuk dan selesai
+    const masukLabel = fmtDateShort(t.tanggal_masuk);
+    const selesaiLabel = t.status === 'selesai' || t.status === 'diambil'
+      ? fmtDateShort(t.updated_at)
+      : fmtDateShort(t.tanggal_selesai);
+    const selesaiText = t.status === 'selesai' || t.status === 'diambil' ? 'Selesai' : 'Estimasi';
+
     const next = nextStatus(t.status);
     const actions = [];
     if (next && t.status !== 'dibatalkan') {
@@ -456,6 +474,10 @@ function renderCards(rows) {
             <div class="oc-mid">
               <div class="oc-nama">${escHtml(t.pelanggan_nama || 'Non-member')}</div>
               <div class="oc-svc" title="${escHtml(layanan)}">${escHtml(layanan)}</div>
+              <div class="oc-dates">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                <span>Masuk: ${masukLabel} · ${selesaiText}: ${selesaiLabel}</span>
+              </div>
             </div>
             <div class="oc-total">${fmtRp(t.total_bayar)}</div>
           </div>
@@ -468,7 +490,7 @@ function renderCards(rows) {
 function renderTable(rows) {
   const tbody = document.getElementById('tableBody');
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:#94A3B8">Tidak ada order di filter ini</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:40px;color:#94A3B8">Tidak ada order di filter ini</td></tr>`;
     return;
   }
   tbody.innerHTML = rows.map(t => {
@@ -484,6 +506,10 @@ function renderTable(rows) {
     const badgePay = lunas
       ? '<span class="badge b-lunas">Lunas</span>'
       : (isDP ? '<span class="badge b-dp">DP</span>' : '<span class="badge b-belum">Belum Lunas</span>');
+
+    // Tanggal selesai: jika sudah selesai/diambil gunakan updated_at, jika belum gunakan estimasi
+    const selesaiDate = (t.status === 'selesai' || t.status === 'diambil') ? t.updated_at : t.tanggal_selesai;
+    const selesaiLabel = (t.status === 'selesai' || t.status === 'diambil') ? 'Selesai' : 'Est.';
 
     let actions = '';
     const next = nextStatus(t.status);
@@ -519,7 +545,11 @@ function renderTable(rows) {
         ${badgeStatus}
         ${lewat ? `<div class="td-meta" style="color:#EF4444;font-weight:700">Lewat Waktu</div>` : ''}
       </td>
-      <td style="white-space:nowrap;font-size:12px">${fmtDate(t.tanggal_selesai)}</td>
+      <td style="white-space:nowrap;font-size:12px">${fmtDate(t.tanggal_masuk)}</td>
+      <td style="white-space:nowrap;font-size:12px">
+        <div>${fmtDate(selesaiDate)}</div>
+        <div class="td-meta">${selesaiLabel}</div>
+      </td>
       <td class="td-actions-cell">${actions}</td>
     </tr>`;
   }).join('');
@@ -575,7 +605,7 @@ document.querySelectorAll('.pill').forEach(p => {
 
 const urlParams = new URLSearchParams(location.search);
 const qpParam = urlParams.get('quick') || urlParams.get('status');
-if (qpParam && ['semua','aktif','selesai','lewat'].includes(qpParam)) {
+if (qpParam && ['semua','aktif','selesai','selesai_hari_ini','lewat'].includes(qpParam)) {
   quickFilter = qpParam;
   document.querySelectorAll('.pill').forEach(x => x.classList.toggle('active', x.dataset.quick === qpParam));
 }

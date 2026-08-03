@@ -56,14 +56,15 @@ const statusSchema = Joi.object({
 exports.index = async (req, res) => {
   try {
     const filters = {
-      status:      req.query.status,
-      tanggal:     req.query.tanggal,
-      pelanggan_id: req.query.pelanggan_id,
-      q:           req.query.q,
-      belum_lunas: req.query.belum_lunas === '1' || req.query.belum_lunas === 'true',
-      sort:        req.query.sort,
-      page:        parseInt(req.query.page)  || 1,
-      limit:       parseInt(req.query.limit) || 20
+      status:           req.query.status,
+      tanggal:          req.query.tanggal,
+      pelanggan_id:     req.query.pelanggan_id,
+      q:                req.query.q,
+      belum_lunas:      req.query.belum_lunas === '1' || req.query.belum_lunas === 'true',
+      selesai_hari_ini: req.query.selesai_hari_ini === '1' || req.query.selesai_hari_ini === 'true',
+      sort:             req.query.sort,
+      page:             parseInt(req.query.page)  || 1,
+      limit:            parseInt(req.query.limit) || 20
     };
     const [data, count] = await Promise.all([
       transaksiModel.findAll(filters),

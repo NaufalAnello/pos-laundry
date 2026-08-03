@@ -18,7 +18,7 @@ const generateNomor = async () => {
 };
 
 // ── List dengan filter & pagination ────────────────────────────────────────
-const findAll = ({ status, tanggal, pelanggan_id, q, belum_lunas, sort, page = 1, limit = 20 } = {}) => {
+const findAll = ({ status, tanggal, pelanggan_id, q, belum_lunas, selesai_hari_ini, sort, page = 1, limit = 20 } = {}) => {
   const offset = (page - 1) * limit;
   const query = db('transaksi as t')
     .leftJoin('pelanggan as p', 'p.id', 't.pelanggan_id')
@@ -29,7 +29,7 @@ const findAll = ({ status, tanggal, pelanggan_id, q, belum_lunas, sort, page = 1
       't.id', 't.nomor_transaksi', 't.status', 't.total_harga',
       't.diskon', 't.poin_digunakan', 't.total_bayar', 't.bayar',
       't.kembalian', 't.metode_bayar', 't.tanggal_masuk', 't.tanggal_selesai',
-      't.tanggal_ambil', 't.antar_jemput', 't.catatan', 't.created_at',
+      't.tanggal_ambil', 't.antar_jemput', 't.catatan', 't.created_at', 't.updated_at',
       'p.id as pelanggan_id', 'p.nama as pelanggan_nama', 'p.telepon as pelanggan_telepon',
       'u.nama as kasir_nama',
       db.raw(`(SELECT GROUP_CONCAT(nama_layanan || ' ' || jumlah || ' ' || COALESCE(satuan,''), ', ')
@@ -46,6 +46,10 @@ const findAll = ({ status, tanggal, pelanggan_id, q, belum_lunas, sort, page = 1
   if (belum_lunas) {
     query.whereRaw('t.bayar < t.total_bayar').whereNotIn('t.status', ['dibatalkan', 'diambil']);
   }
+  if (selesai_hari_ini) {
+    query.where('t.status', 'selesai')
+         .whereRaw("date(t.updated_at/1000,'unixepoch') = date('now')");
+  }
   if (q)            query.where(function () {
     this.where('t.nomor_transaksi', 'like', `%${q}%`).orWhere('p.nama', 'like', `%${q}%`);
   });
@@ -53,7 +57,7 @@ const findAll = ({ status, tanggal, pelanggan_id, q, belum_lunas, sort, page = 1
   return query;
 };
 
-const countAll = ({ status, tanggal, pelanggan_id, q, belum_lunas } = {}) => {
+const countAll = ({ status, tanggal, pelanggan_id, q, belum_lunas, selesai_hari_ini } = {}) => {
   const query = db('transaksi as t')
     .leftJoin('pelanggan as p', 'p.id', 't.pelanggan_id')
     .count('t.id as total').first();
@@ -62,6 +66,10 @@ const countAll = ({ status, tanggal, pelanggan_id, q, belum_lunas } = {}) => {
   if (tanggal)      query.whereRaw("date(t.tanggal_masuk/1000,'unixepoch') = ?", [tanggal]);
   if (belum_lunas) {
     query.whereRaw('t.bayar < t.total_bayar').whereNotIn('t.status', ['dibatalkan', 'diambil']);
+  }
+  if (selesai_hari_ini) {
+    query.where('t.status', 'selesai')
+         .whereRaw("date(t.updated_at/1000,'unixepoch') = date('now')");
   }
   if (q)            query.where(function () {
     this.where('t.nomor_transaksi', 'like', `%${q}%`).orWhere('p.nama', 'like', `%${q}%`);
