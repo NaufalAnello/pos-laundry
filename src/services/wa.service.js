@@ -9,6 +9,7 @@ const fmtDate = (d)  => d
 const formatPhone = (telepon) => {
   if (!telepon) return null;
   const clean = telepon.replace(/\D/g, '');
+  if (!clean) return null;
   if (clean.startsWith('62')) return clean;
   if (clean.startsWith('0'))  return '62' + clean.slice(1);
   return '62' + clean;
@@ -38,8 +39,13 @@ const getSettings = async () => {
 };
 
 // ── Replace variabel dalam template ─────────────────────────────────────────
+// Setelah substitusi, collapse 3+ newline berturut jadi 2. Ini menangani kasus
+// placeholder block-level (mis. {sisa_tagihan_block}) yang bernilai kosong,
+// yang kalau tidak dinormalkan akan meninggalkan baris kosong ganda di pesan.
 const render = (template, vars) =>
-  template.replace(/\{(\w+)\}/g, (_, k) => vars[k] !== undefined ? vars[k] : `{${k}}`);
+  template
+    .replace(/\{(\w+)\}/g, (_, k) => vars[k] !== undefined ? vars[k] : `{${k}}`)
+    .replace(/\n{3,}/g, '\n\n');
 
 // ── Build teks item per baris ────────────────────────────────────────────────
 const buildItemLines = (items = []) =>
@@ -60,7 +66,7 @@ const buildItemLines = (items = []) =>
 // ── Build teks biaya tambahan per baris ──────────────────────────────────────
 const buildBiayaTambahanLines = (biayaTambahan = []) => {
   if (!biayaTambahan || biayaTambahan.length === 0) return '';
-  const lines = biayaTambahan.map(b => `- ${b.keterangan}: Rp${fmtRp(b.nominal)}`).join('\n');
+  const lines = biayaTambahan.map(b => `- ${b.keterangan}: Rp ${fmtRp(b.nominal)}`).join('\n');
   return `\n\n💰 *Biaya Tambahan:*\n${lines}`;
 };
 
