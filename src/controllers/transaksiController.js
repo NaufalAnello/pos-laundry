@@ -338,7 +338,14 @@ exports.store = async (req, res) => {
       if (value.metode_bayar === 'deposit') {
         const saldoRow   = await depositModel.getSaldo(pelanggan.id);
         const saldo      = Number(saldoRow.saldo);
-        const potongDepo = Math.min(saldo, totalBayar);
+        // Potong deposit sebesar bagian yang REAL dibayar dari saldo.
+        // - DP + saldo cukup: bayarFinal = nominalDP → potong nominalDP.
+        // - Bayar penuh + saldo cukup: bayarFinal = totalBayar → potong totalBayar.
+        // - Kombinasi (saldo tak cukup + kekurangan): bayarFinal = saldo + kekurangan,
+        //   Math.min → saldo (semua saldo dipotong, sisanya dari metode kekurangan).
+        // Sebelumnya pakai Math.min(saldo, totalBayar) — bug: kalau DP & saldo > DP,
+        // saldo terpotong LEBIH dari DP (delta hilang tanpa direfleksikan di order).
+        const potongDepo = Math.min(saldo, bayarFinal);
         depositInfo = await depositModel.bayar({
           pelangganId:  pelanggan.id,
           nominal:      potongDepo,
