@@ -597,7 +597,11 @@ function updateTarifMeta() {
   if (!state.hasil) return;
   const tarif = Number(document.getElementById('ajTarif').value || 0);
   const hpp = state.hasil.hppPerPelanggan;
-  const margin = hpp > 0 ? Math.round(((tarif - hpp) / hpp) * 100) : 0;
+  // Margin (bukan markup): (tarif - hpp) / tarif × 100.
+  // Sebelumnya (bug): dibagi hpp (rumus markup) — mis. tarif 6000 hpp 5000
+  // → 20% margin bukan 20% markup. Sudah difix di utils/margin.js dan
+  // frontend lain, sisa satu ini di preview tarif AJ.
+  const margin = tarif > 0 && hpp > 0 ? Math.round(((tarif - hpp) / tarif) * 100) : 0;
   document.getElementById('ajTarifMeta').textContent =
     `HPP: Rp ${fmt(hpp)} · Margin: ${margin}%`;
 }
