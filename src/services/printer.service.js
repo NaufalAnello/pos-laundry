@@ -25,6 +25,17 @@ function withPrintLock(fn) {
 
 const fmtRp = (n) => Number(n || 0).toLocaleString('id-ID');
 
+// Normalisasi nomor telepon ke format 08xxx untuk tampilan struk/label.
+// Dipakai bersama oleh renderer default (generateEscPos, generateLabelEscPos)
+// dan template renderer (generateStrukFromTemplate, generateLabelFromTemplate).
+function formatTeleponTampil(nomor) {
+  if (!nomor) return '';
+  const n = String(nomor).trim();
+  if (n.startsWith('628')) return '08' + n.slice(3);
+  if (n.startsWith('62'))  return '0'  + n.slice(2);
+  return n;
+}
+
 // Ambil config template (struk/label) dari pengaturan. Return null kalau belum ada
 // supaya pemanggil bisa fallback ke renderer default yang lama (zero-regression).
 async function loadTemplateConfig(jenis) {
@@ -61,7 +72,7 @@ function generateEscPos(transaksi, pengaturan, poinEarned = 0) {
   push(pengaturan.nama_toko || 'MEMPAWAH LAUNDRY'); nl();
   bold(false);
   if (pengaturan.alamat_toko) { push(pengaturan.alamat_toko); nl(); }
-  if (pengaturan.telepon_toko) { push('WA: ' + pengaturan.telepon_toko); nl(); }
+  if (pengaturan.telepon_toko) { push('WA: ' + formatTeleponTampil(pengaturan.telepon_toko)); nl(); }
   line();
 
   // Info order
@@ -72,7 +83,7 @@ function generateEscPos(transaksi, pengaturan, poinEarned = 0) {
     year: 'numeric', hour: '2-digit', minute: '2-digit'
   })); nl();
   push('Plg: ' + (transaksi.pelanggan_nama || 'Non-member')); nl();
-  if (transaksi.pelanggan_telepon) { push('WA : ' + transaksi.pelanggan_telepon); nl(); }
+  if (transaksi.pelanggan_telepon) { push('WA : ' + formatTeleponTampil(transaksi.pelanggan_telepon)); nl(); }
   if (transaksi.kasir_nama) { push('Kasir: ' + transaksi.kasir_nama); nl(); }
   line();
 
@@ -268,13 +279,8 @@ function makeWriters(bytes) {
   return { push, nl, bold, center, left, line, dline, lr };
 }
 
-function formatTeleponPelanggan(nomor) {
-  if (!nomor) return '';
-  const n = String(nomor).trim();
-  if (n.startsWith('628')) return '08' + n.slice(3);
-  if (n.startsWith('62'))  return '0'  + n.slice(2);
-  return n;
-}
+// Alias untuk backward compat — pakai formatTeleponTampil di code baru.
+const formatTeleponPelanggan = formatTeleponTampil;
 
 // Group setiap elemen pada STRUK — dipakai untuk insert pemisah otomatis
 // saat berpindah grup, supaya layout tetap rapi meski urutan diubah.
@@ -347,7 +353,7 @@ function generateStrukFromTemplate(transaksi, pengaturan, poinEarned, config) {
       case 'telepon_toko':
         if (pengaturan.telepon_toko) {
           ensureCenter();
-          w.push('WA: ' + pengaturan.telepon_toko); w.nl();
+          w.push('WA: ' + formatTeleponTampil(pengaturan.telepon_toko)); w.nl();
         }
         break;
 
@@ -379,7 +385,7 @@ function generateStrukFromTemplate(transaksi, pengaturan, poinEarned, config) {
       case 'nomor_wa':
         if (transaksi.pelanggan_telepon) {
           ensureLeft();
-          w.push('WA : ' + transaksi.pelanggan_telepon); w.nl();
+          w.push('WA : ' + formatTeleponTampil(transaksi.pelanggan_telepon)); w.nl();
         }
         break;
 
@@ -554,7 +560,7 @@ function generateLabelFromTemplate(transaksi, pengaturan, layanan_ids, config) {
       case 'telepon_toko':
         if (pengaturan.telepon_toko) {
           ensureCenter();
-          w.push('WA: ' + pengaturan.telepon_toko); w.nl();
+          w.push('WA: ' + formatTeleponTampil(pengaturan.telepon_toko)); w.nl();
         }
         break;
 
@@ -730,13 +736,7 @@ function generateLabelEscPos(transaksi, pengaturan, layanan_ids = null) {
     const sp = LEBAR - l.length - r.length;
     push(l + ' '.repeat(Math.max(1, sp)) + r); nl();
   };
-  const formatTelepon = (nomor) => {
-    if (!nomor) return '';
-    const n = String(nomor).trim();
-    if (n.startsWith('628')) return '08' + n.slice(3);
-    if (n.startsWith('62'))  return '0'  + n.slice(2);
-    return n;
-  };
+  const formatTelepon = formatTeleponTampil;
 
   // Filter items jika layanan_ids diberikan
   let items = transaksi.items || [];

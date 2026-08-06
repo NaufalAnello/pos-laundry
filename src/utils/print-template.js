@@ -111,8 +111,12 @@ function parseConfig(nilaiRaw, jenis) {
   return normalizeConfig(parsed, jenis);
 }
 
-// Normalisasi: pastikan semua ALL_ELEMENTS ada (tambah yg hilang sebagai nonaktif),
+// Normalisasi: pastikan semua ALL_ELEMENTS ada (tambah yg hilang sebagai NONAKTIF),
 // pastikan REQUIRED_ELEMENTS aktif, dan urutan stabil 1..N.
+// Elemen yang tidak disebutkan user diperlakukan sebagai "sengaja tidak aktif" —
+// mencegah renderer mencetak elemen yang dinonaktifkan operator akibat fallback
+// ke default (bug ditemukan saat screening: PUT partial config → elemen missing
+// diaktifkan lagi dari default, mengabaikan intent user).
 function normalizeConfig(config, jenis) {
   const def = jenis === 'label' ? DEFAULT_LABEL : DEFAULT_STRUK;
   const fromUser = new Map();
@@ -126,10 +130,17 @@ function normalizeConfig(config, jenis) {
     }
   }
 
-  // Tambahkan elemen yang belum ada dari user (pakai default-nya)
+  // Tambahkan elemen yang belum ada dari user sebagai NONAKTIF — user harus
+  // secara eksplisit mengaktifkan via UI (yang selalu mengirim seluruh daftar
+  // elemen). Fallback aktif dari default hanya dipakai kalau elemen tsb ada
+  // di REQUIRED_ELEMENTS.
   for (const d of def.elemen) {
     if (!fromUser.has(d.id)) {
-      fromUser.set(d.id, { id: d.id, aktif: d.aktif, urutan: d.urutan + 1000 });
+      fromUser.set(d.id, {
+        id: d.id,
+        aktif: REQUIRED_ELEMENTS.has(d.id),
+        urutan: d.urutan + 1000
+      });
     }
   }
 

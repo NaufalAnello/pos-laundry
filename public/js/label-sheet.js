@@ -143,14 +143,21 @@
   }
 
   async function openSheet(orderId) {
-    // Cooldown check: cegah proses baru jika masih ada yang berjalan
+    // Cooldown check: cegah proses baru jika masih ada yang berjalan.
+    // PENTING: set isPrinting=true SEBELUM await fetch, supaya race window
+    // "user klik 2 order berbeda cepat" tertutup — sebelumnya check&set
+    // dipisah await, sehingga klik kedua bisa lolos sebelum klik pertama
+    // sempat set flag. Kalau fetch gagal / order 1 item / user cancel sheet,
+    // reset flag di catch/finally.
     if (isPrinting) {
       if (window.showToast) window.showToast('⏳ Tunggu, masih memproses label sebelumnya...');
       return;
     }
+    isPrinting = true;
 
     // Capture orderId secara lokal untuk closure ini (immutable per invocation)
     const localOrderId = orderId;
+    let willKeepLock = false;
 
     try {
       const r = await fetch(`/api/v1/transaksi/${localOrderId}/detail`, { credentials: 'include' });
@@ -160,27 +167,27 @@
 
       const items = data.items || [];
 
-      // 1 layanan → langsung cetak tanpa sheet
+      // 1 layanan → langsung cetak tanpa sheet. cetakLabel akan reset isPrinting
+      // di finally-nya, jadi kita "serahkan" ownership lock ke situ.
       if (items.length <= 1) {
         if (items.length === 0) {
           if (window.showToast) window.showToast('Tidak ada layanan');
-          return;
+          return; // finally akan reset flag
         }
-        // Pass orderId eksplisit, tidak baca dari global state
-        // cetakLabel akan set isPrinting dan reset setelah selesai
-        await cetakLabel(localOrderId, [items[0].id]);
+        willKeepLock = true; // cetakLabel handle reset
+        await cetakLabel(localOrderId, [items[0].id], data.nomor_transaksi);
         return;
       }
 
-      // 2+ layanan → tampilkan sheet pilihan
-      // TIDAK set isPrinting = true di sini, karena belum cetak
-      // isPrinting akan di-set saat submitLabelSheet → cetakLabel dipanggil
+      // 2+ layanan → tampilkan sheet pilihan. Kita LEPAS lock di sini karena
+      // user akan berinteraksi (pilih layanan) → cetakLabel di submit akan
+      // set ulang lock. Lepasnya dilakukan lewat finally di bawah.
       createSheet();
-      // Simpan orderId di dataset sheet untuk dibaca saat submit
+      // Simpan orderId + nomor_transaksi di dataset sheet untuk dibaca saat submit
       sheet.dataset.orderId = localOrderId;
+      sheet.dataset.nomorTransaksi = data.nomor_transaksi || '';
       const orderInfo = `${data.nomor_transaksi} · ${data.pelanggan_nama || 'Non-member'}`;
       document.getElementById('labelOrderInfo').textContent = orderInfo;
-      // Pass items sebagai parameter, bukan set global state
       renderItems(items, localOrderId);
 
       setTimeout(() => {
@@ -190,6 +197,9 @@
     } catch (err) {
       console.error(err);
       if (window.showToast) window.showToast('Gagal: ' + err.message);
+    } finally {
+      // Reset lock kecuali sudah diserahkan ke cetakLabel (single-item flow).
+      if (!willKeepLock) isPrinting = false;
     }
   }
 
@@ -252,33 +262,37 @@
       return;
     }
 
-    // Baca orderId dari dataset sheet (disimpan saat openSheet dipanggil)
+    // Baca orderId + expected_nomor_transaksi dari dataset sheet
     const orderId = sheet?.dataset?.orderId;
+    const expectedNomor = sheet?.dataset?.nomorTransaksi || null;
     if (!orderId) {
       if (window.showToast) window.showToast('Error: Order ID tidak ditemukan');
       return;
     }
 
     closeSheet();
-    // Pass orderId eksplisit ke cetakLabel
-    await cetakLabel(orderId, layananIds);
+    await cetakLabel(orderId, layananIds, expectedNomor);
   };
 
-  async function cetakLabel(orderId, layananIds) {
+  async function cetakLabel(orderId, layananIds, expectedNomor) {
     // TIDAK BOLEH ada referensi ke currentOrderId - semua data harus dari parameter
-
-    // Set lock saat mulai proses cetak
+    // Set lock saat mulai proses cetak (kalau belum di-set oleh openSheet)
     isPrinting = true;
 
     try {
       if (window.showToast) window.showToast('Mencetak label...');
 
-      // Gunakan orderId dari parameter, bukan dari global state
+      // POST /label dengan expected_nomor_transaksi supaya backend memvalidasi
+      // bahwa order yang tampil di layar client sama dengan yg akan dicetak
+      // (defense in depth vs bug label tertukar).
+      const body = { layanan_ids: layananIds };
+      if (expectedNomor) body.expected_nomor_transaksi = expectedNomor;
+
       const r = await fetch(`/api/v1/transaksi/${orderId}/label`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ layanan_ids: layananIds })
+        body: JSON.stringify(body)
       });
       const data = await r.json();
 
