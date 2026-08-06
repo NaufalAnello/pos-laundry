@@ -821,7 +821,22 @@ function renderAll(d) {
     };
     mkOmset.textContent = 'Rp' + short(omset.total);
     mkOrder.textContent = omset.jumlah;
-    mkMargin.textContent = 'Rp' + short(laba_rugi?.laba || 0);
+
+    // Margin/profit MURNI dari layanan (omset − HPP×volume) — TIDAK boleh
+    // ikut kas masuk/keluar (buku kas mencatat operasional non-HPP seperti
+    // beli alat, bayar listrik yg tidak berhubungan dgn margin per layanan).
+    // Metrik "Laba/Rugi Kas" adalah kartu terpisah di seksi Laba Rugi.
+    // Sebelumnya kartu ini pakai laba_rugi.laba (bug: kas keluar Rp 500k
+    // membuat kartu Margin ikut turun Rp 500k padahal margin layanan tidak
+    // berubah).
+    const profitLayanan = (distribusi_layanan || []).reduce((sum, r) => {
+      const hpp   = Number(r.hpp) || 0;
+      const vol   = Number(r.total_jumlah) || 0;
+      const omset = Number(r.total_omset)  || 0;
+      // Layanan tanpa HPP di-skip (tidak bisa dihitung profit-nya)
+      return hpp > 0 ? sum + (omset - hpp * vol) : sum;
+    }, 0);
+    mkMargin.textContent = 'Rp' + short(profitLayanan);
   }
   document.getElementById('sAvg').textContent = rupiah(omset.rata_rata);
   document.getElementById('sAvgSub').textContent = 'per transaksi (selesai)';
