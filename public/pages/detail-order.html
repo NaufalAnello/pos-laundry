@@ -640,7 +640,10 @@ function nextStatusLabel(s) {
 
 function isLewatEstimasi(o) {
   if (!o || !o.tanggal_selesai) return false;
-  if (!['pending','proses'].includes(o.status)) return false;
+  // Include 'selesai' juga: kalau sudah selesai tapi belum diambil dan lewat
+  // estimasi, itu pelanggan telat ambil — indikator tetap perlu tampil.
+  // Status 'diambil' & 'dibatalkan' tidak pernah dianggap lewat.
+  if (!['pending','proses','selesai'].includes(o.status)) return false;
   const today = new Date(); today.setHours(0,0,0,0);
   const est = new Date(o.tanggal_selesai); est.setHours(0,0,0,0);
   return est < today;

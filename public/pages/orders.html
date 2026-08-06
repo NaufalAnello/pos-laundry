@@ -334,7 +334,11 @@ function debounceLoad() {
 }
 
 function isLewat(t) {
-  if (!['pending','proses'].includes(t.status)) return false;
+  // Include 'selesai' juga: kalau order sudah selesai tapi belum diambil dan
+  // sudah lewat tanggal estimasi, itu artinya pelanggan telat ambil — indikator
+  // "lewat waktu" tetap perlu tampil supaya operator tahu untuk follow-up.
+  // Status 'diambil' dan 'dibatalkan' TIDAK pernah dianggap lewat.
+  if (!['pending','proses','selesai'].includes(t.status)) return false;
   if (!t.tanggal_selesai) return false;
   const today = new Date(); today.setHours(0,0,0,0);
   const est = new Date(t.tanggal_selesai); est.setHours(0,0,0,0);
