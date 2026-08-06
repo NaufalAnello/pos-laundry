@@ -30,11 +30,27 @@ async function recalculateTransaksiWithBiaya(trx, transaksiId) {
   const svc = require('../services/transaksiService');
   // Pakai `trx` — jangan global db (hindari deadlock pool saat dalam transaction)
   const settings = await svc.getPoinSettings(trx);
-  const { totalBayar } = svc.hitungTotal(
+
+  // Pertahankan diskon manual yang sudah ada (persen di-scale ulang, nominal di-cap
+  // biar tidak > totalItem). Konsisten dengan recalculateOrderTotal.
+  let diskonManual = null;
+  const diskonPersenLama = Number(transaksi.diskon_persen) || 0;
+  if (!transaksi.paket_promo_id) {
+    if (transaksi.diskon_tipe === 'persen' && diskonPersenLama > 0) {
+      diskonManual = { tipe: 'persen', nilai: diskonPersenLama };
+    } else if (Number(transaksi.diskon) > 0) {
+      diskonManual = {
+        tipe: 'nominal',
+        nilai: Math.min(Number(transaksi.diskon), totalItem)
+      };
+    }
+  }
+  const { totalBayar, diskon, diskonTipe, diskonPersen } = svc.hitungTotal(
     items,
     transaksi.paket_promo_id ? { diskon_nominal: transaksi.diskon } : null,
     transaksi.poin_digunakan || 0,
-    settings.nilaiPerPoin
+    settings.nilaiPerPoin,
+    diskonManual
   );
 
   // Tambahkan biaya tambahan ke total_bayar
@@ -44,9 +60,12 @@ async function recalculateTransaksiWithBiaya(trx, transaksiId) {
   await trx('transaksi')
     .where('id', transaksiId)
     .update({
-      total_harga: totalHarga,
-      total_bayar: totalBayarFinal,
-      updated_at:  new Date()
+      total_harga:   totalHarga,
+      diskon,
+      diskon_tipe:   diskonTipe,
+      diskon_persen: diskonPersen,
+      total_bayar:   totalBayarFinal,
+      updated_at:    new Date()
     });
 
   return { totalHarga, totalBayarFinal };

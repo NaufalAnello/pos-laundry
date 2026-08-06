@@ -161,6 +161,15 @@ exports.store = async (req, res) => {
       value.poin_digunakan = 0; // non-member tidak bisa pakai poin
     }
 
+    // Validasi diskon nominal manual tidak melebihi subtotal item
+    // (untuk persen, dikepras otomatis via Math.min di bawah karena max 100%)
+    const subtotalItems = resolvedItems.reduce((s, it) => s + Number(it.subtotal), 0);
+    if (value.diskon_tipe === 'nominal' && value.diskon_nilai > subtotalItems) {
+      return res.status(400).json({
+        error: `Diskon (Rp ${value.diskon_nilai.toLocaleString('id-ID')}) melebihi subtotal layanan (Rp ${subtotalItems.toLocaleString('id-ID')})`
+      });
+    }
+
     // Hitung harga (dengan diskon manual jika ada)
     const diskonManual = value.diskon_nilai > 0
       ? { tipe: value.diskon_tipe, nilai: value.diskon_nilai }
@@ -828,11 +837,29 @@ async function recalculateOrderTotal(trx, transaksiId) {
   // Recalculate total_bayar (dengan diskon & poin yang sudah ada).
   // Pakai `trx` untuk getPoinSettings — jangan global db (hindari deadlock pool).
   const settings = await svc.getPoinSettings(trx);
-  const { totalBayar } = svc.hitungTotal(
+
+  // Pertahankan diskon manual yang sudah ada di order:
+  //   - persen: hitung ulang dari total item baru (biar berskala saat item diubah)
+  //   - nominal: pertahankan angka, tapi cap ke totalItem baru (biar tidak > subtotal)
+  // Untuk order yang pakai paket promo, biarkan hitungTotal me-resolve dari promo.
+  let diskonManual = null;
+  const diskonPersenLama = Number(transaksi.diskon_persen) || 0;
+  if (!transaksi.paket_promo_id) {
+    if (transaksi.diskon_tipe === 'persen' && diskonPersenLama > 0) {
+      diskonManual = { tipe: 'persen', nilai: diskonPersenLama };
+    } else if (Number(transaksi.diskon) > 0) {
+      diskonManual = {
+        tipe: 'nominal',
+        nilai: Math.min(Number(transaksi.diskon), totalItem)
+      };
+    }
+  }
+  const { totalBayar, diskon, diskonTipe, diskonPersen } = svc.hitungTotal(
     items,
     transaksi.paket_promo_id ? { diskon_nominal: transaksi.diskon } : null,
     transaksi.poin_digunakan || 0,
-    settings.nilaiPerPoin
+    settings.nilaiPerPoin,
+    diskonManual
   );
   const totalBayarFinal = totalBayar + totalBiaya;
 
@@ -854,6 +881,9 @@ async function recalculateOrderTotal(trx, transaksiId) {
     .where('id', transaksiId)
     .update({
       total_harga:     totalHarga,
+      diskon,
+      diskon_tipe:     diskonTipe,
+      diskon_persen:   diskonPersen,
       total_bayar:     totalBayarFinal,
       tanggal_selesai: estimasiSelesai,
       updated_at:      new Date()
@@ -877,28 +907,34 @@ exports.updateDiskon = async (req, res) => {
       return res.status(400).json({ error: `Transaksi sudah ${transaksi.status}, tidak dapat diubah` });
     }
 
-    // Hitung total item
-    const totalItem = transaksi.items.reduce((sum, it) => sum + it.subtotal, 0);
+    // Hitung total item (dasar untuk diskon — biaya tambahan TIDAK didiskon)
+    const totalItem = transaksi.items.reduce((sum, it) => sum + Number(it.subtotal), 0);
 
-    // Hitung biaya tambahan
+    // Hitung biaya tambahan (di-tambahkan ke total_bayar SETELAH diskon)
     const totalBiayaTambahan = transaksi.biaya_tambahan?.reduce((sum, b) => sum + Number(b.nominal), 0) || 0;
 
-    // Subtotal sebelum diskon
-    const subtotal = totalItem + totalBiayaTambahan;
-
-    // Hitung diskon
+    // Hitung diskon (basis = totalItem, konsisten dgn hitungTotal di service)
     let diskon = 0;
     let diskonPersen = 0;
     if (value.tipe === 'nominal') {
       diskon = value.nilai;
     } else if (value.tipe === 'persen') {
-      diskon = Math.round(subtotal * value.nilai / 100);
+      diskon = Math.round(totalItem * value.nilai / 100);
       diskonPersen = value.nilai;
     }
 
-    // Total bayar setelah diskon dan poin
-    const nilaiPoin = (transaksi.poin_digunakan || 0) * 100;
-    const totalBayar = Math.max(0, subtotal - diskon - nilaiPoin);
+    // Validasi: diskon tidak boleh melebihi total item (mencegah total negatif / diskon
+    // "hantu" yang tercatat lebih besar dari yang bisa didiskon)
+    if (diskon > totalItem) {
+      return res.status(400).json({
+        error: `Diskon (Rp ${diskon.toLocaleString('id-ID')}) melebihi subtotal layanan (Rp ${totalItem.toLocaleString('id-ID')})`
+      });
+    }
+
+    // Nilai tukar poin dari settings (bukan hardcode) — biar konsisten dgn modul poin
+    const settings = await svc.getPoinSettings();
+    const nilaiPoin = (transaksi.poin_digunakan || 0) * settings.nilaiPerPoin;
+    const totalBayar = Math.max(0, totalItem - diskon - nilaiPoin) + totalBiayaTambahan;
 
     // Update transaksi
     await transaksiModel.update(req.params.id, {
