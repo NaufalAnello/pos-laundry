@@ -322,7 +322,8 @@ function sisa(t) { return Math.max(0, Number(t.total_bayar) - Number(t.bayar)); 
 function lunasiPayload(t) {
   return {
     id: t.id, nomor: t.nomor_transaksi, nama: t.pelanggan_nama,
-    total: t.total_bayar, dibayar: t.bayar, pelanggan_id: t.pelanggan_id
+    total: t.total_bayar, dibayar: t.bayar,
+    pelanggan_id: t.pelanggan_id, telepon: t.pelanggan_telepon
   };
 }
 function waPayload(t) {

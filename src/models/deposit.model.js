@@ -136,6 +136,54 @@ const getMutasi = (pelangganId, { limit = 20, offset = 0 } = {}) =>
 const countMutasi = (pelangganId) =>
   db('mutasi_deposit').where({ pelanggan_id: pelangganId }).count('id as total').first();
 
+// ── Koreksi saldo manual (owner-only) ──────────────────────────────────────
+// Menetapkan saldo pelanggan langsung ke `saldoBaru` (bukan penambahan!).
+// Selisih dicatat sebagai mutasi `koreksi` dengan `nominal` = selisih
+// (positif jika bertambah, negatif jika berkurang).
+const koreksi = async ({ pelangganId, saldoBaru, keterangan, createdBy }) => {
+  const target = Math.round(Number(saldoBaru));
+  if (!Number.isFinite(target) || target < 0) {
+    throw new Error('Saldo baru harus angka ≥ 0');
+  }
+
+  return db.transaction(async (trx) => {
+    // Pastikan row saldo ada
+    let row = await trx('deposit_pelanggan').where({ pelanggan_id: pelangganId }).first();
+    if (!row) {
+      await trx('deposit_pelanggan').insert({
+        pelanggan_id: pelangganId, saldo: 0, updated_at: new Date()
+      });
+      row = await trx('deposit_pelanggan').where({ pelanggan_id: pelangganId }).first();
+    }
+
+    const saldoSebelum = Number(row.saldo);
+    const selisih      = target - saldoSebelum;
+    if (selisih === 0) {
+      // Tidak ada perubahan → tidak perlu catat mutasi.
+      return { saldoSebelum, saldoSesudah: target, selisih: 0 };
+    }
+
+    await trx('deposit_pelanggan')
+      .where({ pelanggan_id: pelangganId })
+      .update({ saldo: target, updated_at: new Date() });
+
+    await trx('mutasi_deposit').insert({
+      pelanggan_id:  pelangganId,
+      transaksi_id:  null,
+      jenis:         'koreksi',
+      nominal:       selisih, // bisa negatif — mencatat arah perubahan
+      saldo_sebelum: saldoSebelum,
+      saldo_sesudah: target,
+      keterangan:    keterangan || 'Koreksi saldo manual (owner)',
+      metode_bayar:  null,
+      created_by:    createdBy || null,
+      created_at:    new Date()
+    });
+
+    return { saldoSebelum, saldoSesudah: target, selisih };
+  });
+};
+
 // ── Batalkan topup (refund) ─────────────────────────────────────────────────
 const batalkanTopup = async ({ mutasiId, createdBy }) => {
   return db.transaction(async (trx) => {
@@ -236,4 +284,4 @@ const getRingkasan = async () => {
   };
 };
 
-module.exports = { getSaldo, topup, bayar, tambahKelebihan, getMutasi, countMutasi, getRingkasan, batalkanTopup };
+module.exports = { getSaldo, topup, bayar, tambahKelebihan, koreksi, getMutasi, countMutasi, getRingkasan, batalkanTopup };

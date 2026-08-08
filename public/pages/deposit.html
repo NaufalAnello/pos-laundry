@@ -426,9 +426,65 @@
   </div>
   <div class="panel-foot">
     <button class="btn btn-outline" onclick="closeMutasiPanel()">Tutup</button>
+    <!-- Owner-only: koreksi manual saldo (mis. koreksi kesalahan input).
+         Tombol disembunyikan lewat JS untuk karyawan; endpoint juga di-guard
+         requireOwner (403 kalau bypass UI). -->
+    <button class="btn btn-outline" id="btnKoreksiFromPanel"
+            onclick="openModalKoreksi()" style="display:none">Koreksi Saldo</button>
     <button class="btn btn-success" id="btnTopupFromPanel" onclick="topupFromPanel()">+ Topup</button>
   </div>
 </aside>
+
+<!-- ── Modal Koreksi Saldo (owner-only) ─────────────────────────── -->
+<div class="lm-bg" id="modalKoreksi">
+  <div class="lm">
+    <div class="lm-h">
+      <h3>Koreksi Saldo Deposit</h3>
+      <button class="x" onclick="closeModalKoreksi()" aria-label="Tutup">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
+    </div>
+    <div class="lm-b">
+      <div class="info-box">
+        <div class="row">
+          <span class="lbl">Pelanggan</span>
+          <span class="val" id="koreksiNama">—</span>
+        </div>
+        <div class="row">
+          <span class="lbl">Saldo sekarang</span>
+          <span class="val" id="koreksiSaldoSekarang">Rp 0</span>
+        </div>
+      </div>
+
+      <div class="fld">
+        <label>Saldo baru (setelah koreksi)</label>
+        <input type="number" id="koreksiSaldoBaru" min="0" step="1000" placeholder="0"
+               oninput="updateKoreksiPreview()"/>
+        <small>Nilai ABSOLUT — bukan penambahan. Contoh: koreksi ke Rp 50.000 → saldo langsung jadi Rp 50.000.</small>
+      </div>
+
+      <div class="fld">
+        <label>Keterangan koreksi</label>
+        <input type="text" id="koreksiKeterangan"
+               placeholder="Contoh: Koreksi kesalahan input awal" maxlength="255"/>
+      </div>
+
+      <div class="preview-box" id="koreksiPreview" style="display:none">
+        <span id="koreksiPreviewLbl">Selisih</span>
+        <span id="koreksiPreviewVal">Rp 0</span>
+      </div>
+
+      <div style="font-size:12px;color:#64748B;line-height:1.5">
+        Perubahan akan tercatat di Mutasi sebagai <strong>koreksi</strong>
+        dengan nominal selisih (bisa +/-). Hanya bisa dilakukan oleh Owner.
+      </div>
+    </div>
+    <div class="lm-f">
+      <button class="btn btn-outline" onclick="closeModalKoreksi()">Batal</button>
+      <button class="btn btn-primary" id="btnSimpanKoreksi" onclick="submitKoreksi()">Simpan Koreksi</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── Modal Topup ──────────────────────────────────── -->
 <div class="lm-bg" id="modalTopup">
@@ -760,6 +816,11 @@ async function openMutasiPanel(pelangganId, nama) {
   document.getElementById('mutasiPanel').classList.add('open');
   document.getElementById('mutasiBody').innerHTML =
     '<div style="text-align:center;color:#94A3B8;padding:40px">Memuat…</div>';
+
+  // Tombol Koreksi hanya untuk owner (endpoint juga di-guard requireOwner).
+  const isOwner = typeof window.isOwner === 'function' ? window.isOwner() : false;
+  document.getElementById('btnKoreksiFromPanel').style.display = isOwner ? '' : 'none';
+
   await loadMutasi(pelangganId);
 }
 async function loadMutasi(pelangganId) {
@@ -788,13 +849,17 @@ function renderMutasi(rows) {
   el.innerHTML = rows.map(m => {
     const jenis = m.jenis;
     const nominal = Number(m.nominal || 0);
-    const isPositif = ['topup','kelebihan'].includes(jenis);
+    // Koreksi bisa +/- tergantung selisih — cek nominal, bukan jenis
+    const isPositif = jenis === 'koreksi'
+      ? nominal > 0
+      : ['topup','kelebihan'].includes(jenis);
     const isCanceled = !!m.is_dibatalkan;
     const tag = {
       topup: 'Topup', bayar: 'Bayar Order',
-      kelebihan: 'Kelebihan Bayar', refund: 'Refund Topup'
+      kelebihan: 'Kelebihan Bayar', refund: 'Refund Topup',
+      koreksi: 'Koreksi Saldo'
     }[jenis] || jenis;
-    const icon = { topup: SVG_UP, bayar: SVG_DOWN, kelebihan: SVG_UP, refund: SVG_UNDO }[jenis] || SVG_DOT;
+    const icon = { topup: SVG_UP, bayar: SVG_DOWN, kelebihan: SVG_UP, refund: SVG_UNDO, koreksi: SVG_DOT }[jenis] || SVG_DOT;
 
     const meta = [];
     if (jenis === 'topup' && m.metode_bayar) meta.push(esc(m.metode_bayar));
@@ -900,6 +965,70 @@ async function submitBatalTopup() {
   finally {
     btn.disabled = false;
     btn.textContent = 'Ya, Batalkan Topup';
+  }
+}
+
+// ── Koreksi saldo (owner-only) ───────────────────────
+function openModalKoreksi() {
+  if (!currentPelanggan) return;
+  document.getElementById('koreksiNama').textContent = currentPelanggan.nama;
+  document.getElementById('koreksiSaldoSekarang').textContent = fmtRp(currentPelanggan.saldo);
+  document.getElementById('koreksiSaldoBaru').value = currentPelanggan.saldo;
+  document.getElementById('koreksiKeterangan').value = '';
+  document.getElementById('koreksiPreview').style.display = 'none';
+  document.getElementById('modalKoreksi').classList.add('open');
+  setTimeout(() => document.getElementById('koreksiSaldoBaru').focus(), 100);
+}
+function closeModalKoreksi() {
+  document.getElementById('modalKoreksi').classList.remove('open');
+}
+function updateKoreksiPreview() {
+  if (!currentPelanggan) return;
+  const nilai = parseFloat(document.getElementById('koreksiSaldoBaru').value);
+  const el = document.getElementById('koreksiPreview');
+  if (!Number.isFinite(nilai) || nilai < 0) { el.style.display = 'none'; return; }
+  const selisih = Math.round(nilai) - Math.round(currentPelanggan.saldo);
+  const lbl = document.getElementById('koreksiPreviewLbl');
+  const val = document.getElementById('koreksiPreviewVal');
+  if (selisih === 0) {
+    lbl.textContent = 'Tidak ada perubahan';
+    val.textContent = '';
+  } else {
+    lbl.textContent = 'Selisih';
+    val.textContent = (selisih > 0 ? '+ ' : '- ') + fmtRp(Math.abs(selisih));
+    val.style.color = selisih > 0 ? '#10B981' : '#EF4444';
+  }
+  el.style.display = '';
+}
+async function submitKoreksi() {
+  if (!currentPelanggan) return;
+  const saldoBaru = parseFloat(document.getElementById('koreksiSaldoBaru').value);
+  const keterangan = document.getElementById('koreksiKeterangan').value.trim();
+  if (!Number.isFinite(saldoBaru) || saldoBaru < 0) {
+    showToast('Saldo baru harus ≥ 0', true); return;
+  }
+  if (keterangan.length < 3) {
+    showToast('Keterangan wajib diisi (min. 3 karakter)', true); return;
+  }
+  const btn = document.getElementById('btnSimpanKoreksi');
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan…';
+  try {
+    const r = await fetch(`/api/v1/deposit/${currentPelanggan.id}/koreksi`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ saldo_baru: Math.round(saldoBaru), keterangan })
+    });
+    const d = await r.json();
+    if (!r.ok) { showToast('Gagal: ' + (d.error || 'Error'), true); return; }
+    showToast(d.message || 'Koreksi tersimpan');
+    closeModalKoreksi();
+    await loadMutasi(currentPelanggan.id);
+    loadDeposit(currentPage);
+  } catch { showToast('Koneksi gagal', true); }
+  finally {
+    btn.disabled = false;
+    btn.textContent = 'Simpan Koreksi';
   }
 }
 

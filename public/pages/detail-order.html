@@ -1012,7 +1012,8 @@ function lunasi() {
       nama: o.pelanggan?.nama,
       total: o.total_bayar,
       dibayar: o.total_dibayar || o.bayar || 0,
-      pelanggan_id: o.pelanggan?.id
+      pelanggan_id: o.pelanggan?.id,
+      telepon: o.pelanggan?.telepon
     });
   } else {
     showToast('Komponen Lunasi belum siap');

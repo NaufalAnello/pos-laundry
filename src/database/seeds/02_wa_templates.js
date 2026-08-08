@@ -58,6 +58,24 @@ Terima kasih! 🙏
 _— {nama_toko} —_`,
     'Template pesan WA pengingat tagihan');
 
+  await upsert('wa_template_lunas',
+    `✅ *PEMBAYARAN LUNAS*
+
+Halo {nama} 👋
+Pembayaran laundry Anda telah *LUNAS* ✅
+
+🧾 *Order: {nomor}*
+💰 Total: Rp {total}
+💳 Metode: {metode_bayar}
+📅 Dibayar: {tanggal_lunas}
+
+Terima kasih atas pembayarannya!
+Cucian siap diambil sesuai estimasi.
+
+_Bukti pembayaran ini sah, simpan sebagai referensi._
+_— {nama_toko} —_`,
+    'Template pesan WA saat order dilunasi (bukti pembayaran)');
+
   await upsert('wa_template_notif_selesai',
     `Halo {nama} 👋
 

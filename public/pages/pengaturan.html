@@ -441,6 +441,7 @@
             Variabel: <code>{nama}</code> <code>{nomor}</code> <code>{tanggal_masuk}</code> <code>{tanggal_selesai}</code>
             <code>{items}</code> <code>{subtotal}</code> <code>{diskon}</code> <code>{total}</code>
             <code>{bayar}</code> <code>{kembalian}</code> <code>{poin_dapat}</code> <code>{poin_total}</code>
+            <code>{metode_bayar}</code> <code>{tanggal_lunas}</code>
             <code>{nama_toko}</code> <code>{alamat_toko}</code> <code>{telepon_toko}</code>
           </div>
           <div class="field">
@@ -454,6 +455,11 @@
           <div class="field">
             <label>Template Notifikasi Selesai</label>
             <textarea id="tplNotif" rows="6"></textarea>
+          </div>
+          <div class="field">
+            <label>Template Bukti Pelunasan (LUNAS)</label>
+            <textarea id="tplLunas" rows="8"></textarea>
+            <small style="color:#64748b">Dipakai variabel khusus: <code>{metode_bayar}</code>, <code>{tanggal_lunas}</code>. Terkirim setelah aksi Lunasi berhasil.</small>
           </div>
           <div class="save-bar">
             <button class="btn btn-primary" onclick="saveWA()">Simpan Pengaturan WA</button>
@@ -792,6 +798,7 @@ async function loadSettings() {
     document.getElementById('tplNota').value = data.wa_template_nota || '';
     document.getElementById('tplTagihan').value = data.wa_template_tagihan || '';
     document.getElementById('tplNotif').value = data.wa_template_notif_selesai || '';
+    document.getElementById('tplLunas').value = data.wa_template_lunas || '';
 
     // Margin
     document.getElementById('marginPembulatan').value = data.margin_pembulatan || 'ratusan';
@@ -922,7 +929,8 @@ async function saveWA() {
         wa_reminder_hari: document.getElementById('tReminderHari').value || '3',
         wa_template_nota: document.getElementById('tplNota').value,
         wa_template_tagihan: document.getElementById('tplTagihan').value,
-        wa_template_notif_selesai: document.getElementById('tplNotif').value
+        wa_template_notif_selesai: document.getElementById('tplNotif').value,
+        wa_template_lunas: document.getElementById('tplLunas').value
       })
     });
     showOk('waOk');

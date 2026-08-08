@@ -155,6 +155,54 @@ const buildNotifSelesai = async (transaksi, mode = 'regular') => {
   return render(template, vars);
 };
 
+// ── buildNotifLunas — konfirmasi pembayaran LUNAS ──────────────────────────
+// Dipakai setelah aksi Lunasi berhasil supaya pelanggan menerima bukti
+// pelunasan (bukan reproduksi nota order baru).
+const METODE_LABEL = {
+  tunai:    'Tunai',
+  transfer: 'Transfer',
+  qris:     'QRIS',
+  deposit:  'Deposit'
+};
+
+const buildNotifLunas = async (transaksi, mode = 'regular') => {
+  const s = await getSettings();
+
+  // Tanggal lunas: pakai kolom transaksi.tanggal_lunas kalau ada,
+  // fallback ke updated_at (fresh setelah pelunasan) atau now.
+  const tglLunas = transaksi.tanggal_lunas || transaksi.updated_at || new Date();
+
+  // Metode pelunasan: yang PALING AKURAT adalah entri terakhir di
+  // riwayat_bayar (jenis pelunasan). `transaksi.metode_bayar` bisa jadi
+  // masih menyimpan metode DP awal (misal DP tunai, lunasi pakai deposit)
+  // — kalau dipakai apa adanya, pesan LUNAS akan menampilkan metode salah.
+  let metodePelunasan = transaksi.metode_bayar;
+  try {
+    const last = await db('riwayat_bayar')
+      .where({ transaksi_id: transaksi.id })
+      .whereIn('jenis', ['pelunasan', 'dp_tambahan'])
+      .orderBy('id', 'desc').first();
+    if (last?.metode) metodePelunasan = last.metode;
+  } catch (_) { /* fallback ke transaksi.metode_bayar */ }
+  const metodeRaw = (metodePelunasan || '').toString().toLowerCase();
+
+  const vars = {
+    nama:            transaksi.pelanggan_nama || 'Pelanggan',
+    nomor:           transaksi.nomor_transaksi,
+    total:           fmtRp(transaksi.total_bayar),
+    metode_bayar:    METODE_LABEL[metodeRaw] || (metodePelunasan || '—'),
+    tanggal_lunas:   fmtDate(tglLunas),
+    nama_toko:       s.nama_toko    || 'Laundry',
+    alamat_toko:     s.alamat_toko  || '',
+    telepon_toko:    s.telepon_toko || '',
+    jam_operasional: s.jam_operasional || '08.00–21.00'
+  };
+
+  const template = s.wa_template_lunas ||
+    `✅ *PEMBAYARAN LUNAS*\n\nHalo {nama}, order {nomor} telah *LUNAS*.\nTotal: Rp {total}\nMetode: {metode_bayar}\nDibayar: {tanggal_lunas}\n\nTerima kasih!\n_— {nama_toko} —_`;
+  return render(template, vars);
+};
+
 // ── buildNotifDepositTipis — saldo deposit hampir habis ─────────────────────
 const buildNotifDepositTipis = async (pelanggan, saldo) => {
   const s = await getSettings();
@@ -210,6 +258,7 @@ module.exports = {
   buildNota,
   buildTagihan,
   buildNotifSelesai,
+  buildNotifLunas,
   buildNotifDepositTipis,
   cekNotifDepositTipis,
   buildBroadcast,

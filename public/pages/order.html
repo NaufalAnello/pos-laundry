@@ -2962,7 +2962,11 @@ async function submitOrder(kirimWa, cetakSetelah) {
     payment_mode: mode,
     is_dp: isDp,
     metode_bayar: metode,
-    bayar: isDepositMode ? 0 : bayar,
+    // Deposit + bayar-sekarang: kirim 0 (backend menghitung sendiri dari totalBayar).
+    // Deposit + DP:            wajib kirim nominal DP — backend memakainya sebagai
+    //                          `nominalDiminta` untuk memotong saldo deposit. Kalau
+    //                          di-zero-kan, DP tidak tercatat & saldo tidak berkurang.
+    bayar: (isDepositMode && mode === 'bayar-sekarang') ? 0 : bayar,
     catatan: document.getElementById('catatan').value.trim() || null,
     tanggal_selesai: document.getElementById('tanggalSelesai').value || null,
     antar_jemput: document.getElementById('antarJemput').checked,

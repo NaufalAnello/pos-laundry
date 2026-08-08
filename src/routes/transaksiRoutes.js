@@ -37,6 +37,7 @@ router.get('/:id/struk',      struk.show);
 router.get('/:id/wa/nota',    wa.nota);
 router.get('/:id/wa/tagihan', wa.tagihan);
 router.get('/:id/wa/notif',   wa.notif);
+router.get('/:id/wa/lunas',   wa.lunas);
 
 // Print thermal
 router.post('/:id/print', printer.cetakTransaksi);

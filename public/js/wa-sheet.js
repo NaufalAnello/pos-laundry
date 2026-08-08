@@ -54,6 +54,7 @@
 .ws-opt.nota .ic    { background:#eff6ff; color:#2563eb; }
 .ws-opt.tagihan .ic { background:#fef2f2; color:#dc2626; }
 .ws-opt.notif .ic   { background:#f0fdf4; color:#16a34a; }
+.ws-opt.lunas .ic   { background:#ecfdf5; color:#059669; }
 .ws-opt .txt { flex:1; min-width:0; }
 .ws-opt .txt .lbl { font-size:14px; font-weight:700; color:#111827; }
 .ws-opt .txt .desc { font-size:11px; color:#64748b; margin-top:2px; }
@@ -117,6 +118,14 @@
         <span class="txt">
           <span class="lbl">Siap Diambil</span>
           <span class="desc">Notif laundry sudah selesai</span>
+        </span>
+        <span class="arrow">›</span>
+      </button>
+      <button type="button" class="ws-opt lunas" data-type="lunas">
+        <span class="ic">🧾</span>
+        <span class="txt">
+          <span class="lbl">Bukti Lunas</span>
+          <span class="desc">Konfirmasi pembayaran sudah lunas</span>
         </span>
         <span class="arrow">›</span>
       </button>

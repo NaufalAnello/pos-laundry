@@ -247,4 +247,39 @@ router.post('/:pelangganId/batalkan-topup', requireOwner, async (req, res) => {
   }
 });
 
+// ── POST /api/v1/deposit/:pelangganId/koreksi ────────────────────────────────
+// Owner-only — koreksi saldo manual (misal koreksi kesalahan input).
+// `saldo_baru` menetapkan nilai saldo secara ABSOLUT (bukan penambahan).
+router.post('/:pelangganId/koreksi', requireOwner, async (req, res) => {
+  const { error, value } = Joi.object({
+    saldo_baru: Joi.number().integer().min(0).required(),
+    keterangan: Joi.string().min(3).max(255).required()
+  }).validate(req.body);
+  if (error) return res.status(400).json({ error: error.details[0].message });
+
+  try {
+    const pel = await pelangganModel.findById(req.params.pelangganId);
+    if (!pel) return res.status(404).json({ error: 'Pelanggan tidak ditemukan' });
+
+    const result = await depositModel.koreksi({
+      pelangganId: req.params.pelangganId,
+      saldoBaru:   value.saldo_baru,
+      keterangan:  value.keterangan,
+      createdBy:   req.session?.user?.id
+    });
+
+    res.json({
+      message: result.selisih === 0
+        ? 'Saldo tidak berubah (sudah sama dengan nilai yang diinput)'
+        : `Saldo dikoreksi ke Rp ${Number(value.saldo_baru).toLocaleString('id-ID')}`,
+      saldo_sebelum: result.saldoSebelum,
+      saldo_sesudah: result.saldoSesudah,
+      selisih:       result.selisih
+    });
+  } catch (err) {
+    console.error('[deposit:koreksi]', err);
+    res.status(400).json({ error: err.message || 'Gagal koreksi saldo' });
+  }
+});
+
 module.exports = router;

@@ -475,7 +475,8 @@ function setNotif(n, breakdown) {
 function payload(t, dibayarOverride) {
   return {
     id: t.id, nomor: t.nomor_transaksi, nama: t.pelanggan_nama,
-    total: t.total_bayar, dibayar: dibayarOverride ?? t.bayar, pelanggan_id: t.pelanggan_id
+    total: t.total_bayar, dibayar: dibayarOverride ?? t.bayar,
+    pelanggan_id: t.pelanggan_id, telepon: t.pelanggan_telepon
   };
 }
 function waPayload(t) {

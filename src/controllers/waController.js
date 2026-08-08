@@ -1,6 +1,6 @@
 const db                 = require('../database/connection');
 const transaksiModel     = require('../models/transaksiModel');
-const { buildNota, buildTagihan, buildNotifSelesai, generateURL, buildBroadcast, getSettings } = require('../services/wa.service');
+const { buildNota, buildTagihan, buildNotifSelesai, buildNotifLunas, generateURL, buildBroadcast, getSettings } = require('../services/wa.service');
 
 const getDefaultWAMode = async () => {
   const s = await getSettings();
@@ -64,6 +64,30 @@ exports.notif = async (req, res) => {
   } catch (err) {
     console.error('[wa:notif]', err);
     res.status(500).json({ error: 'Gagal generate pesan WA notifikasi' });
+  }
+};
+
+// ── GET /api/v1/transaksi/:id/wa/lunas ──────────────────────────────────────
+// Bukti pembayaran LUNAS — dipakai setelah aksi Lunasi berhasil.
+// Order harus sudah lunas (bayar >= total_bayar), kalau belum ditolak.
+exports.lunas = async (req, res) => {
+  try {
+    const { t, error, code } = await getTransaksiWithPhone(req.params.id);
+    if (error) return res.status(code).json({ error });
+
+    const bayar = Number(t.total_dibayar ?? t.bayar ?? 0);
+    if (bayar < Number(t.total_bayar || 0)) {
+      return res.status(400).json({ error: 'Order belum lunas — belum bisa mengirim bukti pelunasan' });
+    }
+
+    const defaultMode = await getDefaultWAMode();
+    const mode = ['regular', 'business'].includes(req.query.mode) ? req.query.mode : defaultMode;
+    const teks = await buildNotifLunas(t, mode);
+    const url  = generateURL(t.pelanggan_telepon, teks, mode);
+    res.json({ url, teks, telepon: t.pelanggan_telepon, pelanggan: t.pelanggan_nama, mode });
+  } catch (err) {
+    console.error('[wa:lunas]', err);
+    res.status(500).json({ error: 'Gagal generate pesan WA pelunasan' });
   }
 };
 

@@ -97,6 +97,25 @@
   padding:10px 12px; background:#fef2f2; border:1px solid #fecaca;
   color:#dc2626; border-radius:8px; font-size:12px; font-weight:600;
 }
+.ls-success {
+  padding:16px; background:#ecfdf5; border:1px solid #a7f3d0;
+  border-radius:10px; color:#065f46; text-align:center;
+}
+.ls-success .ic { font-size:38px; }
+.ls-success .lbl { font-size:15px; font-weight:800; margin:4px 0 2px; }
+.ls-success .sub { font-size:12px; color:#047857; }
+.ls-btn-wa-lunas {
+  width:100%; padding:14px; border:none; border-radius:10px;
+  background:#25d366; color:#fff; font-size:15px; font-weight:800;
+  cursor:pointer; min-height:48px; display:flex; align-items:center;
+  justify-content:center; gap:8px;
+}
+.ls-btn-wa-lunas:hover { background:#1eb457; }
+.ls-btn-selesai {
+  width:100%; padding:12px; border:1.5px solid #cbd5e1; border-radius:10px;
+  background:#fff; color:#374151; font-size:14px; font-weight:700;
+  cursor:pointer; margin-top:8px;
+}
 @media (max-width: 480px) {
   .ls-methods { grid-template-columns:repeat(2, 1fr); }
   .ls-method-btn { font-size:12px; }
@@ -156,7 +175,22 @@
 
     <div class="ls-err" id="lsErr" style="display:none"></div>
   </div>
-  <div class="ls-foot">
+
+  <!-- Success view: muncul setelah pelunasan berhasil.
+       Untuk pelanggan ber-telepon: tampil tombol Kirim Bukti Lunas via WA. -->
+  <div class="ls-body" id="lsSuccessBody" style="display:none">
+    <div class="ls-success">
+      <div class="ic">✅</div>
+      <div class="lbl">Pembayaran Lunas!</div>
+      <div class="sub" id="lsSuccessSub">Order tercatat lunas</div>
+    </div>
+    <button class="ls-btn-wa-lunas" id="lsBtnWaLunas" style="display:none">
+      💬 Kirim Bukti Lunas via WA
+    </button>
+    <button class="ls-btn-selesai" id="lsBtnSelesai">Selesai</button>
+  </div>
+
+  <div class="ls-foot" id="lsFoot">
     <button class="ls-btn-submit" id="lsBtnSubmit">Simpan Pelunasan</button>
   </div>
 </div>`;
@@ -308,7 +342,15 @@
       }
       window.dispatchEvent(new CustomEvent('lunasi:done', { detail: { id: ctx.id, result: d } }));
       if (typeof window.posRefreshBadges === 'function') window.posRefreshBadges();
-      closeLunasiSheet();
+
+      // Kalau pelunasan (bukan cicilan) berhasil & pelanggan punya telepon,
+      // tampilkan tombol "Kirim Bukti Lunas via WA" (pakai template lunas —
+      // TIDAK boleh reproduksi nota order awal).
+      if (d.lunas && ctx.pelanggan_id && ctx.telepon) {
+        showSuccessView(d);
+      } else {
+        closeLunasiSheet();
+      }
     } catch {
       $('lsErr').textContent = 'Koneksi gagal';
       $('lsErr').style.display = '';
@@ -318,10 +360,58 @@
     }
   }
 
+  /* ── Success view (tombol Kirim Bukti Lunas via WA) ───── */
+  function showSuccessView(result) {
+    // Sembunyikan form input, tampilkan blok sukses
+    document.querySelectorAll('#lsSheet > .ls-body').forEach(el => {
+      if (el.id === 'lsSuccessBody') el.style.display = '';
+      else el.style.display = 'none';
+    });
+    $('lsFoot').style.display = 'none';
+
+    const metodeLabel = ({ tunai: 'Tunai', transfer: 'Transfer', qris: 'QRIS', deposit: 'Deposit' })[metode] || metode;
+    let subTxt = `${ctx.nomor} · Metode: ${metodeLabel}`;
+    if (result.kembalian > 0) subTxt += ` · Kembalian: ${fmtRp(result.kembalian)}`;
+    if (result.kelebihan_ke_deposit > 0) subTxt += ` · Kelebihan ke deposit: ${fmtRp(result.kelebihan_ke_deposit)}`;
+    $('lsSuccessSub').textContent = subTxt;
+
+    // Tombol WA hanya muncul kalau ada telepon
+    const btnWa = $('lsBtnWaLunas');
+    if (ctx.telepon) {
+      btnWa.style.display = '';
+      btnWa.onclick = () => {
+        // Buka WA sheet — user tinggal pilih "Bukti Lunas" (opsi baru).
+        // Alternatif langsung buka /wa/lunas endpoint, tapi mengalir lewat
+        // wa-sheet supaya konsisten (pilih WA biasa vs Business).
+        if (typeof window.openWaSheet === 'function') {
+          closeLunasiSheet();
+          window.openWaSheet({
+            id: ctx.id, nomor: ctx.nomor,
+            nama: ctx.nama, telepon: ctx.telepon
+          });
+        }
+      };
+    } else {
+      btnWa.style.display = 'none';
+    }
+  }
+
+  function resetSheetView() {
+    document.querySelectorAll('#lsSheet > .ls-body').forEach(el => {
+      el.style.display = el.id === 'lsSuccessBody' ? 'none' : '';
+    });
+    $('lsFoot').style.display = '';
+  }
+
   /* ── Hooks ─────────────────────────────────────────────── */
   $('lsNominal').addEventListener('input', updateKembalian);
   $('lsBtnSubmit').addEventListener('click', submitLunasi);
+  $('lsBtnSelesai').addEventListener('click', closeLunasiSheet);
   document.querySelectorAll('#lsMethods .ls-method-btn').forEach(b => {
     b.addEventListener('click', () => selectMethod(b.dataset.method));
   });
+
+  // Reset ke tampilan form setiap kali sheet dibuka ulang
+  const origOpen = window.openLunasiSheet;
+  window.openLunasiSheet = (data) => { resetSheetView(); origOpen(data); };
 })();
