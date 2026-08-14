@@ -967,6 +967,7 @@ function renderMobile() {
       </div>
     `;
   }).join('');
+  stripOwnerGuardIfOwner();
 }
 
 // ── Render desktop accordion ──────────────────────────────────────────────────
@@ -1079,6 +1080,7 @@ function renderAkordion() {
       </div>
     </div>`;
   }).join('');
+  stripOwnerGuardIfOwner();
 }
 
 function toggleCat(id) {
@@ -1106,6 +1108,19 @@ async function loadLayanan() {
 function esc(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+// Belt-and-suspenders: strip data-owner-only attribute setelah render
+// supaya tombol owner tetap muncul walau MutationObserver auth-helper.js
+// terlambat pasang / miss mutation (race saat first-load).
+function stripOwnerGuardIfOwner() {
+  if (!(window.isOwner && window.isOwner())) return;
+  document.querySelectorAll('[data-owner-only="1"]').forEach(el => {
+    el.removeAttribute('data-owner-only');
+  });
+}
+// Kalau role belum ketahuan saat render pertama jalan, re-strip begitu
+// auth /me selesai (event dari auth-helper.js).
+window.addEventListener('pos:role-loaded', stripOwnerGuardIfOwner);
 
 document.querySelectorAll('.lm-bg').forEach(bg => {
   bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
