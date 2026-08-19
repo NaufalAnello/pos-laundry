@@ -24,7 +24,7 @@ Terima kasih telah mempercayakan laundry Anda kepada kami! 🧺
 
 💵 Subtotal   : Rp {subtotal}
 🏷️ Diskon     : Rp {diskon}
-💰 *Total Bayar: Rp {total}*
+💰 Total Tagihan: Rp {total}
 💳 Bayar      : Rp {bayar}
 💵 Kembalian  : Rp {kembalian}
 {sisa_tagihan_block}

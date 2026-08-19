@@ -102,7 +102,7 @@ const buildNota = async (transaksi, mode = 'regular') => {
     kembalian:       fmtRp(transaksi.kembalian),
     sisa_tagihan:    fmtRp(sisaTagihan),
     sisa_tagihan_block: sisaTagihan > 0
-      ? `⚠️ *Sisa Tagihan: Rp ${fmtRp(sisaTagihan)}* (bayar saat ambil)`
+      ? `⚠️ *PERLU DIBAYAR: Rp ${fmtRp(sisaTagihan)}* (saat ambil cucian)`
       : '',
     poin_dapat:      poinEarned,
     poin_total:      transaksi.pelanggan_poin ?? '—',
