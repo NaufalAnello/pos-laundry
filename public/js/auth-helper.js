@@ -22,11 +22,17 @@
   if (window.__authHelperLoaded) return;
   window.__authHelperLoaded = true;
 
-  /* ── Inject CSS: sembunyikan owner-only sampai role dikonfirmasi ── */
+  /* ── Inject CSS: sembunyikan owner-only sampai role owner terkonfirmasi ──
+     Selector di-scope ke body:not(.role-owner) supaya begitu applyRole()
+     menambahkan class 'role-owner' ke body, semua elemen owner-only
+     langsung visible via CSS specificity — tanpa perlu strip attribute
+     satu-satu (yang sensitif terhadap race MutationObserver). Elemen
+     dinamis yang di-inject via innerHTML SETELAH role loaded juga otomatis
+     visible karena CSS rule tidak lagi match. */
   if (!document.getElementById('rbac-guard-style')) {
     const s = document.createElement('style');
     s.id = 'rbac-guard-style';
-    s.textContent = '[data-owner-only="1"]{display:none !important}';
+    s.textContent = 'body:not(.role-owner) [data-owner-only="1"]{display:none !important}';
     (document.head || document.documentElement).appendChild(s);
   }
 
