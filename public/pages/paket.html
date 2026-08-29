@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="/css/design-system.css"/>
+  <link rel="stylesheet" href="/css/layout.css"/>
+  <link rel="stylesheet" href="/css/responsive.css"/>
+  <title>Paket Layanan — POS Laundry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: #F0F7FF; color: #1E2A6E; font-size: 14px; min-height: 100vh; }
+    .page { max-width: 1200px; margin: 0 auto; }
+    .pos-topbar { display: none !important; }
+
+    /* Header */
+    .pk-head {
+      position: sticky; top: 0; z-index: 20; background: #F0F7FF;
+      padding: 14px 16px 10px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .pk-head .ic-btn {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: #fff; color: #2D3BB5; border: none; cursor: pointer; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      text-decoration: none; box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+    }
+    .pk-title { flex: 1; font-size: 20px; font-weight: 800; color: #1E2A6E; letter-spacing: -.01em; }
+    .btn-add {
+      height: 36px; padding: 0 14px; border: none; border-radius: 8px;
+      background: #2D3BB5; color: #fff; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .btn-add:active { transform: scale(.97); }
+    @media (max-width: 480px) {
+      .pk-head { gap: 6px; padding: 12px 12px 8px; }
+      .btn-add { padding: 0 10px; font-size: 12px; gap: 3px; }
+      .btn-add svg { width: 14px; height: 14px; }
+    }
+
+    /* Tab switch */
+    .tab-row {
+      display: flex; gap: 6px; padding: 0 16px 10px;
+    }
+    .tab-btn {
+      flex: 1; height: 40px; border: 1px solid #E2E8F0;
+      background: #fff; color: #64748B;
+      border-radius: 10px; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+    }
+    .tab-btn.active { background: #2D3BB5; color: #fff; border-color: #2D3BB5; }
+
+    .body-wrap { padding: 4px 16px 130px; display: flex; flex-direction: column; gap: 12px; }
+
+    /* Cards */
+    .card {
+      background: #fff; border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(45,59,181,0.08);
+      padding: 14px;
+    }
+    .tpl-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+    .tpl-nama { font-size: 15px; font-weight: 800; color: #1E2A6E; }
+    .tpl-harga { font-size: 16px; font-weight: 800; color: #2D3BB5; white-space: nowrap; }
+    .tpl-desc { font-size: 12px; color: #64748B; margin-top: 4px; }
+    .tpl-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; font-size: 12px; color: #94A3B8; }
+    .tpl-meta b { color: #1E2A6E; font-weight: 700; }
+    .tpl-actions { display: flex; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #F1F5F9; }
+    .badge-nonaktif { background: #F1F5F9; color: #94A3B8; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+
+    /* Paket Pelanggan card */
+    .pp-card { border-left: 4px solid #10B981; }
+    .pp-card.warn { border-left-color: #F59E0B; }
+    .pp-card.exp { border-left-color: #EF4444; opacity: .75; }
+    .pp-top { display: flex; justify-content: space-between; gap: 10px; }
+    .pp-nama-pel { font-size: 14px; font-weight: 800; color: #1E2A6E; }
+    .pp-sub { font-size: 12px; color: #64748B; margin-top: 2px; }
+    .pp-status {
+      font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px;
+    }
+    .pp-status.aktif { background: #DCFCE7; color: #10B981; }
+    .pp-status.habis { background: #F1F5F9; color: #64748B; }
+    .pp-status.kadaluarsa { background: #FEE2E2; color: #EF4444; }
+
+    .pp-kuota {
+      display: flex; align-items: center; gap: 10px; margin-top: 10px;
+    }
+    .pp-kuota-bar {
+      flex: 1; height: 8px; background: #F1F5F9; border-radius: 999px; overflow: hidden;
+    }
+    .pp-kuota-fill { height: 100%; background: #10B981; border-radius: 999px; }
+    .pp-kuota.warn .pp-kuota-fill { background: #F59E0B; }
+    .pp-kuota-txt { font-size: 12px; color: #64748B; white-space: nowrap; }
+    .pp-info {
+      display: flex; flex-direction: column; gap: 3px; margin-top: 8px;
+      font-size: 12px; color: #64748B;
+    }
+    .pp-info b { color: #1E2A6E; font-weight: 700; }
+    .pp-days { font-weight: 700; }
+    .pp-days.warn { color: #F59E0B; }
+    .pp-days.exp { color: #EF4444; }
+    .pp-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid #F1F5F9; }
+
+    /* Empty */
+    .empty {
+      text-align: center; padding: 40px 20px; color: #94A3B8;
+      background: #fff; border-radius: 10px; border: 1px dashed #E2E8F0;
+    }
+    .empty .ttl { font-size: 15px; font-weight: 700; color: #64748B; margin-bottom: 4px; }
+
+    /* Buttons */
+    .btn {
+      padding: 8px 14px; border-radius: 8px; border: 1px solid transparent;
+      font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .btn:disabled { opacity: .5; cursor: default; }
+    .btn-sm { padding: 6px 10px; font-size: 12px; }
+    .btn-primary { background: #2D3BB5; color: #fff; }
+    .btn-outline { background: #fff; border-color: #E2E8F0; color: #64748B; }
+    .btn-success { background: #10B981; color: #fff; }
+    .btn-ghost { background: none; border: none; color: #64748B; padding: 6px 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+
+    /* Search */
+    .search-wrap { padding: 0 16px 10px; }
+    .search-wrap input {
+      width: 100%; height: 42px; border: 1.5px solid #E2E8F0;
+      border-radius: 10px; padding: 0 14px; font-size: 14px;
+      font-family: inherit; color: #1E2A6E; outline: none; background: #fff;
+    }
+    .search-wrap input:focus { border-color: #2D3BB5; }
+
+    /* Modal (bottom sheet) */
+    .pm-bg {
+      display: none; position: fixed !important; inset: 0 !important;
+      background: rgba(30,42,110,0.45) !important; z-index: 100 !important;
+      align-items: flex-end; justify-content: center;
+    }
+    .pm-bg.open { display: flex; }
+    .pm {
+      background: #fff; border-radius: 18px 18px 0 0;
+      width: 100%; max-width: 100%; max-height: 92vh; overflow: hidden;
+      display: flex; flex-direction: column;
+      box-shadow: 0 -8px 32px rgba(45,59,181,.18);
+    }
+    .pm-h {
+      padding: 14px 18px; border-bottom: 1px solid #E2E8F0;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; background: #fff; z-index: 2;
+    }
+    .pm-h .ttl { font-size: 16px; font-weight: 800; color: #1E2A6E; }
+    .pm-x { width: 32px; height: 32px; border-radius: 8px; background: #F1F5F9; border: none; cursor: pointer; color: #64748B; display: inline-flex; align-items: center; justify-content: center; }
+    .pm-b { padding: 16px 18px; overflow-y: auto; flex: 1; }
+    .pm-f {
+      padding: 12px 18px; border-top: 1px solid #E2E8F0;
+      display: flex; justify-content: flex-end; gap: 8px;
+      flex-wrap: wrap; position: sticky; bottom: 0; background: #fff;
+    }
+    @media (min-width: 1024px) {
+      .pm-bg { align-items: center; padding: 16px; }
+      .pm { max-width: 540px; border-radius: 14px; }
+    }
+
+    .fg { margin-bottom: 14px; }
+    .fg label {
+      display: block; font-size: 12px; font-weight: 700;
+      color: #64748B; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .3px;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; padding: 10px 12px;
+      border: 1.5px solid #E2E8F0; border-radius: 8px;
+      font-size: 14px; color: #1E2A6E;
+      outline: none; background: #fff; font-family: inherit; min-height: 44px;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #2D3BB5; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+    .form-hint { font-size: 11px; color: #94A3B8; margin-top: 4px; }
+
+    /* Mutasi list (dalam modal) */
+    .mut-item {
+      padding: 10px 0; border-bottom: 1px solid #F1F5F9;
+      font-size: 13px;
+    }
+    .mut-item:last-child { border-bottom: none; }
+    .mut-jenis {
+      display: inline-block; padding: 2px 8px; border-radius: 6px;
+      font-size: 11px; font-weight: 700; margin-right: 8px;
+    }
+    .mut-jenis.pembelian { background: #DBEAFE; color: #2563EB; }
+    .mut-jenis.pemakaian { background: #FEF3C7; color: #D97706; }
+    .mut-jenis.toleransi { background: #EDE9FE; color: #7C3AED; }
+    .mut-jenis.hangus    { background: #FEE2E2; color: #EF4444; }
+    .mut-meta { font-size: 11px; color: #94A3B8; margin-top: 3px; }
+
+    /* Toast */
+    #toast {
+      position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%);
+      background: #1E2A6E; color: #fff; padding: 10px 20px; border-radius: 999px;
+      font-size: 13px; font-weight: 600; z-index: 9999;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+      max-width: calc(100vw - 32px); text-align: center;
+    }
+    #toast.show { opacity: 1; }
+    #toast.err { background: #EF4444; }
+    @media (min-width: 1024px) { #toast { bottom: 24px; } }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div class="pk-head">
+    <a class="ic-btn" href="/" aria-label="Kembali">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </a>
+    <div class="pk-title">Paket Layanan</div>
+    <button class="btn-add" id="btnHeaderAdd" onclick="handleHeaderAdd()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      <span id="btnHeaderAddLabel">Jual Paket</span>
+    </button>
+  </div>
+
+  <div class="tab-row">
+    <button class="tab-btn active" data-tab="pelanggan" onclick="switchTab('pelanggan')">Paket Pelanggan</button>
+    <button class="tab-btn" data-tab="template" onclick="switchTab('template')">Template Paket</button>
+  </div>
+
+  <div class="search-wrap">
+    <input id="searchInput" type="text" placeholder="Cari nama pelanggan atau template..." oninput="renderCurrentTab()"/>
+  </div>
+
+  <div class="body-wrap">
+    <div id="listArea">
+      <div class="empty"><div class="ttl">Memuat…</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal Template ── -->
+<div class="pm-bg" id="tplModal">
+  <div class="pm">
+    <div class="pm-h">
+      <div class="ttl" id="tplModalTitle">Tambah Template</div>
+      <button class="pm-x" onclick="closeModal('tplModal')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
+    </div>
+    <div class="pm-b">
+      <input type="hidden" id="tplId"/>
+      <div class="fg">
+        <label>Nama Paket *</label>
+        <input type="text" id="tplNama" class="form-input" placeholder="contoh: Paket Dewasa 30kg"/>
+      </div>
+      <div class="fg">
+        <label>Deskripsi</label>
+        <input type="text" id="tplDeskripsi" class="form-input" placeholder="Opsional"/>
+      </div>
+      <div class="form-row">
+        <div class="fg">
+          <label>Kuota (kg) *</label>
+          <input type="number" id="tplKuota" class="form-input" min="0" step="0.5" placeholder="30"/>
+        </div>
+        <div class="fg">
+          <label>Harga (Rp) *</label>
+          <input type="number" id="tplHarga" class="form-input" min="0" placeholder="150000"/>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Masa Berlaku (hari) *</label>
+        <input type="number" id="tplMasaBerlaku" class="form-input" min="1" value="30"/>
+        <div class="form-hint">Dihitung dari tanggal pembelian</div>
+      </div>
+      <div class="form-row">
+        <div class="fg">
+          <label>Est. Min Hari</label>
+          <input type="number" id="tplMinHari" class="form-input" min="0" value="3"/>
+        </div>
+        <div class="fg">
+          <label>Est. Max Hari</label>
+          <input type="number" id="tplMaxHari" class="form-input" min="0" value="4"/>
+        </div>
+      </div>
+    </div>
+    <div class="pm-f">
+      <button class="btn btn-outline" onclick="closeModal('tplModal')">Batal</button>
+      <button class="btn btn-primary" id="tplSaveBtn" onclick="saveTemplate()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal Jual Paket ── -->
+<div class="pm-bg" id="jualModal">
+  <div class="pm">
+    <div class="pm-h">
+      <div class="ttl">Jual Paket ke Pelanggan</div>
+      <button class="pm-x" onclick="closeModal('jualModal')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
+    </div>
+    <div class="pm-b">
+      <div class="fg">
+        <label>Pelanggan *</label>
+        <select id="jualPelangganId" class="form-select"></select>
+      </div>
+      <div class="fg">
+        <label>Template Paket *</label>
+        <select id="jualTemplateId" class="form-select" onchange="updateJualPreview()"></select>
+      </div>
+      <div class="fg">
+        <label>Metode Bayar *</label>
+        <select id="jualMetodeBayar" class="form-select">
+          <option value="tunai">Tunai</option>
+          <option value="transfer">Transfer</option>
+          <option value="qris">QRIS</option>
+        </select>
+      </div>
+      <div id="jualPreview" style="background:#F8FAFF;border-radius:8px;padding:12px;font-size:13px;color:#64748B;display:none">
+      </div>
+    </div>
+    <div class="pm-f">
+      <button class="btn btn-outline" onclick="closeModal('jualModal')">Batal</button>
+      <button class="btn btn-success" id="jualSaveBtn" onclick="jualPaket()">Jual</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal Toleransi ── -->
+<div class="pm-bg" id="tolModal">
+  <div class="pm">
+    <div class="pm-h">
+      <div class="ttl">Beri Toleransi</div>
+      <button class="pm-x" onclick="closeModal('tolModal')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
+    </div>
+    <div class="pm-b">
+      <input type="hidden" id="tolPaketId"/>
+      <div id="tolPaketInfo" style="background:#F8FAFF;border-radius:8px;padding:10px 14px;font-size:13px;color:#64748B;margin-bottom:14px"></div>
+      <div class="fg">
+        <label>Tambah Hari *</label>
+        <input type="number" id="tolTambahHari" class="form-input" min="1" max="365" value="7"/>
+        <div class="form-hint">Perpanjangan masa berlaku dari tanggal kadaluarsa saat ini</div>
+      </div>
+      <div class="fg">
+        <label>Alasan / Catatan</label>
+        <textarea id="tolCatatan" class="form-textarea" rows="3" placeholder="contoh: pelanggan lagi ke luar kota"></textarea>
+      </div>
+    </div>
+    <div class="pm-f">
+      <button class="btn btn-outline" onclick="closeModal('tolModal')">Batal</button>
+      <button class="btn btn-primary" id="tolSaveBtn" onclick="saveToleransi()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal Riwayat Mutasi ── -->
+<div class="pm-bg" id="mutModal">
+  <div class="pm">
+    <div class="pm-h">
+      <div class="ttl">Riwayat Mutasi Paket</div>
+      <button class="pm-x" onclick="closeModal('mutModal')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+      </button>
+    </div>
+    <div class="pm-b" id="mutBody">
+      <div style="text-align:center;color:#94A3B8;padding:20px">Memuat…</div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const fmtRp = n => Number(n||0).toLocaleString('id-ID');
+const fmtDate = d => d ? new Date(d).toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' }) : '—';
+const fmtDateTime = d => d ? new Date(d).toLocaleString('id-ID', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+let currentTab = 'pelanggan';
+let templates = [];
+let paketPelanggan = [];
+let pelangganList = [];
+
+function showToast(msg, err = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  el.classList.toggle('err', !!err);
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.pm-bg').forEach(bg => {
+  bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
+});
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+  const searchInput = document.getElementById('searchInput');
+  searchInput.placeholder = tab === 'template'
+    ? 'Cari template paket...'
+    : 'Cari nama pelanggan...';
+  const btnLabel = document.getElementById('btnHeaderAddLabel');
+  btnLabel.textContent = tab === 'template' ? 'Template' : 'Jual Paket';
+  // Header add button hanya owner untuk tab template
+  const btnAdd = document.getElementById('btnHeaderAdd');
+  btnAdd.setAttribute('data-owner-only', tab === 'template' ? '1' : '');
+  if (tab !== 'template') btnAdd.removeAttribute('data-owner-only');
+  // trigger role-scoped CSS refresh (kalau ada race)
+  if (window.isOwner && !window.isOwner() && tab === 'template') {
+    btnAdd.style.display = 'none';
+  } else {
+    btnAdd.style.display = '';
+  }
+  renderCurrentTab();
+}
+
+function handleHeaderAdd() {
+  if (currentTab === 'template') openTemplateModal();
+  else openJualModal();
+}
+
+// ── Loading ──────────────────────────────────────────────────────────────────
+async function loadTemplates() {
+  const r = await fetch('/api/v1/paket-template?aktif=semua', { credentials: 'include' });
+  if (r.status === 401) { location.href = '/login'; return; }
+  const d = await r.json();
+  templates = d.data || [];
+}
+
+async function loadPaketPelanggan() {
+  const r = await fetch('/api/v1/paket-pelanggan', { credentials: 'include' });
+  if (r.status === 401) { location.href = '/login'; return; }
+  const d = await r.json();
+  paketPelanggan = d.data || [];
+}
+
+async function loadPelangganList() {
+  const r = await fetch('/api/v1/pelanggan?limit=1000', { credentials: 'include' });
+  const d = await r.json();
+  pelangganList = d.data || [];
+}
+
+async function reloadAll() {
+  await Promise.all([loadTemplates(), loadPaketPelanggan()]);
+  renderCurrentTab();
+}
+
+function renderCurrentTab() {
+  if (currentTab === 'template') renderTemplates();
+  else renderPaketPelanggan();
+}
+
+// ── Render Template ──────────────────────────────────────────────────────────
+function renderTemplates() {
+  const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+  const list = templates.filter(t => !q || t.nama.toLowerCase().includes(q));
+  const el = document.getElementById('listArea');
+  if (!list.length) {
+    el.innerHTML = `<div class="empty"><div class="ttl">Belum ada template</div><div>Klik "Template" di header untuk menambah.</div></div>`;
+    return;
+  }
+  el.innerHTML = list.map(t => `
+    <div class="card">
+      <div class="tpl-top">
+        <div>
+          <div class="tpl-nama">${esc(t.nama)}${!t.aktif ? ' <span class="badge-nonaktif">Nonaktif</span>' : ''}</div>
+          ${t.deskripsi ? `<div class="tpl-desc">${esc(t.deskripsi)}</div>` : ''}
+        </div>
+        <div class="tpl-harga">Rp ${fmtRp(t.harga)}</div>
+      </div>
+      <div class="tpl-meta">
+        <span>Kuota: <b>${t.kuota_kg} kg</b></span>
+        <span>Masa berlaku: <b>${t.masa_berlaku_hari} hari</b></span>
+        <span>Est. pengerjaan: <b>${t.estimasi_min_hari}–${t.estimasi_max_hari} hari</b></span>
+      </div>
+      <div class="tpl-actions" data-owner-only="1">
+        <button class="btn btn-sm btn-outline" onclick='editTemplate(${JSON.stringify(t).replace(/'/g,"&#39;")})'>Edit</button>
+        ${t.aktif ? `<button class="btn btn-sm btn-ghost" style="color:#EF4444" onclick="nonaktifkanTemplate(${t.id})">Nonaktifkan</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Render Paket Pelanggan ───────────────────────────────────────────────────
+function renderPaketPelanggan() {
+  const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+  const list = paketPelanggan.filter(p => !q ||
+    (p.pelanggan_nama || '').toLowerCase().includes(q) ||
+    (p.nama_paket_snapshot || '').toLowerCase().includes(q)
+  );
+  const el = document.getElementById('listArea');
+  if (!list.length) {
+    el.innerHTML = `<div class="empty"><div class="ttl">Belum ada paket dijual</div><div>Klik "Jual Paket" di header untuk mulai.</div></div>`;
+    return;
+  }
+  el.innerHTML = list.map(p => {
+    const persenSisa = p.kuota_awal_kg > 0 ? (p.kuota_sisa_kg / p.kuota_awal_kg) * 100 : 0;
+    const isWarn = p.status === 'aktif' && p.sisa_hari <= 3;
+    const isExp = p.status === 'kadaluarsa' || p.sisa_hari < 0;
+    const cardCls = isExp ? 'exp' : (isWarn ? 'warn' : '');
+    const barCls = persenSisa < 30 ? 'warn' : '';
+    let statusLabel = 'Aktif', statusCls = 'aktif';
+    if (p.status === 'habis_kuota') { statusLabel = 'Habis Kuota'; statusCls = 'habis'; }
+    else if (p.status === 'kadaluarsa') { statusLabel = 'Kadaluarsa'; statusCls = 'kadaluarsa'; }
+    let daysLabel, daysCls = '';
+    if (p.sisa_hari < 0) { daysLabel = `Lewat ${Math.abs(p.sisa_hari)} hari`; daysCls = 'exp'; }
+    else if (p.sisa_hari === 0) { daysLabel = 'Hari ini kadaluarsa'; daysCls = 'exp'; }
+    else if (p.sisa_hari <= 3) { daysLabel = `${p.sisa_hari} hari lagi`; daysCls = 'warn'; }
+    else { daysLabel = `${p.sisa_hari} hari lagi`; }
+
+    return `
+    <div class="card pp-card ${cardCls}">
+      <div class="pp-top">
+        <div>
+          <div class="pp-nama-pel">${esc(p.pelanggan_nama || '—')}</div>
+          <div class="pp-sub">${esc(p.nama_paket_snapshot)} · Beli ${fmtDate(p.tanggal_beli)}</div>
+        </div>
+        <span class="pp-status ${statusCls}">${statusLabel}</span>
+      </div>
+      <div class="pp-kuota ${barCls}">
+        <div class="pp-kuota-bar"><div class="pp-kuota-fill" style="width:${persenSisa}%"></div></div>
+        <div class="pp-kuota-txt"><b>${p.kuota_sisa_kg}</b>/${p.kuota_awal_kg} kg</div>
+      </div>
+      <div class="pp-info">
+        <div>Kadaluarsa: <b>${fmtDate(p.tanggal_kadaluarsa)}</b> · <span class="pp-days ${daysCls}">${daysLabel}</span></div>
+        ${p.toleransi_hari_tambahan > 0 ? `<div>Toleransi diberikan: <b>+${p.toleransi_hari_tambahan} hari</b>${p.catatan_toleransi ? ` — <i>${esc(p.catatan_toleransi)}</i>` : ''}</div>` : ''}
+        <div>Harga dibayar: <b>Rp ${fmtRp(p.harga_dibayar)}</b> · ${esc(p.metode_bayar || '—')}</div>
+      </div>
+      <div class="pp-actions">
+        <button class="btn btn-sm btn-outline" onclick="lihatMutasi(${p.id})">Riwayat</button>
+        ${p.pelanggan_telepon ? `<button class="btn btn-sm btn-outline" onclick="kirimReminderWa(${p.id})">Kirim WA</button>` : ''}
+        <button class="btn btn-sm btn-outline" data-owner-only="1" onclick='beriToleransi(${p.id}, ${JSON.stringify(p).replace(/'/g,"&#39;")})'>Beri Toleransi</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Template CRUD ────────────────────────────────────────────────────────────
+function openTemplateModal() {
+  document.getElementById('tplId').value = '';
+  document.getElementById('tplNama').value = '';
+  document.getElementById('tplDeskripsi').value = '';
+  document.getElementById('tplKuota').value = '';
+  document.getElementById('tplHarga').value = '';
+  document.getElementById('tplMasaBerlaku').value = 30;
+  document.getElementById('tplMinHari').value = 3;
+  document.getElementById('tplMaxHari').value = 4;
+  document.getElementById('tplModalTitle').textContent = 'Tambah Template';
+  document.getElementById('tplModal').classList.add('open');
+}
+
+function editTemplate(t) {
+  document.getElementById('tplId').value = t.id;
+  document.getElementById('tplNama').value = t.nama;
+  document.getElementById('tplDeskripsi').value = t.deskripsi || '';
+  document.getElementById('tplKuota').value = t.kuota_kg;
+  document.getElementById('tplHarga').value = t.harga;
+  document.getElementById('tplMasaBerlaku').value = t.masa_berlaku_hari;
+  document.getElementById('tplMinHari').value = t.estimasi_min_hari;
+  document.getElementById('tplMaxHari').value = t.estimasi_max_hari;
+  document.getElementById('tplModalTitle').textContent = 'Edit Template';
+  document.getElementById('tplModal').classList.add('open');
+}
+
+async function saveTemplate() {
+  const id = document.getElementById('tplId').value;
+  const body = {
+    nama: document.getElementById('tplNama').value.trim(),
+    deskripsi: document.getElementById('tplDeskripsi').value.trim(),
+    kuota_kg: parseFloat(document.getElementById('tplKuota').value) || 0,
+    harga: parseFloat(document.getElementById('tplHarga').value) || 0,
+    masa_berlaku_hari: parseInt(document.getElementById('tplMasaBerlaku').value) || 30,
+    estimasi_min_hari: parseInt(document.getElementById('tplMinHari').value) || 3,
+    estimasi_max_hari: parseInt(document.getElementById('tplMaxHari').value) || 4
+  };
+  if (!body.nama) { showToast('Nama wajib diisi', true); return; }
+  if (body.kuota_kg <= 0) { showToast('Kuota wajib > 0', true); return; }
+  if (body.harga <= 0) { showToast('Harga wajib > 0', true); return; }
+  const btn = document.getElementById('tplSaveBtn');
+  btn.disabled = true;
+  try {
+    const url = id ? `/api/v1/paket-template/${id}` : '/api/v1/paket-template';
+    const method = id ? 'PUT' : 'POST';
+    const r = await fetch(url, { method, credentials:'include', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    const d = await r.json();
+    if (!r.ok) { showToast('Gagal: ' + d.error, true); return; }
+    showToast(d.message);
+    closeModal('tplModal');
+    await reloadAll();
+  } catch { showToast('Koneksi gagal', true); }
+  finally { btn.disabled = false; }
+}
+
+async function nonaktifkanTemplate(id) {
+  if (!confirm('Nonaktifkan template ini? Paket yang sudah terjual tidak terpengaruh.')) return;
+  try {
+    const r = await fetch(`/api/v1/paket-template/${id}`, { method:'DELETE', credentials:'include' });
+    const d = await r.json();
+    if (!r.ok) { showToast('Gagal: ' + d.error, true); return; }
+    showToast(d.message);
+    await reloadAll();
+  } catch { showToast('Koneksi gagal', true); }
+}
+
+// ── Jual Paket ───────────────────────────────────────────────────────────────
+async function openJualModal() {
+  if (!pelangganList.length) await loadPelangganList();
+  const pelSel = document.getElementById('jualPelangganId');
+  pelSel.innerHTML = '<option value="">-- Pilih Pelanggan --</option>' +
+    pelangganList.map(p => `<option value="${p.id}">${esc(p.nama)}${p.telepon ? ' · ' + esc(p.telepon) : ''}</option>`).join('');
+  const tplSel = document.getElementById('jualTemplateId');
+  const templatesAktif = templates.filter(t => t.aktif);
+  if (!templatesAktif.length) {
+    showToast('Belum ada template aktif', true);
+    return;
+  }
+  tplSel.innerHTML = '<option value="">-- Pilih Template --</option>' +
+    templatesAktif.map(t => `<option value="${t.id}">${esc(t.nama)} · ${t.kuota_kg} kg · Rp ${fmtRp(t.harga)}</option>`).join('');
+  document.getElementById('jualMetodeBayar').value = 'tunai';
+  document.getElementById('jualPreview').style.display = 'none';
+  document.getElementById('jualModal').classList.add('open');
+}
+
+function updateJualPreview() {
+  const tplId = document.getElementById('jualTemplateId').value;
+  const tpl = templates.find(t => String(t.id) === String(tplId));
+  const el = document.getElementById('jualPreview');
+  if (!tpl) { el.style.display = 'none'; return; }
+  const exp = new Date();
+  exp.setDate(exp.getDate() + Number(tpl.masa_berlaku_hari));
+  el.innerHTML = `
+    <div><b style="color:#1E2A6E">${esc(tpl.nama)}</b></div>
+    <div style="margin-top:6px">Kuota: <b>${tpl.kuota_kg} kg</b> · Harga: <b>Rp ${fmtRp(tpl.harga)}</b></div>
+    <div>Masa berlaku: <b>${tpl.masa_berlaku_hari} hari</b> (kadaluarsa ${fmtDate(exp)})</div>
+  `;
+  el.style.display = 'block';
+}
+
+async function jualPaket() {
+  const pelId = parseInt(document.getElementById('jualPelangganId').value);
+  const tplId = parseInt(document.getElementById('jualTemplateId').value);
+  const metode = document.getElementById('jualMetodeBayar').value;
+  if (!pelId) { showToast('Pilih pelanggan', true); return; }
+  if (!tplId) { showToast('Pilih template', true); return; }
+  const btn = document.getElementById('jualSaveBtn');
+  btn.disabled = true;
+  try {
+    const r = await fetch('/api/v1/paket-pelanggan/beli', {
+      method:'POST', credentials:'include', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ pelanggan_id: pelId, paket_template_id: tplId, metode_bayar: metode })
+    });
+    const d = await r.json();
+    if (!r.ok) { showToast('Gagal: ' + d.error, true); return; }
+    showToast(d.message);
+    closeModal('jualModal');
+    await reloadAll();
+  } catch { showToast('Koneksi gagal', true); }
+  finally { btn.disabled = false; }
+}
+
+// ── Toleransi ────────────────────────────────────────────────────────────────
+function beriToleransi(id, paket) {
+  document.getElementById('tolPaketId').value = id;
+  document.getElementById('tolTambahHari').value = 7;
+  document.getElementById('tolCatatan').value = '';
+  document.getElementById('tolPaketInfo').innerHTML = `
+    <b style="color:#1E2A6E">${esc(paket.nama_paket_snapshot)}</b> · ${esc(paket.pelanggan_nama || '—')}<br>
+    Sisa kuota: <b>${paket.kuota_sisa_kg} kg</b> · Kadaluarsa: <b>${fmtDate(paket.tanggal_kadaluarsa)}</b>
+  `;
+  document.getElementById('tolModal').classList.add('open');
+}
+
+async function saveToleransi() {
+  const id = document.getElementById('tolPaketId').value;
+  const body = {
+    tambah_hari: parseInt(document.getElementById('tolTambahHari').value) || 0,
+    catatan: document.getElementById('tolCatatan').value.trim()
+  };
+  if (body.tambah_hari <= 0) { showToast('Tambah hari harus > 0', true); return; }
+  const btn = document.getElementById('tolSaveBtn');
+  btn.disabled = true;
+  try {
+    const r = await fetch(`/api/v1/paket-pelanggan/${id}/toleransi`, {
+      method:'POST', credentials:'include', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    if (!r.ok) { showToast('Gagal: ' + d.error, true); return; }
+    showToast(d.message);
+    closeModal('tolModal');
+    await reloadAll();
+  } catch { showToast('Koneksi gagal', true); }
+  finally { btn.disabled = false; }
+}
+
+// ── Riwayat Mutasi ───────────────────────────────────────────────────────────
+async function lihatMutasi(id) {
+  document.getElementById('mutBody').innerHTML = '<div style="text-align:center;color:#94A3B8;padding:20px">Memuat…</div>';
+  document.getElementById('mutModal').classList.add('open');
+  try {
+    const r = await fetch(`/api/v1/paket-pelanggan/${id}/mutasi`, { credentials: 'include' });
+    const d = await r.json();
+    const list = d.data || [];
+    if (!list.length) {
+      document.getElementById('mutBody').innerHTML = '<div class="empty"><div class="ttl">Belum ada mutasi</div></div>';
+      return;
+    }
+    document.getElementById('mutBody').innerHTML = list.map(m => `
+      <div class="mut-item">
+        <span class="mut-jenis ${m.jenis}">${m.jenis}</span>
+        <span>${esc(m.keterangan || '')}</span>
+        <div class="mut-meta">
+          ${fmtDateTime(m.created_at)}
+          ${m.transaksi_nomor ? ` · Order ${esc(m.transaksi_nomor)}` : ''}
+          ${m.user_nama ? ` · oleh ${esc(m.user_nama)}` : ''}
+          ${m.kg_terpakai != null ? ` · ${m.kg_terpakai} kg` : ''}
+          ${(m.kuota_sebelum != null && m.kuota_sesudah != null) ? ` · ${m.kuota_sebelum} → ${m.kuota_sesudah} kg` : ''}
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    document.getElementById('mutBody').innerHTML = '<div class="empty"><div class="ttl">Gagal memuat</div></div>';
+  }
+}
+
+// ── Kirim WA Reminder ────────────────────────────────────────────────────────
+async function kirimReminderWa(id) {
+  try {
+    const r = await fetch(`/api/v1/paket-pelanggan/${id}/reminder-wa`, { credentials: 'include' });
+    const d = await r.json();
+    if (!r.ok) { showToast('Gagal: ' + d.error, true); return; }
+    if (d.url) {
+      window.open(d.url, '_blank');
+      showToast('Pesan WA dibuat');
+    }
+  } catch { showToast('Koneksi gagal', true); }
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+(async () => {
+  await loadPelangganList().catch(() => {});
+  await reloadAll();
+})();
+</script>
+
+<script src="/js/nav.js"></script>
+</body>
+</html>

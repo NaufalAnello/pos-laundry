@@ -209,6 +209,14 @@ exports.index = async (req, res) => {
       reservasiCount = Number(reservasiRow?.total ?? 0);
     } catch (_e) { /* tabel belum ada */ }
 
+    // ── Paket layanan mendekati kadaluarsa ─────────────────────────────────
+    // Ambang default 3 hari, bisa diatur via pengaturan.paket_reminder_ambang_hari.
+    let paketMendekat = [];
+    try {
+      const paketSvc = require('../services/paketLayanan.service');
+      paketMendekat = await paketSvc.getPaketMendekatiKadaluarsa();
+    } catch (_e) { /* tabel belum ada / migration belum jalan */ }
+
     res.json({
       order_hari_ini:      Number(orderHariIni?.total  ?? 0),
       antar_jemput_belum_diproses: Number(ajCountRow?.total ?? 0),
@@ -222,7 +230,8 @@ exports.index = async (req, res) => {
       bar_chart_7hari:     chart7Hari,
       promo_aktif_hari_ini: promoAktif,
       stok_hampir_habis:   stokHampirHabis,
-      deposit:             depositStats
+      deposit:             depositStats,
+      paket_mendekat_kadaluarsa: paketMendekat
     });
   } catch (err) {
     console.error('[dashboard:index]', err);

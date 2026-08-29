@@ -27,6 +27,7 @@ const masterItemRoutes  = require('./routes/masterItemRoutes');
 const antarJemputRoutes = require('./routes/antarJemputRoutes');
 const reservasiJemputRoutes = require('./routes/reservasiJemputRoutes');
 const stokBahanRoutes   = require('./routes/stokBahanRoutes');
+const paketLayananRoutes = require('./routes/paketLayananRoutes');
 
 const app = express();
 
@@ -128,6 +129,9 @@ app.use('/api/v1/reservasi-jemput', reservasiJemputRoutes);
 // Stok Bahan Baku
 app.use('/api/v1/stok-bahan', stokBahanRoutes);
 
+// Paket Layanan (kuota kg dengan masa berlaku)
+app.use('/api/v1', paketLayananRoutes);
+
 // ── Web page routes ────────────────────────────────────────────────────────────
 
 // Halaman owner-only: laporan, kas, layanan, promo, poin, ai-insight,
@@ -196,6 +200,13 @@ app.get('/kas', gateOwnerPage, (req, res) => {
 app.get('/promo', (req, res) => {
   if (!req.session?.userId) return res.redirect('/login');
   res.sendFile(path.join(__dirname, '../public/pages/promo.html'));
+});
+
+// Paket Layanan — karyawan boleh lihat + jual paket; kelola template &
+// beri toleransi dilindungi requireOwner di route API.
+app.get('/paket', (req, res) => {
+  if (!req.session?.userId) return res.redirect('/login');
+  res.sendFile(path.join(__dirname, '../public/pages/paket.html'));
 });
 
 // Poin Pelanggan (owner-only)

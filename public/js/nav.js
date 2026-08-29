@@ -67,6 +67,7 @@
       items: [
         // Karyawan boleh LIHAT promo — kelola (CRUD) di-guard di halaman
         { href: '/promo',     mono: 'PR', label: 'Promo'    },
+        { href: '/paket',     mono: 'PK', label: 'Paket'    },
         { href: '/poin',      mono: 'PN', label: 'Poin',      ownerOnly: true },
         { href: '/pelanggan', mono: 'PL', label: 'Pelanggan' },
         { href: '/wa-center', mono: 'PW', label: 'Pusat WA'  },
@@ -93,6 +94,7 @@
     { href: '/antar-jemput',     mono: 'AJ', label: 'Antar Jemput' },
     { href: '/reservasi-jemput', mono: 'JJ', label: 'Jadwal Jemput', badge: 'reservasi' },
     { href: '/promo',            mono: 'PR', label: 'Promo'    },
+    { href: '/paket',            mono: 'PK', label: 'Paket'    },
     { href: '/poin',             mono: 'PN', label: 'Poin',         ownerOnly: true },
     { href: '/pelanggan',        mono: 'PL', label: 'Pelanggan' },
     { href: '/wa-center',        mono: 'PW', label: 'Pusat WA' },

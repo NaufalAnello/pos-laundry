@@ -8,6 +8,7 @@ const svc             = require('../services/transaksiService');
 const depositModel    = require('../models/deposit.model');
 const riwayatBayarModel = require('../models/riwayatBayarModel');
 const stokBahanService  = require('../services/stokBahan.service');
+const paketService      = require('../services/paketLayanan.service');
 
 // ── Validation schemas ───────────────────────────────────────────────────────
 const rincianItemSchema = Joi.object({
@@ -44,7 +45,8 @@ const createSchema = Joi.object({
   alamat_jemput:   Joi.string().allow('', null),
   jarak_jemput_km: Joi.number().min(0).max(999).allow(null),
   kirim_wa:        Joi.boolean().default(false),
-  waktu_transaksi: Joi.date().iso().allow(null)  // Backdate feature
+  waktu_transaksi: Joi.date().iso().allow(null),  // Backdate feature
+  pakai_paket:     Joi.boolean().default(false)   // Pakai kuota paket layanan pelanggan
 });
 
 const statusSchema = Joi.object({
@@ -170,6 +172,47 @@ exports.store = async (req, res) => {
       });
     }
 
+    // ── Pakai paket kuota (kalau dicentang) ────────────────────────────────
+    // Sebelum hitung total, potong berat kg-based items berdasarkan kuota
+    // paket aktif pelanggan (FIFO by tanggal_kadaluarsa). Untuk kg yang
+    // tercover paket, subtotal item = 0. Sisa kg yang tidak tercover dihitung
+    // harga normal seperti biasa. Deduksi DB kuota dilakukan SETELAH transaksi
+    // berhasil dibuat (di bawah), dengan trx_id yang valid untuk audit trail.
+    let paketPelangganIdRef = null;
+    let kgDariPaket = 0;
+    let paketPreview = null;
+    if (value.pakai_paket) {
+      if (!pelanggan) {
+        return res.status(400).json({ error: 'Pilih pelanggan untuk memakai paket kuota' });
+      }
+      // Total kg dari item yang satuan='kg'
+      const totalKg = resolvedItems
+        .filter(it => String(it.satuan).toLowerCase() === 'kg')
+        .reduce((s, it) => s + Number(it.jumlah), 0);
+      if (totalKg <= 0) {
+        return res.status(400).json({ error: 'Order tidak punya layanan berbasis kg — paket kuota tidak berlaku' });
+      }
+      paketPreview = await paketService.simulateKuotaPaket(pelanggan.id, totalKg);
+      if (paketPreview.kg_tercover <= 0) {
+        return res.status(400).json({ error: 'Pelanggan tidak punya paket aktif dengan sisa kuota' });
+      }
+      // Distribusi kg_tercover ke item kg proporsional (untuk kasus multi-layanan kg)
+      let sisaCover = paketPreview.kg_tercover;
+      const kgItems = resolvedItems.filter(it => String(it.satuan).toLowerCase() === 'kg');
+      for (let i = 0; i < kgItems.length; i++) {
+        const it = kgItems[i];
+        const isLast = i === kgItems.length - 1;
+        // Bagi proporsional; item terakhir ambil sisa supaya total = kg_tercover
+        const share = isLast ? sisaCover
+          : Math.min(Number(it.jumlah), Math.round((Number(it.jumlah) / totalKg) * paketPreview.kg_tercover * 100) / 100);
+        it._kg_dari_paket = share;
+        it.subtotal = it.harga_satuan * Math.max(0, Number(it.jumlah) - share);
+        sisaCover = Math.round((sisaCover - share) * 100) / 100;
+      }
+      kgDariPaket = paketPreview.kg_tercover;
+      paketPelangganIdRef = paketPreview.potongan[0]?.paket_pelanggan_id || null;
+    }
+
     // Hitung harga (dengan diskon manual jika ada)
     const diskonManual = value.diskon_nilai > 0
       ? { tipe: value.diskon_tipe, nilai: value.diskon_nilai }
@@ -271,11 +314,44 @@ exports.store = async (req, res) => {
       antar_jemput:    value.antar_jemput   ? 1 : 0,
       alamat_jemput:   value.alamat_jemput  || null,
       jarak_jemput_km: value.jarak_jemput_km != null ? value.jarak_jemput_km : null,
+      paket_pelanggan_id: paketPelangganIdRef,
+      kg_dari_paket:      kgDariPaket,
       created_at:      new Date(),
       updated_at:      new Date()
     };
 
-    const transaksiId = await transaksiModel.create(transaksiData, resolvedItems);
+    // Strip field internal (_kg_dari_paket) supaya tidak dimasukkan ke
+    // detail_transaksi oleh transaksiModel.create.
+    const itemsForInsert = resolvedItems.map(({ _kg_dari_paket, ...rest }) => rest);
+    const transaksiId = await transaksiModel.create(transaksiData, itemsForInsert);
+
+    // ── Deduksi kuota paket setelah transaksi berhasil dibuat ───────────────
+    // Dilakukan di sini (bukan di dalam trx create) supaya mutasi bisa
+    // menyimpan transaksi_id yang valid. Race di antara simulate & deduct
+    // dimitigasi dengan re-cek: kalau kuota berkurang di tengah, deduksi
+    // aktual bisa lebih kecil dari kg_tercover — kolom kg_dari_paket di
+    // transaksi disesuaikan berdasarkan hasil aktual.
+    if (value.pakai_paket && pelanggan && kgDariPaket > 0) {
+      try {
+        const actual = await paketService.pakaiKuotaPaket({
+          pelangganId: pelanggan.id,
+          kgDipakai:   kgDariPaket,
+          transaksiId,
+          userId:      req.session.user.id
+        });
+        if (Math.abs(actual.kg_tercover - kgDariPaket) > 0.01) {
+          console.warn(`[transaksi:store] Paket kuota drift: preview=${kgDariPaket} aktual=${actual.kg_tercover} (trx=${transaksiId})`);
+          // Update transaksi dengan angka aktual supaya konsisten
+          await db('transaksi').where('id', transaksiId).update({
+            kg_dari_paket:      actual.kg_tercover,
+            paket_pelanggan_id: actual.potongan[0]?.paket_pelanggan_id || null,
+            updated_at:         new Date()
+          });
+        }
+      } catch (e) {
+        console.error('[transaksi:store] pakaiKuotaPaket error:', e.message);
+      }
+    }
     const created = await transaksiModel.findById(transaksiId);
 
     // Kurangi stok bahan otomatis (non-blocking: kegagalan hitung stok tidak

@@ -1042,6 +1042,21 @@
           <div id="ciNoteBody" style="line-height:1.55"></div>
         </div>
 
+        <!-- Card info paket kuota aktif pelanggan (mulai ditampilkan kalau pelanggan punya) -->
+        <div id="paketAktifBox" style="display:none;background:#F0FDF4;border:1px solid #BBF7D0;border-left:4px solid #10B981;border-radius:10px;padding:12px 14px;margin-top:8px;font-size:13px;color:#065F46">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+            <div style="flex:1">
+              <div style="font-weight:800;margin-bottom:2px">📦 Paket Kuota Aktif</div>
+              <div id="paketAktifSummary" style="font-size:12px;color:#047857;line-height:1.6"></div>
+            </div>
+            <label class="toggle" style="flex-shrink:0">
+              <input type="checkbox" id="usePaket" onchange="togglePakaiPaket()"/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div id="paketBreakdown" style="display:none;margin-top:8px;padding-top:8px;border-top:1px dashed #86EFAC;font-size:12px;color:#065F46;line-height:1.7"></div>
+        </div>
+
         <!-- Quick Repeat Order — suggestion order seperti terakhir -->
         <div id="repeatSuggestion" class="repeat-card" style="display:none">
           <div class="repeat-head">
@@ -1171,6 +1186,15 @@
     <div class="card">
       <div class="card-header"><h2>Ringkasan</h2></div>
       <div class="card-body">
+        <div class="summary-row" id="sumBeratTotalRow" style="display:none">
+          <span>Berat Total</span><span class="summary-val" id="sumBeratTotal">0 kg</span>
+        </div>
+        <div class="summary-row discount" id="sumPaketRow" style="display:none">
+          <span>Dari Kuota Paket</span><span class="summary-val" id="sumPaketKg" style="color:#10B981">0 kg (gratis)</span>
+        </div>
+        <div class="summary-row" id="sumDibayarNormalRow" style="display:none">
+          <span>Dibayar Normal</span><span class="summary-val" id="sumDibayarNormal">0 kg</span>
+        </div>
         <div class="summary-row">
           <span>Subtotal</span><span class="summary-val" id="sumSubtotal">Rp 0</span>
         </div>
@@ -1397,6 +1421,10 @@ const state = {
   metodKekurangan: 'tunai',
   kelebihanMode: 'deposit', // 'tunai' | 'deposit' — default: masuk deposit
   _totalBayar: 0,
+  paketAktif: [],       // paket kuota aktif milik pelanggan (kg tersisa > 0)
+  pakaiPaket: false,    // toggle: apakah order ini pakai kuota paket
+  paketKgTercover: 0,   // kg yang tercover paket (computed di calcTotal)
+  paketPelangganIdRef: null,
   settings: { perNominal: 10000, nilaiPerPoin: 100, minRedeem: 100 }
 };
 
@@ -1640,6 +1668,14 @@ async function selectCustomer(p) {
   state.depositSaldo = dr?.data?.saldo ?? 0;
   updateDepositPanel();
   updatePaymentPreview();
+
+  // Load paket kuota aktif pelanggan
+  try {
+    const pr = await apiFetch(`/api/v1/paket-pelanggan/aktif/${p.id}`);
+    state.paketAktif = pr?.data || [];
+  } catch (_) { state.paketAktif = []; }
+  state.pakaiPaket = false;
+  renderPaketAktifCard();
   calcTotal();
 
   // Sync customer chip active state
@@ -1751,6 +1787,11 @@ document.getElementById('clearCustomer').addEventListener('click', () => {
   state.poinDigunakan = 0;
   state.usePoin = false;
   state.depositSaldo = 0;
+  state.paketAktif = [];
+  state.pakaiPaket = false;
+  state.paketKgTercover = 0;
+  state.paketPelangganIdRef = null;
+  renderPaketAktifCard();
   window.ajJarakOverride = null;
   window.ajSkipJarak = false;
   if (typeof refreshJarakAJSection === 'function') refreshJarakAJSection();
@@ -2733,8 +2774,89 @@ function updateEstimasiSelesai() {
 // ════════════════════════════════════════════════════════
 // CALCULATE TOTAL
 // ════════════════════════════════════════════════════════
+// ── Paket kuota helpers ──────────────────────────────────────────────────────
+function renderPaketAktifCard() {
+  const box = document.getElementById('paketAktifBox');
+  if (!box) return;
+  if (!state.paketAktif || !state.paketAktif.length) {
+    box.style.display = 'none';
+    document.getElementById('usePaket').checked = false;
+    return;
+  }
+  const totalSisa = state.paketAktif.reduce((s, p) => s + Number(p.kuota_sisa_kg), 0);
+  const first = state.paketAktif[0];
+  const sisaHari = Number(first.sisa_hari);
+  const dayLabel = sisaHari < 0 ? `lewat ${Math.abs(sisaHari)} hari`
+    : sisaHari === 0 ? 'kadaluarsa hari ini'
+    : `kadaluarsa ${sisaHari} hari lagi`;
+  const detailPaket = state.paketAktif.length === 1
+    ? `${first.nama_paket_snapshot} · sisa ${first.kuota_sisa_kg}/${first.kuota_awal_kg} kg (${dayLabel})`
+    : `${state.paketAktif.length} paket aktif · total sisa <b>${totalSisa} kg</b> · terdekat kadaluarsa ${dayLabel}`;
+  document.getElementById('paketAktifSummary').innerHTML = detailPaket;
+  box.style.display = '';
+  document.getElementById('usePaket').checked = !!state.pakaiPaket;
+}
+
+function togglePakaiPaket() {
+  state.pakaiPaket = document.getElementById('usePaket').checked;
+  calcTotal();
+}
+
+// Hitung berapa kg dari items yang tercover kuota paket (simulasi FIFO).
+// Return { kg_tercover, kg_selisih, potongan: [{ paket_id, kg }] }
+function simulatePaket() {
+  if (!state.pakaiPaket || !state.paketAktif.length) {
+    return { kg_tercover: 0, kg_selisih: 0, potongan: [], totalKg: 0 };
+  }
+  const totalKg = state.items
+    .filter(i => String(i.satuan).toLowerCase() === 'kg')
+    .reduce((s, i) => s + Number(i.jumlah), 0);
+  if (totalKg <= 0) return { kg_tercover: 0, kg_selisih: 0, potongan: [], totalKg: 0 };
+  let sisa = Math.round(totalKg * 100) / 100;
+  const potongan = [];
+  for (const p of state.paketAktif) {
+    if (sisa <= 0) break;
+    const ambil = Math.min(Number(p.kuota_sisa_kg), sisa);
+    if (ambil <= 0) continue;
+    potongan.push({ paket_id: p.id, kg: ambil, nama: p.nama_paket_snapshot });
+    sisa = Math.round((sisa - ambil) * 100) / 100;
+  }
+  return {
+    kg_tercover: Math.round((totalKg - sisa) * 100) / 100,
+    kg_selisih:  sisa,
+    potongan,
+    totalKg
+  };
+}
+
 function calcTotal() {
-  const totalHarga = state.items.reduce((s, i) => s + i.subtotal, 0);
+  // ── Hitung coverage paket dulu supaya bisa dipakai kalau perlu di UI ──
+  const paketSim = simulatePaket();
+  state.paketKgTercover = paketSim.kg_tercover;
+  state.paketPelangganIdRef = paketSim.potongan[0]?.paket_id || null;
+
+  // Bangun subtotal per item, kurangi kg yang tercover paket (proporsional)
+  let itemsSubtotalCovered = 0;
+  const covered = paketSim.kg_tercover;
+  const kgItems = state.items.filter(i => String(i.satuan).toLowerCase() === 'kg');
+  const totalKg = paketSim.totalKg;
+  const perItemCover = {};
+  if (covered > 0 && totalKg > 0) {
+    let sisaCover = covered;
+    for (let i = 0; i < kgItems.length; i++) {
+      const it = kgItems[i];
+      const isLast = i === kgItems.length - 1;
+      const share = isLast ? sisaCover
+        : Math.min(Number(it.jumlah), Math.round((Number(it.jumlah) / totalKg) * covered * 100) / 100);
+      perItemCover[it.id] = share;
+      sisaCover = Math.round((sisaCover - share) * 100) / 100;
+    }
+  }
+  for (const it of state.items) {
+    const cover = perItemCover[it.id] || 0;
+    itemsSubtotalCovered += it.harga * Math.max(0, Number(it.jumlah) - cover);
+  }
+  const totalHarga = itemsSubtotalCovered;
 
   // Diskon promo
   let diskonPromo = 0;
@@ -2763,6 +2885,30 @@ function calcTotal() {
   const total = Math.max(0, totalHarga - diskon - diskonPoin);
 
   document.getElementById('sumSubtotal').textContent = 'Rp ' + fmtRp(totalHarga);
+
+  // Breakdown paket kuota (kalau aktif)
+  const beratRow = document.getElementById('sumBeratTotalRow');
+  const paketRow = document.getElementById('sumPaketRow');
+  const normalRow = document.getElementById('sumDibayarNormalRow');
+  const breakdownBox = document.getElementById('paketBreakdown');
+  if (state.pakaiPaket && paketSim.totalKg > 0 && paketSim.kg_tercover > 0) {
+    beratRow.style.display = '';
+    paketRow.style.display = '';
+    normalRow.style.display = '';
+    document.getElementById('sumBeratTotal').textContent = `${paketSim.totalKg} kg`;
+    document.getElementById('sumPaketKg').textContent = `${paketSim.kg_tercover} kg (gratis)`;
+    document.getElementById('sumDibayarNormal').textContent = `${paketSim.kg_selisih} kg`;
+    if (breakdownBox) {
+      const rows = paketSim.potongan.map(pt => `<div>• ${pt.nama}: ${pt.kg} kg</div>`).join('');
+      breakdownBox.innerHTML = `Kuota dipakai:<br>${rows}${paketSim.kg_selisih > 0 ? `<div style="margin-top:4px">Kelebihan ${paketSim.kg_selisih} kg dihitung harga normal.</div>` : ''}`;
+      breakdownBox.style.display = 'block';
+    }
+  } else {
+    beratRow.style.display = 'none';
+    paketRow.style.display = 'none';
+    normalRow.style.display = 'none';
+    if (breakdownBox) breakdownBox.style.display = 'none';
+  }
 
   // Tampilkan diskon promo
   const diskonPromoRow = document.getElementById('sumDiskonPromoRow');
@@ -2951,6 +3097,7 @@ async function submitOrder(kirimWa, cetakSetelah) {
   const body = {
     pelanggan_id: state.pelanggan?.id || null,
     paket_promo_id: state.promo?.id || null,
+    pakai_paket: !!state.pakaiPaket,
     poin_digunakan: state.usePoin ? state.poinDigunakan : 0,
     diskon_tipe: state.diskonTipe,
     diskon_nilai: state.diskonNilai,
